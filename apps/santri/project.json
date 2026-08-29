@@ -1,0 +1,9 @@
+{
+  "name": "santri",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/santri/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project santri --web",
+  "targets": {}
+}
