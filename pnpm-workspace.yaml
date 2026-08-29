@@ -5,5 +5,6 @@ allowBuilds:
   '@parcel/watcher': true
   nx: true
   unrs-resolver: true
-  "@swc/core": false
+  '@swc/core': false
   esbuild: false
+  '@nestjs/core': false
