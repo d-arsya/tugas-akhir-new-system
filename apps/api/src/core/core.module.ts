@@ -18,13 +18,10 @@ import { IpBanModule } from "./ip-ban/ip-ban.module"
 		// Config must be first — all other modules depend on it
 		ConfigModule,
 
-		// Pino structured logging
+		// Pino structured logging (serverless & Vercel compatible)
 		LoggerModule.forRoot({
 			pinoHttp: {
-				...(process.env["NODE_ENV"] !== "production"
-					? { transport: { target: "pino-pretty", options: { colorize: true } } }
-					: {}),
-				level: process.env["NODE_ENV"] !== "production" ? "debug" : "info",
+				level: process.env["NODE_ENV"] === "production" ? "info" : "debug",
 			},
 		}),
 
