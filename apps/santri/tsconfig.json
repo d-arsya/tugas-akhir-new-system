@@ -4,17 +4,24 @@
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["vite/client", "vitest"]
+    "types": ["vite/client", "vitest", "react", "react-dom"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@roja/ui": ["../../libs/ui/src/index.ts"],
+      "@roja/ui/*": ["../../libs/ui/src/*"],
+      "@roja/types": ["../../libs/types/src/index.ts"],
+      "@roja/types/*": ["../../libs/types/src/*"],
+      "@roja/api-client": ["../../libs/api-client/src/index.ts"],
+      "@roja/api-client/*": ["../../libs/api-client/src/*"],
+      "@roja/utils": ["../../libs/utils/src/index.ts"],
+      "@roja/utils/*": ["../../libs/utils/src/*"]
+    }
   },
   "files": [],
   "include": [],
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" }
   ],
   "extends": "../../tsconfig.base.json"
 }

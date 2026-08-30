@@ -1,10 +1,14 @@
 packages:
   - 'apps/*'
+  - 'libs/*'
 autoInstallPeers: true
 allowBuilds:
   '@parcel/watcher': true
   nx: true
   unrs-resolver: true
+  bcrypt: true
+  msgpackr-extract: true
+  '@scarf/scarf': false
   '@swc/core': false
   esbuild: false
   '@nestjs/core': false

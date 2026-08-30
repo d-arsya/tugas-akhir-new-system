@@ -8,13 +8,27 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es2021",
     "module": "esnext",
-    "lib": ["es2020", "dom"],
+    "lib": ["es2021", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "strict": false,
-    "paths": {}
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@roja/ui": ["./libs/ui/src/index.ts"],
+      "@roja/ui/*": ["./libs/ui/src/*"],
+      "@roja/types": ["./libs/types/src/index.ts"],
+      "@roja/types/*": ["./libs/types/src/*"],
+      "@roja/api-client": ["./libs/api-client/src/index.ts"],
+      "@roja/api-client/*": ["./libs/api-client/src/*"],
+      "@roja/utils": ["./libs/utils/src/index.ts"],
+      "@roja/utils/*": ["./libs/utils/src/*"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

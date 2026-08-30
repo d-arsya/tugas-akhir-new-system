@@ -1,0 +1,124 @@
+/* ROJA DESIGN SYSTEM — Global CSS Tokens
+ * Source: E:\Pondok Roja\references\DESIGN.md
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary:              #e4007e;
+  --primary-rgb:          228, 0, 126;
+  --secondary:            #8dc31e;
+  --secondary-rgb:        141, 195, 30;
+  --tertiary:             #1bc5bd;
+  --tertiary-rgb:         27, 197, 189;
+  --quaternary:           #c694f9;
+  --quaternary-rgb:       198, 148, 249;
+  --quinary:              #de2ff5;
+  --quinary-rgb:          222, 47, 245;
+  --danger:               #f8374b;
+  --danger-rgb:           248, 55, 75;
+  --warning:              #ffa800;
+  --warning-rgb:          255, 168, 0;
+  --success:              #28af52;
+  --success-rgb:          40, 175, 82;
+  --info:                 #6866e9;
+  --info-rgb:             104, 102, 233;
+  --light:                #f9f9f9;
+  --grey:                 #abb4be;
+  --dark:                 #17283c;
+  --white:                #ffffff;
+
+  --heading-txt-color:    #4b4b4b;
+  --body-txt-color:       #777777;
+  --muted-txt-color:      #abb4be;
+  --heading-txt-inverse:  #4b4b4b;
+  --body-txt-inverse:     #777777;
+
+  --bg-primary:           #ecedf0;
+  --bg-secondary:         #fdfdfd;
+  --bg-tertiary:          #f7f7f7;
+  --bg-quaternary:        #f4f4f4;
+  --bg-form:              #ffffff;
+  --bg-form-border:       #eeeeee;
+  --bg-form-disabled:     #F1F1FB;
+  --bg-login:             #f7f7f7;
+  --bg-login-form:        #ffffff;
+  --bg-inverse:           #ffffff;
+  --bg-btn-light-inverse: #f9f9f9;
+  --table-inverse:        #f3f3f3;
+  --table-head-txt-inverse: #777777;
+  --table-txt-inverse:    #8a949b;
+  --scroolbar:            #f1f1f1;
+  --scroolbar-thumb:      #cccccc;
+  --scroolbar-hover:      #a8a8a8;
+  --rgb-shadow-inverse:   0, 0, 0;
+}
+
+[data-theme="dark"] {
+  --rgb-shadow-inverse:      17, 30, 44;
+  --bg-primary:              #111e2c;
+  --bg-secondary:            #17283c;
+  --bg-tertiary:             #142335;
+  --bg-quaternary:           #111e2c;
+  --bg-form:                 #17283c;
+  --bg-form-border:          #111e2c;
+  --bg-form-disabled:        #1e2f42;
+  --bg-login:                #17283c;
+  --bg-login-form:           #111e2c;
+  --bg-inverse:              #17283c;
+  --bg-btn-light-inverse:    #111e2c;
+  --table-inverse:           #111e2c;
+  --table-head-txt-inverse:  #eeeeee;
+  --table-txt-inverse:       #cccccc;
+  --heading-txt-inverse:     #ffffff;
+  --body-txt-inverse:        #eeeeee;
+  --scroolbar:               #27374a;
+  --scroolbar-thumb:         #17283c;
+  --scroolbar-hover:         #111e2c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 1.4rem;
+  color: var(--body-txt-inverse);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--heading-txt-inverse);
+  margin: 0;
+}
+
+h1 { font-size: 46px; line-height: 1.2; }
+h2 { font-size: 40px; line-height: 1.2; }
+h3 { font-size: 34px; line-height: 1.2; }
+h4 { font-size: 28px; line-height: 1.3; }
+h5 { font-size: 22px; line-height: 1.3; }
+h6 { font-size: 16px; line-height: 1.3; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--scroolbar); }
+::-webkit-scrollbar-thumb { background: var(--scroolbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scroolbar-hover); }
+
+* { transition-duration: 300ms; transition-timing-function: ease; }

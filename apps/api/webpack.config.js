@@ -1,5 +1,6 @@
-const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin');
-const { join } = require('path');
+const { NxAppWebpackPlugin } = require('@nx/webpack/app-plugin')
+const { join } = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
   output: {
@@ -21,5 +22,14 @@ module.exports = {
       generatePackageJson: true,
       sourceMap: true,
     }),
+    // Copy Handlebars email templates to dist
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: 'src/core/mailer/templates',
+          to: 'core/mailer/templates',
+        },
+      ],
+    }),
   ],
-};
+}
