@@ -1,6 +1,6 @@
 import { Logger, ValidationPipe } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
-import { SwaggerModule } from "@nestjs/swagger"
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { cleanupOpenApiDoc } from "nestjs-zod"
 import { Logger as PinoLogger } from "nestjs-pino"
 import { AppModule } from "./app.module"
@@ -50,12 +50,24 @@ async function bootstrap(): Promise<void> {
 		res.redirect("/docs")
 	})
 
-	// Scalar API docs (dev only / serverless-safe standalone renderer)
+	// Scalar API docs styled with Roja Design System (DESIGN.md)
 	if (process.env["NODE_ENV"] !== "production") {
-		const rawDocument = SwaggerModule.createDocument(app, {
-			openapi: "3.0.0",
-			info: { title: "Roja API", version: "1.0.0" },
-		})
+		const config = new DocumentBuilder()
+			.setTitle("Pondok Roja API")
+			.setDescription("Dokumentasi Resmi REST API Sistem Monorepo Pondok Roja.")
+			.setVersion("1.0.0")
+			.addBearerAuth(
+				{
+					type: "http",
+					scheme: "bearer",
+					bearerFormat: "JWT",
+					description: "Masukkan token JWT akses Anda di sini",
+				},
+				"JWT-Auth",
+			)
+			.build()
+
+		const rawDocument = SwaggerModule.createDocument(app, config)
 		const document = cleanupOpenApiDoc(rawDocument)
 
 		httpAdapter.get("/docs/openapi.json", (_req: Request, res: Response) => {
@@ -65,18 +77,91 @@ async function bootstrap(): Promise<void> {
 		httpAdapter.get("/docs", (_req: Request, res: Response) => {
 			res.type("text/html").send(`
 <!doctype html>
-<html>
+<html lang="id">
   <head>
-    <title>Roja API Documentation</title>
+    <title>Pondok Roja — API Documentation</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="icon" type="image/svg+xml" href="https://scalar.com/favicon.svg" />
+    <style>
+      :root {
+        --scalar-font: 'Montserrat', sans-serif;
+        --scalar-font-code: 'JetBrains Mono', monospace;
+        --scalar-radius: 6px;
+        --scalar-radius-md: 6px;
+        --scalar-radius-lg: 8px;
+        --scalar-radius-xl: 12px;
+      }
+
+      /* Roja Light Mode */
+      .light-mode {
+        --scalar-color-1: #4b4b4b;
+        --scalar-color-2: #777777;
+        --scalar-color-3: #abb4be;
+        --scalar-color-accent: #e4007e;
+        --scalar-background-1: #ffffff;
+        --scalar-background-2: #fdfdfd;
+        --scalar-background-3: #ecedf0;
+        --scalar-background-accent: rgba(228, 0, 126, 0.08);
+        --scalar-border-color: #eeeeee;
+      }
+
+      /* Roja Dark Mode */
+      .dark-mode {
+        --scalar-color-1: #ffffff;
+        --scalar-color-2: #eeeeee;
+        --scalar-color-3: #abb4be;
+        --scalar-color-accent: #e4007e;
+        --scalar-background-1: #111e2c;
+        --scalar-background-2: #17283c;
+        --scalar-background-3: #142335;
+        --scalar-background-accent: rgba(228, 0, 126, 0.15);
+        --scalar-border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      /* Roja Persistent Dark Sidebar */
+      .light-mode .t-doc__sidebar,
+      .dark-mode .t-doc__sidebar,
+      .light-mode .sidebar,
+      .dark-mode .sidebar {
+        --scalar-sidebar-background-1: #17283c;
+        --scalar-sidebar-color-1: #ffffff;
+        --scalar-sidebar-color-2: rgba(255, 255, 255, 0.75);
+        --scalar-sidebar-color-active: #e4007e;
+        --scalar-sidebar-item-hover-background: rgba(255, 255, 255, 0.08);
+        --scalar-sidebar-item-hover-color: #ffffff;
+        --scalar-sidebar-item-active-background: rgba(228, 0, 126, 0.15);
+        --scalar-sidebar-border-color: rgba(255, 255, 255, 0.08);
+        --scalar-sidebar-search-background: #111e2c;
+        --scalar-sidebar-search-border-color: rgba(255, 255, 255, 0.1);
+        --scalar-sidebar-search-color: #ffffff;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #111e2c;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #17283c;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #27374a;
+      }
+    </style>
   </head>
   <body>
     <script
       id="api-reference"
       data-url="/docs/openapi.json"
-      data-configuration='{"theme":"purple"}'></script>
+      data-configuration='{"theme":"none","withDefaultFonts":false,"layout":"modern","hideModels":false}'></script>
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   </body>
 </html>`)

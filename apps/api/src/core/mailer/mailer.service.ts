@@ -40,4 +40,16 @@ export class MailerService {
 			context: data,
 		})
 	}
+
+	async sendRegistrantPassword(
+		to: string,
+		data: { fullName: string; registrantId: string; password: string; loginUrl: string },
+	): Promise<void> {
+		await this.mailer.sendMail({
+			to,
+			subject: "Pendaftaran Santri Baru — Akun Anda",
+			template: "registrant-password",
+			context: data,
+		})
+	}
 }
