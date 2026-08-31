@@ -9,50 +9,550 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as MemberRouteImport } from './routes/_member'
+import { Route as WizardRouteImport } from './routes/_wizard'
+import { Route as BannedRouteImport } from './routes/banned'
+import { Route as EmailVerifyRouteImport } from './routes/email-verify'
+import { Route as Verify2faRouteImport } from './routes/verify-2fa'
+import { Route as GuestIndexRouteImport } from './routes/_guest.index'
+import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-password'
+import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
+import { Route as MemberDashboardRouteImport } from './routes/_member.dashboard'
+import { Route as MemberSettingsRouteImport } from './routes/_member.settings'
+import { Route as MemberInvalidAttachmentRouteImport } from './routes/_member.invalid.attachment'
+import { Route as MemberInvalidFamilyRouteImport } from './routes/_member.invalid.family'
+import { Route as MemberInvalidGuardianRouteImport } from './routes/_member.invalid.guardian'
+import { Route as MemberInvalidIdentityRouteImport } from './routes/_member.invalid.identity'
+import { Route as MemberInvalidPersonalRouteImport } from './routes/_member.invalid.personal'
+import { Route as WizardRegisterAttachmentRouteImport } from './routes/_wizard.register.attachment'
+import { Route as WizardRegisterFamilyRouteImport } from './routes/_wizard.register.family'
+import { Route as WizardRegisterGuardianRouteImport } from './routes/_wizard.register.guardian'
+import { Route as WizardRegisterIdentityRouteImport } from './routes/_wizard.register.identity'
+import { Route as WizardRegisterPersonalRouteImport } from './routes/_wizard.register.personal'
+import { Route as PrintTypeRegistrantIdRouteImport } from './routes/print.$type.$registrantId'
+import { Route as RegisterSuccessRegistrantIdRouteImport } from './routes/register.success.$registrantId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemberRoute = MemberRouteImport.update({
+  id: '/_member',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WizardRoute = WizardRouteImport.update({
+  id: '/_wizard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BannedRoute = BannedRouteImport.update({
+  id: '/banned',
+  path: '/banned',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmailVerifyRoute = EmailVerifyRouteImport.update({
+  id: '/email-verify',
+  path: '/email-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Verify2faRoute = Verify2faRouteImport.update({
+  id: '/verify-2fa',
+  path: '/verify-2fa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestIndexRoute = GuestIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestLoginRoute = GuestLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestResetPasswordRoute = GuestResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => GuestRoute,
+} as any)
+const MemberDashboardRoute = MemberDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberSettingsRoute = MemberSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberInvalidAttachmentRoute = MemberInvalidAttachmentRouteImport.update({
+  id: '/invalid/attachment',
+  path: '/invalid/attachment',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberInvalidFamilyRoute = MemberInvalidFamilyRouteImport.update({
+  id: '/invalid/family',
+  path: '/invalid/family',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberInvalidGuardianRoute = MemberInvalidGuardianRouteImport.update({
+  id: '/invalid/guardian',
+  path: '/invalid/guardian',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberInvalidIdentityRoute = MemberInvalidIdentityRouteImport.update({
+  id: '/invalid/identity',
+  path: '/invalid/identity',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberInvalidPersonalRoute = MemberInvalidPersonalRouteImport.update({
+  id: '/invalid/personal',
+  path: '/invalid/personal',
+  getParentRoute: () => MemberRoute,
+} as any)
+const WizardRegisterAttachmentRoute =
+  WizardRegisterAttachmentRouteImport.update({
+    id: '/register/attachment',
+    path: '/register/attachment',
+    getParentRoute: () => WizardRoute,
+  } as any)
+const WizardRegisterFamilyRoute = WizardRegisterFamilyRouteImport.update({
+  id: '/register/family',
+  path: '/register/family',
+  getParentRoute: () => WizardRoute,
+} as any)
+const WizardRegisterGuardianRoute = WizardRegisterGuardianRouteImport.update({
+  id: '/register/guardian',
+  path: '/register/guardian',
+  getParentRoute: () => WizardRoute,
+} as any)
+const WizardRegisterIdentityRoute = WizardRegisterIdentityRouteImport.update({
+  id: '/register/identity',
+  path: '/register/identity',
+  getParentRoute: () => WizardRoute,
+} as any)
+const WizardRegisterPersonalRoute = WizardRegisterPersonalRouteImport.update({
+  id: '/register/personal',
+  path: '/register/personal',
+  getParentRoute: () => WizardRoute,
+} as any)
+const PrintTypeRegistrantIdRoute = PrintTypeRegistrantIdRouteImport.update({
+  id: '/print/$type/$registrantId',
+  path: '/print/$type/$registrantId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterSuccessRegistrantIdRoute =
+  RegisterSuccessRegistrantIdRouteImport.update({
+    id: '/register/success/$registrantId',
+    path: '/register/success/$registrantId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof GuestIndexRoute
+  '/banned': typeof BannedRoute
+  '/email-verify': typeof EmailVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
+  '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
+  '/dashboard': typeof MemberDashboardRoute
+  '/settings': typeof MemberSettingsRoute
+  '/invalid/attachment': typeof MemberInvalidAttachmentRoute
+  '/invalid/family': typeof MemberInvalidFamilyRoute
+  '/invalid/guardian': typeof MemberInvalidGuardianRoute
+  '/invalid/identity': typeof MemberInvalidIdentityRoute
+  '/invalid/personal': typeof MemberInvalidPersonalRoute
+  '/register/attachment': typeof WizardRegisterAttachmentRoute
+  '/register/family': typeof WizardRegisterFamilyRoute
+  '/register/guardian': typeof WizardRegisterGuardianRoute
+  '/register/identity': typeof WizardRegisterIdentityRoute
+  '/register/personal': typeof WizardRegisterPersonalRoute
+  '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
+  '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof GuestIndexRoute
+  '/banned': typeof BannedRoute
+  '/email-verify': typeof EmailVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
+  '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
+  '/dashboard': typeof MemberDashboardRoute
+  '/settings': typeof MemberSettingsRoute
+  '/invalid/attachment': typeof MemberInvalidAttachmentRoute
+  '/invalid/family': typeof MemberInvalidFamilyRoute
+  '/invalid/guardian': typeof MemberInvalidGuardianRoute
+  '/invalid/identity': typeof MemberInvalidIdentityRoute
+  '/invalid/personal': typeof MemberInvalidPersonalRoute
+  '/register/attachment': typeof WizardRegisterAttachmentRoute
+  '/register/family': typeof WizardRegisterFamilyRoute
+  '/register/guardian': typeof WizardRegisterGuardianRoute
+  '/register/identity': typeof WizardRegisterIdentityRoute
+  '/register/personal': typeof WizardRegisterPersonalRoute
+  '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
+  '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_guest': typeof GuestRouteWithChildren
+  '/_member': typeof MemberRouteWithChildren
+  '/_wizard': typeof WizardRouteWithChildren
+  '/banned': typeof BannedRoute
+  '/email-verify': typeof EmailVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/_guest/forgot-password': typeof GuestForgotPasswordRoute
+  '/_guest/login': typeof GuestLoginRoute
+  '/_guest/reset-password': typeof GuestResetPasswordRoute
+  '/_member/dashboard': typeof MemberDashboardRoute
+  '/_member/settings': typeof MemberSettingsRoute
+  '/_guest/': typeof GuestIndexRoute
+  '/_member/invalid/attachment': typeof MemberInvalidAttachmentRoute
+  '/_member/invalid/family': typeof MemberInvalidFamilyRoute
+  '/_member/invalid/guardian': typeof MemberInvalidGuardianRoute
+  '/_member/invalid/identity': typeof MemberInvalidIdentityRoute
+  '/_member/invalid/personal': typeof MemberInvalidPersonalRoute
+  '/_wizard/register/attachment': typeof WizardRegisterAttachmentRoute
+  '/_wizard/register/family': typeof WizardRegisterFamilyRoute
+  '/_wizard/register/guardian': typeof WizardRegisterGuardianRoute
+  '/_wizard/register/identity': typeof WizardRegisterIdentityRoute
+  '/_wizard/register/personal': typeof WizardRegisterPersonalRoute
+  '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
+  '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/banned'
+    | '/email-verify'
+    | '/verify-2fa'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/dashboard'
+    | '/settings'
+    | '/invalid/attachment'
+    | '/invalid/family'
+    | '/invalid/guardian'
+    | '/invalid/identity'
+    | '/invalid/personal'
+    | '/register/attachment'
+    | '/register/family'
+    | '/register/guardian'
+    | '/register/identity'
+    | '/register/personal'
+    | '/print/$type/$registrantId'
+    | '/register/success/$registrantId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/banned'
+    | '/email-verify'
+    | '/verify-2fa'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/dashboard'
+    | '/settings'
+    | '/invalid/attachment'
+    | '/invalid/family'
+    | '/invalid/guardian'
+    | '/invalid/identity'
+    | '/invalid/personal'
+    | '/register/attachment'
+    | '/register/family'
+    | '/register/guardian'
+    | '/register/identity'
+    | '/register/personal'
+    | '/print/$type/$registrantId'
+    | '/register/success/$registrantId'
+  id:
+    | '__root__'
+    | '/_guest'
+    | '/_member'
+    | '/_wizard'
+    | '/banned'
+    | '/email-verify'
+    | '/verify-2fa'
+    | '/_guest/forgot-password'
+    | '/_guest/login'
+    | '/_guest/reset-password'
+    | '/_member/dashboard'
+    | '/_member/settings'
+    | '/_guest/'
+    | '/_member/invalid/attachment'
+    | '/_member/invalid/family'
+    | '/_member/invalid/guardian'
+    | '/_member/invalid/identity'
+    | '/_member/invalid/personal'
+    | '/_wizard/register/attachment'
+    | '/_wizard/register/family'
+    | '/_wizard/register/guardian'
+    | '/_wizard/register/identity'
+    | '/_wizard/register/personal'
+    | '/print/$type/$registrantId'
+    | '/register/success/$registrantId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  GuestRoute: typeof GuestRouteWithChildren
+  MemberRoute: typeof MemberRouteWithChildren
+  WizardRoute: typeof WizardRouteWithChildren
+  BannedRoute: typeof BannedRoute
+  EmailVerifyRoute: typeof EmailVerifyRoute
+  Verify2faRoute: typeof Verify2faRoute
+  PrintTypeRegistrantIdRoute: typeof PrintTypeRegistrantIdRoute
+  RegisterSuccessRegistrantIdRoute: typeof RegisterSuccessRegistrantIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_member': {
+      id: '/_member'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MemberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_wizard': {
+      id: '/_wizard'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof WizardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/banned': {
+      id: '/banned'
+      path: '/banned'
+      fullPath: '/banned'
+      preLoaderRoute: typeof BannedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/email-verify': {
+      id: '/email-verify'
+      path: '/email-verify'
+      fullPath: '/email-verify'
+      preLoaderRoute: typeof EmailVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-2fa': {
+      id: '/verify-2fa'
+      path: '/verify-2fa'
+      fullPath: '/verify-2fa'
+      preLoaderRoute: typeof Verify2faRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest/': {
+      id: '/_guest/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof GuestIndexRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/forgot-password': {
+      id: '/_guest/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof GuestForgotPasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/login': {
+      id: '/_guest/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/reset-password': {
+      id: '/_guest/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof GuestResetPasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_member/dashboard': {
+      id: '/_member/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof MemberDashboardRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/settings': {
+      id: '/_member/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof MemberSettingsRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/invalid/attachment': {
+      id: '/_member/invalid/attachment'
+      path: '/invalid/attachment'
+      fullPath: '/invalid/attachment'
+      preLoaderRoute: typeof MemberInvalidAttachmentRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/invalid/family': {
+      id: '/_member/invalid/family'
+      path: '/invalid/family'
+      fullPath: '/invalid/family'
+      preLoaderRoute: typeof MemberInvalidFamilyRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/invalid/guardian': {
+      id: '/_member/invalid/guardian'
+      path: '/invalid/guardian'
+      fullPath: '/invalid/guardian'
+      preLoaderRoute: typeof MemberInvalidGuardianRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/invalid/identity': {
+      id: '/_member/invalid/identity'
+      path: '/invalid/identity'
+      fullPath: '/invalid/identity'
+      preLoaderRoute: typeof MemberInvalidIdentityRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/invalid/personal': {
+      id: '/_member/invalid/personal'
+      path: '/invalid/personal'
+      fullPath: '/invalid/personal'
+      preLoaderRoute: typeof MemberInvalidPersonalRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_wizard/register/attachment': {
+      id: '/_wizard/register/attachment'
+      path: '/register/attachment'
+      fullPath: '/register/attachment'
+      preLoaderRoute: typeof WizardRegisterAttachmentRouteImport
+      parentRoute: typeof WizardRoute
+    }
+    '/_wizard/register/family': {
+      id: '/_wizard/register/family'
+      path: '/register/family'
+      fullPath: '/register/family'
+      preLoaderRoute: typeof WizardRegisterFamilyRouteImport
+      parentRoute: typeof WizardRoute
+    }
+    '/_wizard/register/guardian': {
+      id: '/_wizard/register/guardian'
+      path: '/register/guardian'
+      fullPath: '/register/guardian'
+      preLoaderRoute: typeof WizardRegisterGuardianRouteImport
+      parentRoute: typeof WizardRoute
+    }
+    '/_wizard/register/identity': {
+      id: '/_wizard/register/identity'
+      path: '/register/identity'
+      fullPath: '/register/identity'
+      preLoaderRoute: typeof WizardRegisterIdentityRouteImport
+      parentRoute: typeof WizardRoute
+    }
+    '/_wizard/register/personal': {
+      id: '/_wizard/register/personal'
+      path: '/register/personal'
+      fullPath: '/register/personal'
+      preLoaderRoute: typeof WizardRegisterPersonalRouteImport
+      parentRoute: typeof WizardRoute
+    }
+    '/print/$type/$registrantId': {
+      id: '/print/$type/$registrantId'
+      path: '/print/$type/$registrantId'
+      fullPath: '/print/$type/$registrantId'
+      preLoaderRoute: typeof PrintTypeRegistrantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register/success/$registrantId': {
+      id: '/register/success/$registrantId'
+      path: '/register/success/$registrantId'
+      fullPath: '/register/success/$registrantId'
+      preLoaderRoute: typeof RegisterSuccessRegistrantIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface GuestRouteChildren {
+  GuestForgotPasswordRoute: typeof GuestForgotPasswordRoute
+  GuestLoginRoute: typeof GuestLoginRoute
+  GuestResetPasswordRoute: typeof GuestResetPasswordRoute
+  GuestIndexRoute: typeof GuestIndexRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestForgotPasswordRoute: GuestForgotPasswordRoute,
+  GuestLoginRoute: GuestLoginRoute,
+  GuestResetPasswordRoute: GuestResetPasswordRoute,
+  GuestIndexRoute: GuestIndexRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
+
+interface MemberRouteChildren {
+  MemberDashboardRoute: typeof MemberDashboardRoute
+  MemberSettingsRoute: typeof MemberSettingsRoute
+  MemberInvalidAttachmentRoute: typeof MemberInvalidAttachmentRoute
+  MemberInvalidFamilyRoute: typeof MemberInvalidFamilyRoute
+  MemberInvalidGuardianRoute: typeof MemberInvalidGuardianRoute
+  MemberInvalidIdentityRoute: typeof MemberInvalidIdentityRoute
+  MemberInvalidPersonalRoute: typeof MemberInvalidPersonalRoute
+}
+
+const MemberRouteChildren: MemberRouteChildren = {
+  MemberDashboardRoute: MemberDashboardRoute,
+  MemberSettingsRoute: MemberSettingsRoute,
+  MemberInvalidAttachmentRoute: MemberInvalidAttachmentRoute,
+  MemberInvalidFamilyRoute: MemberInvalidFamilyRoute,
+  MemberInvalidGuardianRoute: MemberInvalidGuardianRoute,
+  MemberInvalidIdentityRoute: MemberInvalidIdentityRoute,
+  MemberInvalidPersonalRoute: MemberInvalidPersonalRoute,
+}
+
+const MemberRouteWithChildren =
+  MemberRoute._addFileChildren(MemberRouteChildren)
+
+interface WizardRouteChildren {
+  WizardRegisterAttachmentRoute: typeof WizardRegisterAttachmentRoute
+  WizardRegisterFamilyRoute: typeof WizardRegisterFamilyRoute
+  WizardRegisterGuardianRoute: typeof WizardRegisterGuardianRoute
+  WizardRegisterIdentityRoute: typeof WizardRegisterIdentityRoute
+  WizardRegisterPersonalRoute: typeof WizardRegisterPersonalRoute
+}
+
+const WizardRouteChildren: WizardRouteChildren = {
+  WizardRegisterAttachmentRoute: WizardRegisterAttachmentRoute,
+  WizardRegisterFamilyRoute: WizardRegisterFamilyRoute,
+  WizardRegisterGuardianRoute: WizardRegisterGuardianRoute,
+  WizardRegisterIdentityRoute: WizardRegisterIdentityRoute,
+  WizardRegisterPersonalRoute: WizardRegisterPersonalRoute,
+}
+
+const WizardRouteWithChildren =
+  WizardRoute._addFileChildren(WizardRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  GuestRoute: GuestRouteWithChildren,
+  MemberRoute: MemberRouteWithChildren,
+  WizardRoute: WizardRouteWithChildren,
+  BannedRoute: BannedRoute,
+  EmailVerifyRoute: EmailVerifyRoute,
+  Verify2faRoute: Verify2faRoute,
+  PrintTypeRegistrantIdRoute: PrintTypeRegistrantIdRoute,
+  RegisterSuccessRegistrantIdRoute: RegisterSuccessRegistrantIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

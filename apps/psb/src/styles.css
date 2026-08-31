@@ -1,1 +1,133 @@
 @import "@roja/ui/src/styles/globals.css";
+@import "../public/assets/css/wizard.css";
+
+/* PSB custom overrides & responsive layout helpers */
+.roja_wizard_container {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.roja_header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--heading-txt-inverse);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.roja_header.scrolled {
+  background-color: rgba(228, 0, 126, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #ffffff !important;
+  border-bottom-color: rgba(228, 0, 126, 0.9) !important;
+  box-shadow: 0px 8px 20px rgba(228, 0, 126, 0.15) !important;
+}
+
+.roja_header_date {
+  background-color: #F4F7F0;
+  color: var(--body-txt-color);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.roja_header.scrolled .roja_header_date {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.roja_header_login {
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.roja_header.scrolled .roja_header_login {
+  background-color: #ffffff !important;
+  color: var(--primary) !important;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.roja_bg_blobs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 389px;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url('/assets/svg/etc/Register-Bg.svg');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: cover;
+}
+
+.roja_card_wizard {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  box-shadow: 0px 8px 32px rgba(31, 38, 135, 0.05) !important;
+  padding: 35px;
+  position: relative;
+  z-index: 10;
+  max-width: 900px;
+  margin: 40px auto;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+.roja_btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.roja_btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.roja_btn:active {
+  transform: translateY(0);
+  filter: brightness(0.97);
+}
+
+.roja_header_login:hover {
+  box-shadow: 0px 6px 15px rgba(228, 0, 126, 0.25) !important;
+}
+
+.roja_header.scrolled .roja_header_login:hover {
+  box-shadow: 0px 6px 15px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Background Color transitions on Hover */
+.roja_btn-primary:hover,
+.roja_header_login:hover {
+  background-color: #c9006f !important; /* Darker pink */
+}
+
+.roja_btn-warning:hover,
+.bg-\[\#ffa800\]:hover {
+  background-color: #e09400 !important; /* Darker orange */
+}
+
+.roja_btn-secondary:hover {
+  background-color: #f1f5f9 !important; /* Slate gray */
+  color: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.roja_header.scrolled .roja_header_login:hover {
+  background-color: #f1f5f9 !important;
+  color: var(--primary) !important;
+}

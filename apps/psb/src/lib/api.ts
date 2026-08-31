@@ -1,4 +1,4 @@
-import { createApiClient, createSharedApi, setAuthStoreGetter } from "@roja/api-client"
+import { createApiClient, createSharedApi, createPsbApi, setAuthStoreGetter } from "@roja/api-client"
 import useAuthStore from "@/stores/auth.store"
 
 const BASE_URL = import.meta.env["VITE_API_URL"] as string
@@ -7,3 +7,5 @@ setAuthStoreGetter(() => useAuthStore.getState())
 
 export const apiClient = createApiClient(BASE_URL)
 export const sharedApi = createSharedApi(apiClient)
+export const psbApi = createPsbApi(apiClient)
+
