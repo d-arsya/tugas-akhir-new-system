@@ -332,6 +332,6 @@ export class Registrant extends BaseEntity {
 	@Column({ name: "attach_birth_certificate", nullable: true, type: "varchar" })
 	attachBirthCertificate: string | null
 
-	@Column({ name: "email_verified_at", nullable: true, type: "varchar" })
-	emailVerifiedAt: string | null
+	@Column({ name: "email_verified_at", nullable: true, type: "timestamp" })
+	emailVerifiedAt: Date | null
 }

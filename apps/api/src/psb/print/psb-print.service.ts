@@ -20,7 +20,7 @@ export class PsbPrintService {
 		private readonly academicYearRepository: Repository<AcademicYear>,
 		@InjectRepository(Level)
 		private readonly levelRepository: Repository<Level>,
-	) {}
+	) { }
 
 	async getRegistrationProof(id: number): Promise<{
 		registrant: Registrant
@@ -33,7 +33,7 @@ export class PsbPrintService {
 			throw new NotFoundException("Data pendaftar tidak ditemukan.")
 		}
 
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: {}, order: { id: "DESC" } })
 		const academicYear = registrant.academicYearId
 			? await this.academicYearRepository.findOneBy({ id: registrant.academicYearId })
 			: null
@@ -56,8 +56,8 @@ export class PsbPrintService {
 			throw new ForbiddenException("Bukti penerimaan hanya dapat dicetak jika status pendaftaran Anda 'Diterima'.")
 		}
 
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
-		const announcement = await this.settingAnncRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: {}, order: { id: "DESC" } })
+		const announcement = await this.settingAnncRepository.findOne({ where: {}, order: { id: "DESC" } })
 		const academicYear = registrant.academicYearId
 			? await this.academicYearRepository.findOneBy({ id: registrant.academicYearId })
 			: null
@@ -78,8 +78,8 @@ export class PsbPrintService {
 			throw new ForbiddenException("Surat keputusan penolakan hanya tersedia untuk status 'Ditolak'.")
 		}
 
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
-		const announcement = await this.settingAnncRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: {}, order: { id: "DESC" } })
+		const announcement = await this.settingAnncRepository.findOne({ where: {}, order: { id: "DESC" } })
 
 		return { registrant, school, announcement }
 	}
@@ -97,8 +97,8 @@ export class PsbPrintService {
 			throw new ForbiddenException("Surat ini hanya dapat dicetak jika Anda tidak lulus seleksi jalur indent.")
 		}
 
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
-		const announcement = await this.settingAnncRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: {}, order: { id: "DESC" } })
+		const announcement = await this.settingAnncRepository.findOne({ where: {}, order: { id: "DESC" } })
 
 		return { registrant, school, announcement }
 	}

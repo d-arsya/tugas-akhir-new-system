@@ -5,13 +5,10 @@ import Header from "@/components/header"
 
 export const Route = createFileRoute("/_guest")({
 	beforeLoad: () => {
-		// Temporary disabled for visual inspection
-		/*
 		const auth = useAuthStore.getState()
 		if (auth.isAuthenticated) {
 			throw redirect({ to: "/dashboard" })
 		}
-		*/
 	},
 	component: (): JSX.Element => {
 		return (

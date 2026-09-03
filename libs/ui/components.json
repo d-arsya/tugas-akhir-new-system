@@ -7,10 +7,11 @@
     "config": "libs/ui/tailwind.config.ts",
     "css": "libs/ui/src/styles/globals.css",
     "baseColor": "slate",
-    "cssVariables": false
+    "cssVariables": true
   },
   "aliases": {
     "components": "@roja/ui/components",
-    "utils": "@roja/utils"
+    "utils": "@roja/utils",
+    "ui": "@roja/ui/components/ui"
   }
 }

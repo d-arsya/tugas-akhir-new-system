@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from "typeorm"
 import { BaseEntity } from "../../database/base.entity"
-import { Province } from "./province.entity"
-import { District } from "./district.entity"
+import type { Province } from "./province.entity"
+import type { District } from "./district.entity"
 
 @Entity({ name: "tbr_regencies" })
 export class Regency extends BaseEntity {
@@ -11,10 +11,10 @@ export class Regency extends BaseEntity {
 	@Column({ type: "varchar", length: 255, nullable: true })
 	name: string | null
 
-	@ManyToOne(() => Province, (province) => province.regencies)
+	@ManyToOne("Province", (province: any) => province.regencies)
 	@JoinColumn({ name: "province_id" })
 	province: Province
 
-	@OneToMany(() => District, (district) => district.regency)
+	@OneToMany("District", (district: any) => district.regency)
 	districts: District[]
 }

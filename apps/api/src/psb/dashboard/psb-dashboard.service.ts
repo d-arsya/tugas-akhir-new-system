@@ -14,7 +14,7 @@ export class PsbDashboardService {
 		private readonly settingAnncRepository: Repository<SettingAnnc>,
 		@InjectRepository(SettingSchool)
 		private readonly settingSchoolRepository: Repository<SettingSchool>,
-	) {}
+	) { }
 
 	async getDashboard(userId: number): Promise<{
 		registrant: Registrant
@@ -31,8 +31,8 @@ export class PsbDashboardService {
 			throw new NotFoundException("Data pendaftar tidak ditemukan.")
 		}
 
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
-		const announcement = await this.settingAnncRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: {}, order: { id: "DESC" } })
+		const announcement = await this.settingAnncRepository.findOne({ where: {}, order: { id: "DESC" } })
 
 		let status: string = registrant.approvalStatus ?? "wait"
 		let label: string = "Menunggu Verifikasi"

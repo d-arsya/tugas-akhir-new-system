@@ -2,14 +2,15 @@ import type { JSX } from "react"
 import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
+import useAuthStore from "@/stores/auth.store"
 import Header from "@/components/header"
+import { Mail } from "lucide-react"
 
 const SuccessPage = (): JSX.Element => {
 	const navigate = useNavigate()
 	const { registrantId } = useParams({ strict: false }) as { registrantId?: string }
-
-	// Find the registrant id in our mock database (usually match the current user id)
-	const currentUserId = parseInt(localStorage.getItem("roja-mock-current-user-id") || "0")
+	const user = useAuthStore((s) => s.user)
+	const currentUserId = user?.id || 0
 
 	const { data: info, isLoading } = useQuery({
 		queryKey: ["successInfo", currentUserId],
@@ -55,12 +56,16 @@ const SuccessPage = (): JSX.Element => {
 						</div>
 						<div className="flex justify-between text-xs border-b border-slate-100 pb-2">
 							<span className="text-[var(--grey)]">Email Terdaftar</span>
-							<span className="font-semibold text-slate-800">{info?.email}</span>
+							<span className="font-semibold text-slate-800">{info?.email || user?.email}</span>
 						</div>
-						<div className="flex flex-col gap-1 bg-amber-50 border border-amber-200 rounded p-3 text-[10px] text-amber-800 leading-relaxed mt-2">
-							<strong>⚠️ MOCK PASSWORD HANYA UNTUK SIMULASI:</strong>
-							<p>Password Anda adalah: <strong className="text-xs select-all text-amber-950 font-mono bg-white px-1.5 py-0.5 border border-amber-200 rounded">PASSWORD</strong></p>
-							<p>Silakan simpan password di atas untuk melakukan login ke Member Area nanti.</p>
+						<div className="flex flex-col gap-1.5 bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 text-[11px] text-emerald-900 leading-relaxed mt-2">
+							<div className="flex items-center gap-2 font-bold text-emerald-800">
+								<Mail className="w-4 h-4 text-emerald-600 shrink-0" />
+								<span>Informasi Akun & Kata Sandi</span>
+							</div>
+							<p className="m-0 text-emerald-800 text-[11px]">
+								Kata sandi dan detail akun pendaftaran Anda telah dikirimkan ke email terdaftar (<strong>{info?.email || user?.email}</strong>). Silakan periksa kotak masuk atau folder spam email Anda.
+							</p>
 						</div>
 					</div>
 

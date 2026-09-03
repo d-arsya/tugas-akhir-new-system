@@ -1,81 +1,79 @@
-import { Logger, ValidationPipe } from "@nestjs/common"
+import { Logger } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
-import { cleanupOpenApiDoc } from "nestjs-zod"
+import { cleanupOpenApiDoc, ZodValidationPipe } from "nestjs-zod"
 import { Logger as PinoLogger } from "nestjs-pino"
+import cookieParser from "cookie-parser"
 import { AppModule } from "./app.module"
 import { HttpExceptionFilter } from "./core/filters/http-exception.filter"
 import { TransformInterceptor } from "./core/interceptors/transform.interceptor"
 import type { Request, Response } from "express"
 
 async function bootstrap(): Promise<void> {
-	const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule)
 
-	// Use Pino structured logger
-	app.useLogger(app.get(PinoLogger))
+  // Use cookie-parser middleware
+  app.use(cookieParser())
 
-	// Global prefix for API endpoints
-	app.setGlobalPrefix("api")
+  // Use Pino structured logger
+  app.useLogger(app.get(PinoLogger))
 
-	// Global pipes
-	app.useGlobalPipes(
-		new ValidationPipe({
-			whitelist: true,
-			transform: true,
-			forbidNonWhitelisted: true,
-		}),
-	)
+  // Global prefix for API endpoints
+  app.setGlobalPrefix("api")
 
-	// Global filters
-	app.useGlobalFilters(new HttpExceptionFilter())
+  // Global pipes
+  app.useGlobalPipes(new ZodValidationPipe())
 
-	// Global interceptors
-	app.useGlobalInterceptors(new TransformInterceptor())
+  // Global filters
+  app.useGlobalFilters(new HttpExceptionFilter())
 
-	// CORS
-	app.enableCors({
-		origin: [
-			"http://localhost:4200", // psb dev
-			"http://localhost:4201", // santri dev
-			"http://localhost:4202", // merchant dev
-			"http://localhost:4203", // admin dev
-		],
-		credentials: true,
-	})
+  // Global interceptors
+  app.useGlobalInterceptors(new TransformInterceptor())
 
-	const httpAdapter = app.getHttpAdapter()
+  // CORS
+  app.enableCors({
+    origin: [
+      "http://localhost:4200", // psb dev
+      "http://localhost:4201", // santri dev
+      "http://localhost:4202", // merchant dev
+      "http://localhost:4203", // admin dev
+    ],
+    credentials: true,
+  })
 
-	// Redirect root / to /docs
-	httpAdapter.get("/", (_req: Request, res: Response) => {
-		res.redirect("/docs")
-	})
+  const httpAdapter = app.getHttpAdapter()
 
-	// Scalar API docs styled with Roja Design System (DESIGN.md)
-	if (process.env["NODE_ENV"] !== "production") {
-		const config = new DocumentBuilder()
-			.setTitle("Pondok Roja API")
-			.setDescription("Dokumentasi Resmi REST API Sistem Monorepo Pondok Roja.")
-			.setVersion("1.0.0")
-			.addBearerAuth(
-				{
-					type: "http",
-					scheme: "bearer",
-					bearerFormat: "JWT",
-					description: "Masukkan token JWT akses Anda di sini",
-				},
-				"JWT-Auth",
-			)
-			.build()
+  // Redirect root / to /docs
+  httpAdapter.get("/", (_req: Request, res: Response) => {
+    res.redirect("/docs")
+  })
 
-		const rawDocument = SwaggerModule.createDocument(app, config)
-		const document = cleanupOpenApiDoc(rawDocument)
+  // Scalar API docs styled with Roja Design System (DESIGN.md)
+  if (process.env["NODE_ENV"] !== "production") {
+    const config = new DocumentBuilder()
+      .setTitle("Pondok Roja API")
+      .setDescription("Dokumentasi Resmi REST API Sistem Monorepo Pondok Roja.")
+      .setVersion("1.0.0")
+      .addBearerAuth(
+        {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Masukkan token JWT akses Anda di sini",
+        },
+        "JWT-Auth",
+      )
+      .build()
 
-		httpAdapter.get("/docs/openapi.json", (_req: Request, res: Response) => {
-			res.json(document)
-		})
+    const rawDocument = SwaggerModule.createDocument(app, config)
+    const document = cleanupOpenApiDoc(rawDocument)
 
-		httpAdapter.get("/docs", (_req: Request, res: Response) => {
-			res.type("text/html").send(`
+    httpAdapter.get("/docs/openapi.json", (_req: Request, res: Response) => {
+      res.json(document)
+    })
+
+    httpAdapter.get("/docs", (_req: Request, res: Response) => {
+      res.type("text/html").send(`
 <!doctype html>
 <html lang="id">
   <head>
@@ -165,15 +163,15 @@ async function bootstrap(): Promise<void> {
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
   </body>
 </html>`)
-		})
-	}
+    })
+  }
 
-	const port = process.env["PORT"] ?? 4000
-	await app.listen(port)
-	Logger.log(`🚀 API is running on: http://localhost:${port}/api`, "Bootstrap")
-	if (process.env["NODE_ENV"] !== "production") {
-		Logger.log(`📚 Docs: http://localhost:${port}/docs`, "Bootstrap")
-	}
+  const port = process.env["PORT"] ?? 5000
+  await app.listen(port)
+  Logger.log(`🚀 API is running on: http://localhost:${port}/api`, "Bootstrap")
+  if (process.env["NODE_ENV"] !== "production") {
+    Logger.log(`📚 Docs: http://localhost:${port}/docs`, "Bootstrap")
+  }
 }
 
 bootstrap()

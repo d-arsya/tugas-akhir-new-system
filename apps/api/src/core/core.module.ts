@@ -2,6 +2,7 @@ import { Global, Module } from "@nestjs/common"
 import { APP_GUARD } from "@nestjs/core"
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler"
 import { LoggerModule } from "nestjs-pino"
+import pinoPretty from "pino-pretty"
 import { ConfigModule } from "./config/config.module"
 import { DatabaseModule } from "./database/database.module"
 import { RedisModule } from "./redis/redis.module"
@@ -21,21 +22,54 @@ import { IpBanModule } from "./ip-ban/ip-ban.module"
 		// Pino structured logging (serverless & Vercel compatible)
 		LoggerModule.forRoot({
 			pinoHttp: {
-				level: process.env["NODE_ENV"] === "production" ? "info" : "debug",
+				level: "info",
+				autoLogging: true,
+				customSuccessMessage: (req: any, res: any) => {
+					return `${req.method} ${req.url} ${res.statusCode}`
+				},
+				customErrorMessage: (req: any, res: any, err: any) => {
+					return `${req.method} ${req.url} ${res.statusCode} - ${err?.message || "Error"}`
+				},
+				stream: pinoPretty({
+					colorize: true,
+					singleLine: true,
+					translateTime: "SYS:yyyy-mm-dd HH:MM:ss",
+					sync: true,
+				}),
 			},
 		}),
 
 		// Throttler — global rate limiting
 		ThrottlerModule.forRoot([
 			{
-				name: "short",
-				ttl: 60000, // 1 minute
-				limit: 20,
+				name: 'default',
+				ttl: 60_000,
+				limit: 600,
 			},
 			{
-				name: "auth",
-				ttl: 60000,
-				limit: 5, // auth endpoints: 5 per minute
+				name: 'auth',
+				ttl: 60_000,
+				limit: 600,
+			},
+			{
+				name: 'otp',
+				ttl: 5 * 60_000,
+				limit: 600,
+			},
+			{
+				name: 'password',
+				ttl: 10 * 60_000,
+				limit: 600,
+			},
+			{
+				name: 'upload',
+				ttl: 60_000,
+				limit: 600,
+			},
+			{
+				name: 'search',
+				ttl: 60_000,
+				limit: 600,
 			},
 		]),
 
@@ -64,4 +98,4 @@ import { IpBanModule } from "./ip-ban/ip-ban.module"
 		IpBanModule,
 	],
 })
-export class CoreModule {}
+export class CoreModule { }

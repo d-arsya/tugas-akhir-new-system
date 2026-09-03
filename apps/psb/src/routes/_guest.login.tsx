@@ -7,6 +7,8 @@ import useAuthStore from "@/stores/auth.store"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 
+import axios from "axios"
+
 const loginSchema = z.object({
 	email: z.string().email("Email tidak valid"),
 	password: z.string().min(1, "Password wajib diisi"),
@@ -18,7 +20,10 @@ const LoginPage = (): JSX.Element => {
 	const navigate = useNavigate()
 	const login = useAuthStore((s) => s.login)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [isResending, setIsResending] = useState<boolean>(false)
 	const [errorMsg, setErrorMsg] = useState<string | null>(null)
+	const [infoMsg, setInfoMsg] = useState<string | null>(null)
+	const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
 
 	const {
 		register,
@@ -35,19 +40,54 @@ const LoginPage = (): JSX.Element => {
 	const onSubmit = async (data: LoginInput): Promise<void> => {
 		setIsLoading(true)
 		setErrorMsg(null)
+		setInfoMsg(null)
+		setUnverifiedEmail(null)
 		try {
 			const res = await psbApi.login(data)
-			const profile = await psbApi.getProfile()
-			if (profile?.enabled2fa) {
+			console.log("Login response:", res)
+			if (res.requires2fa) {
+				localStorage.setItem("roja-2fa-email", res.email)
 				navigate({ to: "/verify-2fa" })
 			} else {
-				login(res.tokens.accessToken, res.tokens.refreshToken, res.user)
+				login(res.user)
 				navigate({ to: "/dashboard" })
 			}
 		} catch (err: unknown) {
-			setErrorMsg(err instanceof Error ? err.message : "Email atau password salah")
+			let msg = "Email atau password salah"
+			if (axios.isAxiosError(err)) {
+				msg = err.response?.data?.message || err.response?.data?.error || err.message || msg
+			} else if (err instanceof Error) {
+				msg = err.message
+			}
+
+			const is403 = axios.isAxiosError(err) && err.response?.status === 403
+			const isUnverified =
+				is403 ||
+				msg.toLowerCase().includes("verifikasi") ||
+				msg.toLowerCase().includes("verified")
+
+			if (isUnverified) {
+				navigate({ to: "/need-verify", search: { email: data.email } })
+				return
+			}
+			setErrorMsg(msg)
 		} finally {
 			setIsLoading(false)
+		}
+	}
+
+	const handleResendVerification = async (): Promise<void> => {
+		if (!unverifiedEmail) return
+		setIsResending(true)
+		setErrorMsg(null)
+		setInfoMsg(null)
+		try {
+			const res = await psbApi.resendVerification(unverifiedEmail)
+			setInfoMsg(res.message || `Email verifikasi telah dikirimkan ulang ke ${unverifiedEmail}. Silakan cek kotak masuk email Anda.`)
+		} catch (err: unknown) {
+			setErrorMsg(err instanceof Error ? err.message : "Gagal mengirimkan email verifikasi")
+		} finally {
+			setIsResending(false)
 		}
 	}
 
@@ -67,8 +107,24 @@ const LoginPage = (): JSX.Element => {
 				</div>
 
 				{errorMsg && (
-					<div className="alert roja_alert-danger text-xs py-2.5 px-3 border border-[var(--danger)] rounded-lg">
-						{errorMsg}
+					<div className="alert roja_alert-danger text-xs py-2.5 px-3 border border-[var(--danger)] rounded-lg flex flex-col gap-2">
+						<span>{errorMsg}</span>
+						{unverifiedEmail && (
+							<button
+								type="button"
+								onClick={handleResendVerification}
+								disabled={isResending}
+								className="text-[11px] font-bold text-[var(--secondary)] hover:underline text-left cursor-pointer"
+							>
+								{isResending ? "Mengirim email verifikasi..." : "Kirim Ulang Link Verifikasi Email"}
+							</button>
+						)}
+					</div>
+				)}
+
+				{infoMsg && (
+					<div className="p-3 bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 rounded-lg">
+						{infoMsg}
 					</div>
 				)}
 

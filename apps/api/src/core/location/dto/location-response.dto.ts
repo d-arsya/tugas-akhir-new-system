@@ -20,3 +20,11 @@ export const DistrictResponseSchema = z.object({
 	name: z.string().optional(),
 })
 export class DistrictResponseDto extends createZodDto(DistrictResponseSchema) {}
+
+export const VillageResponseSchema = z.object({
+  id: z.number(),
+  districtId: z.number(),
+  code: z.string().optional(),
+  name: z.string().optional(),
+})
+export class VillageResponseDto extends createZodDto(VillageResponseSchema) {}

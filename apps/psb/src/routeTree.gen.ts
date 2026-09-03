@@ -14,23 +14,17 @@ import { Route as MemberRouteImport } from './routes/_member'
 import { Route as WizardRouteImport } from './routes/_wizard'
 import { Route as BannedRouteImport } from './routes/banned'
 import { Route as EmailVerifyRouteImport } from './routes/email-verify'
+import { Route as NeedVerifyRouteImport } from './routes/need-verify'
 import { Route as Verify2faRouteImport } from './routes/verify-2fa'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as GuestIndexRouteImport } from './routes/_guest.index'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
 import { Route as MemberDashboardRouteImport } from './routes/_member.dashboard'
+import { Route as MemberInvalidRouteImport } from './routes/_member.invalid'
 import { Route as MemberSettingsRouteImport } from './routes/_member.settings'
-import { Route as MemberInvalidAttachmentRouteImport } from './routes/_member.invalid.attachment'
-import { Route as MemberInvalidFamilyRouteImport } from './routes/_member.invalid.family'
-import { Route as MemberInvalidGuardianRouteImport } from './routes/_member.invalid.guardian'
-import { Route as MemberInvalidIdentityRouteImport } from './routes/_member.invalid.identity'
-import { Route as MemberInvalidPersonalRouteImport } from './routes/_member.invalid.personal'
-import { Route as WizardRegisterAttachmentRouteImport } from './routes/_wizard.register.attachment'
-import { Route as WizardRegisterFamilyRouteImport } from './routes/_wizard.register.family'
-import { Route as WizardRegisterGuardianRouteImport } from './routes/_wizard.register.guardian'
-import { Route as WizardRegisterIdentityRouteImport } from './routes/_wizard.register.identity'
-import { Route as WizardRegisterPersonalRouteImport } from './routes/_wizard.register.personal'
+import { Route as WizardRegisterRouteImport } from './routes/_wizard.register'
 import { Route as PrintTypeRegistrantIdRouteImport } from './routes/print.$type.$registrantId'
 import { Route as RegisterSuccessRegistrantIdRouteImport } from './routes/register.success.$registrantId'
 
@@ -56,9 +50,19 @@ const EmailVerifyRoute = EmailVerifyRouteImport.update({
   path: '/email-verify',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NeedVerifyRoute = NeedVerifyRouteImport.update({
+  id: '/need-verify',
+  path: '/need-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Verify2faRoute = Verify2faRouteImport.update({
   id: '/verify-2fa',
   path: '/verify-2fa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuestIndexRoute = GuestIndexRouteImport.update({
@@ -86,60 +90,19 @@ const MemberDashboardRoute = MemberDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => MemberRoute,
 } as any)
+const MemberInvalidRoute = MemberInvalidRouteImport.update({
+  id: '/invalid',
+  path: '/invalid',
+  getParentRoute: () => MemberRoute,
+} as any)
 const MemberSettingsRoute = MemberSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => MemberRoute,
 } as any)
-const MemberInvalidAttachmentRoute = MemberInvalidAttachmentRouteImport.update({
-  id: '/invalid/attachment',
-  path: '/invalid/attachment',
-  getParentRoute: () => MemberRoute,
-} as any)
-const MemberInvalidFamilyRoute = MemberInvalidFamilyRouteImport.update({
-  id: '/invalid/family',
-  path: '/invalid/family',
-  getParentRoute: () => MemberRoute,
-} as any)
-const MemberInvalidGuardianRoute = MemberInvalidGuardianRouteImport.update({
-  id: '/invalid/guardian',
-  path: '/invalid/guardian',
-  getParentRoute: () => MemberRoute,
-} as any)
-const MemberInvalidIdentityRoute = MemberInvalidIdentityRouteImport.update({
-  id: '/invalid/identity',
-  path: '/invalid/identity',
-  getParentRoute: () => MemberRoute,
-} as any)
-const MemberInvalidPersonalRoute = MemberInvalidPersonalRouteImport.update({
-  id: '/invalid/personal',
-  path: '/invalid/personal',
-  getParentRoute: () => MemberRoute,
-} as any)
-const WizardRegisterAttachmentRoute =
-  WizardRegisterAttachmentRouteImport.update({
-    id: '/register/attachment',
-    path: '/register/attachment',
-    getParentRoute: () => WizardRoute,
-  } as any)
-const WizardRegisterFamilyRoute = WizardRegisterFamilyRouteImport.update({
-  id: '/register/family',
-  path: '/register/family',
-  getParentRoute: () => WizardRoute,
-} as any)
-const WizardRegisterGuardianRoute = WizardRegisterGuardianRouteImport.update({
-  id: '/register/guardian',
-  path: '/register/guardian',
-  getParentRoute: () => WizardRoute,
-} as any)
-const WizardRegisterIdentityRoute = WizardRegisterIdentityRouteImport.update({
-  id: '/register/identity',
-  path: '/register/identity',
-  getParentRoute: () => WizardRoute,
-} as any)
-const WizardRegisterPersonalRoute = WizardRegisterPersonalRouteImport.update({
-  id: '/register/personal',
-  path: '/register/personal',
+const WizardRegisterRoute = WizardRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => WizardRoute,
 } as any)
 const PrintTypeRegistrantIdRoute = PrintTypeRegistrantIdRouteImport.update({
@@ -158,22 +121,16 @@ export interface FileRoutesByFullPath {
   '/': typeof GuestIndexRoute
   '/banned': typeof BannedRoute
   '/email-verify': typeof EmailVerifyRoute
+  '/need-verify': typeof NeedVerifyRoute
   '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
   '/dashboard': typeof MemberDashboardRoute
+  '/invalid': typeof MemberInvalidRoute
   '/settings': typeof MemberSettingsRoute
-  '/invalid/attachment': typeof MemberInvalidAttachmentRoute
-  '/invalid/family': typeof MemberInvalidFamilyRoute
-  '/invalid/guardian': typeof MemberInvalidGuardianRoute
-  '/invalid/identity': typeof MemberInvalidIdentityRoute
-  '/invalid/personal': typeof MemberInvalidPersonalRoute
-  '/register/attachment': typeof WizardRegisterAttachmentRoute
-  '/register/family': typeof WizardRegisterFamilyRoute
-  '/register/guardian': typeof WizardRegisterGuardianRoute
-  '/register/identity': typeof WizardRegisterIdentityRoute
-  '/register/personal': typeof WizardRegisterPersonalRoute
+  '/register': typeof WizardRegisterRoute
   '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
   '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
@@ -181,22 +138,16 @@ export interface FileRoutesByTo {
   '/': typeof GuestIndexRoute
   '/banned': typeof BannedRoute
   '/email-verify': typeof EmailVerifyRoute
+  '/need-verify': typeof NeedVerifyRoute
   '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
   '/dashboard': typeof MemberDashboardRoute
+  '/invalid': typeof MemberInvalidRoute
   '/settings': typeof MemberSettingsRoute
-  '/invalid/attachment': typeof MemberInvalidAttachmentRoute
-  '/invalid/family': typeof MemberInvalidFamilyRoute
-  '/invalid/guardian': typeof MemberInvalidGuardianRoute
-  '/invalid/identity': typeof MemberInvalidIdentityRoute
-  '/invalid/personal': typeof MemberInvalidPersonalRoute
-  '/register/attachment': typeof WizardRegisterAttachmentRoute
-  '/register/family': typeof WizardRegisterFamilyRoute
-  '/register/guardian': typeof WizardRegisterGuardianRoute
-  '/register/identity': typeof WizardRegisterIdentityRoute
-  '/register/personal': typeof WizardRegisterPersonalRoute
+  '/register': typeof WizardRegisterRoute
   '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
   '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
@@ -207,23 +158,17 @@ export interface FileRoutesById {
   '/_wizard': typeof WizardRouteWithChildren
   '/banned': typeof BannedRoute
   '/email-verify': typeof EmailVerifyRoute
+  '/need-verify': typeof NeedVerifyRoute
   '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/reset-password': typeof GuestResetPasswordRoute
   '/_member/dashboard': typeof MemberDashboardRoute
+  '/_member/invalid': typeof MemberInvalidRoute
   '/_member/settings': typeof MemberSettingsRoute
+  '/_wizard/register': typeof WizardRegisterRoute
   '/_guest/': typeof GuestIndexRoute
-  '/_member/invalid/attachment': typeof MemberInvalidAttachmentRoute
-  '/_member/invalid/family': typeof MemberInvalidFamilyRoute
-  '/_member/invalid/guardian': typeof MemberInvalidGuardianRoute
-  '/_member/invalid/identity': typeof MemberInvalidIdentityRoute
-  '/_member/invalid/personal': typeof MemberInvalidPersonalRoute
-  '/_wizard/register/attachment': typeof WizardRegisterAttachmentRoute
-  '/_wizard/register/family': typeof WizardRegisterFamilyRoute
-  '/_wizard/register/guardian': typeof WizardRegisterGuardianRoute
-  '/_wizard/register/identity': typeof WizardRegisterIdentityRoute
-  '/_wizard/register/personal': typeof WizardRegisterPersonalRoute
   '/print/$type/$registrantId': typeof PrintTypeRegistrantIdRoute
   '/register/success/$registrantId': typeof RegisterSuccessRegistrantIdRoute
 }
@@ -233,22 +178,16 @@ export interface FileRouteTypes {
     | '/'
     | '/banned'
     | '/email-verify'
+    | '/need-verify'
     | '/verify-2fa'
+    | '/verify-email'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/dashboard'
+    | '/invalid'
     | '/settings'
-    | '/invalid/attachment'
-    | '/invalid/family'
-    | '/invalid/guardian'
-    | '/invalid/identity'
-    | '/invalid/personal'
-    | '/register/attachment'
-    | '/register/family'
-    | '/register/guardian'
-    | '/register/identity'
-    | '/register/personal'
+    | '/register'
     | '/print/$type/$registrantId'
     | '/register/success/$registrantId'
   fileRoutesByTo: FileRoutesByTo
@@ -256,22 +195,16 @@ export interface FileRouteTypes {
     | '/'
     | '/banned'
     | '/email-verify'
+    | '/need-verify'
     | '/verify-2fa'
+    | '/verify-email'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/dashboard'
+    | '/invalid'
     | '/settings'
-    | '/invalid/attachment'
-    | '/invalid/family'
-    | '/invalid/guardian'
-    | '/invalid/identity'
-    | '/invalid/personal'
-    | '/register/attachment'
-    | '/register/family'
-    | '/register/guardian'
-    | '/register/identity'
-    | '/register/personal'
+    | '/register'
     | '/print/$type/$registrantId'
     | '/register/success/$registrantId'
   id:
@@ -281,23 +214,17 @@ export interface FileRouteTypes {
     | '/_wizard'
     | '/banned'
     | '/email-verify'
+    | '/need-verify'
     | '/verify-2fa'
+    | '/verify-email'
     | '/_guest/forgot-password'
     | '/_guest/login'
     | '/_guest/reset-password'
     | '/_member/dashboard'
+    | '/_member/invalid'
     | '/_member/settings'
+    | '/_wizard/register'
     | '/_guest/'
-    | '/_member/invalid/attachment'
-    | '/_member/invalid/family'
-    | '/_member/invalid/guardian'
-    | '/_member/invalid/identity'
-    | '/_member/invalid/personal'
-    | '/_wizard/register/attachment'
-    | '/_wizard/register/family'
-    | '/_wizard/register/guardian'
-    | '/_wizard/register/identity'
-    | '/_wizard/register/personal'
     | '/print/$type/$registrantId'
     | '/register/success/$registrantId'
   fileRoutesById: FileRoutesById
@@ -308,7 +235,9 @@ export interface RootRouteChildren {
   WizardRoute: typeof WizardRouteWithChildren
   BannedRoute: typeof BannedRoute
   EmailVerifyRoute: typeof EmailVerifyRoute
+  NeedVerifyRoute: typeof NeedVerifyRoute
   Verify2faRoute: typeof Verify2faRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   PrintTypeRegistrantIdRoute: typeof PrintTypeRegistrantIdRoute
   RegisterSuccessRegistrantIdRoute: typeof RegisterSuccessRegistrantIdRoute
 }
@@ -350,11 +279,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/need-verify': {
+      id: '/need-verify'
+      path: '/need-verify'
+      fullPath: '/need-verify'
+      preLoaderRoute: typeof NeedVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify-2fa': {
       id: '/verify-2fa'
       path: '/verify-2fa'
       fullPath: '/verify-2fa'
       preLoaderRoute: typeof Verify2faRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_guest/': {
@@ -392,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberDashboardRouteImport
       parentRoute: typeof MemberRoute
     }
+    '/_member/invalid': {
+      id: '/_member/invalid'
+      path: '/invalid'
+      fullPath: '/invalid'
+      preLoaderRoute: typeof MemberInvalidRouteImport
+      parentRoute: typeof MemberRoute
+    }
     '/_member/settings': {
       id: '/_member/settings'
       path: '/settings'
@@ -399,74 +349,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberSettingsRouteImport
       parentRoute: typeof MemberRoute
     }
-    '/_member/invalid/attachment': {
-      id: '/_member/invalid/attachment'
-      path: '/invalid/attachment'
-      fullPath: '/invalid/attachment'
-      preLoaderRoute: typeof MemberInvalidAttachmentRouteImport
-      parentRoute: typeof MemberRoute
-    }
-    '/_member/invalid/family': {
-      id: '/_member/invalid/family'
-      path: '/invalid/family'
-      fullPath: '/invalid/family'
-      preLoaderRoute: typeof MemberInvalidFamilyRouteImport
-      parentRoute: typeof MemberRoute
-    }
-    '/_member/invalid/guardian': {
-      id: '/_member/invalid/guardian'
-      path: '/invalid/guardian'
-      fullPath: '/invalid/guardian'
-      preLoaderRoute: typeof MemberInvalidGuardianRouteImport
-      parentRoute: typeof MemberRoute
-    }
-    '/_member/invalid/identity': {
-      id: '/_member/invalid/identity'
-      path: '/invalid/identity'
-      fullPath: '/invalid/identity'
-      preLoaderRoute: typeof MemberInvalidIdentityRouteImport
-      parentRoute: typeof MemberRoute
-    }
-    '/_member/invalid/personal': {
-      id: '/_member/invalid/personal'
-      path: '/invalid/personal'
-      fullPath: '/invalid/personal'
-      preLoaderRoute: typeof MemberInvalidPersonalRouteImport
-      parentRoute: typeof MemberRoute
-    }
-    '/_wizard/register/attachment': {
-      id: '/_wizard/register/attachment'
-      path: '/register/attachment'
-      fullPath: '/register/attachment'
-      preLoaderRoute: typeof WizardRegisterAttachmentRouteImport
-      parentRoute: typeof WizardRoute
-    }
-    '/_wizard/register/family': {
-      id: '/_wizard/register/family'
-      path: '/register/family'
-      fullPath: '/register/family'
-      preLoaderRoute: typeof WizardRegisterFamilyRouteImport
-      parentRoute: typeof WizardRoute
-    }
-    '/_wizard/register/guardian': {
-      id: '/_wizard/register/guardian'
-      path: '/register/guardian'
-      fullPath: '/register/guardian'
-      preLoaderRoute: typeof WizardRegisterGuardianRouteImport
-      parentRoute: typeof WizardRoute
-    }
-    '/_wizard/register/identity': {
-      id: '/_wizard/register/identity'
-      path: '/register/identity'
-      fullPath: '/register/identity'
-      preLoaderRoute: typeof WizardRegisterIdentityRouteImport
-      parentRoute: typeof WizardRoute
-    }
-    '/_wizard/register/personal': {
-      id: '/_wizard/register/personal'
-      path: '/register/personal'
-      fullPath: '/register/personal'
-      preLoaderRoute: typeof WizardRegisterPersonalRouteImport
+    '/_wizard/register': {
+      id: '/_wizard/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof WizardRegisterRouteImport
       parentRoute: typeof WizardRoute
     }
     '/print/$type/$registrantId': {
@@ -504,41 +391,25 @@ const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
 
 interface MemberRouteChildren {
   MemberDashboardRoute: typeof MemberDashboardRoute
+  MemberInvalidRoute: typeof MemberInvalidRoute
   MemberSettingsRoute: typeof MemberSettingsRoute
-  MemberInvalidAttachmentRoute: typeof MemberInvalidAttachmentRoute
-  MemberInvalidFamilyRoute: typeof MemberInvalidFamilyRoute
-  MemberInvalidGuardianRoute: typeof MemberInvalidGuardianRoute
-  MemberInvalidIdentityRoute: typeof MemberInvalidIdentityRoute
-  MemberInvalidPersonalRoute: typeof MemberInvalidPersonalRoute
 }
 
 const MemberRouteChildren: MemberRouteChildren = {
   MemberDashboardRoute: MemberDashboardRoute,
+  MemberInvalidRoute: MemberInvalidRoute,
   MemberSettingsRoute: MemberSettingsRoute,
-  MemberInvalidAttachmentRoute: MemberInvalidAttachmentRoute,
-  MemberInvalidFamilyRoute: MemberInvalidFamilyRoute,
-  MemberInvalidGuardianRoute: MemberInvalidGuardianRoute,
-  MemberInvalidIdentityRoute: MemberInvalidIdentityRoute,
-  MemberInvalidPersonalRoute: MemberInvalidPersonalRoute,
 }
 
 const MemberRouteWithChildren =
   MemberRoute._addFileChildren(MemberRouteChildren)
 
 interface WizardRouteChildren {
-  WizardRegisterAttachmentRoute: typeof WizardRegisterAttachmentRoute
-  WizardRegisterFamilyRoute: typeof WizardRegisterFamilyRoute
-  WizardRegisterGuardianRoute: typeof WizardRegisterGuardianRoute
-  WizardRegisterIdentityRoute: typeof WizardRegisterIdentityRoute
-  WizardRegisterPersonalRoute: typeof WizardRegisterPersonalRoute
+  WizardRegisterRoute: typeof WizardRegisterRoute
 }
 
 const WizardRouteChildren: WizardRouteChildren = {
-  WizardRegisterAttachmentRoute: WizardRegisterAttachmentRoute,
-  WizardRegisterFamilyRoute: WizardRegisterFamilyRoute,
-  WizardRegisterGuardianRoute: WizardRegisterGuardianRoute,
-  WizardRegisterIdentityRoute: WizardRegisterIdentityRoute,
-  WizardRegisterPersonalRoute: WizardRegisterPersonalRoute,
+  WizardRegisterRoute: WizardRegisterRoute,
 }
 
 const WizardRouteWithChildren =
@@ -550,7 +421,9 @@ const rootRouteChildren: RootRouteChildren = {
   WizardRoute: WizardRouteWithChildren,
   BannedRoute: BannedRoute,
   EmailVerifyRoute: EmailVerifyRoute,
+  NeedVerifyRoute: NeedVerifyRoute,
   Verify2faRoute: Verify2faRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   PrintTypeRegistrantIdRoute: PrintTypeRegistrantIdRoute,
   RegisterSuccessRegistrantIdRoute: RegisterSuccessRegistrantIdRoute,
 }

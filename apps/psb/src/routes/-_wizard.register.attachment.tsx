@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { attachmentSchema, type AttachmentInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
+import useAuthStore from "@/stores/auth.store"
 import FileUploadField from "@/components/file-upload-field"
 import { useNavigate, createFileRoute } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -13,6 +14,8 @@ const AttachmentStep = (): JSX.Element => {
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
 	const sessionId = useWizardStore((s) => s.sessionId) || ""
+	const login = useAuthStore((s) => s.login)
+	const clearSession = useWizardStore((s) => s.clearSession)
 
 	const { data: initialData, isLoading } = useQuery({
 		queryKey: ["wizardStep", "attachment", sessionId],
@@ -21,10 +24,18 @@ const AttachmentStep = (): JSX.Element => {
 	})
 
 	const mutation = useMutation({
-		mutationFn: (data: AttachmentInput) => psbApi.saveWizardStep("attachment", sessionId, data),
-		onSuccess: () => {
+		mutationFn: (data: AttachmentInput) => psbApi.submitAttachment(sessionId, data),
+		onSuccess: (res) => {
+			login(res.user)
+			clearSession()
 			queryClient.invalidateQueries({ queryKey: ["wizardStep", "attachment", sessionId] })
-			navigate({ to: "/dashboard" })
+			navigate({
+				to: "/register/success/$registrantId",
+				params: { registrantId: res.registrantId },
+			})
+		},
+		onError: (err: any) => {
+			alert(err instanceof Error ? err.message : "Gagal mengirimkan pendaftaran")
 		},
 	})
 
@@ -36,13 +47,13 @@ const AttachmentStep = (): JSX.Element => {
 		resolver: zodResolver(attachmentSchema) as unknown as import("react-hook-form").Resolver<AttachmentInput>,
 		values: (initialData || {}) as AttachmentInput,
 		defaultValues: {
-			ijazah: "",
-			photo: "",
-			kk: "",
-			birthCert: "",
-			ksp: "",
-			kip: "",
-			reportCard: "",
+			ijazah: undefined,
+			photo: undefined,
+			kk: undefined,
+			birthCert: undefined,
+			ksp: undefined,
+			kip: undefined,
+			reportCard: undefined,
 		},
 	})
 

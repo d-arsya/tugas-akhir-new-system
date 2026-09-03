@@ -57,16 +57,8 @@ export const Header = (): JSX.Element => {
 		navigate({ to: "/login" })
 	}
 
-	const userDisplayName = auth.user?.fullName || "Puji Padmi Laksmiwati"
-
-	// Helper to force profile dropdown in member routes (to support visual inspection without login sessions)
-	const isMemberRoute = typeof window !== "undefined" && (
-		window.location.pathname.startsWith("/dashboard") ||
-		window.location.pathname.startsWith("/settings") ||
-		window.location.pathname.includes("/invalid")
-	)
-
-	const shouldShowProfile = auth.isAuthenticated || isMemberRoute
+	const userDisplayName = auth.user?.name || auth.user?.fullname || auth.user?.email || ""
+	const shouldShowProfile = auth.isAuthenticated
 
 	return (
 		<header className={`roja_header ${isScrolled ? "scrolled" : ""}`}>

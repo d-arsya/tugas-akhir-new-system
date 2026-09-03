@@ -19,6 +19,7 @@ export class StorageService {
 		this.s3Client = new S3Client({
 			region: configService.get("AWS_REGION", { infer: true }) ?? "ap-southeast-1",
 			endpoint: configService.get("AWS_S3_URL", { infer: true }) ?? "http://minio:9000",
+			forcePathStyle: true,
 			credentials: {
 				accessKeyId: configService.get("AWS_ACCESS_KEY_ID", { infer: true }) ?? "",
 				secretAccessKey: configService.get("AWS_SECRET_ACCESS_KEY", { infer: true }) ?? "",
@@ -36,10 +37,16 @@ export class StorageService {
 				ContentType: file.mimetype,
 			}),
 		)
-		return key
+
+		const s3Url = (this.configService.get("AWS_S3_URL", { infer: true }) ?? "").replace(/\/+$/, "")
+		return `${s3Url}/${this.bucket}/${key}`
 	}
 
 	async getUrl(filePath: string): Promise<string> {
+		if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+			return filePath
+		}
+
 		// Legacy local files: return a signed URL via legacy endpoint
 		const legacyBase = this.configService.get("LEGACY_FILES_BASE_PATH", { infer: true })
 		if (legacyBase && filePath.startsWith(legacyBase)) {
@@ -48,12 +55,17 @@ export class StorageService {
 			return `${appUrl}/api/files/legacy${relativePath}`
 		}
 
-		// S3 key: generate a signed URL (1 hour expiry)
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: filePath })
-		return getSignedUrl(this.s3Client, command, { expiresIn: 3600 })
+		const s3Url = (this.configService.get("AWS_S3_URL", { infer: true }) ?? "").replace(/\/+$/, "")
+		return `${s3Url}/${this.bucket}/${filePath}`
 	}
 
-	async delete(key: string): Promise<void> {
+	async delete(urlOrKey: string): Promise<void> {
+		let key = urlOrKey
+		const s3Url = (this.configService.get("AWS_S3_URL", { infer: true }) ?? "").replace(/\/+$/, "")
+		const prefix = `${s3Url}/${this.bucket}/`
+		if (key.startsWith(prefix)) {
+			key = key.replace(prefix, "")
+		}
 		await this.s3Client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }))
 	}
 }

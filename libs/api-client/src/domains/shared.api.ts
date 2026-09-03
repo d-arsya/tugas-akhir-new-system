@@ -1,10 +1,18 @@
 import type { AxiosInstance } from "axios"
 import type { ApiResponse, Province, Regency, District } from "@roja/types"
 
+export type Village = {
+  id: number;
+  districtId: number;
+  code?: string;
+  name?: string;
+};
+
 type SharedApi = {
 	getProvinces: () => Promise<Province[]>
 	getRegencies: (provinceId: number) => Promise<Regency[]>
 	getDistricts: (regencyId: number) => Promise<District[]>
+	getVillages: (districtId: number, limit?: number) => Promise<Village[]>
 }
 
 export const createSharedApi = (client: AxiosInstance): SharedApi => ({
@@ -23,5 +31,11 @@ export const createSharedApi = (client: AxiosInstance): SharedApi => ({
 			`/location/districts?regency_id=${regencyId}`,
 		)
 		return data.data
+	},
+	getVillages: async (districtId: number, limit?: number): Promise<Village[]> => {
+		const { data } = await client.get<ApiResponse<Village[]>>(
+			`/location/villages?district_id=${districtId}` + (limit ? `&limit=${limit}` : '')
+		);
+		return data.data;
 	},
 })

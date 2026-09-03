@@ -1,31 +1,17 @@
 import type { JSX } from "react"
-import { createFileRoute, redirect, Outlet, useLocation } from "@tanstack/react-router"
-import useWizardStore from "@/stores/wizard.store"
-import WizardStepper from "@/components/wizard-stepper"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
 import Header from "@/components/header"
+
+import useAuthStore from "@/stores/auth.store"
 
 export const Route = createFileRoute("/_wizard")({
 	beforeLoad: () => {
-		// Temporary disabled for visual inspection
-		/*
-		const wizard = useWizardStore.getState()
-		if (!wizard.sessionId) {
-			throw redirect({ to: "/" })
+		const auth = useAuthStore.getState()
+		if (auth.isAuthenticated) {
+			throw redirect({ to: "/dashboard" })
 		}
-		*/
 	},
 	component: (): JSX.Element => {
-		const location = useLocation()
-		const getStepNumber = (): number => {
-			const path = location.pathname
-			if (path.includes("/register/personal")) return 1
-			if (path.includes("/register/identity")) return 2
-			if (path.includes("/register/family")) return 3
-			if (path.includes("/register/guardian")) return 4
-			if (path.includes("/register/attachment")) return 5
-			return 1
-		}
-
 		return (
 			<div className="roja_wizard_container min-h-screen flex flex-col relative overflow-hidden bg-[var(--bg-primary)] pt-[70px]">
 				<Header />
@@ -40,10 +26,7 @@ export const Route = createFileRoute("/_wizard")({
 						<div className="absolute -top-12 -right-12 w-48 h-48 bg-[var(--secondary)] rounded-full blur-[50px] opacity-[0.12] pointer-events-none z-0" />
 
 						<div className="relative z-10">
-							<WizardStepper currentStep={getStepNumber()} />
-							<div className="tbr_wizard_content mt-8">
-								<Outlet />
-							</div>
+							<Outlet />
 						</div>
 					</div>
 				</main>

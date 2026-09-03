@@ -43,6 +43,7 @@ export class WizardStateResponseDto extends createZodDto(WizardStateResponseSche
 export const SubmitAttachmentResponseSchema = z.object({
 	success: z.boolean(),
 	registrantId: z.string(),
+	password: z.string().optional(),
 	registrant: RegistrantSchema.optional().nullable(),
 	auth: z.object({
 		accessToken: z.string(),

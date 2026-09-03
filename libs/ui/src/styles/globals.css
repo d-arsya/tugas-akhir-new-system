@@ -54,6 +54,51 @@
   --scroolbar-thumb:      #cccccc;
   --scroolbar-hover:      #a8a8a8;
   --rgb-shadow-inverse:   0, 0, 0;
+
+  /* Shadcn UI Semantic Variables (mapped to Roja Tokens) */
+  --background:           var(--bg-primary);
+  --foreground:           var(--body-txt-inverse);
+  --card:                 var(--bg-secondary);
+  --card-foreground:      var(--body-txt-inverse);
+  --popover:              var(--bg-inverse);
+  --popover-foreground:   var(--heading-txt-inverse);
+  --primary-foreground:   #ffffff;
+  --secondary-foreground: #ffffff;
+  --muted:                var(--bg-quaternary);
+  --muted-foreground:     var(--muted-txt-color);
+  --accent:               var(--bg-tertiary);
+  --accent-foreground:    var(--heading-txt-inverse);
+  --destructive:          var(--danger);
+  --destructive-foreground: #ffffff;
+  --border:               var(--bg-form-border);
+  --input:                var(--bg-form-border);
+  --ring:                 var(--secondary);
+  --radius:               0.5rem;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
 [data-theme="dark"] {

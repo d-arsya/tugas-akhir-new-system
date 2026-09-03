@@ -1,18 +1,40 @@
 import type { JSX } from "react"
-import { useNavigate, createFileRoute } from "@tanstack/react-router"
+import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
+import { psbApi } from "@/lib/api"
 import Header from "@/components/header"
+import { z } from "zod"
+
+const searchSchema = z.object({
+	token: z.string().optional(),
+	email: z.string().optional(),
+})
 
 const EmailVerifyPage = (): JSX.Element => {
 	const navigate = useNavigate()
+	const search = useSearch({ from: "/email-verify" }) as { token?: string; email?: string }
 	const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying")
+	const [message, setMessage] = useState<string>("")
 
 	useEffect(() => {
-		const timer = setTimeout(() => {
-			setStatus("success")
-		}, 2000)
-		return () => clearTimeout(timer)
-	}, [])
+		const token = search?.token
+		if (!token) {
+			setStatus("error")
+			setMessage("Token verifikasi email tidak ditemukan.")
+			return
+		}
+
+		psbApi
+			.verifyEmail(token)
+			.then((res) => {
+				setStatus("success")
+				setMessage(res.message || "Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke Member Area.")
+			})
+			.catch((err: unknown) => {
+				setStatus("error")
+				setMessage(err instanceof Error ? err.message : "Gagal memverifikasi email.")
+			})
+	}, [search?.token])
 
 	return (
 		<div className="roja_wizard_container min-h-screen flex flex-col relative overflow-hidden bg-[var(--bg-primary)] pt-[70px]">
@@ -44,14 +66,30 @@ const EmailVerifyPage = (): JSX.Element => {
 							<div className="text-xs font-bold text-[var(--success)] tracking-wide m-0">
 								Email Terverifikasi!
 							</div>
-							<p className="text-xs text-[var(--body-txt-inverse)] m-0">
-								Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke Member Area.
-							</p>
+							<p className="text-xs text-[var(--body-txt-inverse)] m-0">{message}</p>
 							<button
 								onClick={() => navigate({ to: "/login" })}
 								className="roja_btn roja_btn-primary roja_btn-lg w-full text-white bg-[var(--primary)] font-semibold mt-2"
 							>
 								Masuk Sekarang
+							</button>
+						</div>
+					)}
+
+					{status === "error" && (
+						<div className="relative z-10 flex flex-col gap-4 items-center w-full">
+							<div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl font-bold">
+								✕
+							</div>
+							<div className="text-xs font-bold text-[var(--danger)] tracking-wide m-0">
+								Verifikasi Gagal
+							</div>
+							<p className="text-xs text-red-600 m-0">{message}</p>
+							<button
+								onClick={() => navigate({ to: "/login" })}
+								className="roja_btn roja_btn-secondary roja_btn-lg w-full text-xs font-semibold mt-2"
+							>
+								Kembali ke Halaman Login
 							</button>
 						</div>
 					)}
@@ -62,6 +100,7 @@ const EmailVerifyPage = (): JSX.Element => {
 }
 
 export const Route = createFileRoute("/email-verify")({
+	validateSearch: searchSchema,
 	component: EmailVerifyPage,
 })
 

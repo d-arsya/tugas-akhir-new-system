@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config"
 import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "crypto"
-import { DataSource, Repository } from "typeorm"
+import { DataSource, Like, Repository } from "typeorm"
 import { MailerService } from "../../core/mailer/mailer.service"
 import { RedisService } from "../../core/redis/redis.service"
 import { StorageService } from "../../core/storage/storage.service"
@@ -47,7 +47,7 @@ export class PsbRegisterService {
 		private readonly configService: ConfigService<Env, true>,
 		private readonly psbAuthService: PsbAuthService,
 		private readonly dataSource: DataSource,
-	) {}
+	) { }
 
 	async getLandingInfo(): Promise<{
 		academicYear: AcademicYear | null
@@ -61,8 +61,8 @@ export class PsbRegisterService {
 			where: [{ isCurrent: true, status: true }, { status: true }],
 			order: { id: "DESC" },
 		})
-		const school = await this.settingSchoolRepository.findOne({ order: { id: "DESC" } })
-		const announcement = await this.settingAnncRepository.findOne({ order: { id: "DESC" } })
+		const school = await this.settingSchoolRepository.findOne({ where: { id: 1 }, order: { id: "DESC" } })
+		const announcement = await this.settingAnncRepository.findOne({ where: { id: 1 }, order: { id: "DESC" } })
 		const levels = await this.levelRepository.find({ where: { status: "show" } })
 		const formSettings = await this.settingFormRepository.find({
 			where: { visibility: true },
@@ -171,6 +171,41 @@ export class PsbRegisterService {
 		const familyData = JSON.parse(familyRaw) as FamilyDto
 		const guardianData = guardianRaw ? (JSON.parse(guardianRaw) as GuardianDto) : {}
 
+		// Academic year & Registrant ID generation
+		const academicYear = await this.academicYearRepository.findOne({
+			where: [{ isCurrent: true, status: true }, { status: true }],
+			order: { id: "DESC" },
+		})
+
+		const currentYear = academicYear?.year ? academicYear.year.substring(0, 4) : new Date().getFullYear().toString()
+		const prefix = `PR${currentYear}`
+		const startSerialStr = academicYear?.serialNumber || "0001"
+		const padLength = startSerialStr.length > 0 ? startSerialStr.length : 4
+
+		const latestRegistrant = await this.registrantRepository.findOne({
+			where: { registrantId: Like(`${prefix}%`) },
+			order: { id: "DESC" },
+		})
+
+		let nextSeqStr: string
+		if (latestRegistrant?.registrantId && latestRegistrant.registrantId.startsWith(prefix)) {
+			const currentSeqStr = latestRegistrant.registrantId.substring(prefix.length)
+			const currentSeqNum = parseInt(currentSeqStr, 10)
+			const nextNum = isNaN(currentSeqNum) ? 1 : currentSeqNum + 1
+			const actualPadLength = Math.max(padLength, currentSeqStr.length)
+			nextSeqStr = nextNum.toString().padStart(actualPadLength, "0")
+		} else {
+			const startNum = parseInt(startSerialStr, 10)
+			const initialNum = isNaN(startNum) ? 1 : startNum
+			nextSeqStr = initialNum.toString().padStart(padLength, "0")
+		}
+
+		const registrantId = `${prefix}${nextSeqStr}`
+
+		// Generate random 8-character password
+		const generatedPassword = crypto.randomBytes(4).toString("hex").toUpperCase()
+		const hashedPassword = await bcrypt.hash(generatedPassword, 10)
+
 		// Upload files
 		let attachCertificate: string | null = null
 		let attachPhoto: string | null = null
@@ -181,47 +216,47 @@ export class PsbRegisterService {
 		let attachBirthCertificate: string | null = null
 
 		if (files.attachCertificate?.[0]) {
-			attachCertificate = await this.storageService.upload(files.attachCertificate[0], "psb/attachments")
+			attachCertificate = await this.storageService.upload(
+				files.attachCertificate[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachCertificate[0].originalname}`
+			)
 		}
 		if (files.attachPhoto?.[0]) {
-			attachPhoto = await this.storageService.upload(files.attachPhoto[0], "psb/attachments")
+			attachPhoto = await this.storageService.upload(
+				files.attachPhoto[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachPhoto[0].originalname}`
+			)
 		}
 		if (files.attachFamilyCard?.[0]) {
-			attachFamilyCard = await this.storageService.upload(files.attachFamilyCard[0], "psb/attachments")
+			attachFamilyCard = await this.storageService.upload(
+				files.attachFamilyCard[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachFamilyCard[0].originalname}`
+			)
 		}
 		if (files.attachKsp?.[0]) {
-			attachKsp = await this.storageService.upload(files.attachKsp[0], "psb/attachments")
+			attachKsp = await this.storageService.upload(
+				files.attachKsp[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachKsp[0].originalname}`
+			)
 		}
 		if (files.attachKip?.[0]) {
-			attachKip = await this.storageService.upload(files.attachKip[0], "psb/attachments")
+			attachKip = await this.storageService.upload(
+				files.attachKip[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachKip[0].originalname}`
+			)
 		}
 		if (files.attachReportCard?.[0]) {
-			attachReportCard = await this.storageService.upload(files.attachReportCard[0], "psb/attachments")
+			attachReportCard = await this.storageService.upload(
+				files.attachReportCard[0],
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachReportCard[0].originalname}`
+			)
 		}
 		if (files.attachBirthCertificate?.[0]) {
 			attachBirthCertificate = await this.storageService.upload(
 				files.attachBirthCertificate[0],
-				"psb/attachments",
+				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachBirthCertificate[0].originalname}`
 			)
 		}
-
-		// Academic year & Registrant ID generation
-		const academicYear = await this.academicYearRepository.findOne({
-			where: [{ isCurrent: true, status: true }, { status: true }],
-			order: { id: "DESC" },
-		})
-
-		const currentYear = academicYear?.year ? academicYear.year.substring(0, 4) : new Date().getFullYear().toString()
-		const latestRegistrant = await this.registrantRepository.findOne({
-			where: {},
-			order: { id: "DESC" },
-		})
-		const nextSeq = ((latestRegistrant?.id ?? 0) + 1).toString().padStart(4, "0")
-		const registrantId = `PR${currentYear}${nextSeq}`
-
-		// Generate random 8-character password
-		const generatedPassword = crypto.randomBytes(4).toString("hex").toUpperCase()
-		const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
 		const queryRunner = this.dataSource.createQueryRunner()
 		await queryRunner.connect()
@@ -235,7 +270,6 @@ export class PsbRegisterService {
 				email: emailData.email,
 				password: hashedPassword,
 				approvalStatus: "wait",
-				dataValidation: "valid",
 				registrationPath: academicYear?.type === "indent" ? "indent" : "reguler",
 
 				// Personal
@@ -251,10 +285,10 @@ export class PsbRegisterService {
 				numberOfSibling: personalData.numberOfSibling ?? null,
 				parentStatus: personalData.parentStatus ?? null,
 				childStatus: personalData.childStatus ?? null,
-				phone: personalData.phone ?? null,
-				provinceId: personalData.provinceId ?? null,
-				regencyId: personalData.regencyId ?? null,
-				districtId: personalData.districtId ?? null,
+				phone: personalData.phone || null,
+				provinceId: personalData.provinceId || null,
+				regencyId: personalData.regencyId || null,
+				districtId: personalData.districtId || null,
 				village: personalData.village ?? null,
 				subVillage: personalData.subVillage ?? null,
 				rt: personalData.rt ?? null,
@@ -262,20 +296,20 @@ export class PsbRegisterService {
 				street: personalData.street ?? null,
 				schoolName: personalData.schoolName ?? null,
 				schoolPhone: personalData.schoolPhone ?? null,
-				schoolProvinceId: personalData.schoolProvinceId ?? null,
-				schoolRegencyId: personalData.schoolRegencyId ?? null,
-				schoolDistrictId: personalData.schoolDistrictId ?? null,
+				schoolProvinceId: personalData.schoolProvinceId || null,
+				schoolRegencyId: personalData.schoolRegencyId || null,
+				schoolDistrictId: personalData.schoolDistrictId || null,
 				schoolAddressDetail: personalData.schoolAddressDetail ?? null,
-				schoolPostalCode: personalData.schoolPostalCode ?? null,
+				schoolPostalCode: personalData.schoolPostalCode || null,
 
 				// Identity & Health
-				nik: identityData.nik ?? null,
-				nisn: identityData.nisn ?? null,
-				kip: identityData.kip ?? null,
-				ksp: identityData.ksp ?? null,
-				certificateNumber: identityData.certificateNumber ?? null,
-				weight: identityData.weight ?? null,
-				height: identityData.height ?? null,
+				nik: identityData.nik || null,
+				nisn: identityData.nisn || null,
+				kip: identityData.kip || null,
+				ksp: identityData.ksp || null,
+				certificateNumber: identityData.certificateNumber || null,
+				weight: identityData.weight || null,
+				height: identityData.height || null,
 				bloodType: identityData.bloodType ?? null,
 				visualCondition: identityData.visualCondition ?? "normal",
 				hearingCondition: identityData.hearingCondition ?? "normal",
@@ -291,19 +325,19 @@ export class PsbRegisterService {
 				fatherReligion: familyData.fatherReligion ?? "islam",
 				fatherNationality: familyData.fatherNationality ?? "wni",
 				fatherLastEducation: familyData.fatherLastEducation ?? null,
-				fatherPhone: familyData.fatherPhone ?? null,
-				fatherWhatsapp: familyData.fatherWhatsapp ?? null,
+				fatherPhone: familyData.fatherPhone || null,
+				fatherWhatsapp: familyData.fatherWhatsapp || null,
 				fatherJob: familyData.fatherJob ?? null,
 				motherFullname: familyData.motherFullname ?? null,
 				motherReligion: familyData.motherReligion ?? "islam",
 				motherNationality: familyData.motherNationality ?? "wni",
 				motherLastEducation: familyData.motherLastEducation ?? null,
-				motherPhone: familyData.motherPhone ?? null,
-				motherWhatsapp: familyData.motherWhatsapp ?? null,
+				motherPhone: familyData.motherPhone || null,
+				motherWhatsapp: familyData.motherWhatsapp || null,
 				motherJob: familyData.motherJob ?? null,
-				familyProvinceId: familyData.familyProvinceId ?? null,
-				familyRegencyId: familyData.familyRegencyId ?? null,
-				familyDistrictId: familyData.familyDistrictId ?? null,
+				familyProvinceId: familyData.familyProvinceId || null,
+				familyRegencyId: familyData.familyRegencyId || null,
+				familyDistrictId: familyData.familyDistrictId || null,
 				familyVillage: familyData.familyVillage ?? null,
 				familySubVillage: familyData.familySubVillage ?? null,
 				familyRt: familyData.familyRt ?? null,
@@ -315,12 +349,12 @@ export class PsbRegisterService {
 				guardianReligion: guardianData.guardianReligion ?? null,
 				guardianNationality: guardianData.guardianNationality ?? null,
 				guardianLastEducation: guardianData.guardianLastEducation ?? null,
-				guardianPhone: guardianData.guardianPhone ?? null,
-				guardianWhatsapp: guardianData.guardianWhatsapp ?? null,
+				guardianPhone: guardianData.guardianPhone || null,
+				guardianWhatsapp: guardianData.guardianWhatsapp || null,
 				guardianJob: guardianData.guardianJob ?? null,
-				guardianProvinceId: guardianData.guardianProvinceId ?? null,
-				guardianRegencyId: guardianData.guardianRegencyId ?? null,
-				guardianDistrictId: guardianData.guardianDistrictId ?? null,
+				guardianProvinceId: guardianData.guardianProvinceId || null,
+				guardianRegencyId: guardianData.guardianRegencyId || null,
+				guardianDistrictId: guardianData.guardianDistrictId || null,
 				guardianVillage: guardianData.guardianVillage ?? null,
 				guardianSubVillage: guardianData.guardianSubVillage ?? null,
 				guardianRt: guardianData.guardianRt ?? null,
@@ -355,13 +389,18 @@ export class PsbRegisterService {
 			await queryRunner.commitTransaction()
 
 			// Send welcome email with credentials
-			const appUrl = this.configService.get("APP_URL", { infer: true })
-			await this.mailerService.sendRegistrantPassword(savedRegistrant.email!, {
-				fullName: savedRegistrant.fullname ?? "Calon Santri",
-				registrantId,
-				password: generatedPassword,
-				loginUrl: `${appUrl}/login`,
-			})
+			try {
+				const appUrl = this.configService.get("APP_URL", { infer: true })
+				await this.mailerService.sendRegistrantPassword(savedRegistrant.email!, {
+					fullName: savedRegistrant.fullname ?? "Calon Santri",
+					registrantId,
+					password: generatedPassword,
+					loginUrl: `${appUrl}/login`,
+				})
+			} catch (mailError) {
+				// Mail sending failure shouldn't rollback registration
+				console.error("Failed to send registrant password email:", mailError)
+			}
 
 			// Clear Redis wizard keys
 			await this.redisService.del(`psb-wizard:${sessionId}:email`)
@@ -376,11 +415,14 @@ export class PsbRegisterService {
 			return {
 				success: true,
 				registrantId,
+				password: generatedPassword,
 				registrant: savedRegistrant,
 				auth: authResult,
 			}
 		} catch (error) {
-			await queryRunner.rollbackTransaction()
+			if (queryRunner.isTransactionActive) {
+				await queryRunner.rollbackTransaction()
+			}
 			throw error
 		} finally {
 			await queryRunner.release()

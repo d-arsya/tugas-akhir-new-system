@@ -18,7 +18,11 @@ const Verify2faPage = (): JSX.Element => {
 	const navigate = useNavigate()
 	const login = useAuthStore((s) => s.login)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [isResending, setIsResending] = useState<boolean>(false)
 	const [errorMsg, setErrorMsg] = useState<string | null>(null)
+	const [infoMsg, setInfoMsg] = useState<string | null>(null)
+
+	const email = localStorage.getItem("roja-2fa-email") || ""
 
 	const {
 		register,
@@ -30,17 +34,37 @@ const Verify2faPage = (): JSX.Element => {
 	})
 
 	const onSubmit = async (data: Input): Promise<void> => {
+		if (!email) {
+			navigate({ to: "/login" })
+			return
+		}
 		setIsLoading(true)
 		setErrorMsg(null)
+		setInfoMsg(null)
 		try {
-			const registrantId = parseInt(localStorage.getItem("roja-mock-current-user-id") || "0")
-			const res = await psbApi.verify2fa(data.code, registrantId)
-			login(res.tokens.accessToken, res.tokens.refreshToken, res.user)
+			const res = await psbApi.verify2fa({ email, code: data.code })
+			login(res.user)
+			localStorage.removeItem("roja-2fa-email")
 			navigate({ to: "/dashboard" })
 		} catch (err: unknown) {
-			setErrorMsg(err instanceof Error ? err.message : "Kode verifikasi salah (Gunakan 123456)")
+			setErrorMsg(err instanceof Error ? err.message : "Kode verifikasi salah")
 		} finally {
 			setIsLoading(false)
+		}
+	}
+
+	const handleResend = async (): Promise<void> => {
+		if (!email) return
+		setIsResending(true)
+		setErrorMsg(null)
+		setInfoMsg(null)
+		try {
+			const res = await psbApi.resend2fa(email)
+			setInfoMsg(res.message || "Kode verifikasi 2FA telah dikirim ulang ke email Anda.")
+		} catch (err: unknown) {
+			setErrorMsg(err instanceof Error ? err.message : "Gagal mengirim ulang kode")
+		} finally {
+			setIsResending(false)
 		}
 	}
 
@@ -60,13 +84,20 @@ const Verify2faPage = (): JSX.Element => {
 							Verifikasi Dua Faktor (2FA)
 						</div>
 						<p className="text-xs text-[var(--body-txt-inverse)] m-0">
-							Masukkan 6 digit kode keamanan yang telah dikirim ke email terdaftar Anda.
+							Masukkan 6 digit kode verifikasi yang telah dikirim ke email{" "}
+							<strong className="text-slate-700">{email}</strong>.
 						</p>
 					</div>
 
 					{errorMsg && (
 						<div className="relative z-10 p-3 bg-red-50 text-[var(--danger)] text-xs border border-red-200 rounded">
 							{errorMsg}
+						</div>
+					)}
+
+					{infoMsg && (
+						<div className="relative z-10 p-3 bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 rounded">
+							{infoMsg}
 						</div>
 					)}
 
@@ -94,8 +125,16 @@ const Verify2faPage = (): JSX.Element => {
 						</button>
 					</form>
 
-					<div className="relative z-10 text-center text-xs text-[var(--grey)] border-t border-[var(--bg-form-border)] pt-4">
-						Gunakan kode <strong className="text-[var(--primary)]">123456</strong> untuk simulasi verifikasi.
+					<div className="relative z-10 text-center text-xs text-[var(--grey)] border-t border-[var(--bg-form-border)] pt-4 flex justify-between items-center">
+						<span>Tidak menerima kode?</span>
+						<button
+							type="button"
+							onClick={handleResend}
+							disabled={isResending}
+							className="text-[var(--secondary)] hover:underline font-semibold text-xs"
+						>
+							{isResending ? "Mengirim..." : "Kirim Ulang Kode"}
+						</button>
 					</div>
 				</div>
 			</main>

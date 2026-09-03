@@ -11,97 +11,9 @@ import type {
 	WizardGuardianData,
 	AuthUser,
 	TokenPair,
+	ApiResponse,
+	AcademicYear,
 } from "@roja/types"
-
-type MockDb = {
-	sessions: Record<string, {
-		email: string
-		levelId: number
-		personal?: WizardPersonalData | undefined
-		identity?: WizardIdentityData | undefined
-		family?: WizardFamilyData | undefined
-		guardian?: WizardGuardianData | undefined
-		attachments?: Record<string, string> | undefined
-	}>
-	registrants: Record<number, Registrant & {
-		password?: string | undefined
-		enabled2fa?: boolean | undefined
-		personal?: WizardPersonalData | undefined
-		identity?: WizardIdentityData | undefined
-		family?: WizardFamilyData | undefined
-		guardian?: WizardGuardianData | undefined
-		dataValidation: "valid" | "invalid" | "fixed"
-		dataValidationNote: string
-	}>
-}
-
-const getMockDb = (): MockDb => {
-	if (typeof window === "undefined") {
-		return { sessions: {}, registrants: {} }
-	}
-	const stored = localStorage.getItem("roja-psb-mock-db")
-	if (stored) {
-		try {
-			return JSON.parse(stored) as MockDb
-		} catch {
-			// fallback
-		}
-	}
-	const initial: MockDb = {
-		sessions: {},
-		registrants: {
-			12345: {
-				id: 12345,
-				registrantId: "PR20260028",
-				fullName: "Puji Padmi Laksmiwati",
-				email: "puji@example.com",
-				emailVerifiedAt: "2026-08-30T12:00:00Z",
-				gender: "female",
-				nationality: "wni",
-				dateOfBirth: "2012-05-15",
-				placeOfBirth: "Bandung",
-				approvalStatus: "wait",
-				levelId: 2,
-				academicYearId: 2026,
-				createdAt: "2026-08-30T10:00:00Z",
-				updatedAt: "2026-08-30T10:00:00Z",
-				password: "PASSWORD",
-				enabled2fa: false,
-				dataValidation: "valid",
-				dataValidationNote: "",
-				personal: {
-					fullName: "Puji Padmi Laksmiwati",
-					religion: "Islam",
-					gender: "female",
-					nationality: "wni",
-					dateOfBirth: "2012-05-15",
-					placeOfBirth: "Bandung",
-					address: "Jl. Merdeka No. 10",
-					provinceId: 32,
-					regencyId: 3273,
-					districtId: 3273010,
-					rt: "01",
-					rw: "02",
-					postalCode: "40111",
-					phone: "081234567890",
-					liveWith: "parent",
-					previousSchoolName: "SMP Merdeka",
-					previousSchoolProvinceId: 32,
-					previousSchoolRegencyId: 3273,
-					previousSchoolDistrictId: 3273010,
-				},
-			},
-		},
-	}
-	localStorage.setItem("roja-psb-mock-db", JSON.stringify(initial))
-	return initial
-}
-
-const saveMockDb = (db: MockDb): void => {
-	if (typeof window !== "undefined") {
-		localStorage.setItem("roja-psb-mock-db", JSON.stringify(db))
-	}
-}
 
 type SuccessResponse = {
 	registrantId: string
@@ -114,322 +26,585 @@ type DashboardData = {
 		dataValidation: "valid" | "invalid" | "fixed"
 		dataValidationNote: string
 	}
-	announcement: string | null
+	announcement: any
+	statusInfo?: {
+		status: string
+		label: string
+		description: string | null
+	}
 }
 
 export type PsbApi = {
-	getLanding: () => Promise<{ isOpen: boolean; schoolName: string; levels: Array<{ id: number; name: string }> }>
+	getLanding: () => Promise<{ academicYear: AcademicYear; schoolName: string; levels: Array<{ id: number; name: string }>; formSettings?: any[] }>
 	checkEmail: (data: { email: string; levelId: number }) => Promise<{ sessionId: string }>
 	getWizardStep: (step: string, sessionId: string) => Promise<unknown>
 	saveWizardStep: (step: string, sessionId: string, data: unknown) => Promise<{ success: boolean }>
-	submitAttachment: (sessionId: string, files: Record<string, string>) => Promise<{ tokens: TokenPair; user: AuthUser; registrantId: string }>
+	submitAttachment: (sessionId: string, files: Record<string, any>) => Promise<{ tokens: TokenPair; user: AuthUser; registrantId: string }>
 	getSuccess: (id: number) => Promise<SuccessResponse>
-	login: (data: { email: string; password: string }) => Promise<{ tokens: TokenPair; user: AuthUser }>
-	verify2fa: (code: string, registrantId: number) => Promise<{ tokens: TokenPair; user: AuthUser }>
-	resend2fa: (registrantId: number) => Promise<{ success: boolean }>
+	getPrintProof: (type: string, id: number) => Promise<any>
+	login: (
+		data: { email: string; password: string },
+	) => Promise<
+		| { requires2fa: true; email: string }
+		| { requires2fa: false; tokens: TokenPair; user: AuthUser }
+	>
+	verify2fa: (data: { email: string; code: string }) => Promise<{ tokens: TokenPair; user: AuthUser }>
+	resend2fa: (email: string) => Promise<{ message: string }>
+	refreshToken: () => Promise<{ success: boolean }>
 	logout: () => Promise<{ success: boolean }>
-	forgotPassword: (email: string) => Promise<{ success: boolean }>
+	forgotPassword: (email: string, clientUrl?: string) => Promise<{ success: boolean }>
 	resetPassword: (data: { token: string; password: string }) => Promise<{ success: boolean }>
+	verifyEmail: (token: string) => Promise<{ message: string }>
+	resendVerification: (email: string, clientUrl?: string) => Promise<{ message: string }>
 	getDashboard: () => Promise<DashboardData>
 	getInvalidData: () => Promise<unknown>
 	updateInvalidStep: (step: string, data: unknown) => Promise<{ success: boolean }>
-	updateInvalidAttachment: (files: Record<string, string>) => Promise<{ success: boolean }>
+	updateInvalidAttachment: (files: Record<string, any>) => Promise<{ success: boolean }>
 	getProfile: () => Promise<AuthUser & { enabled2fa: boolean }>
 	updateProfile: (data: { name: string }) => Promise<{ success: boolean }>
 	updateAccount: (data: { password: string }) => Promise<{ success: boolean }>
 	toggle2fa: (enabled: boolean) => Promise<{ success: boolean }>
 }
 
-export const createPsbApi = (_client?: AxiosInstance): PsbApi => ({
-	getLanding: async (): Promise<{ isOpen: boolean; schoolName: string; levels: Array<{ id: number; name: string }> }> => {
+// Helper converters for Casing and naming adaptations between Frontend (camelCase) and Backend DTOs
+const toTitleCase = (str?: string) => {
+	if (!str) return ""
+	return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+const mapParentStatusToBackend = (val?: string) => {
+	if (!val) return undefined
+	if (val === "complete") return "father&mother"
+	if (val === "orphan") return "orphan"
+	if (val === "single_parent") return "fatherless"
+	return val as any
+}
+
+const mapParentStatusToFrontend = (val?: string) => {
+	if (!val) return undefined
+	if (val === "father&mother") return "complete"
+	if (val === "orphan") return "orphan"
+	if (val === "fatherless" || val === "motherless") return "single_parent"
+	return val as any
+}
+
+const mapChildStatusToBackend = (val?: string) => {
+	if (!val) return undefined
+	if (val === "kandung") return "biological_child"
+	if (val === "tiri") return "step_child"
+	if (val === "angkat") return "adopted_child"
+	return val as any
+}
+
+const mapChildStatusToFrontend = (val?: string) => {
+	if (!val) return undefined
+	if (val === "biological_child") return "kandung"
+	if (val === "step_child") return "tiri"
+	if (val === "adopted_child") return "angkat"
+	return val as any
+}
+
+const mapPersonalToBackend = (data: WizardPersonalData): any => ({
+	fullname: data.fullName,
+	shortname: data.shortName,
+	religion: data.religion?.toLowerCase() as any,
+	gender: data.gender,
+	placeOfBirth: data.placeOfBirth,
+	dateOfBirth: data.dateOfBirth,
+	nationality: data.nationality,
+	liveWith: data.liveWith === "other" ? "guardian" : data.liveWith,
+	siblingOrder: data.siblingOrder,
+	numberOfSibling: data.numberOfSiblings,
+	parentStatus: mapParentStatusToBackend(data.parentStatus),
+	childStatus: mapChildStatusToBackend(data.childStatus),
+	phone: data.phone,
+	nik: data.nik,
+	nisn: data.nisn,
+	ksp: data.ksp,
+	kip: data.kip,
+	certificateNumber: data.certificateNumber,
+	provinceId: data.provinceId,
+	regencyId: data.regencyId,
+	districtId: data.districtId,
+	village: data.village,
+	subVillage: data.subVillage,
+	rt: data.rt,
+	rw: data.rw,
+	street: data.street,
+	address: data.address,
+	postalCode: data.postalCode,
+	schoolName: data.previousSchoolName,
+	schoolPhone: data.previousSchoolPhone,
+	schoolProvinceId: data.previousSchoolProvinceId,
+	schoolRegencyId: data.previousSchoolRegencyId,
+	schoolDistrictId: data.previousSchoolDistrictId,
+	schoolAddressDetail: data.previousSchoolAddressDetail,
+	schoolPostalCode: data.previousSchoolPostalCode ? parseInt(data.previousSchoolPostalCode) : undefined,
+})
+
+const mapPersonalToFrontend = (data: any): WizardPersonalData => ({
+	fullName: data.fullname || "",
+	shortName: data.shortname || "",
+	religion: data.religion ? (data.religion.charAt(0).toUpperCase() + data.religion.slice(1).toLowerCase()) : "Islam",
+	gender: data.gender || "male",
+	placeOfBirth: data.placeOfBirth || "",
+	dateOfBirth: data.dateOfBirth || "",
+	nationality: data.nationality ? data.nationality.toLowerCase() : "wni",
+	liveWith: data.liveWith || "parent",
+	siblingOrder: data.siblingOrder ? Number(data.siblingOrder) : 1,
+	numberOfSiblings: data.numberOfSibling ? Number(data.numberOfSibling) : 0,
+	parentStatus: mapParentStatusToFrontend(data.parentStatus),
+	childStatus: mapChildStatusToFrontend(data.childStatus),
+	phone: data.phone || "",
+	nik: data.nik || "",
+	nisn: data.nisn || "",
+	ksp: data.ksp || "",
+	kip: data.kip || "",
+	certificateNumber: data.certificateNumber || "",
+	provinceId: Number(data.provinceId) || 0,
+	regencyId: Number(data.regencyId) || 0,
+	districtId: Number(data.districtId) || 0,
+	village: data.village || "",
+	subVillage: data.subVillage || "",
+	rt: data.rt || "",
+	rw: data.rw || "",
+	street: data.street || "",
+	postalCode: data.postalCode?.toString() || "",
+	address: data.street || data.address || "",
+	previousSchoolName: data.schoolName || "",
+	previousSchoolPhone: data.schoolPhone || "",
+	previousSchoolProvinceId: Number(data.schoolProvinceId) || 0,
+	previousSchoolRegencyId: Number(data.schoolRegencyId) || 0,
+	previousSchoolDistrictId: Number(data.schoolDistrictId) || 0,
+	previousSchoolAddressDetail: data.schoolAddressDetail || "",
+	previousSchoolPostalCode: data.schoolPostalCode?.toString() || "",
+})
+
+const mapIdentityToBackend = (data: WizardIdentityData): any => ({
+	nik: data.nik,
+	nisn: data.nisn,
+	kip: data.kip,
+	ksp: data.ksp,
+	certificateNumber: data.certificateNumber,
+	weight: data.weight,
+	height: data.height,
+	bloodType: data.bloodType?.toLowerCase() as any,
+	visualCondition: data.visualCondition,
+	hearingCondition: data.hearingCondition,
+	immunizationGiven: data.immunizationGiven,
+	reading: data.reading,
+	jilidChapter: data.jilidChapter,
+	quranMemorizing: data.quranMemorizing,
+	learningAchievement: data.learningAchievment,
+	gift: data.gift,
+	diseases: data.diseaseHistories?.map((item) => ({
+		diseaseName: item.name,
+		diseaseStatus: item.status === "Sembuh" ? "sembuh" : item.status === "Masa Perawatan" ? "masa perawatan" : "belum sembuh",
+	})),
+})
+
+const mapIdentityToFrontend = (data: any, diseases: any[] = []): WizardIdentityData => ({
+	nik: data.nik || "",
+	nisn: data.nisn || "",
+	kip: data.kip || "",
+	ksp: data.ksp || "",
+	certificateNumber: data.certificateNumber || "",
+	weight: data.weight ? Number(data.weight) : undefined,
+	height: data.height ? Number(data.height) : undefined,
+	bloodType: data.bloodType ? data.bloodType.toUpperCase() : "A",
+	visualCondition: data.visualCondition || "normal",
+	hearingCondition: data.hearingCondition || "normal",
+	immunizationGiven: data.immunizationGiven || "complete",
+	diseaseHistories: (diseases || data.diseases || []).map((item: any) => ({
+		name: item.diseaseName || item.name || "",
+		status: item.diseaseStatus === "sembuh" ? "Sembuh" : item.diseaseStatus === "masa perawatan" ? "Masa Perawatan" : "Belum Sembuh",
+	})),
+	learningAchievment: data.learningAchievement || "",
+	reading: data.reading || "quran",
+	jilidChapter: data.jilidChapter || "",
+	quranMemorizing: data.quranMemorizing || "",
+	gift: data.gift || "",
+})
+
+const mapFamilyToBackend = (data: WizardFamilyData): any => ({
+	fatherFullname: data.fatherName,
+	fatherReligion: data.fatherReligion?.toLowerCase() as any,
+	fatherNationality: data.fatherNationality,
+	fatherLastEducation: data.fatherLastEducation?.toLowerCase() as any,
+	fatherPhone: data.fatherPhone,
+	fatherWhatsapp: data.fatherPhone,
+	fatherJob: data.fatherOccupation,
+	motherFullname: data.motherName,
+	motherReligion: data.motherReligion?.toLowerCase() as any,
+	motherNationality: data.motherNationality,
+	motherLastEducation: data.motherLastEducation?.toLowerCase() as any,
+	motherPhone: data.motherPhone,
+	motherWhatsapp: data.motherPhone,
+	motherJob: data.motherOccupation,
+	familyProvinceId: data.familyProvinceId,
+	familyRegencyId: data.familyRegencyId,
+	familyDistrictId: data.familyDistrictId,
+	familyVillage: data.familyVillage,
+	familySubVillage: data.familySubVillage,
+	familyRt: data.familyRt,
+	familyRw: data.familyRw,
+	familyStreet: data.familyStreet,
+})
+
+const mapFamilyToFrontend = (data: any): WizardFamilyData => ({
+	fatherName: data.fatherFullname || "",
+	fatherReligion: data.fatherReligion ? (data.fatherReligion.charAt(0).toUpperCase() + data.fatherReligion.slice(1).toLowerCase()) : "Islam",
+	fatherNationality: data.fatherNationality || "wni",
+	fatherLastEducation: data.fatherLastEducation ? data.fatherLastEducation.toLowerCase() : "sma",
+	fatherOccupation: data.fatherJob || "",
+	fatherIncome: 0,
+	fatherPhone: data.fatherPhone || "",
+	fatherStatus: "hidup",
+	motherName: data.motherFullname || "",
+	motherReligion: data.motherReligion ? (data.motherReligion.charAt(0).toUpperCase() + data.motherReligion.slice(1).toLowerCase()) : "Islam",
+	motherNationality: data.motherNationality || "wni",
+	motherLastEducation: data.motherLastEducation ? data.motherLastEducation.toLowerCase() : "sma",
+	motherOccupation: data.motherJob || "",
+	motherIncome: 0,
+	motherPhone: data.motherPhone || "",
+	motherStatus: "hidup",
+	numberOfSiblings: data.numberOfSibling ? Number(data.numberOfSibling) : 0,
+	childOrder: data.siblingOrder ? Number(data.siblingOrder) : 1,
+	familyStatus: mapParentStatusToFrontend(data.parentStatus) || "complete",
+	familyProvinceId: Number(data.familyProvinceId) || 0,
+	familyRegencyId: Number(data.familyRegencyId) || 0,
+	familyDistrictId: Number(data.familyDistrictId) || 0,
+	familyVillage: data.familyVillage || "",
+	familyStreet: data.familyStreet || "",
+	familyRt: data.familyRt || "",
+	familyRw: data.familyRw || "",
+	familySubVillage: data.familySubVillage || "",
+})
+
+const mapGuardianToBackend = (data: WizardGuardianData): any => ({
+	guardianFullname: data.guardianName,
+	guardianReligion: data.guardianReligion?.toLowerCase() as any,
+	guardianNationality: data.guardianNationality,
+	guardianLastEducation: data.guardianLastEducation?.toLowerCase() as any,
+	guardianPhone: data.guardianPhone,
+	guardianWhatsapp: data.guardianPhone,
+	guardianJob: data.guardianOccupation,
+	guardianProvinceId: data.guardianProvinceId,
+	guardianRegencyId: data.guardianRegencyId,
+	guardianDistrictId: data.guardianDistrictId,
+	guardianVillage: data.guardianVillage,
+	guardianSubVillage: data.guardianSubVillage,
+	guardianRt: data.guardianRt,
+	guardianRw: data.guardianRw,
+	guardianStreet: data.guardianStreet,
+})
+
+const mapGuardianToFrontend = (data: any): WizardGuardianData => ({
+	guardianName: data.guardianFullname || "",
+	guardianReligion: data.guardianReligion ? (data.guardianReligion.charAt(0).toUpperCase() + data.guardianReligion.slice(1).toLowerCase()) : "Islam",
+	guardianNationality: data.guardianNationality || "wni",
+	guardianLastEducation: data.guardianLastEducation ? data.guardianLastEducation.toLowerCase() : "sma",
+	guardianRelationship: "",
+	guardianOccupation: data.guardianJob || "",
+	guardianIncome: 0,
+	guardianPhone: data.guardianPhone || "",
+	guardianAddress: data.guardianStreet || "",
+	guardianProvinceId: Number(data.guardianProvinceId) || 0,
+	guardianRegencyId: Number(data.guardianRegencyId) || 0,
+	guardianDistrictId: Number(data.guardianDistrictId) || 0,
+	guardianVillage: data.guardianVillage || "",
+	guardianStreet: data.guardianStreet || "",
+	guardianRt: data.guardianRt || "",
+	guardianRw: data.guardianRw || "",
+	guardianSubVillage: data.guardianSubVillage || "",
+})
+
+export const createPsbApi = (client: AxiosInstance): PsbApi => ({
+	getLanding: async (): Promise<{ academicYear: AcademicYear, isOpen: boolean; schoolName: string; levels: Array<{ id: number; name: string }>; formSettings?: any[] }> => {
+		const { data } = await client.get<ApiResponse<any>>("/psb/register/landing")
 		return {
-			isOpen: true,
-			schoolName: "Pondok Roja Islamic Boarding School",
-			levels: [
-				{ id: 1, name: "SMP Roja (Sekolah Menengah Pertama)" },
-				{ id: 2, name: "SMA Roja (Sekolah Menengah Atas)" },
-			],
+			academicYear: data.data.academicYear,
+			isOpen: data.data.isOpen,
+			schoolName: data.data.school?.schoolName || "Pondok Roja",
+			levels: data.data.levels.map((l: any) => ({
+				id: l.id,
+				name: l.name,
+			})),
+			formSettings: data.data.formSettings,
 		}
 	},
 
 	checkEmail: async (data: { email: string; levelId: number }): Promise<{ sessionId: string }> => {
-		const db = getMockDb()
-		const sessionId = `sess_${Math.random().toString(36).substr(2, 9)}`
-		db.sessions[sessionId] = { email: data.email, levelId: data.levelId }
-		saveMockDb(db)
-		return { sessionId }
+		const { data: res } = await client.post<ApiResponse<{ sessionId: string }>>("/psb/register/check-email", data)
+		return {
+			sessionId: res.data.sessionId,
+		}
 	},
 
 	getWizardStep: async (step: string, sessionId: string): Promise<unknown> => {
-		const db = getMockDb()
-		const session = db.sessions[sessionId]
-		if (!session) throw new Error("Session expired or invalid")
-		if (step === "personal") return session.personal || {}
-		if (step === "identity") return session.identity || {}
-		if (step === "family") return session.family || {}
-		if (step === "guardian") return session.guardian || {}
-		if (step === "attachment") return session.attachments || {}
+		const { data } = await client.get<ApiResponse<any>>("/psb/register/wizard-state", {
+			headers: { "x-session-id": sessionId },
+		})
+		if (data && data.success === false) {
+			throw new Error(data.message || "Sesi pendaftaran Anda telah berakhir (kadaluarsa). Silakan mulai kembali.")
+		}
+		const state = data.data || {}
+		if (step === "personal") return mapPersonalToFrontend(state.personal || {})
+		if (step === "identity") return mapIdentityToFrontend(state.identity || {}, state.identity?.diseases || [])
+		if (step === "family") return mapFamilyToFrontend(state.family || {})
+		if (step === "guardian") return mapGuardianToFrontend(state.guardian || {})
 		return {}
 	},
 
 	saveWizardStep: async (step: string, sessionId: string, data: unknown): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const session = db.sessions[sessionId]
-		if (!session) throw new Error("Session expired or invalid")
-		if (step === "personal") session.personal = data as WizardPersonalData
-		if (step === "identity") session.identity = data as WizardIdentityData
-		if (step === "family") session.family = data as WizardFamilyData
-		if (step === "guardian") session.guardian = data as WizardGuardianData
-		saveMockDb(db)
-		return { success: true }
+		let payload = data
+		if (step === "personal") payload = mapPersonalToBackend(data as WizardPersonalData)
+		if (step === "identity") payload = mapIdentityToBackend(data as WizardIdentityData)
+		if (step === "family") payload = mapFamilyToBackend(data as WizardFamilyData)
+		if (step === "guardian") payload = mapGuardianToBackend(data as WizardGuardianData)
+
+		const { data: res } = await client.post<ApiResponse<any>>(`/psb/register/${step}`, payload, {
+			headers: { "x-session-id": sessionId },
+		})
+		if (res && res.success === false) {
+			throw new Error(res.message || "Sesi pendaftaran Anda telah berakhir (kadaluarsa). Silakan mulai kembali.")
+		}
+		return { success: res.success }
 	},
 
-	submitAttachment: async (sessionId: string, files: Record<string, string>): Promise<{ tokens: TokenPair; user: AuthUser; registrantId: string }> => {
-		const db = getMockDb()
-		const session = db.sessions[sessionId]
-		if (!session) throw new Error("Session expired or invalid")
+	submitAttachment: async (
+		sessionId: string,
+		files: Record<string, any>,
+	): Promise<{ tokens: TokenPair; user: AuthUser; registrantId: string }> => {
+		const formData = new FormData()
 
-		session.attachments = files
+		// Map frontend attachment keys to backend Express/Multer file interceptor keys
+		if (files["ijazah"]) formData.append("attachCertificate", files["ijazah"])
+		if (files["photo"]) formData.append("attachPhoto", files["photo"])
+		if (files["kk"]) formData.append("attachFamilyCard", files["kk"])
+		if (files["birthCert"]) formData.append("attachBirthCertificate", files["birthCert"])
+		if (files["ksp"]) formData.append("attachKsp", files["ksp"])
+		if (files["kip"]) formData.append("attachKip", files["kip"])
+		if (files["reportCard"]) formData.append("attachReportCard", files["reportCard"])
 
-		const newId = Math.floor(10000 + Math.random() * 90000)
-		const dateStr = new Date().getFullYear().toString()
-		const sequence = Object.keys(db.registrants).length + 1
-		const registrantId = `PR${dateStr}${sequence.toString().padStart(4, "0")}`
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/register/attachment", formData, {
+			headers: {
+				"x-session-id": sessionId,
+				"Content-Type": "multipart/form-data",
+			},
+		})
 
-		const newRegistrant: Registrant & {
-			password?: string | undefined
-			enabled2fa?: boolean | undefined
-			personal?: WizardPersonalData | undefined
-			identity?: WizardIdentityData | undefined
-			family?: WizardFamilyData | undefined
-			guardian?: WizardGuardianData | undefined
-			dataValidation: "valid" | "invalid" | "fixed"
-			dataValidationNote: string
-		} = {
-			id: newId,
-			registrantId,
-			fullName: session.personal?.fullName || "Calon Santri",
-			email: session.email,
-			emailVerifiedAt: new Date().toISOString(),
-			gender: session.personal?.gender || "male",
-			nationality: session.personal?.nationality || "wni",
-			dateOfBirth: session.personal?.dateOfBirth || "2012-01-01",
-			placeOfBirth: session.personal?.placeOfBirth || "Jakarta",
-			approvalStatus: "wait",
-			levelId: session.levelId,
-			academicYearId: parseInt(dateStr),
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
-			password: "PASSWORD", // mock password sent via email
-			enabled2fa: false,
-			dataValidation: "valid",
-			dataValidationNote: "",
-			personal: session.personal || undefined,
-			identity: session.identity || undefined,
-			family: session.family || undefined,
-			guardian: session.guardian || undefined,
-		}
-
-		db.registrants[newId] = newRegistrant
-		delete db.sessions[sessionId] // clear session
-		saveMockDb(db)
-
-		// Set current user as logged in
-		localStorage.setItem("roja-mock-current-user-id", newId.toString())
-
-		const tokens: TokenPair = {
-			accessToken: `at_${Math.random().toString(36).substr(2)}`,
-			refreshToken: `rt_${Math.random().toString(36).substr(2)}`,
-		}
+		const authData = res.data.auth
+		const registrant = res.data.registrant
 
 		const user: AuthUser = {
-			id: newId,
-			email: newRegistrant.email,
-			name: newRegistrant.fullName,
-			role: "registrant",
-			domain: "psb",
+			id: registrant.id,
+			email: registrant.email,
+			name: registrant.fullname,
+			role: registrant.role || authData?.user?.role || "registrant",
+			domain: registrant.domain || authData?.user?.domain || "psb",
 		}
 
-		return { tokens, user, registrantId }
+		return {
+			tokens: {
+				accessToken: authData.accessToken,
+				refreshToken: authData.refreshToken,
+			},
+			user,
+			registrantId: res.data.registrantId,
+		}
 	},
 
 	getSuccess: async (id: number): Promise<SuccessResponse> => {
-		const db = getMockDb()
-		const reg = db.registrants[id]
-		if (!reg) throw new Error("Registrant not found")
+		const { data } = await client.get<ApiResponse<any>>(`/psb/print/registration/${id}`)
+		const reg = data.data.registrant
 		return {
 			registrantId: reg.registrantId,
-			fullName: reg.fullName,
+			fullName: reg.fullname,
 			email: reg.email,
 		}
 	},
 
-	login: async (data: { email: string; password: string }): Promise<{ tokens: TokenPair; user: AuthUser }> => {
-		const db = getMockDb()
-		const reg = Object.values(db.registrants).find((r) => r.email === data.email)
-		if (!reg) throw new Error("Email atau password salah")
+	getPrintProof: async (type: string, id: number): Promise<any> => {
+		if (type === "registration") {
+			const { data } = await client.get<ApiResponse<any>>(`/psb/print/registration/${id}`)
+			return data.data
+		}
+		// accepted, rejected, indent-rejected (requires JWT token)
+		const { data } = await client.get<ApiResponse<any>>(`/psb/print/${type}`)
+		return data.data
+	},
 
-		// In mock login, any password works or checks "PASSWORD"
-		localStorage.setItem("roja-mock-current-user-id", reg.id.toString())
+	login: async (
+		data: { email: string; password: string },
+	): Promise<
+		| { requires2fa: true; email: string }
+		| { requires2fa: false; tokens: TokenPair; user: AuthUser }
+	> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/login", data)
 
-		const tokens: TokenPair = {
-			accessToken: `at_${Math.random().toString(36).substr(2)}`,
-			refreshToken: `rt_${Math.random().toString(36).substr(2)}`,
+		if (res.data?.requires2fa) {
+			return {
+				requires2fa: true,
+				email: res.data.email || data.email,
+			}
 		}
 
+		const authData = res.data
 		const user: AuthUser = {
-			id: reg.id,
-			email: reg.email,
-			name: reg.fullName,
-			role: "registrant",
-			domain: "psb",
+			id: authData.user.id,
+			email: authData.user.email,
+			name: authData.user.fullname || authData.user.name || "",
+			role: authData.user.role || "registrant",
+			domain: authData.user.domain || "psb",
 		}
 
-		return { tokens, user }
+		return {
+			requires2fa: false,
+			tokens: {
+				accessToken: authData.accessToken,
+				refreshToken: authData.refreshToken,
+			},
+			user,
+		}
 	},
 
-	verify2fa: async (code: string, registrantId: number): Promise<{ tokens: TokenPair; user: AuthUser }> => {
-		const db = getMockDb()
-		const reg = db.registrants[registrantId]
-		if (!reg) throw new Error("Registrant not found")
-		if (code !== "123456") throw new Error("Kode verification 2FA salah")
-
-		const tokens: TokenPair = {
-			accessToken: `at_${Math.random().toString(36).substr(2)}`,
-			refreshToken: `rt_${Math.random().toString(36).substr(2)}`,
-		}
-
+	verify2fa: async (data: { email: string; code: string }): Promise<{ tokens: TokenPair; user: AuthUser }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/two-factor", data)
+		const authData = res.data
 		const user: AuthUser = {
-			id: reg.id,
-			email: reg.email,
-			name: reg.fullName,
-			role: "registrant",
-			domain: "psb",
+			id: authData.user.id,
+			email: authData.user.email,
+			name: authData.user.fullname || authData.user.name || "",
+			role: authData.user.role || "registrant",
+			domain: authData.user.domain || "psb",
 		}
-
-		return { tokens, user }
+		return {
+			tokens: {
+				accessToken: authData.accessToken,
+				refreshToken: authData.refreshToken,
+			},
+			user,
+		}
 	},
 
-	resend2fa: async (_registrantId: number): Promise<{ success: boolean }> => {
-		return { success: true }
+	resend2fa: async (email: string): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/two-factor/resend", { email })
+		return { message: res.message || "Kode 2FA berhasil dikirim ulang." }
+	},
+
+	refreshToken: async (): Promise<{ success: boolean }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/refresh")
+		return { success: res.success }
 	},
 
 	logout: async (): Promise<{ success: boolean }> => {
-		localStorage.removeItem("roja-mock-current-user-id")
-		return { success: true }
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/logout")
+		return { success: res.success }
 	},
 
-	forgotPassword: async (_email: string): Promise<{ success: boolean }> => {
-		return { success: true }
+	forgotPassword: async (email: string, clientUrl?: string): Promise<{ success: boolean }> => {
+		const origin = clientUrl || (typeof window !== "undefined" ? window.location.origin : undefined)
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/forgot-password", { email, clientUrl: origin })
+		return { success: res.success }
 	},
 
-	resetPassword: async (_data: { token: string; password: string }): Promise<{ success: boolean }> => {
-		return { success: true }
+	resetPassword: async (data: { token: string; password: string }): Promise<{ success: boolean }> => {
+		// ResetPasswordDto requires { token, password, passwordConfirmation }
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/reset-password", {
+			token: data.token,
+			password: data.password,
+			passwordConfirmation: data.password, // match confirmation
+		})
+		return { success: res.success }
+	},
+
+	verifyEmail: async (token: string): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/verify-email", { token })
+		return { message: res.message || "Email berhasil diverifikasi." }
+	},
+
+	resendVerification: async (email: string, clientUrl?: string): Promise<{ message: string }> => {
+		const origin = clientUrl || (typeof window !== "undefined" ? window.location.origin : undefined)
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/resend-verification", { email, clientUrl: origin })
+		return { message: res.message || "Email verifikasi telah dikirimkan ulang." }
 	},
 
 	getDashboard: async (): Promise<DashboardData> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id") || "12345"
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
-
+		const { data } = await client.get<ApiResponse<any>>("/psb/dashboard")
 		return {
-			registrant: reg,
-			announcement: "Selamat datang di PSB Pondok Roja. Harap periksa status verifikasi berkas Anda secara berkala.",
+			registrant: data.data.registrant,
+			announcement: data.data.announcement,
+			statusInfo: data.data.statusInfo,
 		}
 	},
 
 	getInvalidData: async (): Promise<unknown> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id") || "12345"
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
+		const { data } = await client.get<ApiResponse<any>>("/psb/invalid/data")
 		return {
-			personal: reg.personal || {},
-			identity: reg.identity || {},
-			family: reg.family || {},
-			guardian: reg.guardian || {},
+			personal: mapPersonalToFrontend(data.data.registrant),
+			identity: mapIdentityToFrontend(data.data.registrant, data.data.diseases),
+			family: mapFamilyToFrontend(data.data.registrant),
+			guardian: mapGuardianToFrontend(data.data.registrant),
 		}
 	},
 
 	updateInvalidStep: async (step: string, data: unknown): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
+		let payload = data
+		if (step === "personal") payload = mapPersonalToBackend(data as WizardPersonalData)
+		if (step === "identity") payload = mapIdentityToBackend(data as WizardIdentityData)
+		if (step === "family") payload = mapFamilyToBackend(data as WizardFamilyData)
+		if (step === "guardian") payload = mapGuardianToBackend(data as WizardGuardianData)
 
-		if (step === "personal") reg.personal = data as WizardPersonalData
-		if (step === "identity") reg.identity = data as WizardIdentityData
-		if (step === "family") reg.family = data as WizardFamilyData
-		if (step === "guardian") reg.guardian = data as WizardGuardianData
-		saveMockDb(db)
-		return { success: true }
+		const { data: res } = await client.patch<ApiResponse<any>>(`/psb/invalid/data/${step}`, payload)
+		return { success: res.success }
 	},
 
-	updateInvalidAttachment: async (_files: Record<string, string>): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
+	updateInvalidAttachment: async (files: Record<string, any>): Promise<{ success: boolean }> => {
+		const formData = new FormData()
+		if (files["ijazah"]) formData.append("attachCertificate", files["ijazah"])
+		if (files["photo"]) formData.append("attachPhoto", files["photo"])
+		if (files["kk"]) formData.append("attachFamilyCard", files["kk"])
+		if (files["birthCert"]) formData.append("attachBirthCertificate", files["birthCert"])
+		if (files["ksp"]) formData.append("attachKsp", files["ksp"])
+		if (files["kip"]) formData.append("attachKip", files["kip"])
+		if (files["reportCard"]) formData.append("attachReportCard", files["reportCard"])
 
-		reg.dataValidation = "fixed"
-		reg.approvalStatus = "fixed"
-		saveMockDb(db)
-		return { success: true }
+		const { data: res } = await client.patch<ApiResponse<any>>("/psb/invalid/data/attachment", formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		})
+		return { success: res.success }
 	},
 
 	getProfile: async (): Promise<AuthUser & { enabled2fa: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
+		// Get profile details from backend
+		const { data } = await client.get<ApiResponse<any>>("/psb/dashboard")
+		const reg = data.data.registrant
 		return {
 			id: reg.id,
 			email: reg.email,
-			name: reg.fullName,
+			name: reg.fullname,
 			role: "registrant",
 			domain: "psb",
-			enabled2fa: reg.enabled2fa || false,
+			enabled2fa: reg.enabled2fa,
 		}
 	},
 
 	updateProfile: async (data: { name: string }): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
-
-		reg.fullName = data.name
-		if (reg.personal) reg.personal.fullName = data.name
-		saveMockDb(db)
-		return { success: true }
+		const { data: res } = await client.patch<ApiResponse<any>>("/psb/setting/profile", { fullname: data.name })
+		return { success: res.success }
 	},
 
 	updateAccount: async (data: { password: string }): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
-
-		reg.password = data.password
-		saveMockDb(db)
-		return { success: true }
+		const { data: res } = await client.patch<ApiResponse<any>>("/psb/setting/password", {
+			password: data.password,
+			passwordConfirmation: data.password,
+		})
+		return { success: res.success }
 	},
 
 	toggle2fa: async (enabled: boolean): Promise<{ success: boolean }> => {
-		const db = getMockDb()
-		const idStr = localStorage.getItem("roja-mock-current-user-id")
-		if (!idStr) throw new Error("Unauthorized")
-		const reg = db.registrants[parseInt(idStr)]
-		if (!reg) throw new Error("Registrant not found")
-
-		reg.enabled2fa = enabled
-		saveMockDb(db)
-		return { success: true }
+		const { data: res } = await client.patch<ApiResponse<any>>("/psb/setting/two-factor", { enabled })
+		return { success: res.success }
 	},
 })

@@ -13,7 +13,15 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, "jwt-refresh"
 		private readonly redisService: RedisService,
 	) {
 		super({
-			jwtFromRequest: ExtractJwt.fromBodyField("refreshToken"),
+			jwtFromRequest: ExtractJwt.fromExtractors([
+				ExtractJwt.fromBodyField("refreshToken"),
+				(req: any) => {
+					if (req && req.cookies) {
+						return req.cookies["refresh_token"] || null
+					}
+					return null
+				},
+			]),
 			ignoreExpiration: false,
 			secretOrKey: configService.get("JWT_REFRESH_SECRET", { infer: true }),
 		})

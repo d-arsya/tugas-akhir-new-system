@@ -2,7 +2,21 @@ import type { JSX } from "react"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
-import { AlertTriangle, Download, CheckCircle, XCircle } from "lucide-react"
+import { AlertTriangle, Download, CheckCircle, XCircle, Info, Calendar } from "lucide-react"
+
+const formatDate = (dateStr?: string | null): string => {
+	if (!dateStr) return ""
+	try {
+		const d = new Date(dateStr)
+		return d.toLocaleDateString("id-ID", {
+			day: "numeric",
+			month: "long",
+			year: "numeric",
+		})
+	} catch {
+		return dateStr
+	}
+}
 
 const DashboardPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -18,141 +32,245 @@ const DashboardPage = (): JSX.Element => {
 
 	const reg = data?.registrant
 	const announcement = data?.announcement
-	const status = reg?.approvalStatus || "wait"
-	const validationStatus = reg?.dataValidation || "valid"
+	const statusInfo = data?.statusInfo
 
-	const levelLabel = reg?.levelId === 1 ? "Setingkat SMP" : "Setingkat SMA"
+	// Determine active status: statusInfo.status -> reg.dataValidation -> reg.approvalStatus
+	let rawStatus =
+		statusInfo?.status ||
+		(reg?.dataValidation && reg.dataValidation !== "valid" ? reg.dataValidation : reg?.approvalStatus) ||
+		"wait"
+	if (rawStatus === "reject") rawStatus = "failed"
+	const status = rawStatus === "indent failed" ? "indent_failed" : rawStatus
+	const validationNote = statusInfo?.description || reg?.dataValidationNote
+
+	const levelLabel = reg?.levelId === 1 ? "Setingkat SMP" : reg?.levelId === 2 ? "Setingkat SMA" : "Pondok Roja"
+	const printType =
+		status === "approve"
+			? "accepted"
+			: status === "failed"
+			? "rejected"
+			: status === "indent_failed"
+			? "indent-rejected"
+			: "registration"
+	const printLabel = status === "approve" ? "Cetak Surat Kelulusan" : "Cetak Bukti PSB"
+	const registrantIdParam = reg?.id ? String(reg.id) : ""
 
 	return (
-		<div className="w-full">
-			{/* Grid container to allow text on left and illustration on right */}
-			<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[300px]">
-				
-				{/* Left Side: Status Info */}
-				<div className="lg:col-span-7 flex flex-col gap-6">
-					<div>
-						<div className="text-xl md:text-2xl font-bold text-slate-800 m-0">
-							Hallo, <span className="text-[var(--primary)]">{reg?.fullName || "Puji Padmi Laksmiwati"}</span>
+		<div className="w-full flex flex-col gap-8">
+			{/* Top Header Section */}
+			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--bg-form-border)] pb-6">
+				<div>
+					<div className="text-xl md:text-2xl font-bold text-slate-800 m-0">
+						Hallo, <span className="text-[var(--primary)]">{reg?.fullname || reg?.fullName || ""}</span>
+					</div>
+					<div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs text-[#abb4be] font-medium">
+						<div>
+							Nomor Pendaftaran: <span className="font-mono text-slate-700 font-bold">{reg?.registrantId || "-"}</span>
 						</div>
-						<div className="mt-3 flex flex-col gap-1 text-xs text-[#abb4be] font-medium">
-							<div>
-								Nomor Pendaftaran : <span className="font-mono text-slate-700 font-bold">{reg?.registrantId || "PR20260028"}</span>
-							</div>
-							<div>
-								Jenjang yang kamu pilih : <span className="text-slate-700 font-semibold">{levelLabel}</span>
-							</div>
+						<div>
+							Jenjang: <span className="text-slate-700 font-semibold">{levelLabel}</span>
 						</div>
 					</div>
+				</div>
 
-					{/* Custom descriptions based on registration approval status */}
-					{status === "wait" && (
+				{/* Print Action Button */}
+				{registrantIdParam && (
+					<Link
+						to="/print/$type/$registrantId"
+						params={{ type: printType, registrantId: registrantIdParam }}
+						target="_blank"
+						className="roja_btn roja_btn-primary text-white bg-[var(--primary)] font-semibold text-xs flex items-center gap-2 w-max shrink-0"
+					>
+						<Download className="w-4 h-4" />
+						<span>{printLabel}</span>
+					</Link>
+				)}
+			</div>
+
+			{/* Status Scenario Content */}
+
+			{/* 1. Wait (Menunggu Verifikasi) */}
+			{status === "wait" && (
+				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[250px]">
+					<div className="lg:col-span-7 flex flex-col gap-4">
+						<div className="text-sm font-bold text-slate-700">Status Pendaftaran: Menunggu Verifikasi</div>
 						<p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium m-0">
 							Data kamu sedang kami proses, mohon menunggu. Informasi penerimaan dan jika ada kelengkapan data akan kami tampilkan pada halaman ini.
 						</p>
-					)}
-
-					{status === "fixed" && (
-						<div className="flex flex-col gap-2">
-							<p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium m-0">
-								Perbaikan data kamu telah tersimpan. Panitia sedang memeriksa kembali berkas pendaftaranmu. Mohon bersabar menunggu hasil verifikasi.
-							</p>
-							<div className="bg-blue-50 text-blue-700 p-3 rounded-lg border border-blue-200 text-xs font-semibold w-max">
-								✓ Data Telah Diperbaiki
-							</div>
-						</div>
-					)}
-
-					{status === "invalid" && (
-						<div className="bg-[#FFF4E5] border border-amber-200 p-5 rounded-xl flex flex-col gap-3">
-							<div className="flex items-center gap-2 text-[#d98f00] font-bold text-sm">
-								<AlertTriangle className="w-5 h-5 shrink-0" />
-								<span>Perbaikan Berkas Pendaftaran Diperlukan</span>
-							</div>
-							<p className="text-xs text-amber-900 leading-relaxed m-0 font-medium">
-								Panitia menemukan bahwa beberapa berkas yang Anda unggah tidak valid atau kurang lengkap. 
-								{reg?.dataValidationNote && (
-									<span className="block mt-2 bg-white/70 p-2.5 rounded-lg border border-amber-100 italic">
-										&ldquo;{reg.dataValidationNote}&rdquo;
-									</span>
-								)}
-							</p>
-							<button
-								onClick={() => navigate({ to: "/invalid/personal" })}
-								className="roja_btn roja_btn-warning text-white bg-[#ffa800] hover:bg-[#e09400] text-xs font-bold w-max mt-2 shadow-lg shadow-[#ffa800]/20"
-							>
-								Mulai Perbaiki Data
-							</button>
-						</div>
-					)}
-
-					{status === "approve" && (
-						<div className="bg-emerald-50 border border-emerald-200 p-5 rounded-xl flex flex-col gap-3">
-							<div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
-								<CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
-								<span>Selamat! Pendaftaran Anda Diterima</span>
-							</div>
-							<p className="text-xs text-emerald-950 leading-relaxed m-0 font-medium">
-								Selamat, Anda telah dinyatakan lulus seleksi administrasi dan diterima sebagai santri baru Pondok Roja. Silakan download Surat Kelulusan di bawah ini.
-							</p>
-							<div className="flex gap-3 mt-2">
-								<Link
-									to="/print/$type/$registrantId"
-									params={{ type: "accepted", registrantId: reg?.id.toString() || "1" }}
-									target="_blank"
-									className="roja_btn roja_btn-success text-white bg-emerald-600 hover:bg-emerald-700 text-xs font-bold flex items-center gap-2"
-								>
-									<Download className="w-4 h-4" />
-									<span>Download Surat Kelulusan</span>
-								</Link>
-							</div>
-						</div>
-					)}
-
-					{status === "failed" && (
-						<div className="bg-rose-50 border border-rose-200 p-5 rounded-xl flex flex-col gap-3">
-							<div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
-								<XCircle className="w-5 h-5 text-rose-600 shrink-0" />
-								<span>Status Pendaftaran: Belum Lulus</span>
-							</div>
-							<p className="text-xs text-rose-950 leading-relaxed m-0 font-medium">
-								Mohon maaf, pendaftaran Anda belum disetujui untuk gelombang ini. Terima kasih atas partisipasi Anda.
-							</p>
-						</div>
-					)}
-
-					{/* Action Buttons for download proofs */}
-					<div className="flex gap-3 mt-4">
-						<Link
-							to="/print/$type/$registrantId"
-							params={{ type: "registration", registrantId: reg?.id.toString() || "1" }}
-							target="_blank"
-							className="roja_btn roja_btn-secondary text-xs font-semibold flex items-center gap-2"
-						>
-							<Download className="w-4 h-4" />
-							<span>Cetak Bukti Pendaftaran</span>
-						</Link>
+					</div>
+					<div className="lg:col-span-5 flex justify-center items-center">
+						<img
+							src="/assets/svg/illustration/No-Activity.svg"
+							alt="Status Review"
+							className="max-w-xs w-full h-auto object-contain select-none pointer-events-none"
+						/>
 					</div>
 				</div>
+			)}
 
-				{/* Right Side: Binoculars Illustration */}
-				<div className="lg:col-span-5 flex justify-center items-center">
-					<img
-						src="/assets/svg/illustration/No-Activity.svg"
-						alt="Status Review"
-						className="max-w-xs md:max-w-md w-full h-auto object-contain select-none pointer-events-none"
-					/>
-				</div>
-			</div>
-
-			{/* Announcement Banner if any */}
-			{announcement && (
-				<div className="mt-8 border-t border-[var(--bg-form-border)] pt-6">
-					<h4 className="text-xs font-bold text-[var(--primary)] tracking-wider uppercase m-0">
-						Pengumuman Tambahan
-					</h4>
-					<p className="text-xs text-slate-500 leading-relaxed mt-2 m-0 font-medium">
-						{announcement}
+			{/* 2. Fixed (Data Telah Diperbaiki) */}
+			{status === "fixed" && (
+				<div className="bg-blue-50/80 border border-blue-200 p-6 rounded-2xl flex flex-col gap-3">
+					<div className="flex items-center gap-2.5 text-blue-800 font-bold text-sm">
+						<CheckCircle className="w-5 h-5 text-blue-600 shrink-0" />
+						<span>Perbaikan Data Tersimpan</span>
+					</div>
+					<p className="text-xs md:text-sm text-blue-950 leading-relaxed font-medium m-0">
+						Kamu berhasil melakukan update data. Silakan tunggu keputusan selanjutnya dari admin kami. Semoga proses pendaftaran kamu berjalan lancar ya.
 					</p>
+				</div>
+			)}
+
+			{/* 3. Invalid (Data / Berkas Tidak Valid) */}
+			{status === "invalid" && (
+				<div className="bg-amber-50/80 border border-amber-200 p-6 rounded-2xl flex flex-col gap-4">
+					<div className="flex items-center gap-2.5 text-amber-800 font-bold text-sm">
+						<AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+						<span>Data / Berkas Tidak Valid!</span>
+					</div>
+					<div className="text-xs text-amber-950 leading-relaxed font-medium">
+						Panitia menemukan bahwa beberapa data/berkas yang Anda unggah tidak valid. Silakan lakukan perbaikan data.
+						{validationNote && (
+							<div
+								className="mt-3 bg-white/80 p-3.5 rounded-xl border border-amber-200 text-xs italic text-amber-900"
+								dangerouslySetInnerHTML={{ __html: validationNote }}
+							/>
+						)}
+					</div>
+					<div>
+						<button
+							onClick={() => navigate({ to: "/invalid" })}
+							className="roja_btn roja_btn-warning text-white bg-[#ffa800] hover:bg-[#e09400] text-xs font-bold shadow-lg shadow-[#ffa800]/20 flex items-center gap-2"
+						>
+							<span>Perbaiki Data Saya</span>
+						</button>
+					</div>
+				</div>
+			)}
+
+			{/* 4. Approve (Diterima) */}
+			{status === "approve" && (
+				<div className="flex flex-col gap-6">
+					<div className="bg-emerald-50/80 border border-emerald-200 p-6 rounded-2xl flex flex-col gap-3">
+						<div className="flex items-center gap-2.5 text-emerald-800 font-bold text-base">
+							<CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+							<span>Selamat! Anda Diterima Sebagai Santri Baru</span>
+						</div>
+						<p className="text-xs md:text-sm text-emerald-950 leading-relaxed font-medium m-0">
+							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
+						</p>
+					</div>
+
+					{announcement && (
+						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
+							<div className="text-xs font-bold text-[var(--primary)] tracking-wider uppercase flex items-center gap-2 border-b border-slate-100 pb-3">
+								<Info className="w-4 h-4" />
+								<span>Detail Hasil Seleksi & Daftar Ulang</span>
+							</div>
+
+							<div className="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6 text-xs">
+								{/* Keterangan Kelulusan */}
+								{announcement.successDesc && (
+									<>
+										<div className="md:col-span-3 font-bold text-slate-600">Keterangan</div>
+										<div
+											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+											dangerouslySetInnerHTML={{ __html: announcement.successDesc }}
+										/>
+									</>
+								)}
+
+								{/* Jadwal Daftar Ulang */}
+								{(announcement.dateStart || announcement.dateEnd) && (
+									<>
+										<div className="md:col-span-3 font-bold text-slate-600 flex items-center gap-1.5">
+											<Calendar className="w-3.5 h-3.5 text-slate-400" />
+											<span>Jadwal Daftar Ulang</span>
+										</div>
+										<div className="md:col-span-9 text-slate-800 font-semibold">
+											{formatDate(announcement.dateStart)} s/d {formatDate(announcement.dateEnd)}
+										</div>
+									</>
+								)}
+
+								{/* Berkas Daftar Ulang */}
+								{announcement.information && (
+									<>
+										<div className="md:col-span-3 font-bold text-slate-600">Berkas Daftar Ulang</div>
+										<div
+											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+											dangerouslySetInnerHTML={{ __html: announcement.information }}
+										/>
+									</>
+								)}
+
+								{/* Pengumuman Tambahan */}
+								{announcement.additionalInformation && (
+									<>
+										<div className="md:col-span-3 font-bold text-slate-600">Pengumuman Lainnya</div>
+										<div
+											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+											dangerouslySetInnerHTML={{ __html: announcement.additionalInformation }}
+										/>
+									</>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* 5. Failed (Selection Failed / Belum Lulus) */}
+			{status === "failed" && (
+				<div className="flex flex-col gap-6">
+					<div className="bg-rose-50/80 border border-rose-200 p-6 rounded-2xl flex flex-col gap-3">
+						<div className="flex items-center gap-2.5 text-rose-800 font-bold text-base">
+							<XCircle className="w-6 h-6 text-rose-600 shrink-0" />
+							<span>Hasil Seleksi: Belum Diterima</span>
+						</div>
+						<p className="text-xs md:text-sm text-rose-950 leading-relaxed font-medium m-0">
+							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
+						</p>
+					</div>
+
+					{announcement?.failedDesc && (
+						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
+							<div className="text-xs font-bold text-slate-600 tracking-wider uppercase border-b border-slate-100 pb-3">
+								Keterangan
+							</div>
+							<div
+								className="text-xs text-slate-700 leading-relaxed font-medium"
+								dangerouslySetInnerHTML={{ __html: announcement.failedDesc }}
+							/>
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* 6. Indent Failed (Gagal Tes Indent) */}
+			{status === "indent_failed" && (
+				<div className="flex flex-col gap-6">
+					<div className="bg-orange-50/80 border border-orange-200 p-6 rounded-2xl flex flex-col gap-3">
+						<div className="flex items-center gap-2.5 text-orange-800 font-bold text-base">
+							<AlertTriangle className="w-6 h-6 text-orange-600 shrink-0" />
+							<span>Hasil Tes Indent: Belum Lulus</span>
+						</div>
+						<p className="text-xs md:text-sm text-orange-950 leading-relaxed font-medium m-0">
+							Berikut kami umumkan hasil tes indent pendaftaran santri baru.
+						</p>
+					</div>
+
+					{announcement?.failedIndentTestDesc && (
+						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
+							<div className="text-xs font-bold text-slate-600 tracking-wider uppercase border-b border-slate-100 pb-3">
+								Keterangan
+							</div>
+							<div
+								className="text-xs text-slate-700 leading-relaxed font-medium"
+								dangerouslySetInnerHTML={{ __html: announcement.failedIndentTestDesc }}
+							/>
+						</div>
+					)}
 				</div>
 			)}
 		</div>

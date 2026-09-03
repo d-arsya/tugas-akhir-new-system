@@ -4,34 +4,27 @@ import type { AuthUser } from "@roja/types"
 
 type AuthState = {
 	user: AuthUser | null
-	accessToken: string | null
 	isAuthenticated: boolean
 }
 
 type AuthActions = {
-	login: (accessToken: string, refreshToken: string, user: AuthUser) => void
+	login: (user: AuthUser) => void
 	logout: () => void
-	setAccessToken: (token: string) => void
 }
 
 const useAuthStore = create<AuthState & AuthActions>()(
 	persist(
 		(set) => ({
 			user: null,
-			accessToken: null,
 			isAuthenticated: false,
 
-			login: (accessToken, refreshToken, user) => {
-				localStorage.setItem("roja-refresh-token", refreshToken)
-				set({ accessToken, user, isAuthenticated: true })
+			login: (user) => {
+				set({ user, isAuthenticated: true })
 			},
 
 			logout: () => {
-				localStorage.removeItem("roja-refresh-token")
-				set({ user: null, accessToken: null, isAuthenticated: false })
+				set({ user: null, isAuthenticated: false })
 			},
-
-			setAccessToken: (accessToken) => set({ accessToken }),
 		}),
 		{
 			name: "roja-auth",

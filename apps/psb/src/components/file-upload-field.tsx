@@ -4,9 +4,9 @@ import { useState } from "react"
 type FileUploadFieldProps = {
 	label: string
 	accept?: string
-	onChange: (fileName: string) => void
+	onChange: (file: File) => void
 	error?: string | undefined
-	value?: string | undefined
+	value?: any
 }
 
 const FileUploadField = ({
@@ -16,7 +16,9 @@ const FileUploadField = ({
 	error,
 	value,
 }: FileUploadFieldProps): JSX.Element => {
-	const [fileName, setFileName] = useState<string>(value || "")
+	const [fileName, setFileName] = useState<string>(
+		value instanceof File ? value.name : typeof value === "string" ? value : ""
+	)
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
 		const files = e.target.files
@@ -28,7 +30,7 @@ const FileUploadField = ({
 					return
 				}
 				setFileName(file.name)
-				onChange(file.name)
+				onChange(file)
 			}
 		}
 	}

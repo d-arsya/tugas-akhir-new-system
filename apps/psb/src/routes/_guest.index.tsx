@@ -6,13 +6,19 @@ import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import { ChevronRight, Info, Mail } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
+import { ChevronRight, Info, Mail, AlertTriangle } from "lucide-react"
 import WizardStepper from "@/components/wizard-stepper"
 
 const LandingPage = (): JSX.Element => {
 	const navigate = useNavigate()
 	const setSession = useWizardStore((s) => s.setSession)
-	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+	const { data: landingData, isLoading: isLandingLoading } = useQuery({
+		queryKey: ["landingInfo"],
+		queryFn: () => psbApi.getLanding(),
+	})
 
 	const {
 		register,
@@ -22,22 +28,60 @@ const LandingPage = (): JSX.Element => {
 		resolver: zodResolver(checkEmailSchema) as unknown as import("react-hook-form").Resolver<CheckEmailInput>,
 		defaultValues: {
 			email: "",
-			levelId: 2, // Default to SMA (TMQ Setingkat SMA is SMA)
+			levelId: 0,
 		},
 	})
 
 	const onSubmit = async (data: CheckEmailInput): Promise<void> => {
-		setIsLoading(true)
+		setIsSubmitting(true)
 		try {
 			const res = await psbApi.checkEmail(data)
-			setSession(res.sessionId || "demo-session-id", data.email, data.levelId)
-			navigate({ to: "/register/personal" })
+			setSession(res.sessionId, data.email, data.levelId)
+			navigate({ to: "/register" })
 		} catch (err: unknown) {
-			setSession("demo-session-id", data.email, data.levelId)
-			navigate({ to: "/register/personal" })
+			alert(err instanceof Error ? err.message : "Gagal memulai pendaftaran")
 		} finally {
-			setIsLoading(false)
+			setIsSubmitting(false)
 		}
+	}
+
+	if (isLandingLoading) {
+		return <div className="text-center py-10 text-xs font-medium text-[var(--grey)]">Memuat informasi pendaftaran...</div>
+	}
+
+	const isOpen = landingData?.isOpen ?? false
+	const schoolName = landingData?.schoolName || "Pondok Roja"
+	const levels = landingData?.levels || []
+	const note = landingData?.academicYear?.note || "PSB Reguler dibuka untuk tahun ajaran aktif. Harap isi email dengan benar untuk pengiriman password."
+
+	if (!isOpen) {
+		return (
+			<div className="max-w-md mx-auto my-8">
+				<div className="roja_card_wizard relative overflow-hidden p-8 md:p-10 flex flex-col items-center text-center gap-6">
+					<div className="absolute -top-12 -left-12 w-32 h-32 bg-[var(--primary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
+					<div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--secondary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
+
+					<div className="relative z-10 w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-200">
+						<AlertTriangle className="w-8 h-8" />
+					</div>
+
+					<div className="relative z-10 flex flex-col gap-2">
+						<div className="text-sm font-bold text-slate-800 m-0">Pendaftaran Ditutup</div>
+						<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
+							Saat ini Penerimaan Santri Baru (PSB) untuk {schoolName} sedang tidak dibuka.
+							Silakan hubungi kontak panitia atau kunjungi website utama untuk informasi lebih lanjut.
+						</p>
+					</div>
+
+					<div className="relative z-10 text-center text-xs border-t border-[var(--bg-form-border)] w-full pt-4">
+						Sudah pernah mendaftar?{" "}
+						<Link to="/login" className="text-[var(--secondary)] hover:underline font-semibold">
+							Masuk ke Member Area
+						</Link>
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	return (
@@ -49,15 +93,15 @@ const LandingPage = (): JSX.Element => {
 				<div className="absolute -top-12 -right-12 w-48 h-48 bg-[var(--secondary)] rounded-full blur-[50px] opacity-[0.12] pointer-events-none z-0" />
 
 				<div className="relative z-10">
-					{/* Stepper showing step 1 */}
-					<WizardStepper currentStep={1} />
+					{/* Stepper showing main step 1 */}
+					<WizardStepper mainStep={1} />
 
 					<form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-6">
 						{/* Info Alert Box */}
 						<div className="roja_alert-warning p-4 rounded-xl flex items-center gap-3 max-w-2xl mx-auto w-full bg-[#FFF4E5] border border-amber-200">
 							<Info className="w-5 h-5 text-[#d98f00] shrink-0" />
 							<p className="text-xs text-[#d98f00] m-0 font-medium leading-relaxed">
-								PSB Reguler 2027-2028 dibuka 15 Agustus - 6 Desember 2026 // tes seleksi 13 Desmber 2026
+								{note}
 							</p>
 						</div>
 
@@ -68,14 +112,16 @@ const LandingPage = (): JSX.Element => {
 							</label>
 							<div className="w-full max-w-md relative">
 								<select
-									className={`form-control roja_form_control-lg rounded-xl pr-10 text-center ${
-										errors.levelId ? "is-invalid" : ""
-									}`}
+									className={`form-control roja_form_control-lg rounded-xl pr-10 text-center ${errors.levelId ? "is-invalid" : ""
+										}`}
 									{...register("levelId")}
 								>
 									<option value="0">-- Pilih Jenjang --</option>
-									<option value="1">TMQ Setingkat SMP</option>
-									<option value="2">TMQ Setingkat SMA</option>
+									{levels.map((l) => (
+										<option key={l.id} value={l.id}>
+											{l.name}
+										</option>
+									))}
 								</select>
 								{errors.levelId && (
 									<span className="invalid-feedback text-center">{errors.levelId.message}</span>
@@ -91,9 +137,8 @@ const LandingPage = (): JSX.Element => {
 							<div className="w-full max-w-md relative">
 								<input
 									type="email"
-									className={`form-control roja_form_control-lg rounded-xl pr-12 ${
-										errors.email ? "is-invalid" : ""
-									}`}
+									className={`form-control roja_form_control-lg rounded-xl pr-12 ${errors.email ? "is-invalid" : ""
+										}`}
 									placeholder="yourmail.address@gmail.com"
 									{...register("email")}
 								/>
@@ -109,9 +154,9 @@ const LandingPage = (): JSX.Element => {
 							<button
 								type="submit"
 								className="roja_btn roja_btn-warning roja_btn-lg px-8 rounded-lg text-white font-semibold flex items-center gap-2 bg-[#ffa800] hover:bg-[#e09400] transition-colors shadow-lg shadow-[#ffa800]/20"
-								disabled={isLoading}
+								disabled={isSubmitting}
 							>
-								<span>{isLoading ? "Memproses..." : "Selanjutnya"}</span>
+								<span>{isSubmitting ? "Memproses..." : "Selanjutnya"}</span>
 								<ChevronRight className="w-5 h-5" />
 							</button>
 						</div>

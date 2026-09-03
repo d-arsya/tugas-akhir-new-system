@@ -11,6 +11,7 @@ import { RegistrantPasswordReset } from "../entities/registrant-password-reset.e
 import { Registrant } from "../entities/registrant.entity"
 import { TwoFactorRegistrant } from "../entities/two-factor-registrant.entity"
 import type { Env } from "../../core/config/env.validation"
+import type { JwtPayload } from "../../core/auth/strategies/jwt.strategy"
 import type { PsbForgotPasswordDto } from "../dto/auth/forgot-password.dto"
 import type { PsbLoginDto } from "../dto/auth/login.dto"
 import type { PsbResetPasswordDto } from "../dto/auth/reset-password.dto"
@@ -19,17 +20,17 @@ import type { PsbTwoFactorDto } from "../dto/auth/two-factor.dto"
 export type AuthResult =
 	| { requires2fa: true; email: string }
 	| {
-			requires2fa: false
-			accessToken: string
-			refreshToken: string
-			user: {
-				id: number
-				email: string
-				fullname: string | null
-				registrantId: string | null
-				approvalStatus: string | null
-			}
-	  }
+		requires2fa: false
+		accessToken: string
+		refreshToken: string
+		user: {
+			id: number
+			email: string
+			fullname: string | null
+			registrantId: string | null
+			approvalStatus: string | null
+		}
+	}
 
 @Injectable()
 export class PsbAuthService {
@@ -44,7 +45,7 @@ export class PsbAuthService {
 		private readonly configService: ConfigService<Env, true>,
 		private readonly redisService: RedisService,
 		private readonly mailerService: MailerService,
-	) {}
+	) { }
 
 	async login(dto: PsbLoginDto, clientIp: string): Promise<AuthResult> {
 		const registrant = await this.registrantRepository.findOneBy({ email: dto.email })
@@ -52,8 +53,10 @@ export class PsbAuthService {
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
-		const isPasswordValid = await bcrypt.compare(dto.password, registrant.password)
+		const dbHash = registrant.password.trim().replace(/^\$2y\$/, "$2b$")
+		const isPasswordValid = await bcrypt.compare(dto.password, dbHash)
 		if (!isPasswordValid) {
+			console.log(`[Auth Debug] Password mismatch for ${dto.email}. DB Hash: "${registrant.password}" (len: ${registrant.password.length})`)
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
@@ -61,7 +64,12 @@ export class PsbAuthService {
 			throw new ForbiddenException("Akun pendaftaran Anda saat ini sedang dinonaktifkan atau diblokir.")
 		}
 
-		// 2FA check
+		// Email verification check (matching legacy behavior)
+		if (!registrant.emailVerifiedAt) {
+			throw new ForbiddenException("Email Anda belum diverifikasi. Silakan cek email Anda untuk melakukan verifikasi terlebih dahulu.")
+		}
+
+		// 2FA check (only executed after email is verified)
 		if (registrant.enabled2fa) {
 			const trustedIp = await this.twoFactorRepository.findOneBy({
 				registrantId: registrant.registrantId ?? String(registrant.id),
@@ -144,7 +152,48 @@ export class PsbAuthService {
 		return { message: "Kode verifikasi baru telah dikirimkan ke email Anda." }
 	}
 
-	async forgotPassword(dto: PsbForgotPasswordDto): Promise<{ message: string }> {
+	async sendVerificationEmail(email: string, name?: string, clientUrl?: string): Promise<{ message: string }> {
+		const registrant = await this.registrantRepository.findOneBy({ email })
+		if (!registrant) {
+			throw new BadRequestException("Email tidak ditemukan.")
+		}
+		if (registrant.emailVerifiedAt) {
+			return { message: "Email Anda sudah terverifikasi sebelumnya." }
+		}
+
+		const token = crypto.randomBytes(32).toString("hex")
+		await this.redisService.set(`email-verify:${token}`, email, 24 * 60 * 60)
+
+		const baseUrl = (clientUrl || this.configService.get("APP_URL", { infer: true }) || "http://localhost:4200").replace(/\/+$/, "")
+		const verifyUrl = `${baseUrl}/verify-email?token=${token}&email=${encodeURIComponent(email)}`
+
+		await this.mailerService.sendEmailVerification(email, {
+			name: name ?? registrant.fullname ?? "Calon Santri",
+			verifyUrl,
+		})
+
+		return { message: "Email verifikasi telah dikirimkan. Silakan cek kotak masuk email Anda." }
+	}
+
+	async verifyEmail(token: string): Promise<{ message: string }> {
+		const email = await this.redisService.get(`email-verify:${token}`)
+		if (!email) {
+			throw new BadRequestException("Token verifikasi email tidak valid atau telah kadaluarsa.")
+		}
+
+		const registrant = await this.registrantRepository.findOneBy({ email })
+		if (!registrant) {
+			throw new BadRequestException("Akun pendaftaran tidak ditemukan.")
+		}
+
+		registrant.emailVerifiedAt = new Date()
+		await this.registrantRepository.save(registrant)
+		await this.redisService.del(`email-verify:${token}`)
+
+		return { message: "Email Anda telah berhasil diverifikasi! Silakan login untuk melanjutkan." }
+	}
+
+	async forgotPassword(dto: PsbForgotPasswordDto, clientUrl?: string): Promise<{ message: string }> {
 		const registrant = await this.registrantRepository.findOneBy({ email: dto.email })
 		if (registrant && registrant.email) {
 			const token = crypto.randomBytes(32).toString("hex")
@@ -154,8 +203,8 @@ export class PsbAuthService {
 			})
 			await this.passwordResetRepository.save(resetRecord)
 
-			const appUrl = this.configService.get("APP_URL", { infer: true })
-			const resetUrl = `${appUrl}/reset-password?token=${token}&email=${encodeURIComponent(registrant.email)}`
+			const baseUrl = (clientUrl || this.configService.get("APP_URL", { infer: true }) || "http://localhost:4200").replace(/\/+$/, "")
+			const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(registrant.email)}`
 
 			await this.mailerService.sendForgotPassword(registrant.email, {
 				name: registrant.fullname ?? "Calon Santri",
@@ -230,5 +279,16 @@ export class PsbAuthService {
 			await this.redisService.revokeRefreshToken(userId, tokenId)
 		}
 		return { message: "Berhasil logout." }
+	}
+
+	async refreshToken(user: JwtPayload): Promise<AuthResult> {
+		const registrant = await this.registrantRepository.findOneBy({ id: user.sub })
+		if (!registrant) {
+			throw new UnauthorizedException("Akun pendaftaran tidak ditemukan.")
+		}
+		if (user.tokenId) {
+			await this.redisService.revokeRefreshToken(user.sub, user.tokenId)
+		}
+		return this.generateTokens(registrant)
 	}
 }

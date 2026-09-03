@@ -7,6 +7,7 @@ import {
 	UploadedFiles,
 	UseGuards,
 	UseInterceptors,
+	Res,
 } from "@nestjs/common"
 import { FileFieldsInterceptor } from "@nestjs/platform-express"
 import {
@@ -34,11 +35,13 @@ import {
 	SubmitAttachmentResponseDto,
 } from "../dto/register/register-response.dto"
 import { PsbRegisterService } from "./psb-register.service"
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags("PSB — Registration Wizard")
 @Controller("psb/register")
+@Throttle({ default: {} })
 export class PsbRegisterController {
-	constructor(private readonly psbRegisterService: PsbRegisterService) {}
+	constructor(private readonly psbRegisterService: PsbRegisterService) { }
 
 	@Public()
 	@Get("landing")
@@ -72,6 +75,7 @@ export class PsbRegisterController {
 	@ApiOperation({ summary: "Validasi email awal & mulai wizard sesi pendaftaran (Step 0)" })
 	@ApiResponseWrapped({ status: 201, description: "Sesi wizard berhasil dibuat di Redis", type: CheckEmailResponseDto })
 	@ApiResponse({ status: 400, description: "Email sudah terdaftar atau jenjang tidak aktif" })
+	@Throttle({ auth: {} })
 	async checkEmail(@Body() dto: CheckEmailDto): Promise<CheckEmailResponseDto> {
 		const res = await this.psbRegisterService.checkEmail(dto)
 		return {
@@ -87,6 +91,7 @@ export class PsbRegisterController {
 	@ApiHeader({ name: "x-session-id", required: true, description: "Session ID pendaftaran dari check-email" })
 	@ApiOperation({ summary: "Ambil progres data wizard yang tersimpan di Redis" })
 	@ApiResponseWrapped({ status: 200, description: "Data progres form saat ini", type: WizardStateResponseDto })
+	@Throttle({ search: {} })
 	async getWizardState(@Headers("x-session-id") sessionId: string): Promise<WizardStateResponseDto> {
 		const res = await this.psbRegisterService.getWizardState(sessionId)
 		return {
@@ -198,11 +203,32 @@ export class PsbRegisterController {
 			attachReportCard?: Express.Multer.File[]
 			attachBirthCertificate?: Express.Multer.File[]
 		},
+		@Res({ passthrough: true }) response: any,
 	): Promise<SubmitAttachmentResponseDto> {
 		const res = await this.psbRegisterService.submitAttachment(sessionId, files)
+		if (res.auth && typeof res.auth === "object") {
+			const authResult = res.auth as { accessToken?: string; refreshToken?: string }
+			if (authResult.accessToken) {
+				response.cookie("access_token", authResult.accessToken, {
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					sameSite: "lax",
+					maxAge: 15 * 60 * 1000, // 15 mins
+				})
+			}
+			if (authResult.refreshToken) {
+				response.cookie("refresh_token", authResult.refreshToken, {
+					httpOnly: true,
+					secure: process.env.NODE_ENV === "production",
+					sameSite: "lax",
+					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				})
+			}
+		}
 		return {
 			success: res.success as boolean,
 			registrantId: res.registrantId as string,
+			password: res.password as string,
 			registrant: res.registrant as any,
 			auth: res.auth as any,
 		}

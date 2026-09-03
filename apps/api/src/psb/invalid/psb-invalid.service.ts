@@ -1,3 +1,4 @@
+import * as crypto from "crypto"
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
@@ -186,34 +187,43 @@ export class PsbInvalidService {
 		if (files.attachCertificate?.[0]) {
 			registrant.attachCertificate = await this.storageService.upload(
 				files.attachCertificate[0],
-				"psb/attachments",
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachCertificate[0].originalname}`
 			)
 		}
 		if (files.attachPhoto?.[0]) {
-			registrant.attachPhoto = await this.storageService.upload(files.attachPhoto[0], "psb/attachments")
+			registrant.attachPhoto = await this.storageService.upload(
+				files.attachPhoto[0], 
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachPhoto[0].originalname}`
+			)
 		}
 		if (files.attachFamilyCard?.[0]) {
 			registrant.attachFamilyCard = await this.storageService.upload(
 				files.attachFamilyCard[0],
-				"psb/attachments",
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachFamilyCard[0].originalname}`
 			)
 		}
 		if (files.attachKsp?.[0]) {
-			registrant.attachKsp = await this.storageService.upload(files.attachKsp[0], "psb/attachments")
+			registrant.attachKsp = await this.storageService.upload(
+				files.attachKsp[0], 
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachKsp[0].originalname}`
+			)
 		}
 		if (files.attachKip?.[0]) {
-			registrant.attachKip = await this.storageService.upload(files.attachKip[0], "psb/attachments")
+			registrant.attachKip = await this.storageService.upload(
+				files.attachKip[0], 
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachKip[0].originalname}`
+			)
 		}
 		if (files.attachReportCard?.[0]) {
 			registrant.attachReportCard = await this.storageService.upload(
 				files.attachReportCard[0],
-				"psb/attachments",
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachReportCard[0].originalname}`
 			)
 		}
 		if (files.attachBirthCertificate?.[0]) {
 			registrant.attachBirthCertificate = await this.storageService.upload(
 				files.attachBirthCertificate[0],
-				"psb/attachments",
+				`psb/attachments/${registrant.registrantId}/${crypto.randomUUID()}-${files.attachBirthCertificate[0].originalname}`
 			)
 		}
 

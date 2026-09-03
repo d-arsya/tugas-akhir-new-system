@@ -31,8 +31,17 @@ export type SettingForm = {
 
 export type AcademicYear = {
 	id: number
+	createdAt: string
+	updatedAt: string | null
 	year: string
-	isActive: boolean
+	activeKbm: string
+	note: string
+	serialNumber: string
+	type: "reguler" | string
+	status: boolean
+	costDateStart: string
+	costDateEnd: string
+	isCurrent: boolean
 }
 
 export type Level = {

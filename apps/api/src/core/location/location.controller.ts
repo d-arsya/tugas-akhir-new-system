@@ -3,13 +3,15 @@ import { ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger"
 import { Public } from "../auth/decorators/public.decorator"
 import { LocationService } from "./location.service"
 import { ApiResponseWrapped } from "../decorators/api-response-wrapped.decorator"
-import { DistrictResponseDto, ProvinceResponseDto, RegencyResponseDto } from "./dto/location-response.dto"
+import { DistrictResponseDto, ProvinceResponseDto, RegencyResponseDto, VillageResponseDto } from "./dto/location-response.dto"
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags("Foundation — Location")
 @Controller("location")
 @Public()
+@Throttle({ search: {} })
 export class LocationController {
-	constructor(private readonly locationService: LocationService) {}
+	constructor(private readonly locationService: LocationService) { }
 
 	@Get("provinces")
 	@ApiOperation({ summary: "Ambil daftar seluruh provinsi di Indonesia" })
@@ -47,4 +49,28 @@ export class LocationController {
 			name: d.name ?? undefined,
 		}))
 	}
+
+	@Get('villages')
+	@ApiOperation({ summary: 'Ambil daftar desa berdasarkan ID kecamatan' })
+	@ApiQuery({ name: 'district_id', required: true, description: 'ID Kecamatan (cth: 331101)' })
+	@ApiQuery({ name: 'limit', required: false, description: 'Maximum number of rows (capped at 300)' })
+	@ApiResponseWrapped({
+		status: 200,
+		description: 'Daftar desa berhasil dimuat',
+		type: VillageResponseDto,
+		isArray: true,
+	})
+	async getVillages(@Query('district_id') districtId: string, @Query('limit') limit?: string): Promise<VillageResponseDto[]> {
+		const villages = await this.locationService.findVillagesByDistrict(
+			Number(districtId),
+			limit ? Number(limit) : undefined,
+		);
+		return villages.map(v => ({
+			id: v.id,
+			districtId: v.districtId,
+			code: v.code ?? undefined,
+			name: v.name ?? undefined,
+		}));
+	}
+
 }
