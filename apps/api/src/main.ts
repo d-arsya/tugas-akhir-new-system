@@ -33,10 +33,10 @@ async function bootstrap(): Promise<void> {
   // CORS
   app.enableCors({
     origin: [
-      "http://localhost:4200", // psb dev
-      "http://localhost:4201", // santri dev
-      "http://localhost:4202", // merchant dev
-      "http://localhost:4203", // admin dev
+      process.env["PSB_URL"] ?? "http://localhost:4200", // default
+      process.env["SANTRI_URL"] ?? "http://localhost:4201", // santri dev
+      process.env["MERCHANT_URL"] ?? "http://localhost:4202", // merchant dev
+      process.env["ADMIN_URL"] ?? "http://localhost:4203", // admin dev
     ],
     credentials: true,
   })
