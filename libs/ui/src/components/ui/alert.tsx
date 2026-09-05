@@ -4,13 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@roja/utils"
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "relative w-full rounded-2xl border-0 p-3.5 px-4 font-semibold text-xs [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-2px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-3.5 shadow-none transition-all",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
-        destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        default: "bg-background text-foreground border border-border",
+        destructive: "roja_alert-danger",
+        warning: "roja_alert-warning",
+        primary: "roja_alert-primary",
+        secondary: "roja_alert-secondary",
+        danger: "roja_alert-danger",
+        success: "roja_alert-success",
+        info: "roja_alert-info",
+        tertiary: "roja_alert-tertiary",
+        "muted-warning": "roja_alert-muted-warning",
+        "muted-primary": "roja_alert-muted-primary",
+        "muted-secondary": "roja_alert-muted-secondary",
+        "muted-danger": "roja_alert-muted-danger",
+        "muted-success": "roja_alert-muted-success",
+        "muted-info": "roja_alert-muted-info",
+        "muted-tertiary": "roja_alert-muted-tertiary",
       },
     },
     defaultVariants: {

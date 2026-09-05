@@ -1,27 +1,33 @@
 import * as React from "react"
 import * as SwitchPrimitives from "@radix-ui/react-switch"
-
 import { cn } from "@roja/utils"
 
-const Switch = React.forwardRef<
-  React.ElementRef<typeof SwitchPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
->(({ className, ...props }, ref) => (
-  <SwitchPrimitives.Root
-    className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
-      className
-    )}
-    {...props}
-    ref={ref}
-  >
-    <SwitchPrimitives.Thumb
+function Switch({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root> & {
+  size?: "sm" | "default"
+}) {
+  return (
+    <SwitchPrimitives.Root
+      data-slot="switch"
+      data-size={size}
       className={cn(
-        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+        "peer group/switch relative inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors outline-none roja_switch_root disabled:cursor-not-allowed disabled:opacity-50",
+        className
       )}
-    />
-  </SwitchPrimitives.Root>
-))
-Switch.displayName = SwitchPrimitives.Root.displayName
+      {...props}
+    >
+      <SwitchPrimitives.Thumb
+        data-slot="switch-thumb"
+        className={cn(
+          "pointer-events-none block rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out roja_switch_thumb",
+          className
+        )}
+      />
+    </SwitchPrimitives.Root>
+  )
+}
 
 export { Switch }

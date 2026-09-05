@@ -48,6 +48,7 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 	})
 
 	const {
+		control,
 		register,
 		handleSubmit,
 		setValue,
@@ -109,23 +110,23 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 					{isFieldVisible(formSettings, 1) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 1, "Nama Lengkap")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 1, "Nama Lengkap")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.fullName ? "is-invalid" : ""}`}
+								className={errors.fullName  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="Sesuai Akta Kelahiran / KK"
 								{...register("fullName")}
 							/>
-							{errors.fullName && <span className="invalid-feedback">{errors.fullName.message}</span>}
+							{errors.fullName && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.fullName.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 2) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 2, "Nama Panggilan")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 2, "Nama Panggilan")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.shortName ? "is-invalid" : ""}`}
+								className={errors.shortName  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="Nama panggilan sehari-hari"
 								{...register("shortName")}
 							/>
@@ -134,106 +135,115 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 
 					{isFieldVisible(formSettings, 3) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 3, "Agama")}</label>
-							<select className={`form-control ${errors.religion ? "is-invalid" : ""}`} {...register("religion")}>
-								{getFieldOptions(formSettings, 3, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => (
-									<option key={opt} value={getOptionValue(opt, 3)}>
-										{opt}
-									</option>
-								))}
-							</select>
-							{errors.religion && <span className="invalid-feedback">{errors.religion.message}</span>}
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 3, "Agama")}</Label>
+							<Controller
+	control={control}
+	name="religion"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName={errors.religion ? "border-destructive focus-visible:ring-destructive" : ""}
+			options={getFieldOptions(formSettings, 3, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => ({
+				value: getOptionValue(opt, 3),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
+							{errors.religion && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.religion.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 4) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 4, "Jenis Kelamin")}</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 4, "Jenis Kelamin")}</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
 								{getFieldOptions(formSettings, 4, ["Laki-laki", "Perempuan"]).map((opt) => (
-									<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+									<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 										<input type="radio" value={getOptionValue(opt, 4)} className="accent-[#059669] w-4 h-4" {...register("gender")} />
 										<span>{opt}</span>
-									</label>
+									</Label>
 								))}
 							</div>
-							{errors.gender && <span className="invalid-feedback">{errors.gender.message}</span>}
+							{errors.gender && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.gender.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 5) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 5, "Tempat Lahir")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 5, "Tempat Lahir")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.placeOfBirth ? "is-invalid" : ""}`}
+								className={errors.placeOfBirth  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="Masukkan kota lahir"
 								{...register("placeOfBirth")}
 							/>
-							{errors.placeOfBirth && <span className="invalid-feedback">{errors.placeOfBirth.message}</span>}
+							{errors.placeOfBirth && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.placeOfBirth.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 6) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 6, "Tanggal Lahir")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 6, "Tanggal Lahir")}</Label>
+							<Input
 								type="date"
-								className={`form-control ${errors.dateOfBirth ? "is-invalid" : ""}`}
+								className={errors.dateOfBirth  ? "border-destructive focus-visible:ring-destructive" : ""}
 								{...register("dateOfBirth")}
 							/>
-							{errors.dateOfBirth && <span className="invalid-feedback">{errors.dateOfBirth.message}</span>}
+							{errors.dateOfBirth && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.dateOfBirth.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 7) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 7, "Kewarganegaraan")}</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 7, "Kewarganegaraan")}</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
 								{getFieldOptions(formSettings, 7, ["WNI", "WNA"]).map((opt) => (
-									<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+									<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 										<input type="radio" value={getOptionValue(opt, 7)} className="accent-[#059669] w-4 h-4" {...register("nationality")} />
 										<span>{opt}</span>
-									</label>
+									</Label>
 								))}
 							</div>
-							{errors.nationality && <span className="invalid-feedback">{errors.nationality.message}</span>}
+							{errors.nationality && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.nationality.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 8) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 8, "Tinggal Bersama")}</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 8, "Tinggal Bersama")}</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
 								{getFieldOptions(formSettings, 8, ["Orang Tua", "Wali"]).map((opt) => (
-									<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+									<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 										<input type="radio" value={getOptionValue(opt, 8)} className="accent-[#059669] w-4 h-4" {...register("liveWith")} />
 										<span>{opt}</span>
-									</label>
+									</Label>
 								))}
 							</div>
-							{errors.liveWith && <span className="invalid-feedback">{errors.liveWith.message}</span>}
+							{errors.liveWith && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.liveWith.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 12) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 12, "Nomor HP / WhatsApp")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 12, "Nomor HP / WhatsApp")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.phone ? "is-invalid" : ""}`}
+								className={errors.phone  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="Contoh: 081234567890"
 								{...register("phone")}
 							/>
-							{errors.phone && <span className="invalid-feedback">{errors.phone.message}</span>}
+							{errors.phone && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.phone.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 9) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 9, "Anak Ke")}</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 9, "Anak Ke")}</Label>
 							<div className="flex gap-2">
-								<input
+								<Input
 									type="number"
 									className={`form-control w-24 ${errors.siblingOrder ? "is-invalid" : ""}`}
 									placeholder="Anak ke"
@@ -241,7 +251,7 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 									{...register("siblingOrder")}
 								/>
 								<span className="flex items-center text-xs text-[var(--grey)]">dari</span>
-								<input
+								<Input
 									type="number"
 									className={`form-control w-24 ${errors.numberOfSiblings ? "is-invalid" : ""}`}
 									placeholder="Jumlah"
@@ -255,27 +265,45 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 
 					{isFieldVisible(formSettings, 10) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 10, "Keadaan Orang Tua")}</label>
-							<select className={`form-control ${errors.parentStatus ? "is-invalid" : ""}`} {...register("parentStatus")}>
-								{getFieldOptions(formSettings, 10, ["Ayah & Ibu", "Yatim Piatu", "Yatim"]).map((opt) => (
-									<option key={opt} value={getOptionValue(opt, 10)}>
-										{opt}
-									</option>
-								))}
-							</select>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 10, "Keadaan Orang Tua")}</Label>
+							<Controller
+	control={control}
+	name="parentStatus"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName={errors.parentStatus ? "border-destructive focus-visible:ring-destructive" : ""}
+			options={getFieldOptions(formSettings, 10, ["Ayah & Ibu", "Yatim Piatu", "Yatim"]).map((opt) => ({
+				value: getOptionValue(opt, 10),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 11) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 11, "Status dalam Keluarga")}</label>
-							<select className={`form-control ${errors.childStatus ? "is-invalid" : ""}`} {...register("childStatus")}>
-								{getFieldOptions(formSettings, 11, ["Anak Kandung", "Anak Tiri", "Anak Asuh/Angkat"]).map((opt) => (
-									<option key={opt} value={getOptionValue(opt, 11)}>
-										{opt}
-									</option>
-								))}
-							</select>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 11, "Status dalam Keluarga")}</Label>
+							<Controller
+	control={control}
+	name="childStatus"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName={errors.childStatus ? "border-destructive focus-visible:ring-destructive" : ""}
+			options={getFieldOptions(formSettings, 11, ["Anak Kandung", "Anak Tiri", "Anak Asuh/Angkat"]).map((opt) => ({
+				value: getOptionValue(opt, 11),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 						</div>
 					)}
 				</div>
@@ -294,47 +322,47 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 							<div className="form-group mb-0">
-								<label className="control-label">Kelurahan</label>
-								<input
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kelurahan</Label>
+								<Input
 									type="text"
-									className={`form-control ${errors.village ? "is-invalid" : ""}`}
+									className={errors.village  ? "border-destructive focus-visible:ring-destructive" : ""}
 									placeholder="Kelurahan"
 									{...register("village")}
 								/>
-								{errors.village && <span className="invalid-feedback">{errors.village.message}</span>}
+								{errors.village && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.village.message}</span>}
 							</div>
 							<div className="form-group mb-0">
-								<label className="control-label">Jalan</label>
-								<input
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Jalan</Label>
+								<Input
 									type="text"
-									className={`form-control ${errors.street ? "is-invalid" : ""}`}
+									className={errors.street  ? "border-destructive focus-visible:ring-destructive" : ""}
 									placeholder="Jalan"
 									{...register("street")}
 								/>
-								{errors.street && <span className="invalid-feedback">{errors.street.message}</span>}
+								{errors.street && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.street.message}</span>}
 							</div>
 						</div>
 
 						<div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
 							<div className="form-group mb-0">
-								<label className="control-label">RT</label>
-								<input type="text" className={`form-control ${errors.rt ? "is-invalid" : ""}`} placeholder="001" {...register("rt")} />
-								{errors.rt && <span className="invalid-feedback">{errors.rt.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RT</Label>
+								<Input type="text" className={errors.rt  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="001" {...register("rt")} />
+								{errors.rt && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.rt.message}</span>}
 							</div>
 							<div className="form-group mb-0">
-								<label className="control-label">RW</label>
-								<input type="text" className={`form-control ${errors.rw ? "is-invalid" : ""}`} placeholder="002" {...register("rw")} />
-								{errors.rw && <span className="invalid-feedback">{errors.rw.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RW</Label>
+								<Input type="text" className={errors.rw  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="002" {...register("rw")} />
+								{errors.rw && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.rw.message}</span>}
 							</div>
 							<div className="form-group mb-0 col-span-2 md:col-span-1">
-								<label className="control-label">Dusun</label>
-								<input
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Dusun</Label>
+								<Input
 									type="text"
-									className={`form-control ${errors.subVillage ? "is-invalid" : ""}`}
+									className={errors.subVillage  ? "border-destructive focus-visible:ring-destructive" : ""}
 									placeholder="Dusun"
 									{...register("subVillage")}
 								/>
-								{errors.subVillage && <span className="invalid-feedback">{errors.subVillage.message}</span>}
+								{errors.subVillage && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.subVillage.message}</span>}
 							</div>
 						</div>
 					</div>
@@ -351,23 +379,23 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 							{isFieldVisible(formSettings, 19) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 19, "Nama Sekolah Asal")}</label>
-									<input
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 19, "Nama Sekolah Asal")}</Label>
+									<Input
 										type="text"
-										className={`form-control ${errors.previousSchoolName ? "is-invalid" : ""}`}
+										className={errors.previousSchoolName  ? "border-destructive focus-visible:ring-destructive" : ""}
 										placeholder="Contoh: SD Negeri 1 Bandung"
 										{...register("previousSchoolName")}
 									/>
 									{errors.previousSchoolName && (
-										<span className="invalid-feedback">{errors.previousSchoolName.message}</span>
+										<span className="text-[11px] font-medium text-destructive mt-1 block">{errors.previousSchoolName.message}</span>
 									)}
 								</div>
 							)}
 
 							{isFieldVisible(formSettings, 20) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 20, "No. Telp / HP Sekolah Asal")}</label>
-									<input type="text" className="form-control" placeholder="Nomor Telepon Sekolah" {...register("previousSchoolPhone")} />
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 20, "No. Telp / HP Sekolah Asal")}</Label>
+									<Input type="text" className="" placeholder="Nomor Telepon Sekolah" {...register("previousSchoolPhone")} />
 								</div>
 							)}
 						</div>
@@ -387,19 +415,19 @@ const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 									<div className="form-group mb-0 md:col-span-2">
-										<label className="control-label">Alamat Detail Sekolah Asal</label>
-										<input
+										<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Alamat Detail Sekolah Asal</Label>
+										<Input
 											type="text"
-											className="form-control"
+											className=""
 											placeholder="Jalan, Dusun, Kelurahan"
 											{...register("previousSchoolAddressDetail")}
 										/>
 									</div>
 									<div className="form-group mb-0">
-										<label className="control-label">Kode POS Sekolah Asal</label>
-										<input
+										<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kode POS Sekolah Asal</Label>
+										<Input
 											type="text"
-											className="form-control"
+											className=""
 											placeholder="Kode POS"
 											{...register("previousSchoolPostalCode")}
 										/>
@@ -449,9 +477,9 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 	})
 
 	const {
+		control,
 		register,
 		handleSubmit,
-		control,
 		watch,
 		formState: { errors },
 	} = useForm<IdentityInput>({
@@ -504,48 +532,48 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 					{isFieldVisible(formSettings, 15) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 15, "NIK (Nomor Induk Kependudukan)")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 15, "NIK (Nomor Induk Kependudukan)")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.nik ? "is-invalid" : ""}`}
+								className={errors.nik  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="16-digit NIK"
 								{...register("nik")}
 							/>
-							{errors.nik && <span className="invalid-feedback">{errors.nik.message}</span>}
+							{errors.nik && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.nik.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 14) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 14, "NISN (Nomor Induk Siswa Nasional)")}</label>
-							<input
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 14, "NISN (Nomor Induk Siswa Nasional)")}</Label>
+							<Input
 								type="text"
-								className={`form-control ${errors.nisn ? "is-invalid" : ""}`}
+								className={errors.nisn  ? "border-destructive focus-visible:ring-destructive" : ""}
 								placeholder="10-digit NISN"
 								{...register("nisn")}
 							/>
-							{errors.nisn && <span className="invalid-feedback">{errors.nisn.message}</span>}
+							{errors.nisn && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.nisn.message}</span>}
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 18) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 18, "No. Ijazah / SKL")}</label>
-							<input type="text" className="form-control" placeholder="Nomor Ijazah Terakhir" {...register("certificateNumber")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 18, "No. Ijazah / SKL")}</Label>
+							<Input type="text" className="" placeholder="Nomor Ijazah Terakhir" {...register("certificateNumber")} />
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 16) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 16, "No. KSP (Kartu Sejahtera)")}</label>
-							<input type="text" className="form-control" placeholder="Nomor KSP jika ada" {...register("ksp")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 16, "No. KSP (Kartu Sejahtera)")}</Label>
+							<Input type="text" className="" placeholder="Nomor KSP jika ada" {...register("ksp")} />
 						</div>
 					)}
 
 					{isFieldVisible(formSettings, 17) && (
 						<div className="form-group mb-0">
-							<label className="control-label">{getFieldLabel(formSettings, 17, "No. KIP (Kartu Indonesia Pintar)")}</label>
-							<input type="text" className="form-control" placeholder="Nomor KIP jika ada" {...register("kip")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 17, "No. KIP (Kartu Indonesia Pintar)")}</Label>
+							<Input type="text" className="" placeholder="Nomor KIP jika ada" {...register("kip")} />
 						</div>
 					)}
 				</div>
@@ -562,26 +590,35 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 							{isFieldVisible(formSettings, 23) && (
 								<>
 									<div className="form-group mb-0">
-										<label className="control-label">Berat Badan (Kg)</label>
-										<input type="number" className="form-control" placeholder="Kg" {...register("weight", { valueAsNumber: true })} />
+										<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Berat Badan (Kg)</Label>
+										<Input type="number" className="" placeholder="Kg" {...register("weight", { valueAsNumber: true })} />
 									</div>
 									<div className="form-group mb-0">
-										<label className="control-label">Tinggi Badan (Cm)</label>
-										<input type="number" className="form-control" placeholder="Cm" {...register("height", { valueAsNumber: true })} />
+										<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Tinggi Badan (Cm)</Label>
+										<Input type="number" className="" placeholder="Cm" {...register("height", { valueAsNumber: true })} />
 									</div>
 								</>
 							)}
 
 							{isFieldVisible(formSettings, 24) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 24, "Golongan Darah")}</label>
-									<select className="form-control" {...register("bloodType")}>
-										{getFieldOptions(formSettings, 24, ["A", "B", "AB", "O"]).map((opt) => (
-											<option key={opt} value={getOptionValue(opt, 24)}>
-												{opt}
-											</option>
-										))}
-									</select>
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 24, "Golongan Darah")}</Label>
+									<Controller
+	control={control}
+	name="bloodType"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 24, ["A", "B", "AB", "O"]).map((opt) => ({
+				value: getOptionValue(opt, 24),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 								</div>
 							)}
 						</div>
@@ -589,13 +626,13 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 							{isFieldVisible(formSettings, 25) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 25, "Kondisi Penglihatan")}</label>
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 25, "Kondisi Penglihatan")}</Label>
 									<div className="flex gap-6 items-center h-10 px-1">
 										{getFieldOptions(formSettings, 25, ["Normal", "Berkacamata"]).map((opt) => (
-											<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+											<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 												<input type="radio" value={getOptionValue(opt, 25)} className="accent-[#059669] w-4 h-4" {...register("visualCondition")} />
 												<span>{opt}</span>
-											</label>
+											</Label>
 										))}
 									</div>
 								</div>
@@ -603,13 +640,13 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 							{isFieldVisible(formSettings, 26) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 26, "Kondisi Pendengaran")}</label>
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 26, "Kondisi Pendengaran")}</Label>
 									<div className="flex gap-6 items-center h-10 px-1">
 										{getFieldOptions(formSettings, 26, ["Normal", "Kurang Peka Suara"]).map((opt) => (
-											<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+											<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 												<input type="radio" value={getOptionValue(opt, 26)} className="accent-[#059669] w-4 h-4" {...register("hearingCondition")} />
 												<span>{opt}</span>
-											</label>
+											</Label>
 										))}
 									</div>
 								</div>
@@ -617,14 +654,23 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 							{isFieldVisible(formSettings, 27) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 27, "Imunisasi yang Diterima")}</label>
-									<select className="form-control" {...register("immunizationGiven")}>
-										{getFieldOptions(formSettings, 27, ["Lengkap", "Tidak Lengkap", "Tidak Imunisasi"]).map((opt) => (
-											<option key={opt} value={getOptionValue(opt, 27)}>
-												{opt}
-											</option>
-										))}
-									</select>
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 27, "Imunisasi yang Diterima")}</Label>
+									<Controller
+	control={control}
+	name="immunizationGiven"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 27, ["Lengkap", "Tidak Lengkap", "Tidak Imunisasi"]).map((opt) => ({
+				value: getOptionValue(opt, 27),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 								</div>
 							)}
 						</div>
@@ -633,7 +679,7 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 						{isFieldVisible(formSettings, 28) && (
 							<div className="form-group mb-0">
 								<div className="flex items-center justify-between mb-3">
-									<label className="control-label mb-0">{getFieldLabel(formSettings, 28, "Riwayat Penyakit Pernah Diderita")}</label>
+									<Label className="control-label mb-0">{getFieldLabel(formSettings, 28, "Riwayat Penyakit Pernah Diderita")}</Label>
 									<button
 										type="button"
 										onClick={() => append({ name: "", status: "Sembuh" })}
@@ -645,17 +691,29 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 								<div className="flex flex-col gap-3">
 									{fields.map((field, index) => (
 										<div key={field.id} className="flex gap-3 items-center bg-slate-50 p-3 rounded-lg border border-slate-200">
-											<input
+											<Input
 												type="text"
-												className="form-control"
+												className=""
 												placeholder="Nama penyakit"
 												{...register(`diseaseHistories.${index}.name`)}
 											/>
-											<select className="form-control w-40" {...register(`diseaseHistories.${index}.status`)}>
-												<option value="Sembuh">Sembuh</option>
-												<option value="Masa Perawatan">Masa Perawatan</option>
-												<option value="Belum Sembuh">Belum Sembuh</option>
-											</select>
+											<Controller
+	control={control}
+	name={`diseaseHistories.${index}.status`}
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih status"
+			triggerClassName="form-control w-40"
+			options={[
+				{ value: "Sembuh", label: "Sembuh" },
+				{ value: "Masa Perawatan", label: "Masa Perawatan" },
+				{ value: "Belum Sembuh", label: "Belum Sembuh" }
+			]}
+		/>
+	)}
+/>
 											<button type="button" onClick={() => remove(index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
 												Hapus
 											</button>
@@ -675,9 +733,9 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 						<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">C. Prestasi Belajar</div>
 					</div>
 					<div className="form-group mb-0">
-						<textarea
+						<Textarea
 							rows={2}
-							className="form-control"
+							className=""
 							placeholder="Tuliskan kejuaraan atau prestasi belajar yang pernah didapat"
 							{...register("learningAchievement")}
 						/>
@@ -695,13 +753,13 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 							{isFieldVisible(formSettings, 32) && (
 								<div className="form-group mb-0">
-									<label className="control-label">{getFieldLabel(formSettings, 32, "Kemampuan Membaca")}</label>
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 32, "Kemampuan Membaca")}</Label>
 									<div className="flex gap-6 items-center h-10 px-1">
 										{getFieldOptions(formSettings, 32, ["Jilid", "Al-Quran"]).map((opt) => (
-											<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+											<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 												<input type="radio" value={getOptionValue(opt, 32)} className="accent-[#059669] w-4 h-4" {...register("reading")} />
 												<span>{opt}</span>
-											</label>
+											</Label>
 										))}
 									</div>
 								</div>
@@ -709,15 +767,15 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 							{watchReading === "jilid" && (
 								<div className="form-group mb-0">
-									<label className="control-label">Sudah Jilid Berapa?</label>
-									<input type="text" className="form-control" placeholder="Contoh: Jilid 4" {...register("jilidChapter")} />
+									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Sudah Jilid Berapa?</Label>
+									<Input type="text" className="" placeholder="Contoh: Jilid 4" {...register("jilidChapter")} />
 								</div>
 							)}
 						</div>
 
 						<div className="form-group mb-0">
-							<label className="control-label">Hafalan Al-Qur'an (Juz / Surat)</label>
-							<textarea rows={2} className="form-control" placeholder="Contoh: Juz 30, Surat Al-Waqi'ah s.d. An-Naas" {...register("quranMemorizing")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Hafalan Al-Qur'an (Juz / Surat)</Label>
+							<Textarea rows={2} className="" placeholder="Contoh: Juz 30, Surat Al-Waqi'ah s.d. An-Naas" {...register("quranMemorizing")} />
 						</div>
 					</div>
 				</div>
@@ -730,7 +788,7 @@ const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 						<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">E. Bakat / Potensi / Hobi</div>
 					</div>
 					<div className="form-group mb-0">
-						<textarea rows={2} className="form-control" placeholder="Seni, olahraga, pidato, kepemimpinan, dll." {...register("gift")} />
+						<Textarea rows={2} className="" placeholder="Seni, olahraga, pidato, kepemimpinan, dll." {...register("gift")} />
 					</div>
 				</div>
 			)}
@@ -772,6 +830,7 @@ const InvalidFamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 	})
 
 	const {
+		control,
 		register,
 		handleSubmit,
 		setValue,
@@ -829,64 +888,82 @@ const InvalidFamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 						{isFieldVisible(formSettings, 37) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 37, "Nama Lengkap Ayah")}</label>
-								<input type="text" className={`form-control ${errors.fatherName ? "is-invalid" : ""}`} placeholder="Nama lengkap Ayah" {...register("fatherName")} />
-								{errors.fatherName && <span className="invalid-feedback">{errors.fatherName.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 37, "Nama Lengkap Ayah")}</Label>
+								<Input type="text" className={errors.fatherName  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Nama lengkap Ayah" {...register("fatherName")} />
+								{errors.fatherName && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.fatherName.message}</span>}
 							</div>
 						)}
 
 						<div className="form-group mb-0">
-							<label className="control-label">Status Ayah</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Status Ayah</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
-								<label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+								<Label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 									<input type="radio" value="hidup" className="accent-[#059669] w-4 h-4" {...register("fatherStatus")} />
 									<span>Masih Hidup</span>
-								</label>
-								<label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+								</Label>
+								<Label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 									<input type="radio" value="wafat" className="accent-[#059669] w-4 h-4" {...register("fatherStatus")} />
 									<span>Sudah Wafat</span>
-								</label>
+								</Label>
 							</div>
 						</div>
 
 						{isFieldVisible(formSettings, 38) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 38, "Agama Ayah")}</label>
-								<select className="form-control" {...register("fatherReligion")}>
-									{getFieldOptions(formSettings, 38, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => (
-										<option key={opt} value={getOptionValue(opt, 38)}>
-											{opt}
-										</option>
-									))}
-								</select>
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 38, "Agama Ayah")}</Label>
+								<Controller
+	control={control}
+	name="fatherReligion"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 38, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => ({
+				value: getOptionValue(opt, 38),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 40) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 40, "Pendidikan Terakhir Ayah")}</label>
-								<select className="form-control" {...register("fatherLastEducation")}>
-									{getFieldOptions(formSettings, 40, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => (
-										<option key={opt} value={getOptionValue(opt, 40)}>
-											{opt}
-										</option>
-									))}
-								</select>
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 40, "Pendidikan Terakhir Ayah")}</Label>
+								<Controller
+	control={control}
+	name="fatherLastEducation"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 40, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => ({
+				value: getOptionValue(opt, 40),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 43) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 43, "Pekerjaan Ayah")}</label>
-								<input type="text" className={`form-control ${errors.fatherOccupation ? "is-invalid" : ""}`} placeholder="Pekerjaan Ayah" {...register("fatherOccupation")} />
-								{errors.fatherOccupation && <span className="invalid-feedback">{errors.fatherOccupation.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 43, "Pekerjaan Ayah")}</Label>
+								<Input type="text" className={errors.fatherOccupation  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Pekerjaan Ayah" {...register("fatherOccupation")} />
+								{errors.fatherOccupation && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.fatherOccupation.message}</span>}
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 41) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 41, "Nomor Telepon Ayah")}</label>
-								<input type="text" className="form-control" placeholder="Contoh: 081234567890" {...register("fatherPhone")} />
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 41, "Nomor Telepon Ayah")}</Label>
+								<Input type="text" className="" placeholder="Contoh: 081234567890" {...register("fatherPhone")} />
 							</div>
 						)}
 					</div>
@@ -902,64 +979,82 @@ const InvalidFamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 						{isFieldVisible(formSettings, 44) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 44, "Nama Lengkap Ibu")}</label>
-								<input type="text" className={`form-control ${errors.motherName ? "is-invalid" : ""}`} placeholder="Nama lengkap Ibu" {...register("motherName")} />
-								{errors.motherName && <span className="invalid-feedback">{errors.motherName.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 44, "Nama Lengkap Ibu")}</Label>
+								<Input type="text" className={errors.motherName  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Nama lengkap Ibu" {...register("motherName")} />
+								{errors.motherName && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.motherName.message}</span>}
 							</div>
 						)}
 
 						<div className="form-group mb-0">
-							<label className="control-label">Status Ibu</label>
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Status Ibu</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
-								<label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+								<Label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 									<input type="radio" value="hidup" className="accent-[#059669] w-4 h-4" {...register("motherStatus")} />
 									<span>Masih Hidup</span>
-								</label>
-								<label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+								</Label>
+								<Label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 									<input type="radio" value="wafat" className="accent-[#059669] w-4 h-4" {...register("motherStatus")} />
 									<span>Sudah Wafat</span>
-								</label>
+								</Label>
 							</div>
 						</div>
 
 						{isFieldVisible(formSettings, 45) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 45, "Agama Ibu")}</label>
-								<select className="form-control" {...register("motherReligion")}>
-									{getFieldOptions(formSettings, 45, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => (
-										<option key={opt} value={getOptionValue(opt, 45)}>
-											{opt}
-										</option>
-									))}
-								</select>
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 45, "Agama Ibu")}</Label>
+								<Controller
+	control={control}
+	name="motherReligion"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 45, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => ({
+				value: getOptionValue(opt, 45),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 47) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 47, "Pendidikan Terakhir Ibu")}</label>
-								<select className="form-control" {...register("motherLastEducation")}>
-									{getFieldOptions(formSettings, 47, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => (
-										<option key={opt} value={getOptionValue(opt, 47)}>
-											{opt}
-										</option>
-									))}
-								</select>
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 47, "Pendidikan Terakhir Ibu")}</Label>
+								<Controller
+	control={control}
+	name="motherLastEducation"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 47, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => ({
+				value: getOptionValue(opt, 47),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 50) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 50, "Pekerjaan Ibu")}</label>
-								<input type="text" className={`form-control ${errors.motherOccupation ? "is-invalid" : ""}`} placeholder="Pekerjaan Ibu" {...register("motherOccupation")} />
-								{errors.motherOccupation && <span className="invalid-feedback">{errors.motherOccupation.message}</span>}
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 50, "Pekerjaan Ibu")}</Label>
+								<Input type="text" className={errors.motherOccupation  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Pekerjaan Ibu" {...register("motherOccupation")} />
+								{errors.motherOccupation && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.motherOccupation.message}</span>}
 							</div>
 						)}
 
 						{isFieldVisible(formSettings, 48) && (
 							<div className="form-group mb-0">
-								<label className="control-label">{getFieldLabel(formSettings, 48, "Nomor Telepon Ibu")}</label>
-								<input type="text" className="form-control" placeholder="Contoh: 081234567890" {...register("motherPhone")} />
+								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 48, "Nomor Telepon Ibu")}</Label>
+								<Input type="text" className="" placeholder="Contoh: 081234567890" {...register("motherPhone")} />
 							</div>
 						)}
 					</div>
@@ -985,27 +1080,27 @@ const InvalidFamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 						<div className="form-group mb-0">
-							<label className="control-label">Kelurahan</label>
-							<input type="text" className="form-control" placeholder="Kelurahan" {...register("familyVillage")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kelurahan</Label>
+							<Input type="text" className="" placeholder="Kelurahan" {...register("familyVillage")} />
 						</div>
 						<div className="form-group mb-0">
-							<label className="control-label">Jalan</label>
-							<input type="text" className="form-control" placeholder="Nama Jalan" {...register("familyStreet")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Jalan</Label>
+							<Input type="text" className="" placeholder="Nama Jalan" {...register("familyStreet")} />
 						</div>
 					</div>
 
 					<div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
 						<div className="form-group mb-0">
-							<label className="control-label">RT</label>
-							<input type="text" className="form-control" placeholder="001" {...register("familyRt")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RT</Label>
+							<Input type="text" className="" placeholder="001" {...register("familyRt")} />
 						</div>
 						<div className="form-group mb-0">
-							<label className="control-label">RW</label>
-							<input type="text" className="form-control" placeholder="002" {...register("familyRw")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RW</Label>
+							<Input type="text" className="" placeholder="002" {...register("familyRw")} />
 						</div>
 						<div className="form-group mb-0 col-span-2 md:col-span-1">
-							<label className="control-label">Dusun</label>
-							<input type="text" className="form-control" placeholder="Dusun" {...register("familySubVillage")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Dusun</Label>
+							<Input type="text" className="" placeholder="Dusun" {...register("familySubVillage")} />
 						</div>
 					</div>
 				</div>
@@ -1048,6 +1143,7 @@ const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 	})
 
 	const {
+		control,
 		register,
 		handleSubmit,
 		setValue,
@@ -1084,65 +1180,83 @@ const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 				{isFieldVisible(formSettings, 54) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 54, "Nama Lengkap Wali")}</label>
-						<input type="text" className={`form-control ${errors.guardianName ? "is-invalid" : ""}`} placeholder="Nama lengkap Wali" {...register("guardianName")} />
-						{errors.guardianName && <span className="invalid-feedback">{errors.guardianName.message}</span>}
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 54, "Nama Lengkap Wali")}</Label>
+						<Input type="text" className={errors.guardianName  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Nama lengkap Wali" {...register("guardianName")} />
+						{errors.guardianName && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.guardianName.message}</span>}
 					</div>
 				)}
 				{isFieldVisible(formSettings, 55) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 55, "Agama Wali")}</label>
-						<select className="form-control" {...register("guardianReligion")}>
-							{getFieldOptions(formSettings, 55, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => (
-								<option key={opt} value={getOptionValue(opt, 55)}>
-									{opt}
-								</option>
-							))}
-						</select>
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 55, "Agama Wali")}</Label>
+						<Controller
+	control={control}
+	name="guardianReligion"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 55, ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"]).map((opt) => ({
+				value: getOptionValue(opt, 55),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 					</div>
 				)}
 				{isFieldVisible(formSettings, 56) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 56, "Kewarganegaraan Wali")}</label>
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 56, "Kewarganegaraan Wali")}</Label>
 						<div className="flex gap-6 items-center h-10 px-1">
 							{getFieldOptions(formSettings, 56, ["WNI", "WNA"]).map((opt) => (
-								<label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+								<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 									<input type="radio" value={getOptionValue(opt, 56)} className="accent-[#059669] w-4 h-4" {...register("guardianNationality")} />
 									<span>{opt}</span>
-								</label>
+								</Label>
 							))}
 						</div>
 					</div>
 				)}
 				{isFieldVisible(formSettings, 57) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 57, "Pendidikan Terakhir Wali")}</label>
-						<select className="form-control" {...register("guardianLastEducation")}>
-							{getFieldOptions(formSettings, 57, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => (
-								<option key={opt} value={getOptionValue(opt, 57)}>
-									{opt}
-								</option>
-							))}
-						</select>
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 57, "Pendidikan Terakhir Wali")}</Label>
+						<Controller
+	control={control}
+	name="guardianLastEducation"
+	render={({ field }) => (
+		<SearchableSelect
+			value={field.value}
+			onValueChange={field.onChange}
+			placeholder="Pilih..."
+			triggerClassName=""
+			options={getFieldOptions(formSettings, 57, ["Tidak Sekolah", "SD", "SMP", "SMA", "Diploma", "S1", "S2", "S3"]).map((opt) => ({
+				value: getOptionValue(opt, 57),
+				label: opt,
+			}))}
+		/>
+	)}
+/>
 					</div>
 				)}
 				{isFieldVisible(formSettings, 58) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 58, "Nomor Telepon Wali")}</label>
-						<input type="text" className="form-control" placeholder="Contoh: 081234567890" {...register("guardianPhone")} />
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 58, "Nomor Telepon Wali")}</Label>
+						<Input type="text" className="" placeholder="Contoh: 081234567890" {...register("guardianPhone")} />
 					</div>
 				)}
 				{isFieldVisible(formSettings, 59) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 59, "Nomor WhatsApp Wali")}</label>
-						<input type="text" className="form-control" placeholder="Contoh: 081234567890" {...register("guardianWhatsapp")} />
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 59, "Nomor WhatsApp Wali")}</Label>
+						<Input type="text" className="" placeholder="Contoh: 081234567890" {...register("guardianWhatsapp")} />
 					</div>
 				)}
 				{isFieldVisible(formSettings, 60) && (
 					<div className="form-group mb-0">
-						<label className="control-label">{getFieldLabel(formSettings, 60, "Pekerjaan Wali")}</label>
-						<input type="text" className={`form-control ${errors.guardianOccupation ? "is-invalid" : ""}`} placeholder="Pekerjaan Wali" {...register("guardianOccupation")} />
-						{errors.guardianOccupation && <span className="invalid-feedback">{errors.guardianOccupation.message}</span>}
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 60, "Pekerjaan Wali")}</Label>
+						<Input type="text" className={errors.guardianOccupation  ? "border-destructive focus-visible:ring-destructive" : ""} placeholder="Pekerjaan Wali" {...register("guardianOccupation")} />
+						{errors.guardianOccupation && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.guardianOccupation.message}</span>}
 					</div>
 				)}
 			</div>
@@ -1162,27 +1276,27 @@ const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 						<div className="form-group mb-0">
-							<label className="control-label">Kelurahan</label>
-							<input type="text" className="form-control" placeholder="Kelurahan" {...register("guardianVillage")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kelurahan</Label>
+							<Input type="text" className="" placeholder="Kelurahan" {...register("guardianVillage")} />
 						</div>
 						<div className="form-group mb-0">
-							<label className="control-label">Jalan</label>
-							<input type="text" className="form-control" placeholder="Nama Jalan" {...register("guardianStreet")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Jalan</Label>
+							<Input type="text" className="" placeholder="Nama Jalan" {...register("guardianStreet")} />
 						</div>
 					</div>
 
 					<div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
 						<div className="form-group mb-0">
-							<label className="control-label">RT</label>
-							<input type="text" className="form-control" placeholder="001" {...register("guardianRt")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RT</Label>
+							<Input type="text" className="" placeholder="001" {...register("guardianRt")} />
 						</div>
 						<div className="form-group mb-0">
-							<label className="control-label">RW</label>
-							<input type="text" className="form-control" placeholder="002" {...register("guardianRw")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RW</Label>
+							<Input type="text" className="" placeholder="002" {...register("guardianRw")} />
 						</div>
 						<div className="form-group mb-0 col-span-2 md:col-span-1">
-							<label className="control-label">Dusun</label>
-							<input type="text" className="form-control" placeholder="Dusun" {...register("guardianSubVillage")} />
+							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Dusun</Label>
+							<Input type="text" className="" placeholder="Dusun" {...register("guardianSubVillage")} />
 						</div>
 					</div>
 				</>

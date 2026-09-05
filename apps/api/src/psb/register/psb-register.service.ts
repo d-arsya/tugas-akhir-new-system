@@ -21,6 +21,9 @@ import type { FamilyDto } from "../dto/register/family.dto"
 import type { GuardianDto } from "../dto/register/guardian.dto"
 import type { IdentityDto } from "../dto/register/identity.dto"
 import type { PersonalDto } from "../dto/register/personal.dto"
+import { generateRegistrantId } from "./helpers/registrant-id.generator"
+import { uploadRegistrantAttachments, type RegistrationFiles } from "./helpers/attachment-uploader.helper"
+import { mapWizardDataToRegistrant } from "./helpers/registrant-mapper.helper"
 
 @Injectable()
 export class PsbRegisterService {
@@ -47,7 +50,7 @@ export class PsbRegisterService {
 		private readonly configService: ConfigService<Env, true>,
 		private readonly psbAuthService: PsbAuthService,
 		private readonly dataSource: DataSource,
-	) { }
+	) {}
 
 	async getLandingInfo(): Promise<{
 		academicYear: AcademicYear | null
@@ -145,15 +148,7 @@ export class PsbRegisterService {
 
 	async submitAttachment(
 		sessionId: string,
-		files: {
-			attachCertificate?: Express.Multer.File[]
-			attachPhoto?: Express.Multer.File[]
-			attachFamilyCard?: Express.Multer.File[]
-			attachKsp?: Express.Multer.File[]
-			attachKip?: Express.Multer.File[]
-			attachReportCard?: Express.Multer.File[]
-			attachBirthCertificate?: Express.Multer.File[]
-		},
+		files: RegistrationFiles,
 	): Promise<Record<string, unknown>> {
 		const emailRaw = await this.redisService.get(`psb-wizard:${sessionId}:email`)
 		const personalRaw = await this.redisService.get(`psb-wizard:${sessionId}:personal`)
@@ -171,209 +166,44 @@ export class PsbRegisterService {
 		const familyData = JSON.parse(familyRaw) as FamilyDto
 		const guardianData = guardianRaw ? (JSON.parse(guardianRaw) as GuardianDto) : {}
 
-		// Academic year & Registrant ID generation
+		// Fetch academic year & generate Registrant ID
 		const academicYear = await this.academicYearRepository.findOne({
 			where: [{ isCurrent: true, status: true }, { status: true }],
 			order: { id: "DESC" },
 		})
-
-		const currentYear = academicYear?.year ? academicYear.year.substring(0, 4) : new Date().getFullYear().toString()
-		const prefix = `PR${currentYear}`
-		const startSerialStr = academicYear?.serialNumber || "0001"
-		const padLength = startSerialStr.length > 0 ? startSerialStr.length : 4
-
+		const currentYearStr = academicYear?.year ? academicYear.year.substring(0, 4) : new Date().getFullYear().toString()
 		const latestRegistrant = await this.registrantRepository.findOne({
-			where: { registrantId: Like(`${prefix}%`) },
+			where: { registrantId: Like(`PR${currentYearStr}%`) },
 			order: { id: "DESC" },
 		})
 
-		let nextSeqStr: string
-		if (latestRegistrant?.registrantId && latestRegistrant.registrantId.startsWith(prefix)) {
-			const currentSeqStr = latestRegistrant.registrantId.substring(prefix.length)
-			const currentSeqNum = parseInt(currentSeqStr, 10)
-			const nextNum = isNaN(currentSeqNum) ? 1 : currentSeqNum + 1
-			const actualPadLength = Math.max(padLength, currentSeqStr.length)
-			nextSeqStr = nextNum.toString().padStart(actualPadLength, "0")
-		} else {
-			const startNum = parseInt(startSerialStr, 10)
-			const initialNum = isNaN(startNum) ? 1 : startNum
-			nextSeqStr = initialNum.toString().padStart(padLength, "0")
-		}
-
-		const registrantId = `${prefix}${nextSeqStr}`
-
-		// Generate random 8-character password
+		const registrantId = generateRegistrantId(academicYear, latestRegistrant)
 		const generatedPassword = crypto.randomBytes(4).toString("hex").toUpperCase()
 		const hashedPassword = await bcrypt.hash(generatedPassword, 10)
 
-		// Upload files
-		let attachCertificate: string | null = null
-		let attachPhoto: string | null = null
-		let attachFamilyCard: string | null = null
-		let attachKsp: string | null = null
-		let attachKip: string | null = null
-		let attachReportCard: string | null = null
-		let attachBirthCertificate: string | null = null
-
-		if (files.attachCertificate?.[0]) {
-			attachCertificate = await this.storageService.upload(
-				files.attachCertificate[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachCertificate[0].originalname}`
-			)
-		}
-		if (files.attachPhoto?.[0]) {
-			attachPhoto = await this.storageService.upload(
-				files.attachPhoto[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachPhoto[0].originalname}`
-			)
-		}
-		if (files.attachFamilyCard?.[0]) {
-			attachFamilyCard = await this.storageService.upload(
-				files.attachFamilyCard[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachFamilyCard[0].originalname}`
-			)
-		}
-		if (files.attachKsp?.[0]) {
-			attachKsp = await this.storageService.upload(
-				files.attachKsp[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachKsp[0].originalname}`
-			)
-		}
-		if (files.attachKip?.[0]) {
-			attachKip = await this.storageService.upload(
-				files.attachKip[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachKip[0].originalname}`
-			)
-		}
-		if (files.attachReportCard?.[0]) {
-			attachReportCard = await this.storageService.upload(
-				files.attachReportCard[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachReportCard[0].originalname}`
-			)
-		}
-		if (files.attachBirthCertificate?.[0]) {
-			attachBirthCertificate = await this.storageService.upload(
-				files.attachBirthCertificate[0],
-				`psb/attachments/${registrantId}/${crypto.randomUUID()}-${files.attachBirthCertificate[0].originalname}`
-			)
-		}
+		const attachments = await uploadRegistrantAttachments(this.storageService, registrantId, files)
 
 		const queryRunner = this.dataSource.createQueryRunner()
 		await queryRunner.connect()
 		await queryRunner.startTransaction()
 
 		try {
-			const registrant = queryRunner.manager.create(Registrant, {
-				academicYearId: academicYear?.id ?? null,
+			const registrantPayload = mapWizardDataToRegistrant({
+				academicYear,
 				levelId: emailData.levelId,
 				registrantId,
 				email: emailData.email,
-				password: hashedPassword,
-				approvalStatus: "wait",
-				registrationPath: academicYear?.type === "indent" ? "indent" : "reguler",
-
-				// Personal
-				fullname: personalData.fullname,
-				shortname: personalData.shortname ?? null,
-				religion: personalData.religion ?? "islam",
-				gender: personalData.gender ?? null,
-				placeOfBirth: personalData.placeOfBirth ?? null,
-				dateOfBirth: personalData.dateOfBirth ?? null,
-				nationality: personalData.nationality ?? "wni",
-				liveWith: personalData.liveWith ?? "parent",
-				siblingOrder: personalData.siblingOrder ?? null,
-				numberOfSibling: personalData.numberOfSibling ?? null,
-				parentStatus: personalData.parentStatus ?? null,
-				childStatus: personalData.childStatus ?? null,
-				phone: personalData.phone || null,
-				provinceId: personalData.provinceId || null,
-				regencyId: personalData.regencyId || null,
-				districtId: personalData.districtId || null,
-				village: personalData.village ?? null,
-				subVillage: personalData.subVillage ?? null,
-				rt: personalData.rt ?? null,
-				rw: personalData.rw ?? null,
-				street: personalData.street ?? null,
-				schoolName: personalData.schoolName ?? null,
-				schoolPhone: personalData.schoolPhone ?? null,
-				schoolProvinceId: personalData.schoolProvinceId || null,
-				schoolRegencyId: personalData.schoolRegencyId || null,
-				schoolDistrictId: personalData.schoolDistrictId || null,
-				schoolAddressDetail: personalData.schoolAddressDetail ?? null,
-				schoolPostalCode: personalData.schoolPostalCode || null,
-
-				// Identity & Health
-				nik: identityData.nik || null,
-				nisn: identityData.nisn || null,
-				kip: identityData.kip || null,
-				ksp: identityData.ksp || null,
-				certificateNumber: identityData.certificateNumber || null,
-				weight: identityData.weight || null,
-				height: identityData.height || null,
-				bloodType: identityData.bloodType ?? null,
-				visualCondition: identityData.visualCondition ?? "normal",
-				hearingCondition: identityData.hearingCondition ?? "normal",
-				immunizationGiven: identityData.immunizationGiven ?? "complete",
-				reading: identityData.reading ?? null,
-				jilidChapter: identityData.jilidChapter ?? null,
-				quranMemorizing: identityData.quranMemorizing ?? null,
-				learningAchievement: identityData.learningAchievement ?? null,
-				gift: identityData.gift ?? null,
-
-				// Family
-				fatherFullname: familyData.fatherFullname ?? null,
-				fatherReligion: familyData.fatherReligion ?? "islam",
-				fatherNationality: familyData.fatherNationality ?? "wni",
-				fatherLastEducation: familyData.fatherLastEducation ?? null,
-				fatherPhone: familyData.fatherPhone || null,
-				fatherWhatsapp: familyData.fatherWhatsapp || null,
-				fatherJob: familyData.fatherJob ?? null,
-				motherFullname: familyData.motherFullname ?? null,
-				motherReligion: familyData.motherReligion ?? "islam",
-				motherNationality: familyData.motherNationality ?? "wni",
-				motherLastEducation: familyData.motherLastEducation ?? null,
-				motherPhone: familyData.motherPhone || null,
-				motherWhatsapp: familyData.motherWhatsapp || null,
-				motherJob: familyData.motherJob ?? null,
-				familyProvinceId: familyData.familyProvinceId || null,
-				familyRegencyId: familyData.familyRegencyId || null,
-				familyDistrictId: familyData.familyDistrictId || null,
-				familyVillage: familyData.familyVillage ?? null,
-				familySubVillage: familyData.familySubVillage ?? null,
-				familyRt: familyData.familyRt ?? null,
-				familyRw: familyData.familyRw ?? null,
-				familyStreet: familyData.familyStreet ?? null,
-
-				// Guardian
-				guardianFullname: guardianData.guardianFullname ?? null,
-				guardianReligion: guardianData.guardianReligion ?? null,
-				guardianNationality: guardianData.guardianNationality ?? null,
-				guardianLastEducation: guardianData.guardianLastEducation ?? null,
-				guardianPhone: guardianData.guardianPhone || null,
-				guardianWhatsapp: guardianData.guardianWhatsapp || null,
-				guardianJob: guardianData.guardianJob ?? null,
-				guardianProvinceId: guardianData.guardianProvinceId || null,
-				guardianRegencyId: guardianData.guardianRegencyId || null,
-				guardianDistrictId: guardianData.guardianDistrictId || null,
-				guardianVillage: guardianData.guardianVillage ?? null,
-				guardianSubVillage: guardianData.guardianSubVillage ?? null,
-				guardianRt: guardianData.guardianRt ?? null,
-				guardianRw: guardianData.guardianRw ?? null,
-				guardianStreet: guardianData.guardianStreet ?? null,
-
-				// Attachments
-				attachCertificate,
-				attachPhoto,
-				attachFamilyCard,
-				attachKsp,
-				attachKip,
-				attachReportCard,
-				attachBirthCertificate,
+				hashedPassword,
+				personalData,
+				identityData,
+				familyData,
+				guardianData,
+				attachments,
 			})
 
+			const registrant = queryRunner.manager.create(Registrant, registrantPayload)
 			const savedRegistrant = await queryRunner.manager.save(registrant)
 
-			// Save disease histories if any
 			if (identityData.diseases && identityData.diseases.length > 0) {
 				const diseaseEntities = identityData.diseases.map((d) =>
 					queryRunner.manager.create(DiseaseHistory, {
@@ -388,7 +218,6 @@ export class PsbRegisterService {
 
 			await queryRunner.commitTransaction()
 
-			// Send welcome email with credentials
 			try {
 				const appUrl = this.configService.get("APP_URL", { infer: true })
 				await this.mailerService.sendRegistrantPassword(savedRegistrant.email!, {
@@ -398,18 +227,17 @@ export class PsbRegisterService {
 					loginUrl: `${appUrl}/login`,
 				})
 			} catch (mailError) {
-				// Mail sending failure shouldn't rollback registration
 				console.error("Failed to send registrant password email:", mailError)
 			}
 
-			// Clear Redis wizard keys
-			await this.redisService.del(`psb-wizard:${sessionId}:email`)
-			await this.redisService.del(`psb-wizard:${sessionId}:personal`)
-			await this.redisService.del(`psb-wizard:${sessionId}:identity`)
-			await this.redisService.del(`psb-wizard:${sessionId}:family`)
-			await this.redisService.del(`psb-wizard:${sessionId}:guardian`)
+			await Promise.all([
+				this.redisService.del(`psb-wizard:${sessionId}:email`),
+				this.redisService.del(`psb-wizard:${sessionId}:personal`),
+				this.redisService.del(`psb-wizard:${sessionId}:identity`),
+				this.redisService.del(`psb-wizard:${sessionId}:family`),
+				this.redisService.del(`psb-wizard:${sessionId}:guardian`),
+			])
 
-			// Auto login
 			const authResult = await this.psbAuthService.generateTokens(savedRegistrant)
 
 			return {

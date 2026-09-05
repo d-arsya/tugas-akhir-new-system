@@ -1,9 +1,10 @@
 import type { JSX } from "react"
 import { useEffect, useState, useRef } from "react"
 import type { Province, Regency, District } from "@roja/types"
-import type { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, FieldValues, Path } from "react-hook-form";
-import { sharedApi } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import type { UseFormRegister, FieldErrors, UseFormWatch, UseFormSetValue, FieldValues, Path } from "react-hook-form"
+import { sharedApi } from "@/lib/api"
+import { useQuery } from "@tanstack/react-query"
+import { Label, SearchableSelect } from "@roja/ui"
 
 type LocationSelectProps<TFieldValues extends FieldValues> = {
 	prefix?: string
@@ -38,6 +39,7 @@ const LocationSelect = <TFieldValues extends FieldValues>({
 
 	const selectedProvince = getNumericValue(watch(provinceFieldName))
 	const selectedRegency = getNumericValue(watch(regencyFieldName))
+	const selectedDistrict = getNumericValue(watch(districtFieldName))
 	const setFormValue = setValue as unknown as (name: string, value: unknown, options?: unknown) => void
 
 	const { data: provinces = [] } = useQuery({ queryKey: ["provinces"], queryFn: () => sharedApi.getProvinces() })
@@ -84,60 +86,69 @@ const LocationSelect = <TFieldValues extends FieldValues>({
 	}, [selectedRegency, districtsQuery.data, setFormValue, districtFieldName])
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
-			<div className="form-group mb-0">
-				<label className="control-label">{provinceLabel}</label>
-				<select
-					className={`form-control ${errs[provinceFieldName as string] ? "is-invalid" : ""}`}
-					{...register(provinceFieldName)}
-				>
-					<option value="0">Provinsi</option>
-					{(provinces || []).map((prov) => (
-						<option key={prov.id} value={prov.id}>
-							{prov.name}
-						</option>
-					))}
-				</select>
+		<div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-6">
+			<div className="flex flex-col gap-1.5">
+				<Label>{provinceLabel}</Label>
+				<SearchableSelect
+					placeholder="Pilih Provinsi"
+					searchPlaceholder="Cari provinsi..."
+					value={selectedProvince ? String(selectedProvince) : ""}
+					onValueChange={(val) => setFormValue(provinceFieldName as string, Number(val), { shouldValidate: true })}
+					triggerClassName={errs[provinceFieldName as string] ? "border-destructive focus:ring-destructive" : ""}
+					options={[
+						{ value: "0", label: "Pilih Provinsi" },
+						...(provinces || []).map((prov) => ({
+							value: String(prov.id),
+							label: prov.name,
+						})),
+					]}
+				/>
 				{errs[provinceFieldName as string] && (
-					<span className="invalid-feedback">{errs[provinceFieldName as string]?.message}</span>
+					<p className="text-xs text-destructive mt-0.5">{errs[provinceFieldName as string]?.message}</p>
 				)}
 			</div>
 
-			<div className="form-group mb-0">
-				<label className="control-label">{regencyLabel}</label>
-				<select
-					className={`form-control ${errs[regencyFieldName as string] ? "is-invalid" : ""}`}
-					{...register(regencyFieldName)}
+			<div className="flex flex-col gap-1.5">
+				<Label>{regencyLabel}</Label>
+				<SearchableSelect
+					placeholder="Pilih Kabupaten / Kota"
+					searchPlaceholder="Cari kabupaten / kota..."
+					value={selectedRegency ? String(selectedRegency) : ""}
+					onValueChange={(val) => setFormValue(regencyFieldName as string, Number(val), { shouldValidate: true })}
 					disabled={!selectedProvince}
-				>
-					<option value="0">Kabupaten</option>
-					{regencies.map((reg) => (
-						<option key={reg.id} value={reg.id}>
-							{reg.name}
-						</option>
-					))}
-				</select>
+					triggerClassName={errs[regencyFieldName as string] ? "border-destructive focus:ring-destructive" : ""}
+					options={[
+						{ value: "0", label: "Pilih Kabupaten / Kota" },
+						...regencies.map((reg) => ({
+							value: String(reg.id),
+							label: reg.name,
+						})),
+					]}
+				/>
 				{errs[regencyFieldName as string] && (
-					<span className="invalid-feedback">{errs[regencyFieldName as string]?.message}</span>
+					<p className="text-xs text-destructive mt-0.5">{errs[regencyFieldName as string]?.message}</p>
 				)}
 			</div>
 
-			<div className="form-group mb-0">
-				<label className="control-label">{districtLabel}</label>
-				<select
-					className={`form-control ${errs[districtFieldName as string] ? "is-invalid" : ""}`}
-					{...register(districtFieldName)}
+			<div className="flex flex-col gap-1.5">
+				<Label>{districtLabel}</Label>
+				<SearchableSelect
+					placeholder="Pilih Kecamatan"
+					searchPlaceholder="Cari kecamatan..."
+					value={selectedDistrict ? String(selectedDistrict) : ""}
+					onValueChange={(val) => setFormValue(districtFieldName as string, Number(val), { shouldValidate: true })}
 					disabled={!selectedRegency}
-				>
-					<option value="0">Kecamatan</option>
-					{districts.map((dist) => (
-						<option key={dist.id} value={dist.id}>
-							{dist.name}
-						</option>
-					))}
-				</select>
+					triggerClassName={errs[districtFieldName as string] ? "border-destructive focus:ring-destructive" : ""}
+					options={[
+						{ value: "0", label: "Pilih Kecamatan" },
+						...districts.map((dist) => ({
+							value: String(dist.id),
+							label: dist.name,
+						})),
+					]}
+				/>
 				{errs[districtFieldName as string] && (
-					<span className="invalid-feedback">{errs[districtFieldName as string]?.message}</span>
+					<p className="text-xs text-destructive mt-0.5">{errs[districtFieldName as string]?.message}</p>
 				)}
 			</div>
 		</div>

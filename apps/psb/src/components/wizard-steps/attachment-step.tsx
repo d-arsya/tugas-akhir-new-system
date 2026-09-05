@@ -1,4 +1,5 @@
 import type { JSX } from "react"
+import { useEffect } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { attachmentSchema, type AttachmentInput } from "@/schemas/register.schema"
@@ -6,22 +7,33 @@ import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import useAuthStore from "@/stores/auth.store"
 import FileUploadField from "@/components/file-upload-field"
-import { useNavigate, createFileRoute } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
+import { Button } from "@roja/ui"
+import { toast } from "sonner"
 
-const AttachmentStep = (): JSX.Element => {
+export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.Element => {
 	const navigate = useNavigate()
 	const queryClient = useQueryClient()
 	const sessionId = useWizardStore((s) => s.sessionId) || ""
 	const login = useAuthStore((s) => s.login)
 	const clearSession = useWizardStore((s) => s.clearSession)
 
-	const { data: initialData, isLoading } = useQuery({
+	const { data: initialData, isLoading, error } = useQuery({
 		queryKey: ["wizardStep", "attachment", sessionId],
 		queryFn: () => psbApi.getWizardStep("attachment", sessionId),
 		enabled: !!sessionId,
+		retry: false,
 	})
+
+	useEffect(() => {
+		if (error) {
+			clearSession()
+			toast.error(error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir.")
+			navigate({ to: "/" })
+		}
+	}, [error, clearSession, navigate])
 
 	const mutation = useMutation({
 		mutationFn: (data: AttachmentInput) => psbApi.submitAttachment(sessionId, data),
@@ -35,7 +47,7 @@ const AttachmentStep = (): JSX.Element => {
 			})
 		},
 		onError: (err: any) => {
-			alert(err instanceof Error ? err.message : "Gagal mengirimkan pendaftaran")
+			toast.error(err instanceof Error ? err.message : "Gagal mengirimkan pendaftaran")
 		},
 	})
 
@@ -171,28 +183,24 @@ const AttachmentStep = (): JSX.Element => {
 			</div>
 
 			<div className="flex justify-between gap-4 mt-8 border-t border-[var(--bg-form-border)] pt-6">
-				<button
+				<Button
 					type="button"
-					onClick={() => navigate({ to: "/register/guardian" })}
-					className="roja_btn roja_btn-secondary font-semibold text-xs text-slate-600 border border-slate-300 hover:bg-slate-50"
+					onClick={onPrev}
+					variant="outline"
 				>
 					Sebelumnya
-				</button>
-				<button
+				</Button>
+				<Button
 					type="submit"
-					className="roja_btn roja_btn-warning text-white bg-[#ffa800] hover:bg-[#e09400] font-semibold flex items-center gap-2 shadow-lg shadow-[#ffa800]/20"
+					variant="roja-warning"
 					disabled={mutation.isPending}
 				>
 					<span>{mutation.isPending ? "Mengirim..." : "Selesaikan Pendaftaran"}</span>
-					<ChevronRight className="w-5 h-5" />
-				</button>
+					<ChevronRight className="w-5 h-5 ml-1" />
+				</Button>
 			</div>
 		</form>
 	)
 }
 
-export const Route = createFileRoute("/_wizard/register/attachment")({
-	component: AttachmentStep,
-})
-
-export default AttachmentStep
+export default AttachmentStepContent

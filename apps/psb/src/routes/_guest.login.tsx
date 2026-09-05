@@ -6,8 +6,8 @@ import { psbApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-
 import axios from "axios"
+import { Button, Input, Label, Alert, AlertDescription, RojaCard } from "@roja/ui"
 
 const loginSchema = z.object({
 	email: z.string().email("Email tidak valid"),
@@ -44,7 +44,6 @@ const LoginPage = (): JSX.Element => {
 		setUnverifiedEmail(null)
 		try {
 			const res = await psbApi.login(data)
-			console.log("Login response:", res)
 			if (res.requires2fa) {
 				localStorage.setItem("roja-2fa-email", res.email)
 				navigate({ to: "/verify-2fa" })
@@ -93,12 +92,8 @@ const LoginPage = (): JSX.Element => {
 
 	return (
 		<div className="max-w-md mx-auto my-8">
-			<div className="roja_card_wizard flex flex-col gap-6 p-8 md:p-10 relative overflow-hidden">
-				{/* Corner gradient glows inside card */}
-				<div className="absolute -top-12 -left-12 w-32 h-32 bg-[var(--primary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
-				<div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--secondary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
-
-				<div className="relative z-10 flex flex-col gap-2 items-center text-center">
+			<RojaCard className="flex flex-col gap-6 p-8 md:p-10">
+				<div className="flex flex-col gap-2 items-center text-center">
 					<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
 					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Login Member Area</div>
 					<p className="text-xs text-[var(--grey)] m-0">
@@ -107,42 +102,44 @@ const LoginPage = (): JSX.Element => {
 				</div>
 
 				{errorMsg && (
-					<div className="alert roja_alert-danger text-xs py-2.5 px-3 border border-[var(--danger)] rounded-lg flex flex-col gap-2">
-						<span>{errorMsg}</span>
+					<Alert variant="destructive" className="flex flex-col gap-2">
+						<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
 						{unverifiedEmail && (
-							<button
+							<Button
 								type="button"
+								variant="link"
 								onClick={handleResendVerification}
 								disabled={isResending}
-								className="text-[11px] font-bold text-[var(--secondary)] hover:underline text-left cursor-pointer"
+								className="text-[11px] p-0 h-auto font-bold text-[var(--secondary)] text-left"
 							>
 								{isResending ? "Mengirim email verifikasi..." : "Kirim Ulang Link Verifikasi Email"}
-							</button>
+							</Button>
 						)}
-					</div>
+					</Alert>
 				)}
 
 				{infoMsg && (
-					<div className="p-3 bg-emerald-50 text-emerald-800 text-xs border border-emerald-200 rounded-lg">
-						{infoMsg}
-					</div>
+					<Alert variant="success">
+						<AlertDescription className="text-xs">{infoMsg}</AlertDescription>
+					</Alert>
 				)}
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-					<div className="form-group mb-3">
-						<label className="control-label">Alamat Email</label>
-						<input
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="email">Alamat Email</Label>
+						<Input
+							id="email"
 							type="email"
-							className={`form-control roja_form_control-lg ${errors.email ? "is-invalid" : ""}`}
+							className="h-11"
 							placeholder="nama@email.com"
 							{...register("email")}
 						/>
-						{errors.email && <span className="invalid-feedback">{errors.email.message}</span>}
+						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
 					</div>
 
-					<div className="form-group mb-5">
-						<div className="flex items-center justify-between mb-1.5">
-							<label className="control-label mb-0">Password</label>
+					<div className="flex flex-col gap-1.5">
+						<div className="flex items-center justify-between">
+							<Label htmlFor="password">Password</Label>
 							<Link
 								to="/forgot-password"
 								className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
@@ -150,22 +147,25 @@ const LoginPage = (): JSX.Element => {
 								Lupa Password?
 							</Link>
 						</div>
-						<input
+						<Input
+							id="password"
 							type="password"
-							className={`form-control roja_form_control-lg ${errors.password ? "is-invalid" : ""}`}
+							className="h-11"
 							placeholder="Masukkan password"
 							{...register("password")}
 						/>
-						{errors.password && <span className="invalid-feedback">{errors.password.message}</span>}
+						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
 					</div>
 
-					<button
+					<Button
 						type="submit"
-						className="roja_btn roja_btn-primary roja_btn-lg w-full text-white font-semibold"
+						variant="roja-primary"
+						size="lg"
+						className="w-full mt-2"
 						disabled={isLoading}
 					>
 						{isLoading ? "Memproses..." : "Masuk"}
-					</button>
+					</Button>
 				</form>
 
 				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4 text-[var(--body-txt-inverse)]">
@@ -174,7 +174,7 @@ const LoginPage = (): JSX.Element => {
 						Mulai Pendaftaran Baru
 					</Link>
 				</div>
-			</div>
+			</RojaCard>
 		</div>
 	)
 }

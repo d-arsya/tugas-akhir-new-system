@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { psbApi } from "@/lib/api"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
+import { Button, Input, Label, Alert, AlertDescription, RojaCard } from "@roja/ui"
 
 const schema = z.object({
 	password: z.string().min(8, "Password minimal 8 karakter"),
@@ -14,7 +15,7 @@ const schema = z.object({
 	path: ["confirmPassword"],
 })
 
-type Input = z.infer<typeof schema>
+type InputType = z.infer<typeof schema>
 
 const ResetPasswordPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -25,12 +26,12 @@ const ResetPasswordPage = (): JSX.Element => {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<Input>({
+	} = useForm<InputType>({
 		resolver: zodResolver(schema),
 		defaultValues: { password: "", confirmPassword: "" },
 	})
 
-	const onSubmit = async (data: Input): Promise<void> => {
+	const onSubmit = async (data: InputType): Promise<void> => {
 		setIsLoading(true)
 		try {
 			await psbApi.resetPassword({ token: "mock_token", password: data.password })
@@ -47,64 +48,64 @@ const ResetPasswordPage = (): JSX.Element => {
 
 	return (
 		<div className="max-w-md mx-auto my-8">
-			<div className="roja_card_wizard flex flex-col gap-6 p-8 md:p-10 relative overflow-hidden">
-				{/* Corner gradient glows inside card */}
-				<div className="absolute -top-12 -left-12 w-32 h-32 bg-[var(--primary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
-				<div className="absolute -top-12 -right-12 w-32 h-32 bg-[var(--secondary)] rounded-full blur-[40px] opacity-[0.1] pointer-events-none z-0" />
-
-				<div className="relative z-10 flex flex-col gap-2 items-center text-center">
+			<RojaCard className="flex flex-col gap-6 p-8 md:p-10">
+				<div className="flex flex-col gap-2 items-center text-center">
 					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Atur Ulang Password</div>
-					<p className="text-xs text-[var(--body-txt-inverse)] m-0">
+					<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
 						Masukkan password baru Anda di bawah ini.
 					</p>
 				</div>
 
 				{successMsg && (
-					<div className="relative z-10 p-3 bg-green-50 text-[var(--success)] text-xs border border-green-200 rounded">
-						{successMsg}
-					</div>
+					<Alert variant="success">
+						<AlertDescription className="text-xs">{successMsg}</AlertDescription>
+					</Alert>
 				)}
 
-				<form onSubmit={handleSubmit(onSubmit)} className="relative z-10 flex flex-col gap-4">
-					<div className="form-group">
-						<label className="control-label">Password Baru</label>
-						<input
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="password">Password Baru</Label>
+						<Input
+							id="password"
 							type="password"
-							className={`form-control ${errors.password ? "is-invalid" : ""}`}
+							className="h-11"
 							placeholder="Minimal 8 karakter"
 							{...register("password")}
 						/>
-						{errors.password && <span className="invalid-feedback">{errors.password.message}</span>}
+						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
 					</div>
 
-					<div className="form-group">
-						<label className="control-label">Konfirmasi Password Baru</label>
-						<input
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
+						<Input
+							id="confirmPassword"
 							type="password"
-							className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+							className="h-11"
 							placeholder="Masukkan ulang password"
 							{...register("confirmPassword")}
 						/>
 						{errors.confirmPassword && (
-							<span className="invalid-feedback">{errors.confirmPassword.message}</span>
+							<p className="text-xs text-destructive mt-0.5">{errors.confirmPassword.message}</p>
 						)}
 					</div>
 
-					<button
+					<Button
 						type="submit"
-						className="roja_btn roja_btn-primary roja_btn-lg w-full text-white bg-[var(--primary)] font-semibold"
+						variant="roja-primary"
+						size="lg"
+						className="w-full mt-2"
 						disabled={isLoading}
 					>
 						{isLoading ? "Memproses..." : "Simpan Password"}
-					</button>
+					</Button>
 				</form>
 
-				<div className="relative z-10 text-center text-xs border-t border-[var(--bg-form-border)] pt-4">
+				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4">
 					<Link to="/login" className="text-[var(--secondary)] hover:underline font-bold">
 						Kembali ke Login
 					</Link>
 				</div>
-			</div>
+			</RojaCard>
 		</div>
 	)
 }

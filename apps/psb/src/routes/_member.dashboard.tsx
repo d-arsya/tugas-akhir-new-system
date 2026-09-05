@@ -3,6 +3,18 @@ import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
 import { AlertTriangle, Download, CheckCircle, XCircle, Info, Calendar } from "lucide-react"
+import {
+	Button,
+	Badge,
+	Alert,
+	AlertTitle,
+	AlertDescription,
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	Skeleton,
+} from "@roja/ui"
 
 const formatDate = (dateStr?: string | null): string => {
 	if (!dateStr) return ""
@@ -27,7 +39,18 @@ const DashboardPage = (): JSX.Element => {
 	})
 
 	if (isLoading) {
-		return <div className="text-center py-10 text-xs font-medium text-[var(--grey)]">Memuat data dashboard...</div>
+		return (
+			<div className="w-full flex flex-col gap-6">
+				<div className="flex justify-between items-center pb-4 border-b">
+					<div className="flex flex-col gap-2">
+						<Skeleton className="h-8 w-64 rounded-lg" />
+						<Skeleton className="h-4 w-48 rounded" />
+					</div>
+					<Skeleton className="h-10 w-36 rounded-lg" />
+				</div>
+				<Skeleton className="h-40 w-full rounded-2xl" />
+			</div>
+		)
 	}
 
 	const reg = data?.registrant
@@ -63,27 +86,29 @@ const DashboardPage = (): JSX.Element => {
 					<div className="text-xl md:text-2xl font-bold text-slate-800 m-0">
 						Hallo, <span className="text-[var(--primary)]">{reg?.fullname || reg?.fullName || ""}</span>
 					</div>
-					<div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-xs text-[#abb4be] font-medium">
-						<div>
-							Nomor Pendaftaran: <span className="font-mono text-slate-700 font-bold">{reg?.registrantId || "-"}</span>
-						</div>
-						<div>
-							Jenjang: <span className="text-slate-700 font-semibold">{levelLabel}</span>
-						</div>
+					<div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs font-medium">
+						<Badge variant="outline" className="font-mono text-slate-700 bg-slate-50 px-2.5 py-1">
+							ID: {reg?.registrantId || "-"}
+						</Badge>
+						<Badge variant="outline" className="text-slate-700 bg-slate-50 px-2.5 py-1">
+							Jenjang: {levelLabel}
+						</Badge>
 					</div>
 				</div>
 
 				{/* Print Action Button */}
 				{registrantIdParam && (
-					<Link
-						to="/print/$type/$registrantId"
-						params={{ type: printType, registrantId: registrantIdParam }}
-						target="_blank"
-						className="roja_btn roja_btn-primary text-white bg-[var(--primary)] font-semibold text-xs flex items-center gap-2 w-max shrink-0"
-					>
-						<Download className="w-4 h-4" />
-						<span>{printLabel}</span>
-					</Link>
+					<Button asChild variant="roja-primary" size="sm" className="shrink-0">
+						<Link
+							to="/print/$type/$registrantId"
+							params={{ type: printType, registrantId: registrantIdParam }}
+							target="_blank"
+							className="flex items-center gap-2"
+						>
+							<Download className="w-4 h-4" />
+							<span>{printLabel}</span>
+						</Link>
+					</Button>
 				)}
 			</div>
 
@@ -91,12 +116,17 @@ const DashboardPage = (): JSX.Element => {
 
 			{/* 1. Wait (Menunggu Verifikasi) */}
 			{status === "wait" && (
-				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[250px]">
-					<div className="lg:col-span-7 flex flex-col gap-4">
-						<div className="text-sm font-bold text-slate-700">Status Pendaftaran: Menunggu Verifikasi</div>
-						<p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium m-0">
+				<Alert variant="default" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-6 border-slate-200 bg-slate-50/50">
+					<div className="lg:col-span-7 flex flex-col gap-3">
+						<div className="flex items-center gap-2">
+							<Badge variant="wait">Menunggu Verifikasi</Badge>
+							<AlertTitle className="text-sm font-bold text-slate-800 m-0">
+								Status Pendaftaran: In Review
+							</AlertTitle>
+						</div>
+						<AlertDescription className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
 							Data kamu sedang kami proses, mohon menunggu. Informasi penerimaan dan jika ada kelengkapan data akan kami tampilkan pada halaman ini.
-						</p>
+						</AlertDescription>
 					</div>
 					<div className="lg:col-span-5 flex justify-center items-center">
 						<img
@@ -105,144 +135,153 @@ const DashboardPage = (): JSX.Element => {
 							className="max-w-xs w-full h-auto object-contain select-none pointer-events-none"
 						/>
 					</div>
-				</div>
+				</Alert>
 			)}
 
 			{/* 2. Fixed (Data Telah Diperbaiki) */}
 			{status === "fixed" && (
-				<div className="bg-blue-50/80 border border-blue-200 p-6 rounded-2xl flex flex-col gap-3">
-					<div className="flex items-center gap-2.5 text-blue-800 font-bold text-sm">
-						<CheckCircle className="w-5 h-5 text-blue-600 shrink-0" />
+				<Alert variant="info" className="flex flex-col gap-2 p-6">
+					<div className="flex items-center gap-2.5 font-bold text-sm">
+						<CheckCircle className="w-5 h-5 shrink-0" />
 						<span>Perbaikan Data Tersimpan</span>
 					</div>
-					<p className="text-xs md:text-sm text-blue-950 leading-relaxed font-medium m-0">
+					<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
 						Kamu berhasil melakukan update data. Silakan tunggu keputusan selanjutnya dari admin kami. Semoga proses pendaftaran kamu berjalan lancar ya.
-					</p>
-				</div>
+					</AlertDescription>
+				</Alert>
 			)}
 
 			{/* 3. Invalid (Data / Berkas Tidak Valid) */}
 			{status === "invalid" && (
-				<div className="bg-amber-50/80 border border-amber-200 p-6 rounded-2xl flex flex-col gap-4">
-					<div className="flex items-center gap-2.5 text-amber-800 font-bold text-sm">
-						<AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+				<Alert variant="warning" className="flex flex-col gap-4 p-6">
+					<div className="flex items-center gap-2.5 font-bold text-sm">
+						<AlertTriangle className="w-5 h-5 shrink-0" />
 						<span>Data / Berkas Tidak Valid!</span>
 					</div>
-					<div className="text-xs text-amber-950 leading-relaxed font-medium">
-						Panitia menemukan bahwa beberapa data/berkas yang Anda unggah tidak valid. Silakan lakukan perbaikan data.
+					<AlertDescription className="text-xs leading-relaxed font-medium flex flex-col gap-3">
+						<span>Panitia menemukan bahwa beberapa data/berkas yang Anda unggah tidak valid. Silakan lakukan perbaikan data.</span>
 						{validationNote && (
 							<div
-								className="mt-3 bg-white/80 p-3.5 rounded-xl border border-amber-200 text-xs italic text-amber-900"
+								className="bg-white/90 p-3.5 rounded-xl border border-amber-200 text-xs italic text-amber-900"
 								dangerouslySetInnerHTML={{ __html: validationNote }}
 							/>
 						)}
-					</div>
+					</AlertDescription>
 					<div>
-						<button
+						<Button
 							onClick={() => navigate({ to: "/invalid" })}
-							className="roja_btn roja_btn-warning text-white bg-[#ffa800] hover:bg-[#e09400] text-xs font-bold shadow-lg shadow-[#ffa800]/20 flex items-center gap-2"
+							variant="roja-warning"
+							size="sm"
+							className="font-bold"
 						>
-							<span>Perbaiki Data Saya</span>
-						</button>
+							Perbaiki Data Saya
+						</Button>
 					</div>
-				</div>
+				</Alert>
 			)}
 
 			{/* 4. Approve (Diterima) */}
 			{status === "approve" && (
 				<div className="flex flex-col gap-6">
-					<div className="bg-emerald-50/80 border border-emerald-200 p-6 rounded-2xl flex flex-col gap-3">
-						<div className="flex items-center gap-2.5 text-emerald-800 font-bold text-base">
-							<CheckCircle className="w-6 h-6 text-emerald-600 shrink-0" />
+					<Alert variant="success" className="flex flex-col gap-2 p-6">
+						<div className="flex items-center gap-2.5 font-bold text-base">
+							<CheckCircle className="w-6 h-6 shrink-0" />
 							<span>Selamat! Anda Diterima Sebagai Santri Baru</span>
 						</div>
-						<p className="text-xs md:text-sm text-emerald-950 leading-relaxed font-medium m-0">
+						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
 							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
-						</p>
-					</div>
+						</AlertDescription>
+					</Alert>
 
 					{announcement && (
-						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-5">
-							<div className="text-xs font-bold text-[var(--primary)] tracking-wider uppercase flex items-center gap-2 border-b border-slate-100 pb-3">
-								<Info className="w-4 h-4" />
-								<span>Detail Hasil Seleksi & Daftar Ulang</span>
-							</div>
+						<Card className="border-slate-200 shadow-sm">
+							<CardHeader className="border-b border-slate-100 pb-3">
+								<CardTitle className="text-xs font-bold text-[var(--primary)] tracking-wider uppercase flex items-center gap-2">
+									<Info className="w-4 h-4" />
+									<span>Detail Hasil Seleksi & Daftar Ulang</span>
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="pt-5">
+								<div className="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6 text-xs">
+									{/* Keterangan Kelulusan */}
+									{announcement.successDesc && (
+										<>
+											<div className="md:col-span-3 font-bold text-slate-600">Keterangan</div>
+											<div
+												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+												dangerouslySetInnerHTML={{ __html: announcement.successDesc }}
+											/>
+										</>
+									)}
 
-							<div className="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6 text-xs">
-								{/* Keterangan Kelulusan */}
-								{announcement.successDesc && (
-									<>
-										<div className="md:col-span-3 font-bold text-slate-600">Keterangan</div>
-										<div
-											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-											dangerouslySetInnerHTML={{ __html: announcement.successDesc }}
-										/>
-									</>
-								)}
+									{/* Jadwal Daftar Ulang */}
+									{(announcement.dateStart || announcement.dateEnd) && (
+										<>
+											<div className="md:col-span-3 font-bold text-slate-600 flex items-center gap-1.5">
+												<Calendar className="w-3.5 h-3.5 text-slate-400" />
+												<span>Jadwal Daftar Ulang</span>
+											</div>
+											<div className="md:col-span-9 text-slate-800 font-semibold">
+												{formatDate(announcement.dateStart)} s/d {formatDate(announcement.dateEnd)}
+											</div>
+										</>
+									)}
 
-								{/* Jadwal Daftar Ulang */}
-								{(announcement.dateStart || announcement.dateEnd) && (
-									<>
-										<div className="md:col-span-3 font-bold text-slate-600 flex items-center gap-1.5">
-											<Calendar className="w-3.5 h-3.5 text-slate-400" />
-											<span>Jadwal Daftar Ulang</span>
-										</div>
-										<div className="md:col-span-9 text-slate-800 font-semibold">
-											{formatDate(announcement.dateStart)} s/d {formatDate(announcement.dateEnd)}
-										</div>
-									</>
-								)}
+									{/* Berkas Daftar Ulang */}
+									{announcement.information && (
+										<>
+											<div className="md:col-span-3 font-bold text-slate-600">Berkas Daftar Ulang</div>
+											<div
+												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+												dangerouslySetInnerHTML={{ __html: announcement.information }}
+											/>
+										</>
+									)}
 
-								{/* Berkas Daftar Ulang */}
-								{announcement.information && (
-									<>
-										<div className="md:col-span-3 font-bold text-slate-600">Berkas Daftar Ulang</div>
-										<div
-											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-											dangerouslySetInnerHTML={{ __html: announcement.information }}
-										/>
-									</>
-								)}
-
-								{/* Pengumuman Tambahan */}
-								{announcement.additionalInformation && (
-									<>
-										<div className="md:col-span-3 font-bold text-slate-600">Pengumuman Lainnya</div>
-										<div
-											className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-											dangerouslySetInnerHTML={{ __html: announcement.additionalInformation }}
-										/>
-									</>
-								)}
-							</div>
-						</div>
+									{/* Pengumuman Tambahan */}
+									{announcement.additionalInformation && (
+										<>
+											<div className="md:col-span-3 font-bold text-slate-600">Pengumuman Lainnya</div>
+											<div
+												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
+												dangerouslySetInnerHTML={{ __html: announcement.additionalInformation }}
+											/>
+										</>
+									)}
+								</div>
+							</CardContent>
+						</Card>
 					)}
 				</div>
 			)}
 
-			{/* 5. Failed (Selection Failed / Belum Lulus) */}
+			{/* 5. Failed (Belum Lulus) */}
 			{status === "failed" && (
 				<div className="flex flex-col gap-6">
-					<div className="bg-rose-50/80 border border-rose-200 p-6 rounded-2xl flex flex-col gap-3">
-						<div className="flex items-center gap-2.5 text-rose-800 font-bold text-base">
-							<XCircle className="w-6 h-6 text-rose-600 shrink-0" />
+					<Alert variant="destructive" className="flex flex-col gap-2 p-6">
+						<div className="flex items-center gap-2.5 font-bold text-base">
+							<XCircle className="w-6 h-6 shrink-0" />
 							<span>Hasil Seleksi: Belum Diterima</span>
 						</div>
-						<p className="text-xs md:text-sm text-rose-950 leading-relaxed font-medium m-0">
+						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
 							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
-						</p>
-					</div>
+						</AlertDescription>
+					</Alert>
 
 					{announcement?.failedDesc && (
-						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-							<div className="text-xs font-bold text-slate-600 tracking-wider uppercase border-b border-slate-100 pb-3">
-								Keterangan
-							</div>
-							<div
-								className="text-xs text-slate-700 leading-relaxed font-medium"
-								dangerouslySetInnerHTML={{ __html: announcement.failedDesc }}
-							/>
-						</div>
+						<Card className="border-slate-200 shadow-sm">
+							<CardHeader className="border-b border-slate-100 pb-3">
+								<CardTitle className="text-xs font-bold text-slate-600 tracking-wider uppercase">
+									Keterangan
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="pt-4">
+								<div
+									className="text-xs text-slate-700 leading-relaxed font-medium"
+									dangerouslySetInnerHTML={{ __html: announcement.failedDesc }}
+								/>
+							</CardContent>
+						</Card>
 					)}
 				</div>
 			)}
@@ -250,26 +289,30 @@ const DashboardPage = (): JSX.Element => {
 			{/* 6. Indent Failed (Gagal Tes Indent) */}
 			{status === "indent_failed" && (
 				<div className="flex flex-col gap-6">
-					<div className="bg-orange-50/80 border border-orange-200 p-6 rounded-2xl flex flex-col gap-3">
-						<div className="flex items-center gap-2.5 text-orange-800 font-bold text-base">
-							<AlertTriangle className="w-6 h-6 text-orange-600 shrink-0" />
+					<Alert variant="warning" className="flex flex-col gap-2 p-6">
+						<div className="flex items-center gap-2.5 font-bold text-base">
+							<AlertTriangle className="w-6 h-6 shrink-0" />
 							<span>Hasil Tes Indent: Belum Lulus</span>
 						</div>
-						<p className="text-xs md:text-sm text-orange-950 leading-relaxed font-medium m-0">
+						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
 							Berikut kami umumkan hasil tes indent pendaftaran santri baru.
-						</p>
-					</div>
+						</AlertDescription>
+					</Alert>
 
 					{announcement?.failedIndentTestDesc && (
-						<div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col gap-3">
-							<div className="text-xs font-bold text-slate-600 tracking-wider uppercase border-b border-slate-100 pb-3">
-								Keterangan
-							</div>
-							<div
-								className="text-xs text-slate-700 leading-relaxed font-medium"
-								dangerouslySetInnerHTML={{ __html: announcement.failedIndentTestDesc }}
-							/>
-						</div>
+						<Card className="border-slate-200 shadow-sm">
+							<CardHeader className="border-b border-slate-100 pb-3">
+								<CardTitle className="text-xs font-bold text-slate-600 tracking-wider uppercase">
+									Keterangan
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="pt-4">
+								<div
+									className="text-xs text-slate-700 leading-relaxed font-medium"
+									dangerouslySetInnerHTML={{ __html: announcement.failedIndentTestDesc }}
+								/>
+							</CardContent>
+						</Card>
 					)}
 				</div>
 			)}

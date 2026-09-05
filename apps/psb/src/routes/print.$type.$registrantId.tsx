@@ -3,6 +3,8 @@ import { useParams, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect } from "react"
+import { Button } from "@roja/ui"
+import { Printer } from "lucide-react"
 
 const PrintPage = (): JSX.Element => {
 	const { type = "registration", registrantId = "0" } = useParams({ strict: false }) as {
@@ -134,13 +136,15 @@ const PrintPage = (): JSX.Element => {
 
 			{/* Floating manual print button (hidden when printing) */}
 			<div className="w-full max-w-[800px] flex justify-end mb-4 print:hidden px-4 md:px-0">
-				<button
+				<Button
 					type="button"
 					onClick={() => window.print()}
-					className="bg-[#E4007E] hover:bg-[#c8006e] text-white text-xs font-semibold py-2 px-5 rounded shadow cursor-pointer transition-all"
+					variant="roja-primary"
+					className="gap-2 shadow text-xs"
 				>
-					🖨️ Cetak Dokumen Ini
-				</button>
+					<Printer className="w-4 h-4" />
+					<span>Cetak Dokumen Ini</span>
+				</Button>
 			</div>
 
 			{/* Invoice Wrap Container */}

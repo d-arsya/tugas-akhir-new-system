@@ -9,15 +9,19 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "roja_btn roja_btn-primary font-semibold",
+        destructive: "roja_btn roja_btn-danger font-semibold",
+        outline: "roja_btn roja_btn-secondary font-semibold",
+        secondary: "roja_btn roja_btn-secondary font-semibold",
+        ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100",
+        link: "text-[var(--primary)] underline-offset-4 hover:underline",
+        "roja-primary": "roja_btn roja_btn-primary font-semibold",
+        "roja-secondary": "roja_btn roja_btn-secondary font-semibold",
+        "roja-warning": "roja_btn roja_btn-warning font-semibold",
+        "roja-danger": "roja_btn roja_btn-danger font-semibold",
+        "roja-light-primary": "roja_btn roja_btn-light-primary font-semibold",
+        "roja-light-secondary": "roja_btn roja_btn-light-secondary font-semibold",
+        "roja-back": "roja_btn roja_btn-back font-semibold",
       },
       size: {
         default: "h-10 px-4 py-2",

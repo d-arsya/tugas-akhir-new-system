@@ -6,6 +6,18 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { psbApi } from "@/lib/api"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
+import { toast } from "sonner"
+import {
+	Button,
+	Input,
+	Label,
+	Switch,
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+	Skeleton,
+} from "@roja/ui"
 
 const profileSchema = z.object({
 	name: z.string().min(2, "Nama minimal 2 karakter"),
@@ -39,14 +51,14 @@ const SettingsPage = (): JSX.Element => {
 		mutationFn: (data: ProfileInput) => psbApi.updateProfile(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["profile"] })
-			alert("Nama profil berhasil diperbarui")
+			toast.success("Nama profil berhasil diperbarui")
 		},
 	})
 
 	const updatePasswordMutation = useMutation({
 		mutationFn: (data: PasswordInput) => psbApi.updateAccount({ password: data.password }),
 		onSuccess: () => {
-			alert("Password berhasil diperbarui")
+			toast.success("Password berhasil diperbarui")
 			resetPasswordForm()
 		},
 	})
@@ -55,7 +67,7 @@ const SettingsPage = (): JSX.Element => {
 		mutationFn: (enabled: boolean) => psbApi.toggle2fa(enabled),
 		onSuccess: (_, enabled) => {
 			setStatus2fa(enabled)
-			alert(`Dua Faktor Otentikasi (2FA) berhasil ${enabled ? "diaktifkan" : "dinonaktifkan"}`)
+			toast.success(`Dua Faktor Otentikasi (2FA) berhasil ${enabled ? "diaktifkan" : "dinonaktifkan"}`)
 		},
 	})
 
@@ -79,7 +91,15 @@ const SettingsPage = (): JSX.Element => {
 	})
 
 	if (isLoading) {
-		return <div className="text-center py-10 text-xs">Memuat data...</div>
+		return (
+			<div className="flex flex-col gap-6">
+				<Skeleton className="h-10 w-48 rounded-lg" />
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<Skeleton className="h-64 rounded-2xl" />
+					<Skeleton className="h-64 rounded-2xl" />
+				</div>
+			</div>
+		)
 	}
 
 	return (
@@ -92,113 +112,125 @@ const SettingsPage = (): JSX.Element => {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
 				{/* Profile Settings */}
-				<form
-					onSubmit={handleProfileSubmit((d) => updateProfileMutation.mutate(d))}
-					className="flex flex-col gap-5 border border-[var(--bg-form-border)] p-6 rounded-2xl bg-white/50 backdrop-blur-sm"
-				>
-					<div className="text-xs font-bold text-[var(--primary)] border-b border-slate-100 pb-3">
-						Profil Calon Santri
-					</div>
+				<form onSubmit={handleProfileSubmit((d) => updateProfileMutation.mutate(d))}>
+					<Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+						<CardHeader className="border-b border-slate-100 pb-3">
+							<CardTitle className="text-xs font-bold text-[var(--primary)]">
+								Profil Calon Santri
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="flex flex-col gap-5 pt-4">
+							<div className="flex flex-col gap-1.5">
+								<Label htmlFor="email">Alamat Email</Label>
+								<Input
+									id="email"
+									type="text"
+									disabled
+									className="bg-slate-50 cursor-not-allowed text-[var(--grey)] h-10"
+									value={profile?.email || ""}
+								/>
+							</div>
 
-					<div className="form-group mb-0">
-						<label className="control-label">Alamat Email</label>
-						<input
-							type="text"
-							disabled
-							className="form-control bg-slate-50 cursor-not-allowed text-[var(--grey)]"
-							value={profile?.email || ""}
-						/>
-					</div>
+							<div className="flex flex-col gap-1.5">
+								<Label htmlFor="name">Nama Lengkap</Label>
+								<Input
+									id="name"
+									type="text"
+									className="h-10"
+									placeholder="Masukkan nama lengkap"
+									{...registerProfile("name")}
+								/>
+								{profileErrors.name && (
+									<p className="text-xs text-destructive mt-0.5">{profileErrors.name.message}</p>
+								)}
+							</div>
 
-					<div className="form-group mb-0">
-						<label className="control-label">Nama Lengkap</label>
-						<input
-							type="text"
-							className={`form-control ${profileErrors.name ? "is-invalid" : ""}`}
-							placeholder="Masukkan nama lengkap"
-							{...registerProfile("name")}
-						/>
-						{profileErrors.name && <span className="invalid-feedback">{profileErrors.name.message}</span>}
-					</div>
-
-					<button
-						type="submit"
-						className="roja_btn roja_btn-primary text-white bg-[var(--primary)] py-2 px-5 text-xs w-max mt-2 font-semibold shadow-md shadow-[var(--primary)]/10"
-						disabled={updateProfileMutation.isPending}
-					>
-						{updateProfileMutation.isPending ? "Menyimpan..." : "Simpan Profil"}
-					</button>
+							<Button
+								type="submit"
+								variant="roja-primary"
+								size="sm"
+								className="w-max mt-2"
+								disabled={updateProfileMutation.isPending}
+							>
+								{updateProfileMutation.isPending ? "Menyimpan..." : "Simpan Profil"}
+							</Button>
+						</CardContent>
+					</Card>
 				</form>
 
 				{/* Security Settings */}
 				<div className="flex flex-col gap-6">
 					{/* Change Password */}
-					<form
-						onSubmit={handlePasswordSubmit((d) => updatePasswordMutation.mutate(d))}
-						className="flex flex-col gap-5 border border-[var(--bg-form-border)] p-6 rounded-2xl bg-white/50 backdrop-blur-sm"
-					>
-						<div className="text-xs font-bold text-[var(--primary)] border-b border-slate-100 pb-3">
-							Ubah Password
-						</div>
+					<form onSubmit={handlePasswordSubmit((d) => updatePasswordMutation.mutate(d))}>
+						<Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+							<CardHeader className="border-b border-slate-100 pb-3">
+								<CardTitle className="text-xs font-bold text-[var(--primary)]">
+									Ubah Password
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="flex flex-col gap-5 pt-4">
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="password">Password Baru</Label>
+									<Input
+										id="password"
+										type="password"
+										className="h-10"
+										placeholder="Minimal 8 karakter"
+										{...registerPassword("password")}
+									/>
+									{passwordErrors.password && (
+										<p className="text-xs text-destructive mt-0.5">{passwordErrors.password.message}</p>
+									)}
+								</div>
 
-						<div className="form-group mb-0">
-							<label className="control-label">Password Baru</label>
-							<input
-								type="password"
-								className={`form-control ${passwordErrors.password ? "is-invalid" : ""}`}
-								placeholder="Minimal 8 karakter"
-								{...registerPassword("password")}
-							/>
-							{passwordErrors.password && (
-								<span className="invalid-feedback">{passwordErrors.password.message}</span>
-							)}
-						</div>
+								<div className="flex flex-col gap-1.5">
+									<Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
+									<Input
+										id="confirmPassword"
+										type="password"
+										className="h-10"
+										placeholder="Masukkan ulang password"
+										{...registerPassword("confirmPassword")}
+									/>
+									{passwordErrors.confirmPassword && (
+										<p className="text-xs text-destructive mt-0.5">{passwordErrors.confirmPassword.message}</p>
+									)}
+								</div>
 
-						<div className="form-group mb-0">
-							<label className="control-label">Konfirmasi Password Baru</label>
-							<input
-								type="password"
-								className={`form-control ${passwordErrors.confirmPassword ? "is-invalid" : ""}`}
-								placeholder="Masukkan ulang password"
-								{...registerPassword("confirmPassword")}
-							/>
-							{passwordErrors.confirmPassword && (
-								<span className="invalid-feedback">{passwordErrors.confirmPassword.message}</span>
-							)}
-						</div>
-
-						<button
-							type="submit"
-							className="roja_btn roja_btn-primary text-white bg-[var(--primary)] py-2 px-5 text-xs w-max mt-2 font-semibold shadow-md shadow-[var(--primary)]/10"
-							disabled={updatePasswordMutation.isPending}
-						>
-							{updatePasswordMutation.isPending ? "Menyimpan..." : "Ubah Password"}
-						</button>
+								<Button
+									type="submit"
+									variant="roja-primary"
+									size="sm"
+									className="w-max mt-2"
+									disabled={updatePasswordMutation.isPending}
+								>
+									{updatePasswordMutation.isPending ? "Menyimpan..." : "Ubah Password"}
+								</Button>
+							</CardContent>
+						</Card>
 					</form>
 
 					{/* 2FA Toggle */}
-					<div className="flex flex-col gap-4 border border-[var(--bg-form-border)] p-6 rounded-2xl bg-white/50 backdrop-blur-sm">
-						<div className="text-xs font-bold text-[var(--primary)] border-b border-slate-100 pb-3">
-							Dua Faktor Otentikasi (2FA)
-						</div>
-						<div className="flex items-center justify-between mt-1">
+					<Card className="bg-white/50 backdrop-blur-sm border-slate-200">
+						<CardHeader className="border-b border-slate-100 pb-3">
+							<CardTitle className="text-xs font-bold text-[var(--primary)]">
+								Dua Faktor Otentikasi (2FA)
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="pt-4 flex items-center justify-between">
 							<div className="flex flex-col gap-1 pr-6">
 								<span className="text-xs font-semibold text-slate-700">Otentikasi melalui Email</span>
-								<p className="text-[10px] text-[var(--grey)] leading-relaxed">
+								<p className="text-[10px] text-[var(--grey)] leading-relaxed m-0">
 									Kirimkan kode OTP unik ke email Anda setiap kali mencoba melakukan login dari perangkat baru.
 								</p>
 							</div>
-							<label className="relative inline-flex items-center cursor-pointer">
-								<input
-									type="checkbox"
-									checked={status2fa}
-									onChange={(e) => toggle2faMutation.mutate(e.target.checked)}
-									className="sr-only peer"
-								/>
-								<div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--primary)]"></div>
-							</label>
-						</div>
-					</div>
+							<Switch
+								checked={status2fa}
+								onCheckedChange={(checked) => toggle2faMutation.mutate(checked)}
+								disabled={toggle2faMutation.isPending}
+							/>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 		</div>

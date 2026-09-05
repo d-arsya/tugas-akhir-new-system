@@ -255,6 +255,7 @@ export const hijackPsbApi = (realApi: PsbApi): PsbApi => {
 				academicYear: {
 					id: 1,
 					name: "2026/2027",
+					type: "reguler",
 					year: "2026",
 					isActive: true,
 					note: "PSB Reguler dibuka untuk tahun ajaran 2026/2027. Harap isi email dengan benar untuk pengiriman password.",
