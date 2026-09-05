@@ -10,33 +10,125 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as MemberRouteImport } from './routes/_member'
+import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as MemberDashboardRouteImport } from './routes/_member.dashboard'
+import { Route as MemberEWalletRouteImport } from './routes/_member.e-wallet'
+import { Route as MemberPaymentHistoryRouteImport } from './routes/_member.payment-history'
+import { Route as MemberProfileRouteImport } from './routes/_member.profile'
+import { Route as MemberSettingRouteImport } from './routes/_member.setting'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemberRoute = MemberRouteImport.update({
+  id: '/_member',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestLoginRoute = GuestLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const MemberDashboardRoute = MemberDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberEWalletRoute = MemberEWalletRouteImport.update({
+  id: '/e-wallet',
+  path: '/e-wallet',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberPaymentHistoryRoute = MemberPaymentHistoryRouteImport.update({
+  id: '/payment-history',
+  path: '/payment-history',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberProfileRoute = MemberProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => MemberRoute,
+} as any)
+const MemberSettingRoute = MemberSettingRouteImport.update({
+  id: '/setting',
+  path: '/setting',
+  getParentRoute: () => MemberRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof GuestLoginRoute
+  '/dashboard': typeof MemberDashboardRoute
+  '/e-wallet': typeof MemberEWalletRoute
+  '/payment-history': typeof MemberPaymentHistoryRoute
+  '/profile': typeof MemberProfileRoute
+  '/setting': typeof MemberSettingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof GuestLoginRoute
+  '/dashboard': typeof MemberDashboardRoute
+  '/e-wallet': typeof MemberEWalletRoute
+  '/payment-history': typeof MemberPaymentHistoryRoute
+  '/profile': typeof MemberProfileRoute
+  '/setting': typeof MemberSettingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_guest': typeof GuestRouteWithChildren
+  '/_member': typeof MemberRouteWithChildren
+  '/_guest/login': typeof GuestLoginRoute
+  '/_member/dashboard': typeof MemberDashboardRoute
+  '/_member/e-wallet': typeof MemberEWalletRoute
+  '/_member/payment-history': typeof MemberPaymentHistoryRoute
+  '/_member/profile': typeof MemberProfileRoute
+  '/_member/setting': typeof MemberSettingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/e-wallet'
+    | '/payment-history'
+    | '/profile'
+    | '/setting'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/e-wallet'
+    | '/payment-history'
+    | '/profile'
+    | '/setting'
+  id:
+    | '__root__'
+    | '/'
+    | '/_guest'
+    | '/_member'
+    | '/_guest/login'
+    | '/_member/dashboard'
+    | '/_member/e-wallet'
+    | '/_member/payment-history'
+    | '/_member/profile'
+    | '/_member/setting'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GuestRoute: typeof GuestRouteWithChildren
+  MemberRoute: typeof MemberRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +140,98 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_member': {
+      id: '/_member'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof MemberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest/login': {
+      id: '/_guest/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_member/dashboard': {
+      id: '/_member/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof MemberDashboardRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/e-wallet': {
+      id: '/_member/e-wallet'
+      path: '/e-wallet'
+      fullPath: '/e-wallet'
+      preLoaderRoute: typeof MemberEWalletRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/payment-history': {
+      id: '/_member/payment-history'
+      path: '/payment-history'
+      fullPath: '/payment-history'
+      preLoaderRoute: typeof MemberPaymentHistoryRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/profile': {
+      id: '/_member/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof MemberProfileRouteImport
+      parentRoute: typeof MemberRoute
+    }
+    '/_member/setting': {
+      id: '/_member/setting'
+      path: '/setting'
+      fullPath: '/setting'
+      preLoaderRoute: typeof MemberSettingRouteImport
+      parentRoute: typeof MemberRoute
+    }
   }
 }
 
+interface GuestRouteChildren {
+  GuestLoginRoute: typeof GuestLoginRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestLoginRoute: GuestLoginRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
+
+interface MemberRouteChildren {
+  MemberDashboardRoute: typeof MemberDashboardRoute
+  MemberEWalletRoute: typeof MemberEWalletRoute
+  MemberPaymentHistoryRoute: typeof MemberPaymentHistoryRoute
+  MemberProfileRoute: typeof MemberProfileRoute
+  MemberSettingRoute: typeof MemberSettingRoute
+}
+
+const MemberRouteChildren: MemberRouteChildren = {
+  MemberDashboardRoute: MemberDashboardRoute,
+  MemberEWalletRoute: MemberEWalletRoute,
+  MemberPaymentHistoryRoute: MemberPaymentHistoryRoute,
+  MemberProfileRoute: MemberProfileRoute,
+  MemberSettingRoute: MemberSettingRoute,
+}
+
+const MemberRouteWithChildren =
+  MemberRoute._addFileChildren(MemberRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GuestRoute: GuestRouteWithChildren,
+  MemberRoute: MemberRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

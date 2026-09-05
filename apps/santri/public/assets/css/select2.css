@@ -1,0 +1,143 @@
+html .select2-container {
+	width: 100% !important;
+}
+
+html .select2-container--default .select2-selection--single {
+	border: 2px solid #EEEEEE;
+	border-radius: 0.375rem;
+	padding-right: 16px;
+	padding-left: 16px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+html .tbr_service_filter .select2-container--default .select2-selection--single {
+	height: 40px;
+}
+
+html .select2-container--default .select2-selection--single .select2-selection__rendered {
+	color: var(--body-txt-color);
+	line-height: 28px;
+	margin: 0;
+	padding: 0;
+}
+
+html .select2-container--default.select2-container--open.select2-container--above .select2-selection--single,
+html .select2-container--default.select2-container--open.select2-container--above .select2-selection--multiple,
+html .select2-container--default.select2-container--open.select2-container--below .select2-selection--single,
+html .select2-container--default.select2-container--open.select2-container--below .select2-selection--multiple {
+	border: 2px solid var(--secondary);
+	border-radius: 5px;
+}
+
+html .select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 100%;
+	top: 1px;
+	right: 7px;
+	background-image: url('../svg/icons/form_select_arrow.svg');
+	background-position: center;
+	background-size: initial;
+	background-repeat: no-repeat;
+}
+
+html .select2-container--default .select2-selection--single .select2-selection__arrow b {
+	display: none;
+}
+
+html .select2-search--dropdown {
+	padding: 0.75rem;
+}
+
+html .select2-container--default .select2-search--dropdown .select2-search__field {
+	border: none;
+	outline: none;
+	box-shadow: none;
+	background: #F4F7F0;
+	border-radius: 6px;
+	padding-right: 16px;
+	padding-left: 16px;
+	color: #777777;
+	height: 40px;
+	margin-bottom: 0;
+}
+
+html .select2-container--open .select2-dropdown--above,
+html .select2-container--open .select2-dropdown--below {
+	border-radius: 10px;
+	border: none;
+	-webkit-box-shadow: 0px 18px 32px 0px rgba(0, 0, 0, 0.12);
+	-moz-box-shadow: 0px 18px 32px 0px rgba(0, 0, 0, 0.12);
+	box-shadow: 0px 18px 32px 0px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
+	padding: 0;
+}
+
+html .select2-results__option {
+	padding: 6px;
+	user-select: none;
+	-webkit-user-select: none;
+    border-radius: 6px;
+    padding-top: 9px;
+    padding-right: 20px;
+    padding-bottom: 8px;
+    padding-left: 20px;
+	margin-bottom: 4px;
+}
+
+html .select2-results__option:last-child {
+	margin-bottom: 0;
+}
+
+html .select2-container--default .select2-results__option[aria-selected=true] {
+	background-color: transparent;
+	color: var(--secondary);
+}
+
+html .select2-container--default .select2-results__option--highlighted[aria-selected] {
+	background-color: var(--secondary);
+	color: #FFFFFF;
+	box-shadow: var(--box-shadow-h-offset) var(--box-shadow-v-offset) var(--box-shadow-blur) rgba(var(--rgb-secondary), var(--box-shadow-opacity));
+}
+
+html select.is-invalid + .select2 span.select2-selection {
+    border-color: var(--danger);
+}
+
+html .select2-container--default .select2-results > .select2-results__options {
+    padding: 0 12px 12px 12px;
+}
+
+html .tbr_select-lg .select2-container--default .select2-selection--single {
+    min-height: 48px;
+    padding-right: 20px;
+    padding-left: 20px;
+    border-radius: 8px;
+}
+
+html .tbr_select-lg .select2-container .select2-selection--single .select2-selection__rendered {
+    font-size: 13px;
+}
+
+html .tbr_select-lg .select2-container--default .select2-selection--single .select2-selection__arrow {
+	right: 12px;
+}
+
+html select.form-control option[disabled],
+html .select2-selection__rendered[title='Select'],
+html .select2-selection__rendered[title='Provinsi'],
+html .select2-selection__rendered[title='Kabupaten'],
+html .select2-selection__rendered[title='Kecamatan'] {
+	color: var(--grey) !important;
+}
+
+@media only screen and (max-width: 768px) {
+    html .select2-container--default .select2-selection--single .select2-selection__arrow {
+        top: 0px;
+    }
+}
+
+html select.is-invalid + .select2 span.select2-selection {
+    border-color: var(--danger) !important;
+}

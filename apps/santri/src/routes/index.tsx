@@ -1,27 +1,26 @@
 import type { JSX } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-
-const IndexPage = (): JSX.Element => {
-	return (
-		<div
-			style={{
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				minHeight: "100vh",
-				fontFamily: "Montserrat, sans-serif",
-				flexDirection: "column",
-				gap: "8px",
-			}}
-		>
-			<h1 style={{ fontSize: "24px", color: "var(--primary)" }}>
-				Pondok Roja — Santri
-			</h1>
-			<p style={{ color: "var(--muted-txt-color)" }}>Phase 0 bootstrap complete ✓</p>
-		</div>
-	)
-}
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import useAuthStore from "@/stores/auth.store"
+import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 export const Route = createFileRoute("/")({
-	component: IndexPage,
+	beforeLoad: () => {
+		if (IS_DEV_HIJACK) {
+			const auth = useAuthStore.getState()
+			if (auth.isAuthenticated) {
+				throw redirect({ to: "/dashboard" })
+			} else {
+				throw redirect({ to: "/login" })
+			}
+		}
+		const auth = useAuthStore.getState()
+		if (auth.isAuthenticated) {
+			throw redirect({ to: "/dashboard" })
+		} else {
+			throw redirect({ to: "/login" })
+		}
+	},
+	component: (): JSX.Element | null => null,
 })
+
+export default Route
