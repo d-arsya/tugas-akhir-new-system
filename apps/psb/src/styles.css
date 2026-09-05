@@ -1,5 +1,8 @@
 @import "@roja/ui/src/styles/globals.css";
-@import "../public/assets/css/wizard.css";
+@import "../../../libs/ui/public/assets/css/wizard.css";
+
+
+
 
 /* PSB custom overrides & responsive layout helpers */
 .roja_wizard_container {

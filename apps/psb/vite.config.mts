@@ -7,6 +7,7 @@ import { resolve } from "path"
 
 export default defineConfig(() => ({
 	root: import.meta.dirname,
+	publicDir: resolve(import.meta.dirname, "../../libs/ui/public"),
 	cacheDir: `../../node_modules/.vite/apps/psb`,
 	server: {
 		port: 4200,
@@ -35,5 +36,5 @@ export default defineConfig(() => ({
 		emptyOutDir: true,
 		reportCompressedSize: true,
 		commonjsOptions: { transformMixedEsModules: true },
-	}
+	},
 }))
