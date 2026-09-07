@@ -4,11 +4,11 @@ import { createFileRoute } from "@tanstack/react-router"
 import { RojaCard, Button, Input, Label, Alert, AlertDescription } from "@roja/ui"
 import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
+import { CheckCircle2, AlertCircle } from "lucide-react"
 
 const SettingPage = (): JSX.Element => {
 	const { user } = useAuthStore()
 
-	// Card 1 Form State (Akun aplikasi)
 	const [email, setEmail] = useState<string>("")
 	const [password, setPassword] = useState<string>("")
 	const [passwordConfirmation, setPasswordConfirmation] = useState<string>("")
@@ -16,12 +16,10 @@ const SettingPage = (): JSX.Element => {
 	const [accountLoading, setAccountLoading] = useState<boolean>(false)
 	const [accountMessage, setAccountMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-	// Card 2 Form State (Keamanan 2FA)
 	const [enabled2fa, setEnabled2fa] = useState<number>(1)
 	const [securityLoading, setSecurityLoading] = useState<boolean>(false)
 	const [securityMessage, setSecurityMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-	// Load initial email status
 	useEffect(() => {
 		const fetchEmailStatus = async () => {
 			try {
@@ -30,7 +28,7 @@ const SettingPage = (): JSX.Element => {
 					setEmail(res.email)
 					setIsVerified(!!res.emailVerifiedAt)
 				}
-			} catch (err) {
+			} catch {
 				if (user?.email) {
 					setEmail(user.email)
 					setIsVerified(true)
@@ -40,7 +38,6 @@ const SettingPage = (): JSX.Element => {
 		fetchEmailStatus()
 	}, [user])
 
-	// Handle Account Update
 	const handleAccountSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setAccountMessage(null)
@@ -48,7 +45,6 @@ const SettingPage = (): JSX.Element => {
 			setAccountMessage({ type: "error", text: "Konfirmasi password tidak cocok." })
 			return
 		}
-
 		setAccountLoading(true)
 		try {
 			const res = await santriApi.updateAccountSettings({
@@ -66,7 +62,6 @@ const SettingPage = (): JSX.Element => {
 		}
 	}
 
-	// Handle 2FA Update
 	const handleSecuritySubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setSecurityMessage(null)
@@ -81,7 +76,6 @@ const SettingPage = (): JSX.Element => {
 		}
 	}
 
-	// Handle Resend Verification Email
 	const handleResendVerification = async () => {
 		try {
 			const res = await santriApi.resendSettingEmailVerification()
@@ -93,14 +87,10 @@ const SettingPage = (): JSX.Element => {
 
 	return (
 		<div className="flex flex-col gap-6 w-full">
-			{/* Card 1: Akun aplikasi (matching setting/index.blade.php) */}
 			<RojaCard className="p-6 md:p-8 rounded-2xl shadow-sm border-slate-100 bg-white">
-				{/* Header Intro */}
 				<div className="mb-6">
 					<h3 className="text-base sm:text-lg font-bold text-slate-800">Akun aplikasi</h3>
-					<p className="text-xs text-slate-500 mt-0.5">
-						Kamu dapat mengganti password akun setiap saat.
-					</p>
+					<p className="text-xs text-slate-500 mt-0.5">Kamu dapat mengganti password akun setiap saat.</p>
 				</div>
 
 				{accountMessage && (
@@ -113,7 +103,6 @@ const SettingPage = (): JSX.Element => {
 				)}
 
 				<form onSubmit={handleAccountSubmit} className="flex flex-col gap-5 w-full">
-					{/* Email Field with Verification Status */}
 					<div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-start">
 						<Label className="md:col-span-4 text-xs font-semibold text-slate-600 md:text-right md:pt-2.5">
 							Email
@@ -127,37 +116,13 @@ const SettingPage = (): JSX.Element => {
 									onChange={(e) => setEmail(e.target.value)}
 									className="h-10 text-xs rounded-xl border-slate-200 bg-white"
 								/>
-								{/* Verification Status Badge Icon */}
 								<div className="shrink-0 flex items-center justify-center">
 									{isVerified && email ? (
-										<svg
-											title="Terverifikasi"
-											xmlns="http://www.w3.org/2000/svg"
-											width="24"
-											height="24"
-											viewBox="0 0 24 24"
-										>
-											<path
-												d="M9.86,18a1,1,0,0,1-.73-.32L4.27,12.51a1,1,0,1,1,1.46-1.37l4.12,4.39,8.41-9.2a1,1,0,1,1,1.48,1.34l-9.14,10a1,1,0,0,1-.73.33Z"
-												fill="#36B45E"
-											/>
-										</svg>
+										<CheckCircle2 className="w-5 h-5 text-emerald-500" />
 									) : email ? (
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32">
-											<g transform="translate(-3 -3)">
-												<circle cx="16" cy="16" r="16" transform="translate(3 3)" fill="#FFA801" opacity="0.3" />
-												<rect width="3" height="13" rx="1" transform="translate(18 11)" fill="#FFA801" />
-												<rect width="3" height="3" rx="1" transform="translate(18 26)" fill="#FFA801" />
-											</g>
-										</svg>
+										<AlertCircle className="w-5 h-5 text-amber-500" />
 									) : (
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32">
-											<g transform="translate(-3 -3)">
-												<circle cx="16" cy="16" r="16" transform="translate(3 3)" fill="#F8374B" opacity="0.3" />
-												<rect width="3" height="13" rx="1" transform="translate(18 11)" fill="#F8374B" />
-												<rect width="3" height="3" rx="1" transform="translate(18 26)" fill="#F8374B" />
-											</g>
-										</svg>
+										<AlertCircle className="w-5 h-5 text-rose-500" />
 									)}
 								</div>
 							</div>
@@ -176,7 +141,6 @@ const SettingPage = (): JSX.Element => {
 						</div>
 					</div>
 
-					{/* Password Field */}
 					<div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-start">
 						<Label className="md:col-span-4 text-xs font-semibold text-slate-600 md:text-right md:pt-2.5">
 							Password
@@ -188,13 +152,10 @@ const SettingPage = (): JSX.Element => {
 								onChange={(e) => setPassword(e.target.value)}
 								className="h-10 text-xs rounded-xl border-slate-200 bg-white"
 							/>
-							<span className="text-[11px] text-slate-400">
-								Kosongkan jika tidak ingin mengganti password.
-							</span>
+							<span className="text-[11px] text-slate-400">Kosongkan jika tidak ingin mengganti password.</span>
 						</div>
 					</div>
 
-					{/* Konfirmasi Password Field */}
 					<div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-start">
 						<Label className="md:col-span-4 text-xs font-semibold text-slate-600 md:text-right md:pt-2.5">
 							Konfirmasi Password
@@ -206,13 +167,10 @@ const SettingPage = (): JSX.Element => {
 								onChange={(e) => setPasswordConfirmation(e.target.value)}
 								className="h-10 text-xs rounded-xl border-slate-200 bg-white"
 							/>
-							<span className="text-[11px] text-slate-400">
-								Kosongkan jika tidak ingin mengganti password.
-							</span>
+							<span className="text-[11px] text-slate-400">Kosongkan jika tidak ingin mengganti password.</span>
 						</div>
 					</div>
 
-					{/* Submit Action */}
 					<div className="grid grid-cols-1 md:grid-cols-12 gap-4">
 						<div className="md:col-start-5 md:col-span-7">
 							<Button
@@ -227,9 +185,7 @@ const SettingPage = (): JSX.Element => {
 				</form>
 			</RojaCard>
 
-			{/* Card 2: Keamanan (matching setting/index.blade.php) */}
 			<RojaCard className="p-6 md:p-8 rounded-2xl shadow-sm border-slate-100 bg-white">
-				{/* Header Intro */}
 				<div className="mb-6">
 					<h3 className="text-base sm:text-lg font-bold text-slate-800">Keamanan</h3>
 					<p className="text-xs text-slate-500 mt-0.5">
@@ -275,7 +231,6 @@ const SettingPage = (): JSX.Element => {
 						</div>
 					</div>
 
-					{/* Submit Action */}
 					<div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
 						<div className="md:col-start-5 md:col-span-7">
 							<Button
@@ -298,3 +253,4 @@ export const Route = createFileRoute("/_member/setting")({
 })
 
 export default SettingPage
+

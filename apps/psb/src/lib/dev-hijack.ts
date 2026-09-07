@@ -1,17 +1,25 @@
 import type { PsbApi } from "@roja/api-client"
-import type { AuthUser } from "@roja/types"
+import {
+	hijackAuthUser,
+	mockDashboardData,
+	mockWizardPersonalData,
+	mockWizardIdentityData,
+	mockWizardFamilyData,
+	mockWizardGuardianData,
+	type DashboardScenario,
+} from "./dev-hijack.fixtures"
 
-export const IS_DEV_HIJACK = import.meta.env.VITE_DEV_HIJACK === "true"
-
-export const hijackAuthUser: AuthUser = {
-	id: 999,
-	email: "calonsantri@pondokroja.ac.id",
-	name: "Ahmad Mujtaba",
-	role: "registrant",
-	domain: "psb",
+export {
+	hijackAuthUser,
+	mockDashboardData,
+	mockWizardPersonalData,
+	mockWizardIdentityData,
+	mockWizardFamilyData,
+	mockWizardGuardianData,
+	type DashboardScenario,
 }
 
-export type DashboardScenario = "wait" | "fixed" | "invalid" | "approve" | "failed" | "indent_failed"
+export const IS_DEV_HIJACK = import.meta.env.VITE_DEV_HIJACK === "true"
 
 export const getStoredScenario = (): DashboardScenario => {
 	if (typeof window === "undefined") return "approve"
@@ -31,354 +39,74 @@ export const setStoredScenario = (scenario: DashboardScenario) => {
 	}
 }
 
-const mockRegistrantBase = {
-	id: 999,
-	registrantId: "PSB-2026-0999",
-	fullname: "Ahmad Mujtaba",
-	fullName: "Ahmad Mujtaba",
-	email: "calonsantri@pondokroja.ac.id",
-	levelId: 1,
-	dataValidation: "valid" as const,
-	dataValidationNote: "",
-	approvalStatus: "wait" as const,
-}
-
-export const mockDashboardData: Record<DashboardScenario, any> = {
-	wait: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "valid",
-			approvalStatus: "wait",
-		},
-		announcement: null,
-		statusInfo: {
-			status: "wait",
-			label: "Menunggu Verifikasi",
-			description: "Data Anda sedang diverifikasi oleh panitia PSB.",
-		},
-	},
-	fixed: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "fixed",
-			approvalStatus: "wait",
-		},
-		announcement: null,
-		statusInfo: {
-			status: "fixed",
-			label: "Perbaikan Data Tersimpan",
-			description: "Kamu berhasil melakukan update data. Silakan tunggu keputusan selanjutnya dari admin.",
-		},
-	},
-	invalid: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "invalid",
-			dataValidationNote: "• Foto ijazah buram / tidak terbaca.<br/>• Nomor NIK tidak sesuai dengan Kartu Keluarga.",
-			approvalStatus: "wait",
-		},
-		announcement: null,
-		statusInfo: {
-			status: "invalid",
-			label: "Data / Berkas Tidak Valid",
-			description: "Panitia menemukan beberapa data/berkas yang tidak valid. Silakan lakukan perbaikan data.",
-		},
-	},
-	approve: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "valid",
-			approvalStatus: "approve",
-		},
-		announcement: {
-			successDesc: "Selamat, calon santri atas nama <strong>Ahmad Mujtaba</strong> dinyatakan <strong>LULUS SELEKSI</strong> Penerimaan Santri Baru Pondok Roja Tahun Ajaran 2026/2027.",
-			dateStart: "2026-09-10",
-			dateEnd: "2026-09-20",
-			information: "Silakan melakukan pembayaran uang pangkal dan membawa berkas fisik asli (Ijazah, KK, Akta Kelahiran) ke sekretariat panitia PSB.",
-			additionalInformation: "Pertemuan wali santri baru akan dilaksanakan pada tanggal 25 September 2026 di Aula Utama Pondok Roja.",
-		},
-		statusInfo: {
-			status: "approve",
-			label: "Diterima / Lulus",
-			description: "Selamat! Anda dinyatakan DITERIMA sebagai Santri Baru Pondok Roja.",
-		},
-	},
-	failed: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "valid",
-			approvalStatus: "reject",
-		},
-		announcement: {
-			failedDesc: "Mohon maaf, calon santri atas nama <strong>Ahmad Mujtaba</strong> belum berhasil lulus seleksi PSB periode ini karena kuota pendaftaran telah terpenuhi.",
-		},
-		statusInfo: {
-			status: "failed",
-			label: "Belum Diterima",
-			description: "Mohon maaf, Anda belum berhasil lulus pada seleksi PSB periode ini.",
-		},
-	},
-	indent_failed: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "valid",
-			approvalStatus: "indent failed",
-		},
-		announcement: {
-			failedIndentTestDesc: "Hasil tes indent menyatakan calon santri belum memenuhi kriteria minimal pembacaan Al-Qur'an dan hafalan dasar.",
-		},
-		statusInfo: {
-			status: "indent_failed",
-			label: "Tes Indent Belum Lulus",
-			description: "Hasil tes indent pendaftaran santri baru menyatakan Anda belum lulus.",
-		},
-	},
-}
-
-export const mockWizardPersonalData = {
-	fullName: "Ahmad Mujtaba",
-	shortName: "Ahmad",
-	religion: "Islam",
-	gender: "male",
-	placeOfBirth: "Jakarta",
-	dateOfBirth: "2012-05-15",
-	nationality: "wni",
-	liveWith: "parent",
-	siblingOrder: 1,
-	numberOfSiblings: 2,
-	parentStatus: "complete",
-	childStatus: "kandung",
-	phone: "081234567890",
-	nik: "3171011505120001",
-	nisn: "0051234567",
-	ksp: "",
-	kip: "",
-	certificateNumber: "DN-01/D-SD/12/0001",
-	provinceId: 31,
-	regencyId: 3171,
-	districtId: 317101,
-	village: "Cilandak Barat",
-	subVillage: "RT 02 / RW 05",
-	rt: "02",
-	rw: "05",
-	street: "Jl. Pondok Indah No. 12",
-	address: "Jl. Pondok Indah No. 12, RT 02 / RW 05",
-	postalCode: "12430",
-	previousSchoolName: "SD Islam Terpadu Al-Azhar",
-	previousSchoolPhone: "0217654321",
-	previousSchoolProvinceId: 31,
-	previousSchoolRegencyId: 3171,
-	previousSchoolDistrictId: 317101,
-	previousSchoolAddressDetail: "Jl. Sisingamangaraja No. 1",
-	previousSchoolPostalCode: "12110",
-}
-
-export const mockWizardIdentityData = {
-	nik: "3171011505120001",
-	nisn: "0051234567",
-	kip: "",
-	ksp: "",
-	certificateNumber: "DN-01/D-SD/12/0001",
-	weight: 45,
-	height: 152,
-	bloodType: "O",
-	visualCondition: "normal",
-	hearingCondition: "normal",
-	immunizationGiven: "complete",
-	diseaseHistories: [{ name: "Asma Ringan", status: "Sembuh" }],
-	learningAchievment: "Juara 1 Lomba LCT Al-Qur'an Tingkat Kecamatan",
-	reading: "quran",
-	jilidChapter: "Juz 30",
-	quranMemorizing: "Juz 30 (An-Naas s/d An-Naba)",
-	gift: "Bisa Tilawah",
-}
-
-export const mockWizardFamilyData = {
-	fatherName: "Budi Santoso",
-	fatherReligion: "Islam",
-	fatherNationality: "wni",
-	fatherLastEducation: "s1",
-	fatherOccupation: "Wiraswasta",
-	fatherIncome: 10000000,
-	fatherPhone: "08111222333",
-	fatherStatus: "hidup",
-	motherName: "Siti Rahmah",
-	motherReligion: "Islam",
-	motherNationality: "wni",
-	motherLastEducation: "s1",
-	motherOccupation: "Ibu Rumah Tangga",
-	motherIncome: 0,
-	motherPhone: "08111222444",
-	motherStatus: "hidup",
-	numberOfSiblings: 2,
-	childOrder: 1,
-	familyStatus: "complete",
-	familyProvinceId: 31,
-	familyRegencyId: 3171,
-	familyDistrictId: 317101,
-	familyVillage: "Cilandak Barat",
-	familyStreet: "Jl. Pondok Indah No. 12",
-	familyRt: "02",
-	familyRw: "05",
-	familySubVillage: "-",
-}
-
-export const mockWizardGuardianData = {
-	guardianName: "Budi Santoso",
-	guardianReligion: "Islam",
-	guardianNationality: "wni",
-	guardianLastEducation: "s1",
-	guardianRelationship: "Ayah Kandung",
-	guardianOccupation: "Wiraswasta",
-	guardianIncome: 10000000,
-	guardianPhone: "08111222333",
-	guardianAddress: "Jl. Pondok Indah No. 12",
-	guardianProvinceId: 31,
-	guardianRegencyId: 3171,
-	guardianDistrictId: 317101,
-	guardianVillage: "Cilandak Barat",
-	guardianStreet: "Jl. Pondok Indah No. 12",
-	guardianRt: "02",
-	guardianRw: "05",
-	guardianSubVillage: "-",
-}
-
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const hijackPsbApi = (realApi: PsbApi): PsbApi => {
 	if (!IS_DEV_HIJACK) return realApi
 
 	return {
-		getLanding: async () => {
-			await delay()
+		...realApi,
+		login: async (_credentials) => {
+			await delay(400)
 			return {
-				academicYear: {
-					id: 1,
-					name: "2026/2027",
-					type: "reguler",
-					year: "2026",
-					isActive: true,
-					note: "PSB Reguler dibuka untuk tahun ajaran 2026/2027. Harap isi email dengan benar untuk pengiriman password.",
-					createdAt: "2026-01-01",
-					updatedAt: "2026-01-01",
-				},
-				isOpen: true,
-				schoolName: "Pondok Roja",
-				levels: [
-					{ id: 1, name: "Setingkat SMP (TMQ)" },
-					{ id: 2, name: "Setingkat SMA (TMQ)" },
-				],
-			}
-		},
-
-		checkEmail: async () => {
-			await delay()
-			return { sessionId: "mock-session-12345" }
-		},
-
-		getWizardStep: async (step) => {
-			await delay()
-			if (step === "personal") return mockWizardPersonalData
-			if (step === "identity") return mockWizardIdentityData
-			if (step === "family") return mockWizardFamilyData
-			if (step === "guardian") return mockWizardGuardianData
-			return {}
-		},
-
-		saveWizardStep: async () => {
-			await delay()
-			return { success: true }
-		},
-
-		submitAttachment: async () => {
-			await delay(600)
-			return {
-				tokens: { accessToken: "mock-access-token", refreshToken: "mock-refresh-token" },
+				accessToken: "mock-psb-access-token",
+				refreshToken: "mock-psb-refresh-token",
 				user: hijackAuthUser,
-				registrantId: "PSB-2026-0999",
-			}
-		},
-
-		getSuccess: async () => {
-			await delay()
-			return {
-				registrantId: "PSB-2026-0999",
-				fullName: "Ahmad Mujtaba",
-				email: "calonsantri@pondokroja.ac.id",
-			}
-		},
-
-		getPrintProof: async () => {
-			await delay()
-			return {
-				registrant: mockRegistrantBase,
-				academicYear: { name: "2026/2027" },
-				levelName: "Setingkat SMP (TMQ)",
-				printDate: new Date().toISOString(),
-			}
-		},
-
-		login: async (data) => {
-			await delay(500)
-			if (data.email.includes("2fa")) {
-				return { requires2fa: true, email: data.email }
-			}
-			return {
 				requires2fa: false,
-				tokens: { accessToken: "mock-access-token", refreshToken: "mock-refresh-token" },
-				user: hijackAuthUser,
+				email: hijackAuthUser.email,
 			}
 		},
-
-		verify2fa: async () => {
-			await delay()
+		register: async (_data) => {
+			await delay(500)
 			return {
-				tokens: { accessToken: "mock-access-token", refreshToken: "mock-refresh-token" },
-				user: hijackAuthUser,
+				registrantId: "PSB-2026-0999",
+				sessionId: "mock-session-12345",
+				email: hijackAuthUser.email,
+				message: "Registrasi akun berhasil. Kode OTP verifikasi telah dikirimkan ke email Anda.",
 			}
 		},
-
-		resend2fa: async (email) => {
-			await delay()
-			return { message: "Kode 2FA berhasil dikirim ulang ke " + email }
-		},
-
-		refreshToken: async () => {
-			await delay()
-			return { success: true }
-		},
-
-		logout: async () => {
-			await delay(200)
-			return { success: true }
-		},
-
-		forgotPassword: async () => {
+		verifyEmail: async (_token) => {
 			await delay(400)
-			return { success: true }
+			return {
+				message: "Email berhasil diverifikasi. Silakan masuk ke Member Area.",
+			}
 		},
-
-		resetPassword: async () => {
+		resendVerification: async (_email) => {
 			await delay(400)
-			return { success: true }
+			return {
+				message: "Email verifikasi baru telah berhasil dikirimkan.",
+			}
 		},
-
-		verifyEmail: async () => {
-			await delay(300)
-			return { message: "Email berhasil diverifikasi." }
+		forgotPassword: async (_email) => {
+			await delay(400)
+			return {
+				message: "Link reset password telah dikirim ke email Anda.",
+			}
 		},
-
-		resendVerification: async (email) => {
-			await delay(300)
-			return { message: `Link verifikasi email baru telah berhasil dikirimkan ke ${email}.` }
+		resetPassword: async (_data) => {
+			await delay(400)
+			return {
+				message: "Password Anda berhasil diperbarui.",
+			}
 		},
-
 		getDashboard: async () => {
-			await delay(200)
+			await delay(300)
 			const scenario = getStoredScenario()
 			return mockDashboardData[scenario] || mockDashboardData.approve
 		},
-
+		getWizardStep: async (step, _sessionId) => {
+			await delay(300)
+			if (step === "personal") return mockWizardPersonalData as any
+			if (step === "identity") return mockWizardIdentityData as any
+			if (step === "family") return mockWizardFamilyData as any
+			if (step === "guardian") return mockWizardGuardianData as any
+			if (step === "attachment") return {} as any
+			return {} as any
+		},
+		saveWizardStep: async (_step, _sessionId, data) => {
+			await delay(400)
+			return data as any
+		},
 		getInvalidData: async () => {
 			await delay(300)
 			return {
@@ -386,40 +114,30 @@ export const hijackPsbApi = (realApi: PsbApi): PsbApi => {
 				identity: mockWizardIdentityData,
 				family: mockWizardFamilyData,
 				guardian: mockWizardGuardianData,
-			}
+			} as any
 		},
-
-		updateInvalidStep: async () => {
+		updateInvalidStep: async (_step, data) => {
 			await delay(400)
-			return { success: true }
+			return data as any
 		},
-
-		updateInvalidAttachment: async () => {
+		updateInvalidAttachment: async (_files) => {
 			await delay(500)
-			return { success: true }
+			return { message: "Berkas perbaikan berhasil diperbarui." }
 		},
-
-		getProfile: async () => {
-			await delay(200)
+		getPrintProof: async (type, _registrantId) => {
+			await delay(300)
+			const scenarioData = mockDashboardData.approve
 			return {
-				...hijackAuthUser,
-				enabled2fa: false,
+				type,
+				registrant: scenarioData.registrant,
+				school: {
+					name: "TMQ PONDOK ROJA",
+					logo: "/assets/svg/etc/Logo.svg",
+					phone: "81392104443",
+					fullAddress: "Brumbung RT 03/02 Kelurahan Dukuh\nKecamatan Sukoharjo, Kabupaten Sukoharjo\nProvinsi Jawa Tengah",
+				},
+				announcement: scenarioData.announcement,
 			}
-		},
-
-		updateProfile: async () => {
-			await delay(300)
-			return { success: true }
-		},
-
-		updateAccount: async () => {
-			await delay(400)
-			return { success: true }
-		},
-
-		toggle2fa: async () => {
-			await delay(300)
-			return { success: true }
 		},
 	}
 }

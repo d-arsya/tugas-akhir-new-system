@@ -2,33 +2,16 @@ import type { JSX } from "react"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
-import { AlertTriangle, Download, CheckCircle, XCircle, Info, Calendar } from "lucide-react"
+import { AlertTriangle, Download, CheckCircle } from "lucide-react"
 import {
 	Button,
 	Badge,
 	Alert,
 	AlertTitle,
 	AlertDescription,
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
 	Skeleton,
 } from "@roja/ui"
-
-const formatDate = (dateStr?: string | null): string => {
-	if (!dateStr) return ""
-	try {
-		const d = new Date(dateStr)
-		return d.toLocaleDateString("id-ID", {
-			day: "numeric",
-			month: "long",
-			year: "numeric",
-		})
-	} catch {
-		return dateStr
-	}
-}
+import { AnnouncementResultCard } from "@/components/dashboard/AnnouncementResultCard"
 
 const DashboardPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -180,142 +163,8 @@ const DashboardPage = (): JSX.Element => {
 				</Alert>
 			)}
 
-			{/* 4. Approve (Diterima) */}
-			{status === "approve" && (
-				<div className="flex flex-col gap-6">
-					<Alert variant="success" className="flex flex-col gap-2 p-6">
-						<div className="flex items-center gap-2.5 font-bold text-base">
-							<CheckCircle className="w-6 h-6 shrink-0" />
-							<span>Selamat! Anda Diterima Sebagai Santri Baru</span>
-						</div>
-						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
-							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
-						</AlertDescription>
-					</Alert>
-
-					{announcement && (
-						<Card className="border-slate-200 shadow-sm">
-							<CardHeader className="border-b border-slate-100 pb-3">
-								<CardTitle className="text-xs font-bold text-[var(--primary)] tracking-wider uppercase flex items-center gap-2">
-									<Info className="w-4 h-4" />
-									<span>Detail Hasil Seleksi & Daftar Ulang</span>
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="pt-5">
-								<div className="grid grid-cols-1 md:grid-cols-12 gap-y-4 gap-x-6 text-xs">
-									{/* Keterangan Kelulusan */}
-									{announcement.successDesc && (
-										<>
-											<div className="md:col-span-3 font-bold text-slate-600">Keterangan</div>
-											<div
-												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-												dangerouslySetInnerHTML={{ __html: announcement.successDesc }}
-											/>
-										</>
-									)}
-
-									{/* Jadwal Daftar Ulang */}
-									{(announcement.dateStart || announcement.dateEnd) && (
-										<>
-											<div className="md:col-span-3 font-bold text-slate-600 flex items-center gap-1.5">
-												<Calendar className="w-3.5 h-3.5 text-slate-400" />
-												<span>Jadwal Daftar Ulang</span>
-											</div>
-											<div className="md:col-span-9 text-slate-800 font-semibold">
-												{formatDate(announcement.dateStart)} s/d {formatDate(announcement.dateEnd)}
-											</div>
-										</>
-									)}
-
-									{/* Berkas Daftar Ulang */}
-									{announcement.information && (
-										<>
-											<div className="md:col-span-3 font-bold text-slate-600">Berkas Daftar Ulang</div>
-											<div
-												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-												dangerouslySetInnerHTML={{ __html: announcement.information }}
-											/>
-										</>
-									)}
-
-									{/* Pengumuman Tambahan */}
-									{announcement.additionalInformation && (
-										<>
-											<div className="md:col-span-3 font-bold text-slate-600">Pengumuman Lainnya</div>
-											<div
-												className="md:col-span-9 text-slate-800 leading-relaxed font-medium"
-												dangerouslySetInnerHTML={{ __html: announcement.additionalInformation }}
-											/>
-										</>
-									)}
-								</div>
-							</CardContent>
-						</Card>
-					)}
-				</div>
-			)}
-
-			{/* 5. Failed (Belum Lulus) */}
-			{status === "failed" && (
-				<div className="flex flex-col gap-6">
-					<Alert variant="destructive" className="flex flex-col gap-2 p-6">
-						<div className="flex items-center gap-2.5 font-bold text-base">
-							<XCircle className="w-6 h-6 shrink-0" />
-							<span>Hasil Seleksi: Belum Diterima</span>
-						</div>
-						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
-							Berikut kami umumkan hasil penerimaan santri baru Pondok Roja.
-						</AlertDescription>
-					</Alert>
-
-					{announcement?.failedDesc && (
-						<Card className="border-slate-200 shadow-sm">
-							<CardHeader className="border-b border-slate-100 pb-3">
-								<CardTitle className="text-xs font-bold text-slate-600 tracking-wider uppercase">
-									Keterangan
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="pt-4">
-								<div
-									className="text-xs text-slate-700 leading-relaxed font-medium"
-									dangerouslySetInnerHTML={{ __html: announcement.failedDesc }}
-								/>
-							</CardContent>
-						</Card>
-					)}
-				</div>
-			)}
-
-			{/* 6. Indent Failed (Gagal Tes Indent) */}
-			{status === "indent_failed" && (
-				<div className="flex flex-col gap-6">
-					<Alert variant="warning" className="flex flex-col gap-2 p-6">
-						<div className="flex items-center gap-2.5 font-bold text-base">
-							<AlertTriangle className="w-6 h-6 shrink-0" />
-							<span>Hasil Tes Indent: Belum Lulus</span>
-						</div>
-						<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
-							Berikut kami umumkan hasil tes indent pendaftaran santri baru.
-						</AlertDescription>
-					</Alert>
-
-					{announcement?.failedIndentTestDesc && (
-						<Card className="border-slate-200 shadow-sm">
-							<CardHeader className="border-b border-slate-100 pb-3">
-								<CardTitle className="text-xs font-bold text-slate-600 tracking-wider uppercase">
-									Keterangan
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="pt-4">
-								<div
-									className="text-xs text-slate-700 leading-relaxed font-medium"
-									dangerouslySetInnerHTML={{ __html: announcement.failedIndentTestDesc }}
-								/>
-							</CardContent>
-						</Card>
-					)}
-				</div>
-			)}
+			{/* 4/5/6. Announcement Result Card (Approve / Failed / Indent Failed) */}
+			<AnnouncementResultCard status={status} announcement={announcement} />
 		</div>
 	)
 }
@@ -325,3 +174,4 @@ export const Route = createFileRoute("/_member/dashboard")({
 })
 
 export default DashboardPage
+
