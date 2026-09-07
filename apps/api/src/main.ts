@@ -5,8 +5,8 @@ import { cleanupOpenApiDoc, ZodValidationPipe } from "nestjs-zod"
 import { Logger as PinoLogger } from "nestjs-pino"
 import cookieParser from "cookie-parser"
 import { AppModule } from "./app.module"
-import { HttpExceptionFilter } from "./core/filters/http-exception.filter"
-import { TransformInterceptor } from "./core/interceptors/transform.interceptor"
+import { HttpExceptionFilter } from "@core/filters/http-exception.filter"
+import { TransformInterceptor } from "@core/interceptors/transform.interceptor"
 import type { Request, Response } from "express"
 
 async function bootstrap(): Promise<void> {

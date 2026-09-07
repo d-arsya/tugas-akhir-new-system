@@ -3,8 +3,9 @@ import { ConfigService } from "@nestjs/config"
 import { MailerModule as NestMailerModule } from "@nestjs-modules/mailer"
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/adapters/handlebars.adapter"
 import { join } from "path"
-import { MailerService } from "./mailer.service"
-import type { Env } from "../config/env.validation"
+import { MailerService } from "@core/mailer/mailer.service"
+import { EmailListener } from "@core/mailer/listeners/email.listener"
+import type { Env } from "@core/config/env.validation"
 
 @Module({
 	imports: [
@@ -34,7 +35,7 @@ import type { Env } from "../config/env.validation"
 			}),
 		}),
 	],
-	providers: [MailerService],
+	providers: [MailerService, EmailListener],
 	exports: [MailerService],
 })
 export class MailerModule {}

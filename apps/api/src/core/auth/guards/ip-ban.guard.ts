@@ -1,5 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
-import { IpBanService } from "../../ip-ban/ip-ban.service"
+import { IpBanService } from "@core/ip-ban/ip-ban.service"
 import type { Request } from "express"
 
 @Injectable()

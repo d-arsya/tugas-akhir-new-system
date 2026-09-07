@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
-import { BannedIp } from "./entities/banned-ip.entity"
+import { BannedIp } from "@core/ip-ban/entities/banned-ip.entity"
 
 @Injectable()
 export class IpBanService {

@@ -3,15 +3,15 @@ import { APP_GUARD } from "@nestjs/core"
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler"
 import { LoggerModule } from "nestjs-pino"
 import pinoPretty from "pino-pretty"
-import { ConfigModule } from "./config/config.module"
-import { DatabaseModule } from "./database/database.module"
-import { RedisModule } from "./redis/redis.module"
-import { AuthModule } from "./auth/auth.module"
-import { MailerModule } from "./mailer/mailer.module"
-import { StorageModule } from "./storage/storage.module"
-import { QueueModule } from "./queue/queue.module"
-import { LocationModule } from "./location/location.module"
-import { IpBanModule } from "./ip-ban/ip-ban.module"
+import { EventEmitterModule } from "@nestjs/event-emitter"
+import { ConfigModule } from "@core/config/config.module"
+import { DatabaseModule } from "@core/database/database.module"
+import { RedisModule } from "@core/redis/redis.module"
+import { AuthModule } from "@core/auth/auth.module"
+import { MailerModule } from "@core/mailer/mailer.module"
+import { StorageModule } from "@core/storage/storage.module"
+import { QueueModule } from "@core/queue/queue.module"
+import { IpBanModule } from "@core/ip-ban/ip-ban.module"
 
 @Global()
 @Module({
@@ -73,13 +73,15 @@ import { IpBanModule } from "./ip-ban/ip-ban.module"
 			},
 		]),
 
+		// Event Emitter — in-process async domain events
+		EventEmitterModule.forRoot(),
+
 		DatabaseModule,
 		RedisModule,
 		AuthModule,
 		MailerModule,
 		StorageModule,
 		QueueModule,
-		LocationModule,
 		IpBanModule,
 	],
 	providers: [
@@ -89,12 +91,12 @@ import { IpBanModule } from "./ip-ban/ip-ban.module"
 		},
 	],
 	exports: [
+		EventEmitterModule,
 		AuthModule,
 		RedisModule,
 		MailerModule,
 		StorageModule,
 		QueueModule,
-		LocationModule,
 		IpBanModule,
 	],
 })

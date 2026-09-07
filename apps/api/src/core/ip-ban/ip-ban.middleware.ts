@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NestMiddleware } from "@nestjs/common"
 import type { NextFunction, Request, Response } from "express"
-import { IpBanService } from "./ip-ban.service"
+import { IpBanService } from "@core/ip-ban/ip-ban.service"
 
 @Injectable()
 export class IpBanMiddleware implements NestMiddleware {

@@ -1,12 +1,12 @@
 import { BullModule } from "@nestjs/bullmq"
 import { Module } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { EMAIL_QUEUE, EXPORT_QUEUE } from "./queue.constants"
-import { EmailProcessor } from "./processors/email.processor"
-import { ExportProcessor } from "./processors/export.processor"
-import type { Env } from "../config/env.validation"
+import { EMAIL_QUEUE, EXPORT_QUEUE } from "@core/queue/queue.constants"
+import { EmailProcessor } from "@core/queue/processors/email.processor"
+import { ExportProcessor } from "@core/queue/processors/export.processor"
+import type { Env } from "@core/config/env.validation"
 
-export { EMAIL_QUEUE, EXPORT_QUEUE } from "./queue.constants"
+export { EMAIL_QUEUE, EXPORT_QUEUE } from "@core/queue/queue.constants"
 
 @Module({
 	imports: [

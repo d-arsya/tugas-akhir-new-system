@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq"
 import { Logger } from "@nestjs/common"
 import type { Job } from "bullmq"
-import { EXPORT_QUEUE } from "../queue.constants"
+import { EXPORT_QUEUE } from "@core/queue/queue.constants"
 
 @Processor(EXPORT_QUEUE)
 export class ExportProcessor extends WorkerHost {

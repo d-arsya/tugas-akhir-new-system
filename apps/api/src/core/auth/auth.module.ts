@@ -2,12 +2,12 @@ import { Module } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { JwtModule } from "@nestjs/jwt"
 import { PassportModule } from "@nestjs/passport"
-import { JwtStrategy } from "./strategies/jwt.strategy"
-import { JwtRefreshStrategy } from "./strategies/jwt-refresh.strategy"
-import { JwtAuthGuard } from "./guards/jwt-auth.guard"
-import { RolesGuard } from "./guards/roles.guard"
-import { IpBanGuard } from "./guards/ip-ban.guard"
-import type { Env } from "../config/env.validation"
+import { JwtStrategy } from "@core/auth/strategies/jwt.strategy"
+import { JwtRefreshStrategy } from "@core/auth/strategies/jwt-refresh.strategy"
+import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
+import { RolesGuard } from "@core/auth/guards/roles.guard"
+import { IpBanGuard } from "@core/auth/guards/ip-ban.guard"
+import type { Env } from "@core/config/env.validation"
 
 @Module({
 	imports: [

@@ -8,7 +8,7 @@ import {
 	DeleteObjectCommand,
 } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
-import type { Env } from "../config/env.validation"
+import type { Env } from "@core/config/env.validation"
 
 @Injectable()
 export class StorageService {

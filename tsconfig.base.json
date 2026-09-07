@@ -27,7 +27,13 @@
       "@roja/api-client": ["./libs/api-client/src/index.ts"],
       "@roja/api-client/*": ["./libs/api-client/src/*"],
       "@roja/utils": ["./libs/utils/src/index.ts"],
-      "@roja/utils/*": ["./libs/utils/src/*"]
+      "@roja/utils/*": ["./libs/utils/src/*"],
+      "@core/*": ["./apps/api/src/core/*"],
+      "@shared/*": ["./apps/api/src/shared/*"],
+      "@modules/*": ["./apps/api/src/modules/*"],
+      "@psb/*": ["./apps/api/src/modules/psb/*"],
+      "@santri/*": ["./apps/api/src/modules/santri/*"],
+      "@ewallet/*": ["./apps/api/src/modules/ewallet/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

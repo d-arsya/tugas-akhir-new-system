@@ -1,5 +1,5 @@
 import { Column, Entity } from "typeorm"
-import { BaseEntity } from "../../database/base.entity"
+import { BaseEntity } from "@core/database/base.entity"
 
 @Entity({ name: "tbr_banned_ips" })
 export class BannedIp extends BaseEntity {

@@ -2,9 +2,9 @@ import { Injectable, UnauthorizedException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { PassportStrategy } from "@nestjs/passport"
 import { ExtractJwt, Strategy } from "passport-jwt"
-import { RedisService } from "../../redis/redis.service"
-import type { Env } from "../../config/env.validation"
-import type { JwtPayload } from "./jwt.strategy"
+import { RedisService } from "@core/redis/redis.service"
+import type { Env } from "@core/config/env.validation"
+import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, "jwt-refresh") {

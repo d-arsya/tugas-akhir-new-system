@@ -1,12 +1,28 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common"
-import { CoreModule } from "./core/core.module"
-import { IpBanMiddleware } from "./core/ip-ban/ip-ban.middleware"
-import { EwalletModule } from "./ewallet/ewallet.module"
-import { PsbModule } from "./psb/psb.module"
-import { SantriModule } from "./santri/santri.module"
+import { CoreModule } from "@core/core.module"
+import { IpBanMiddleware } from "@core/ip-ban/ip-ban.middleware"
+import { EwalletModule } from "@ewallet/ewallet.module"
+import { PsbModule } from "@psb/psb.module"
+import { SantriModule } from "@santri/santri.module"
+import { MerchantModule } from "@modules/merchant/merchant.module"
+import { AdminModule } from "@modules/admin/admin.module"
+
+import { SchoolModule } from "@shared/school/school.module"
+import { MasterModule } from "@shared/master/master.module"
+import { LocationModule } from "@shared/location/location.module"
 
 @Module({
-	imports: [CoreModule, PsbModule, EwalletModule, SantriModule],
+	imports: [
+		CoreModule,
+		LocationModule,
+		SchoolModule,
+		MasterModule,
+		EwalletModule,
+		PsbModule,
+		SantriModule,
+		MerchantModule,
+		AdminModule,
+	],
 })
 export class AppModule implements NestModule {
 	configure(consumer: MiddlewareConsumer): void {

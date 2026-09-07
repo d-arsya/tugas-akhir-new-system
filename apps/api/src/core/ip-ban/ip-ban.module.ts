@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common"
 import { TypeOrmModule } from "@nestjs/typeorm"
-import { BannedIp } from "./entities/banned-ip.entity"
-import { IpBanMiddleware } from "./ip-ban.middleware"
-import { IpBanService } from "./ip-ban.service"
+import { BannedIp } from "@core/ip-ban/entities/banned-ip.entity"
+import { IpBanMiddleware } from "@core/ip-ban/ip-ban.middleware"
+import { IpBanService } from "@core/ip-ban/ip-ban.service"
 
 @Module({
 	imports: [TypeOrmModule.forFeature([BannedIp])],

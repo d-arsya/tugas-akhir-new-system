@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { TypeOrmModule } from "@nestjs/typeorm"
-import type { Env } from "../config/env.validation"
+import type { Env } from "@core/config/env.validation"
 
 @Module({
 	imports: [

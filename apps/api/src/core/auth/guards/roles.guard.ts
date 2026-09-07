@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
-import { ROLES_KEY, type UserRole } from "../decorators/roles.decorator"
-import type { JwtPayload } from "../strategies/jwt.strategy"
+import { ROLES_KEY, type UserRole } from "@core/auth/decorators/roles.decorator"
+import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import type { Request } from "express"
 
 @Injectable()
