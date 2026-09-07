@@ -7,11 +7,11 @@ import {
 } from "@nestjs/common"
 import type { Request } from "express"
 import type { JwtPayload } from "../../core/auth/strategies/jwt.strategy"
-import { RedisService } from "../../core/redis/redis.service"
+import { EwalletService } from "../../ewallet/ewallet.service"
 
 @Injectable()
 export class EwalletPinGuard implements CanActivate {
-	constructor(private readonly redisService: RedisService) {}
+	constructor(private readonly ewalletService: EwalletService) {}
 
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest<Request>()
@@ -21,8 +21,10 @@ export class EwalletPinGuard implements CanActivate {
 			throw new UnauthorizedException("Sesi tidak ditemukan")
 		}
 
-		const pinKey = `santri-ewallet-pin:${user.sub}`
-		const isPinVerified = await this.redisService.exists(pinKey)
+		const isPinVerified = await this.ewalletService.hasPinSession(
+			"santri-ewallet-pin",
+			user.sub,
+		)
 
 		if (!isPinVerified) {
 			throw new ForbiddenException("Verifikasi PIN e-wallet diperlukan untuk melanjutkan.")

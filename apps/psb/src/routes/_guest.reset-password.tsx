@@ -64,24 +64,22 @@ const ResetPasswordPage = (): JSX.Element => {
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="password">Password Baru</Label>
 						<Input
 							id="password"
 							type="password"
 							className="h-11"
-							placeholder="Minimal 8 karakter"
+							placeholder="Password Baru"
 							{...register("password")}
 						/>
 						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
 					</div>
 
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="confirmPassword">Konfirmasi Password Baru</Label>
 						<Input
 							id="confirmPassword"
 							type="password"
 							className="h-11"
-							placeholder="Masukkan ulang password"
+							placeholder="Konfirmasi Password Baru"
 							{...register("confirmPassword")}
 						/>
 						{errors.confirmPassword && (

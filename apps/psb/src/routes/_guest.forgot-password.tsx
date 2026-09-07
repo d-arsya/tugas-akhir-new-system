@@ -60,12 +60,11 @@ const ForgotPasswordPage = (): JSX.Element => {
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="email">Alamat Email</Label>
 						<Input
 							id="email"
 							type="email"
 							className="h-11"
-							placeholder="nama@email.com"
+							placeholder="Alamat Email"
 							{...register("email")}
 						/>
 						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}

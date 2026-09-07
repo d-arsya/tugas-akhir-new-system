@@ -73,6 +73,6 @@
   position: relative;
   z-index: 10;
   max-width: 900px;
-  margin: 40px auto;
+  margin: 0px auto;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
 }

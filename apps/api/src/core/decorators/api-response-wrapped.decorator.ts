@@ -33,6 +33,16 @@ export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 				success: { type: "boolean", example: true },
 				message: { type: "string", example: "OK" },
 				data: dataSchema,
+				meta: {
+					type: "object",
+					properties: {
+						page: { type: "number", example: 1 },
+						limit: { type: "number", example: 10 },
+						total: { type: "number", example: 25 },
+						totalPages: { type: "number", example: 3 },
+					},
+					nullable: true,
+				},
 			},
 			required: ["success", "message", "data"],
 		},

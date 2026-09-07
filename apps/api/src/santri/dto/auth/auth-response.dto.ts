@@ -1,0 +1,41 @@
+import { createZodDto } from "nestjs-zod"
+import { z } from "zod"
+
+export const SantriUserPayloadSchema = z.object({
+	id: z.number(),
+	nis: z.string().nullable(),
+	email: z.string().nullable(),
+})
+
+export const SantriAuthResultSchema = z.object({
+	requires2fa: z.boolean(),
+	studentId: z.number().optional(),
+	email: z.string().nullable().optional(),
+	accessToken: z.string().optional(),
+	refreshToken: z.string().optional(),
+	user: SantriUserPayloadSchema.optional(),
+})
+
+export class SantriAuthResultDto extends createZodDto(SantriAuthResultSchema) {}
+
+export const SantriMessageResponseSchema = z.object({
+	message: z.string(),
+})
+
+export class SantriMessageResponseDto extends createZodDto(SantriMessageResponseSchema) {}
+
+export const SantriEmailInfoSchema = z.object({
+	id: z.number(),
+	nis: z.string().nullable(),
+	email: z.string().nullable(),
+	emailVerifiedAt: z.string().nullable(),
+})
+
+export class SantriEmailInfoDto extends createZodDto(SantriEmailInfoSchema) {}
+
+export const SantriRefreshResultSchema = z.object({
+	accessToken: z.string(),
+	refreshToken: z.string(),
+})
+
+export class SantriRefreshResultDto extends createZodDto(SantriRefreshResultSchema) {}

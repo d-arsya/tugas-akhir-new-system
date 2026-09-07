@@ -5,6 +5,7 @@ import { cn } from "@roja/utils"
 
 export interface PageLayoutProps {
 	children: ReactNode
+	topBanner?: ReactNode
 	maxWidth?: string
 	useCardWrapper?: boolean
 	showFooter?: boolean
@@ -13,23 +14,31 @@ export interface PageLayoutProps {
 
 export const PageLayout = ({
 	children,
-	maxWidth = "max-w-5xl",
+	topBanner,
+	maxWidth = "max-w-[1140px]",
 	useCardWrapper = false,
 	showFooter = false,
 	className,
 }: PageLayoutProps): JSX.Element => {
 	return (
 		<div className="roja_wizard_container min-h-screen flex flex-col relative overflow-hidden bg-[var(--bg-primary)] pt-[70px]">
-			{/* Shared Header */}
+			{/* Shared Header (100% full width across window) */}
 			<Header />
 
 			{/* Background decorative blob shapes */}
 			<div className="roja_bg_blobs" />
 
-			{/* Main Content Area */}
+			{/* Full Width Top Banner Strip */}
+			{topBanner && (
+				<div className="w-full relative z-10">
+					{topBanner}
+				</div>
+			)}
+
+			{/* Main Content Area (matching legacy container 1140px width and padding) */}
 			<main
 				className={cn(
-					"flex-1 relative z-10 px-4 py-8 w-full mx-auto flex flex-col items-center justify-center",
+					"flex-1 relative z-10 px-4 sm:px-6 py-6 md:py-8 w-full mx-auto flex flex-col items-stretch justify-start",
 					maxWidth,
 					className,
 				)}

@@ -10,11 +10,12 @@ type AuthState = {
 
 type AuthActions = {
 	login: (accessToken: string, refreshToken: string, user: AuthUser) => void
+	setAuth: (user: AuthUser, accessToken: string) => void
 	logout: () => void
 	setAccessToken: (token: string) => void
 }
 
-const useAuthStore = create<AuthState & AuthActions>()(
+export const useAuthStore = create<AuthState & AuthActions>()(
 	persist(
 		(set) => ({
 			user: null,
@@ -24,6 +25,10 @@ const useAuthStore = create<AuthState & AuthActions>()(
 			login: (accessToken, refreshToken, user) => {
 				localStorage.setItem("roja-refresh-token", refreshToken)
 				set({ accessToken, user, isAuthenticated: true })
+			},
+
+			setAuth: (user, accessToken) => {
+				set({ user, accessToken, isAuthenticated: true })
 			},
 
 			logout: () => {

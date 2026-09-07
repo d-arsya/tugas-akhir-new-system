@@ -96,13 +96,12 @@ const Verify2faPage = (): JSX.Element => {
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5 items-center">
-						<Label htmlFor="code" className="text-center block w-full">Kode Verifikasi</Label>
 						<Input
 							id="code"
 							type="text"
 							maxLength={6}
 							className="h-12 text-center tracking-widest text-lg font-bold w-full"
-							placeholder="123456"
+							placeholder="Kode Verifikasi (6 angka)"
 							{...register("code")}
 						/>
 						{errors.code && <p className="text-xs text-destructive text-center mt-1">{errors.code.message}</p>}

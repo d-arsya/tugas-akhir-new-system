@@ -10,11 +10,11 @@ export default defineConfig(() => ({
 	publicDir: resolve(import.meta.dirname, "../../libs/ui/public"),
 	cacheDir: `../../node_modules/.vite/apps/psb`,
 	server: {
-		port: 4200,
+		port: 4300,
 		host: "localhost",
 	},
 	preview: {
-		port: 4200,
+		port: 4300,
 		host: "localhost",
 	},
 	resolve: {

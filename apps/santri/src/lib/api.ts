@@ -9,4 +9,4 @@ setAuthStoreGetter(() => useAuthStore.getState())
 export const apiClient = createApiClient(BASE_URL)
 export const sharedApi = createSharedApi(apiClient)
 export const santriApi = hijackSantriApi(createSantriApi(apiClient))
-
+export const santriApiClient = santriApi

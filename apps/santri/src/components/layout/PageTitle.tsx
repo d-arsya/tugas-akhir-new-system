@@ -9,9 +9,12 @@ interface PageTitleProps {
 
 export const PageTitle = ({ title, breadcrumbs = [] }: PageTitleProps): JSX.Element => {
 	return (
-		<div className="bg-white dark:bg-[#142335] border-b border-slate-200/80 dark:border-slate-800/80 py-4 shadow-xs transition-colors duration-300">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-				<h2 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+		<div className="w-full bg-white/40 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 py-3 backdrop-blur-md">
+			<div className="max-w-[1140px] mx-auto px-4 sm:px-6 flex items-center justify-between">
+				<h2
+					className="!text-[15px] !text-[#e4007e] !font-bold tracking-tight m-0 p-0"
+					style={{ fontSize: "15px", color: "#e4007e", fontWeight: 700 }}
+				>
 					{title}
 				</h2>
 
@@ -20,28 +23,37 @@ export const PageTitle = ({ title, breadcrumbs = [] }: PageTitleProps): JSX.Elem
 						<li className="inline-flex items-center">
 							<Link
 								to="/dashboard"
-								className="text-[var(--primary)] hover:opacity-80 transition-opacity flex items-center gap-1"
+								className="text-[#e4007e] hover:opacity-80 transition-opacity flex items-center"
 							>
-								<Home className="w-4 h-4 fill-[var(--primary)]/10 text-[var(--primary)]" />
+								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15.4" viewBox="0 0 18 17.328">
+									<path d="M3.957,8.415l7.521-4.6a1,1,0,0,1,1.043,0l7.521,4.6A2,2,0,0,1,21,10.122V19a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2V10.122A2,2,0,0,1,3.957,8.415ZM10,13a1,1,0,0,0-1,1v3a1,1,0,0,0,1,1h4a1,1,0,0,0,1-1V14a1,1,0,0,0-1-1Z" transform="translate(-3 -3.672)" fill="#e4007e" fillRule="evenodd" />
+								</svg>
 							</Link>
 						</li>
-						{breadcrumbs.map((crumb, idx) => (
-							<li key={idx} className="inline-flex items-center gap-2">
-								<span className="w-1.5 h-1.5 rounded-full bg-[var(--secondary)]" />
-								{crumb.to ? (
-									<Link
-										to={crumb.to as any}
-										className="text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] font-medium transition-colors"
-									>
-										{crumb.label}
-									</Link>
-								) : (
-									<span className="text-slate-400 dark:text-slate-500 font-normal">
-										{crumb.label}
-									</span>
-								)}
-							</li>
-						))}
+						<li className="w-1.5 h-1.5 rounded-full bg-[#e4007e]" />
+						{breadcrumbs.length > 0 ? (
+							breadcrumbs.map((crumb, idx) => (
+								<li key={idx} className="inline-flex items-center gap-2">
+									{crumb.to ? (
+										<Link
+											to={crumb.to as any}
+											className="text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] font-medium transition-colors"
+										>
+											{crumb.label}
+										</Link>
+									) : (
+										<span className="text-slate-500 dark:text-slate-400 font-normal">
+											{crumb.label}
+										</span>
+									)}
+									{idx < breadcrumbs.length - 1 && (
+										<span className="w-1.5 h-1.5 rounded-full bg-[var(--primary)]" />
+									)}
+								</li>
+							))
+						) : (
+							<li className="text-slate-500 dark:text-slate-400 font-normal">{title}</li>
+						)}
 					</ol>
 				</nav>
 			</div>

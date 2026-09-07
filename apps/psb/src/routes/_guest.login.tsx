@@ -126,20 +126,25 @@ const LoginPage = (): JSX.Element => {
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-						<Label htmlFor="email">Alamat Email</Label>
 						<Input
 							id="email"
 							type="email"
 							className="h-11"
-							placeholder="nama@email.com"
+							placeholder="Alamat Email"
 							{...register("email")}
 						/>
 						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
 					</div>
 
 					<div className="flex flex-col gap-1.5">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="password">Password</Label>
+						<Input
+							id="password"
+							type="password"
+							className="h-11"
+							placeholder="Password"
+							{...register("password")}
+						/>
+						<div className="flex justify-end">
 							<Link
 								to="/forgot-password"
 								className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
@@ -147,13 +152,6 @@ const LoginPage = (): JSX.Element => {
 								Lupa Password?
 							</Link>
 						</div>
-						<Input
-							id="password"
-							type="password"
-							className="h-11"
-							placeholder="Masukkan password"
-							{...register("password")}
-						/>
 						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
 					</div>
 

@@ -12,11 +12,11 @@ export default defineConfig(() => ({
 	publicDir: resolve(import.meta.dirname, "../../libs/ui/public"),
 	cacheDir: `../../node_modules/.vite/apps/santri`,
 	server: {
-		port: 4201,
+		port: 4301,
 		host: "localhost",
 	},
 	preview: {
-		port: 4201,
+		port: 4301,
 		host: "localhost",
 	},
 	resolve: {

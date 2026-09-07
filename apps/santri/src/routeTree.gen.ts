@@ -12,12 +12,25 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuestRouteImport } from './routes/_guest'
 import { Route as MemberRouteImport } from './routes/_member'
+import { Route as BannedRouteImport } from './routes/banned'
+import { Route as CheckEmailRouteImport } from './routes/check-email'
+import { Route as NeedVerifyRouteImport } from './routes/need-verify'
+import { Route as Verify2faRouteImport } from './routes/verify-2fa'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
 import { Route as MemberDashboardRouteImport } from './routes/_member.dashboard'
 import { Route as MemberEWalletRouteImport } from './routes/_member.e-wallet'
 import { Route as MemberPaymentHistoryRouteImport } from './routes/_member.payment-history'
 import { Route as MemberProfileRouteImport } from './routes/_member.profile'
 import { Route as MemberSettingRouteImport } from './routes/_member.setting'
+import { Route as MemberEWalletEditPinRouteImport } from './routes/_member.e-wallet.edit-pin'
+import { Route as MemberEWalletWithdrawRouteImport } from './routes/_member.e-wallet.withdraw'
+import { Route as MemberEWalletTopUpBankTransferRouteImport } from './routes/_member.e-wallet.top-up.bank-transfer'
+import { Route as MemberEWalletTopUpCashRouteImport } from './routes/_member.e-wallet.top-up.cash'
+import { Route as MemberEWalletTransactionsTransactionIdRouteImport } from './routes/_member.e-wallet.transactions.$transactionId'
+import { Route as MemberPaymentHistoryDetailInvoiceIdRouteImport } from './routes/_member.payment-history.detail.$invoiceId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,9 +45,44 @@ const MemberRoute = MemberRouteImport.update({
   id: '/_member',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BannedRoute = BannedRouteImport.update({
+  id: '/banned',
+  path: '/banned',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckEmailRoute = CheckEmailRouteImport.update({
+  id: '/check-email',
+  path: '/check-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NeedVerifyRoute = NeedVerifyRouteImport.update({
+  id: '/need-verify',
+  path: '/need-verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Verify2faRoute = Verify2faRouteImport.update({
+  id: '/verify-2fa',
+  path: '/verify-2fa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => GuestRoute,
+} as any)
 const GuestLoginRoute = GuestLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestResetPasswordRoute = GuestResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => GuestRoute,
 } as any)
 const MemberDashboardRoute = MemberDashboardRouteImport.update({
@@ -62,73 +110,189 @@ const MemberSettingRoute = MemberSettingRouteImport.update({
   path: '/setting',
   getParentRoute: () => MemberRoute,
 } as any)
+const MemberEWalletEditPinRoute = MemberEWalletEditPinRouteImport.update({
+  id: '/edit-pin',
+  path: '/edit-pin',
+  getParentRoute: () => MemberEWalletRoute,
+} as any)
+const MemberEWalletWithdrawRoute = MemberEWalletWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => MemberEWalletRoute,
+} as any)
+const MemberEWalletTopUpBankTransferRoute =
+  MemberEWalletTopUpBankTransferRouteImport.update({
+    id: '/top-up/bank-transfer',
+    path: '/top-up/bank-transfer',
+    getParentRoute: () => MemberEWalletRoute,
+  } as any)
+const MemberEWalletTopUpCashRoute = MemberEWalletTopUpCashRouteImport.update({
+  id: '/top-up/cash',
+  path: '/top-up/cash',
+  getParentRoute: () => MemberEWalletRoute,
+} as any)
+const MemberEWalletTransactionsTransactionIdRoute =
+  MemberEWalletTransactionsTransactionIdRouteImport.update({
+    id: '/transactions/$transactionId',
+    path: '/transactions/$transactionId',
+    getParentRoute: () => MemberEWalletRoute,
+  } as any)
+const MemberPaymentHistoryDetailInvoiceIdRoute =
+  MemberPaymentHistoryDetailInvoiceIdRouteImport.update({
+    id: '/detail/$invoiceId',
+    path: '/detail/$invoiceId',
+    getParentRoute: () => MemberPaymentHistoryRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/banned': typeof BannedRoute
+  '/check-email': typeof CheckEmailRoute
+  '/need-verify': typeof NeedVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
   '/dashboard': typeof MemberDashboardRoute
-  '/e-wallet': typeof MemberEWalletRoute
-  '/payment-history': typeof MemberPaymentHistoryRoute
+  '/e-wallet': typeof MemberEWalletRouteWithChildren
+  '/payment-history': typeof MemberPaymentHistoryRouteWithChildren
   '/profile': typeof MemberProfileRoute
   '/setting': typeof MemberSettingRoute
+  '/e-wallet/edit-pin': typeof MemberEWalletEditPinRoute
+  '/e-wallet/withdraw': typeof MemberEWalletWithdrawRoute
+  '/e-wallet/top-up/bank-transfer': typeof MemberEWalletTopUpBankTransferRoute
+  '/e-wallet/top-up/cash': typeof MemberEWalletTopUpCashRoute
+  '/e-wallet/transactions/$transactionId': typeof MemberEWalletTransactionsTransactionIdRoute
+  '/payment-history/detail/$invoiceId': typeof MemberPaymentHistoryDetailInvoiceIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/banned': typeof BannedRoute
+  '/check-email': typeof CheckEmailRoute
+  '/need-verify': typeof NeedVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
   '/dashboard': typeof MemberDashboardRoute
-  '/e-wallet': typeof MemberEWalletRoute
-  '/payment-history': typeof MemberPaymentHistoryRoute
+  '/e-wallet': typeof MemberEWalletRouteWithChildren
+  '/payment-history': typeof MemberPaymentHistoryRouteWithChildren
   '/profile': typeof MemberProfileRoute
   '/setting': typeof MemberSettingRoute
+  '/e-wallet/edit-pin': typeof MemberEWalletEditPinRoute
+  '/e-wallet/withdraw': typeof MemberEWalletWithdrawRoute
+  '/e-wallet/top-up/bank-transfer': typeof MemberEWalletTopUpBankTransferRoute
+  '/e-wallet/top-up/cash': typeof MemberEWalletTopUpCashRoute
+  '/e-wallet/transactions/$transactionId': typeof MemberEWalletTransactionsTransactionIdRoute
+  '/payment-history/detail/$invoiceId': typeof MemberPaymentHistoryDetailInvoiceIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_guest': typeof GuestRouteWithChildren
   '/_member': typeof MemberRouteWithChildren
+  '/banned': typeof BannedRoute
+  '/check-email': typeof CheckEmailRoute
+  '/need-verify': typeof NeedVerifyRoute
+  '/verify-2fa': typeof Verify2faRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
+  '/_guest/reset-password': typeof GuestResetPasswordRoute
   '/_member/dashboard': typeof MemberDashboardRoute
-  '/_member/e-wallet': typeof MemberEWalletRoute
-  '/_member/payment-history': typeof MemberPaymentHistoryRoute
+  '/_member/e-wallet': typeof MemberEWalletRouteWithChildren
+  '/_member/payment-history': typeof MemberPaymentHistoryRouteWithChildren
   '/_member/profile': typeof MemberProfileRoute
   '/_member/setting': typeof MemberSettingRoute
+  '/_member/e-wallet/edit-pin': typeof MemberEWalletEditPinRoute
+  '/_member/e-wallet/withdraw': typeof MemberEWalletWithdrawRoute
+  '/_member/e-wallet/top-up/bank-transfer': typeof MemberEWalletTopUpBankTransferRoute
+  '/_member/e-wallet/top-up/cash': typeof MemberEWalletTopUpCashRoute
+  '/_member/e-wallet/transactions/$transactionId': typeof MemberEWalletTransactionsTransactionIdRoute
+  '/_member/payment-history/detail/$invoiceId': typeof MemberPaymentHistoryDetailInvoiceIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/banned'
+    | '/check-email'
+    | '/need-verify'
+    | '/verify-2fa'
+    | '/verify-email'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/dashboard'
     | '/e-wallet'
     | '/payment-history'
     | '/profile'
     | '/setting'
+    | '/e-wallet/edit-pin'
+    | '/e-wallet/withdraw'
+    | '/e-wallet/top-up/bank-transfer'
+    | '/e-wallet/top-up/cash'
+    | '/e-wallet/transactions/$transactionId'
+    | '/payment-history/detail/$invoiceId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/banned'
+    | '/check-email'
+    | '/need-verify'
+    | '/verify-2fa'
+    | '/verify-email'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/dashboard'
     | '/e-wallet'
     | '/payment-history'
     | '/profile'
     | '/setting'
+    | '/e-wallet/edit-pin'
+    | '/e-wallet/withdraw'
+    | '/e-wallet/top-up/bank-transfer'
+    | '/e-wallet/top-up/cash'
+    | '/e-wallet/transactions/$transactionId'
+    | '/payment-history/detail/$invoiceId'
   id:
     | '__root__'
     | '/'
     | '/_guest'
     | '/_member'
+    | '/banned'
+    | '/check-email'
+    | '/need-verify'
+    | '/verify-2fa'
+    | '/verify-email'
+    | '/_guest/forgot-password'
     | '/_guest/login'
+    | '/_guest/reset-password'
     | '/_member/dashboard'
     | '/_member/e-wallet'
     | '/_member/payment-history'
     | '/_member/profile'
     | '/_member/setting'
+    | '/_member/e-wallet/edit-pin'
+    | '/_member/e-wallet/withdraw'
+    | '/_member/e-wallet/top-up/bank-transfer'
+    | '/_member/e-wallet/top-up/cash'
+    | '/_member/e-wallet/transactions/$transactionId'
+    | '/_member/payment-history/detail/$invoiceId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuestRoute: typeof GuestRouteWithChildren
   MemberRoute: typeof MemberRouteWithChildren
+  BannedRoute: typeof BannedRoute
+  CheckEmailRoute: typeof CheckEmailRoute
+  NeedVerifyRoute: typeof NeedVerifyRoute
+  Verify2faRoute: typeof Verify2faRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -154,11 +318,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/banned': {
+      id: '/banned'
+      path: '/banned'
+      fullPath: '/banned'
+      preLoaderRoute: typeof BannedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check-email': {
+      id: '/check-email'
+      path: '/check-email'
+      fullPath: '/check-email'
+      preLoaderRoute: typeof CheckEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/need-verify': {
+      id: '/need-verify'
+      path: '/need-verify'
+      fullPath: '/need-verify'
+      preLoaderRoute: typeof NeedVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-2fa': {
+      id: '/verify-2fa'
+      path: '/verify-2fa'
+      fullPath: '/verify-2fa'
+      preLoaderRoute: typeof Verify2faRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest/forgot-password': {
+      id: '/_guest/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof GuestForgotPasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
     '/_guest/login': {
       id: '/_guest/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/reset-password': {
+      id: '/_guest/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof GuestResetPasswordRouteImport
       parentRoute: typeof GuestRoute
     }
     '/_member/dashboard': {
@@ -196,31 +409,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MemberSettingRouteImport
       parentRoute: typeof MemberRoute
     }
+    '/_member/e-wallet/edit-pin': {
+      id: '/_member/e-wallet/edit-pin'
+      path: '/edit-pin'
+      fullPath: '/e-wallet/edit-pin'
+      preLoaderRoute: typeof MemberEWalletEditPinRouteImport
+      parentRoute: typeof MemberEWalletRoute
+    }
+    '/_member/e-wallet/withdraw': {
+      id: '/_member/e-wallet/withdraw'
+      path: '/withdraw'
+      fullPath: '/e-wallet/withdraw'
+      preLoaderRoute: typeof MemberEWalletWithdrawRouteImport
+      parentRoute: typeof MemberEWalletRoute
+    }
+    '/_member/e-wallet/top-up/bank-transfer': {
+      id: '/_member/e-wallet/top-up/bank-transfer'
+      path: '/top-up/bank-transfer'
+      fullPath: '/e-wallet/top-up/bank-transfer'
+      preLoaderRoute: typeof MemberEWalletTopUpBankTransferRouteImport
+      parentRoute: typeof MemberEWalletRoute
+    }
+    '/_member/e-wallet/top-up/cash': {
+      id: '/_member/e-wallet/top-up/cash'
+      path: '/top-up/cash'
+      fullPath: '/e-wallet/top-up/cash'
+      preLoaderRoute: typeof MemberEWalletTopUpCashRouteImport
+      parentRoute: typeof MemberEWalletRoute
+    }
+    '/_member/e-wallet/transactions/$transactionId': {
+      id: '/_member/e-wallet/transactions/$transactionId'
+      path: '/transactions/$transactionId'
+      fullPath: '/e-wallet/transactions/$transactionId'
+      preLoaderRoute: typeof MemberEWalletTransactionsTransactionIdRouteImport
+      parentRoute: typeof MemberEWalletRoute
+    }
+    '/_member/payment-history/detail/$invoiceId': {
+      id: '/_member/payment-history/detail/$invoiceId'
+      path: '/detail/$invoiceId'
+      fullPath: '/payment-history/detail/$invoiceId'
+      preLoaderRoute: typeof MemberPaymentHistoryDetailInvoiceIdRouteImport
+      parentRoute: typeof MemberPaymentHistoryRoute
+    }
   }
 }
 
 interface GuestRouteChildren {
+  GuestForgotPasswordRoute: typeof GuestForgotPasswordRoute
   GuestLoginRoute: typeof GuestLoginRoute
+  GuestResetPasswordRoute: typeof GuestResetPasswordRoute
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
+  GuestForgotPasswordRoute: GuestForgotPasswordRoute,
   GuestLoginRoute: GuestLoginRoute,
+  GuestResetPasswordRoute: GuestResetPasswordRoute,
 }
 
 const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
 
+interface MemberEWalletRouteChildren {
+  MemberEWalletEditPinRoute: typeof MemberEWalletEditPinRoute
+  MemberEWalletWithdrawRoute: typeof MemberEWalletWithdrawRoute
+  MemberEWalletTopUpBankTransferRoute: typeof MemberEWalletTopUpBankTransferRoute
+  MemberEWalletTopUpCashRoute: typeof MemberEWalletTopUpCashRoute
+  MemberEWalletTransactionsTransactionIdRoute: typeof MemberEWalletTransactionsTransactionIdRoute
+}
+
+const MemberEWalletRouteChildren: MemberEWalletRouteChildren = {
+  MemberEWalletEditPinRoute: MemberEWalletEditPinRoute,
+  MemberEWalletWithdrawRoute: MemberEWalletWithdrawRoute,
+  MemberEWalletTopUpBankTransferRoute: MemberEWalletTopUpBankTransferRoute,
+  MemberEWalletTopUpCashRoute: MemberEWalletTopUpCashRoute,
+  MemberEWalletTransactionsTransactionIdRoute:
+    MemberEWalletTransactionsTransactionIdRoute,
+}
+
+const MemberEWalletRouteWithChildren = MemberEWalletRoute._addFileChildren(
+  MemberEWalletRouteChildren,
+)
+
+interface MemberPaymentHistoryRouteChildren {
+  MemberPaymentHistoryDetailInvoiceIdRoute: typeof MemberPaymentHistoryDetailInvoiceIdRoute
+}
+
+const MemberPaymentHistoryRouteChildren: MemberPaymentHistoryRouteChildren = {
+  MemberPaymentHistoryDetailInvoiceIdRoute:
+    MemberPaymentHistoryDetailInvoiceIdRoute,
+}
+
+const MemberPaymentHistoryRouteWithChildren =
+  MemberPaymentHistoryRoute._addFileChildren(MemberPaymentHistoryRouteChildren)
+
 interface MemberRouteChildren {
   MemberDashboardRoute: typeof MemberDashboardRoute
-  MemberEWalletRoute: typeof MemberEWalletRoute
-  MemberPaymentHistoryRoute: typeof MemberPaymentHistoryRoute
+  MemberEWalletRoute: typeof MemberEWalletRouteWithChildren
+  MemberPaymentHistoryRoute: typeof MemberPaymentHistoryRouteWithChildren
   MemberProfileRoute: typeof MemberProfileRoute
   MemberSettingRoute: typeof MemberSettingRoute
 }
 
 const MemberRouteChildren: MemberRouteChildren = {
   MemberDashboardRoute: MemberDashboardRoute,
-  MemberEWalletRoute: MemberEWalletRoute,
-  MemberPaymentHistoryRoute: MemberPaymentHistoryRoute,
+  MemberEWalletRoute: MemberEWalletRouteWithChildren,
+  MemberPaymentHistoryRoute: MemberPaymentHistoryRouteWithChildren,
   MemberProfileRoute: MemberProfileRoute,
   MemberSettingRoute: MemberSettingRoute,
 }
@@ -232,6 +524,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuestRoute: GuestRouteWithChildren,
   MemberRoute: MemberRouteWithChildren,
+  BannedRoute: BannedRoute,
+  CheckEmailRoute: CheckEmailRoute,
+  NeedVerifyRoute: NeedVerifyRoute,
+  Verify2faRoute: Verify2faRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
