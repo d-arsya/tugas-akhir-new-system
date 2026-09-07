@@ -1,4 +1,4 @@
-﻿import type { JSX } from "react"
+import type { JSX } from "react"
 import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { psbApi } from "@/lib/api"
@@ -28,7 +28,7 @@ const VerifyEmailPage = (): JSX.Element => {
 
 		psbApi
 			.verifyEmail(token)
-			.then((res) => {
+			.then((res: { message?: string }) => {
 				setStatus("success")
 				setMessage(res.message || "Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke Member Area.")
 			})

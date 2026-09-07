@@ -28,7 +28,7 @@ const EmailVerifyPage = (): JSX.Element => {
 
 		psbApi
 			.verifyEmail(token)
-			.then((res) => {
+			.then((res: { message?: string }) => {
 				setStatus("success")
 				setMessage(res.message || "Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke Member Area.")
 			})

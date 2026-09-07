@@ -16,18 +16,18 @@ export interface SearchableSelectOption {
 
 export interface SearchableSelectProps {
 	options: SearchableSelectOption[]
-	value?: string | number | null
-	onValueChange?: (value: string) => void
-	placeholder?: string
-	searchPlaceholder?: string
-	emptyText?: string
-	className?: string
-	triggerClassName?: string
-	contentClassName?: string
-	disabled?: boolean
-	name?: string
-	id?: string
-	modal?: boolean
+	value?: string | number | null | undefined
+	onValueChange?: ((value: string) => void) | undefined
+	placeholder?: string | undefined
+	searchPlaceholder?: string | undefined
+	emptyText?: string | undefined
+	className?: string | undefined
+	triggerClassName?: string | undefined
+	contentClassName?: string | undefined
+	disabled?: boolean | undefined
+	name?: string | undefined
+	id?: string | undefined
+	modal?: boolean | undefined
 }
 
 export const SearchableSelect = React.forwardRef<HTMLButtonElement, SearchableSelectProps>(
@@ -132,7 +132,7 @@ export const SearchableSelect = React.forwardRef<HTMLButtonElement, SearchableSe
 											key={optValueStr}
 											value={typeof option.label === "string" ? option.label : optValueStr}
 											keywords={searchKeywords}
-											disabled={option.disabled}
+											disabled={Boolean(option.disabled)}
 											onSelect={() => handleSelect(optValueStr)}
 											className={cn(
 												"relative flex cursor-pointer select-none items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium outline-none transition-all duration-150 text-slate-700 dark:text-slate-200",
