@@ -2,7 +2,8 @@ import { defineConfig } from "vite"
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
 import tailwindcss from "@tailwindcss/vite"
-import tsconfigPaths from "vite-tsconfig-paths"
+import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin"
+import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin"
 import { resolve } from "path"
 
 export default defineConfig(() => ({
@@ -30,6 +31,8 @@ export default defineConfig(() => ({
 		}),
 		react(),
 		tailwindcss(),
+		nxViteTsPaths(),
+		nxCopyAssetsPlugin(["*.md", "vercel.json"]),
 	],
 	build: {
 		outDir: `../../dist/apps/psb`,

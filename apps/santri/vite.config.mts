@@ -32,7 +32,7 @@ export default defineConfig(() => ({
 		react(),
 		tailwindcss(),
 		nxViteTsPaths(),
-		nxCopyAssetsPlugin(["*.md"]),
+		nxCopyAssetsPlugin(["*.md", "vercel.json"]),
 	],
 	build: {
 		outDir: `../../dist/apps/santri`,
