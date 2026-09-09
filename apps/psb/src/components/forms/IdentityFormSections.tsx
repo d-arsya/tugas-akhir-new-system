@@ -19,6 +19,7 @@ export interface IdentityFormSectionsProps {
 export const IdentityFormSections = ({
 	control,
 	register,
+	errors,
 	fields,
 	append,
 	remove,
@@ -27,10 +28,11 @@ export const IdentityFormSections = ({
 }: IdentityFormSectionsProps): JSX.Element => {
 	return (
 		<>
-			<IdentityNumbersFields register={register} formSettings={formSettings} />
+			<IdentityNumbersFields register={register} errors={errors} formSettings={formSettings} />
 			<HealthDataFields
 				control={control}
 				register={register}
+				errors={errors}
 				fields={fields}
 				append={append}
 				remove={remove}
@@ -38,6 +40,7 @@ export const IdentityFormSections = ({
 			/>
 			<AchievementAndTalentFields
 				register={register}
+				errors={errors}
 				watchReading={watchReading}
 				formSettings={formSettings}
 			/>

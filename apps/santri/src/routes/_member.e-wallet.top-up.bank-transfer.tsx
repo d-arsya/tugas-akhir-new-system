@@ -1,7 +1,7 @@
 import type { JSX, FormEvent, ChangeEvent } from "react"
 import { useState, useRef } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { RojaCard, Button, Input, Alert, AlertDescription } from "@roja/ui"
+import { RojaCard, Button, Input, DatePicker, Alert, AlertDescription } from "@roja/ui"
 import {
 	ArrowLeft,
 	Calendar,
@@ -119,17 +119,12 @@ const EwalletConfirmationPage = (): JSX.Element => {
 								Nominal yang ditransfer
 							</label>
 							<div className="md:col-span-8">
-								<div className="relative flex items-center">
-									<span className="absolute left-3.5 text-slate-500 font-semibold text-xs">
-										Rp
-									</span>
-									<Input
-										type="text"
-										value={amount}
-										readOnly
-										className="pl-10 bg-slate-50 text-slate-800 font-bold text-sm h-10 rounded-xl border-slate-200"
-									/>
-								</div>
+								<Input
+									type="text"
+									value={amount ? `Rp ${amount}` : ""}
+									readOnly
+									className="bg-slate-50 text-slate-800 font-bold text-sm h-10 rounded-xl border-slate-200"
+								/>
 							</div>
 						</div>
 
@@ -154,16 +149,11 @@ const EwalletConfirmationPage = (): JSX.Element => {
 								Tanggal Transfer <span className="text-rose-500">*</span>
 							</label>
 							<div className="md:col-span-8">
-								<div className="relative flex items-center">
-									<Calendar className="w-4 h-4 text-slate-400 absolute left-3.5" />
-									<Input
-										type="date"
-										value={paymentDate}
-										onChange={(e) => setPaymentDate(e.target.value)}
-										className="pl-10 text-xs h-10 rounded-xl border-slate-200"
-										required
-									/>
-								</div>
+								<DatePicker
+									mode="single"
+									value={paymentDate}
+									onValueChange={(_, formattedStr) => setPaymentDate(formattedStr)}
+								/>
 							</div>
 						</div>
 

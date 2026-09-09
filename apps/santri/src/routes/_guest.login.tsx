@@ -78,72 +78,70 @@ const LoginPage = (): JSX.Element => {
 	}
 
 	return (
-		<div className="max-w-md mx-auto my-8">
-			<RojaCard className="flex flex-col gap-6 p-8 md:p-10">
-				<div className="flex flex-col gap-2 items-center text-center">
-					<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
-					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Login Santri Area</div>
-					<p className="text-xs text-[var(--grey)] m-0">
-						Masuk untuk melihat informasi riwayat pembayaran baru & e-wallet.
-					</p>
+		<RojaCard className="flex flex-col gap-6 p-8 md:p-10 w-full max-w-md mx-auto my-8">
+			<div className="flex flex-col gap-2 items-center text-center">
+				<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
+				<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Login Santri Area</div>
+				<p className="text-xs text-[var(--grey)] m-0">
+					Masuk untuk melihat informasi riwayat pembayaran baru & e-wallet.
+				</p>
+			</div>
+
+			{errorMsg && (
+				<Alert variant="destructive" className="flex flex-col gap-2">
+					<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
+				</Alert>
+			)}
+
+			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+				<div className="flex flex-col gap-1.5">
+					<Input
+						id="nis"
+						type="text"
+						className="h-11"
+						placeholder="Nomor Induk Santri"
+						{...register("nis")}
+					/>
+					{errors.nis && <p className="text-xs text-destructive mt-0.5">{errors.nis.message}</p>}
 				</div>
 
-				{errorMsg && (
-					<Alert variant="destructive" className="flex flex-col gap-2">
-						<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
-					</Alert>
-				)}
-
-				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-					<div className="flex flex-col gap-1.5">
-						<Input
-							id="nis"
-							type="text"
-							className="h-11"
-							placeholder="Nomor Induk Santri"
-							{...register("nis")}
-						/>
-						{errors.nis && <p className="text-xs text-destructive mt-0.5">{errors.nis.message}</p>}
+				<div className="flex flex-col gap-1.5">
+					<Input
+						id="password"
+						type="password"
+						className="h-11"
+						placeholder="Password"
+						{...register("password")}
+					/>
+					<div className="flex justify-end">
+						<Link
+							to="/forgot-password"
+							className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
+						>
+							Lupa Password?
+						</Link>
 					</div>
-
-					<div className="flex flex-col gap-1.5">
-						<Input
-							id="password"
-							type="password"
-							className="h-11"
-							placeholder="Password"
-							{...register("password")}
-						/>
-						<div className="flex justify-end">
-							<Link
-								to="/forgot-password"
-								className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
-							>
-								Lupa Password?
-							</Link>
-						</div>
-						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
-					</div>
-
-					<Button
-						type="submit"
-						variant="roja-primary"
-						size="lg"
-						className="w-full mt-2"
-						disabled={isLoading}
-					>
-						{isLoading ? "Memproses..." : "Masuk"}
-					</Button>
-				</form>
-
-				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4 text-[var(--body-txt-inverse)]">
-					Butuh bantuan akun?{" "}
-					<Link to="/forgot-password" className="text-[var(--secondary)] hover:underline font-semibold">
-						Lupa Password
-					</Link>
+					{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
 				</div>
-			</RojaCard>
-		</div>
+
+				<Button
+					type="submit"
+					variant="roja-primary"
+					size="lg"
+					className="w-full mt-2"
+					disabled={isLoading}
+				>
+					{isLoading ? "Memproses..." : "Masuk"}
+				</Button>
+			</form>
+
+			<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4 text-[var(--body-txt-inverse)]">
+				Butuh bantuan akun?{" "}
+				<Link to="/forgot-password" className="text-[var(--secondary)] hover:underline font-semibold">
+					Lupa Password
+				</Link>
+			</div>
+		</RojaCard>
 	)
 }
 

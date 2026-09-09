@@ -59,20 +59,17 @@ export const RegistrationProofDocument = ({ registrant, school }: RegistrationPr
 				<div className="flex flex-row justify-between items-start gap-4">
 					{/* Left: Brand / School Logo */}
 					<div className="flex flex-col">
-						{school?.logo ? (
-							<img
-								src={school.logo.startsWith("http") ? school.logo : `/storage/${school.logo}`}
-								alt={school.name || "Logo"}
-								className="h-10 mb-1 object-contain self-start -mt-2"
-							/>
-						) : (
-							<h2
-								className="font-bold text-[24px] tracking-wide m-0 mb-1"
-								style={{ color: "#E4007E", fontWeight: 700 }}
-							>
-								ROJA
-							</h2>
-						)}
+						<img
+							src={
+								school?.logo
+									? school.logo.startsWith("http") || school.logo.startsWith("/")
+										? school.logo
+										: `/storage/${school.logo}`
+									: "/assets/svg/etc/Logo.svg"
+							}
+							alt={school?.name || "Logo"}
+							className="h-10 mb-1 object-contain self-start -mt-2"
+						/>
 						<p
 							className="p-0 m-0 font-semibold text-[14px] tracking-[1px]"
 							style={{ color: "#777777", fontWeight: 600, fontSize: "14px", letterSpacing: "1px" }}

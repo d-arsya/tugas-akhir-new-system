@@ -10,8 +10,10 @@ import {
 	AlertTitle,
 	AlertDescription,
 	Skeleton,
+	RojaCard,
 } from "@roja/ui"
 import { AnnouncementResultCard } from "@/components/dashboard/AnnouncementResultCard"
+import PageHeader from "@/components/page-header"
 
 const DashboardPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -23,7 +25,7 @@ const DashboardPage = (): JSX.Element => {
 
 	if (isLoading) {
 		return (
-			<div className="w-full flex flex-col gap-6">
+			<RojaCard className="w-full flex flex-col gap-6 p-6 md:p-8">
 				<div className="flex justify-between items-center pb-4 border-b">
 					<div className="flex flex-col gap-2">
 						<Skeleton className="h-8 w-64 rounded-lg" />
@@ -32,7 +34,7 @@ const DashboardPage = (): JSX.Element => {
 					<Skeleton className="h-10 w-36 rounded-lg" />
 				</div>
 				<Skeleton className="h-40 w-full rounded-2xl" />
-			</div>
+			</RojaCard>
 		)
 	}
 
@@ -61,39 +63,29 @@ const DashboardPage = (): JSX.Element => {
 	const printLabel = status === "approve" ? "Cetak Surat Kelulusan" : "Cetak Bukti PSB"
 	const registrantIdParam = reg?.id ? String(reg.id) : ""
 
-	return (
-		<div className="w-full flex flex-col gap-8">
-			{/* Top Header Section */}
-			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--bg-form-border)] pb-6">
-				<div>
-					<div className="text-xl md:text-2xl font-bold text-slate-800 m-0">
-						Hallo, <span className="text-[var(--primary)]">{reg?.fullname || reg?.fullName || ""}</span>
-					</div>
-					<div className="mt-2.5 flex flex-wrap items-center gap-2 text-xs font-medium">
-						<Badge variant="outline" className="font-mono text-slate-700 bg-slate-50 px-2.5 py-1">
-							ID: {reg?.registrantId || "-"}
-						</Badge>
-						<Badge variant="outline" className="text-slate-700 bg-slate-50 px-2.5 py-1">
-							Jenjang: {levelLabel}
-						</Badge>
-					</div>
-				</div>
+	const printAction = registrantIdParam ? (
+		<Button asChild variant="roja-primary" size="sm">
+			<Link
+				to="/print/$type/$registrantId"
+				params={{ type: printType, registrantId: registrantIdParam }}
+				target="_blank"
+				className="flex items-center gap-2"
+			>
+				<Download className="w-4 h-4" />
+				<span>{printLabel}</span>
+			</Link>
+		</Button>
+	) : undefined
 
-				{/* Print Action Button */}
-				{registrantIdParam && (
-					<Button asChild variant="roja-primary" size="sm" className="shrink-0">
-						<Link
-							to="/print/$type/$registrantId"
-							params={{ type: printType, registrantId: registrantIdParam }}
-							target="_blank"
-							className="flex items-center gap-2"
-						>
-							<Download className="w-4 h-4" />
-							<span>{printLabel}</span>
-						</Link>
-					</Button>
-				)}
-			</div>
+	return (
+		<RojaCard className="w-full flex flex-col gap-8 p-6 md:p-8">
+			<PageHeader
+				title={`Hallo, ${reg?.fullname || reg?.fullName || ""}`}
+				subtitle={
+					reg ? `ID: ${reg.registrantId || "-"}  •  Jenjang: ${levelLabel}` : undefined
+				}
+				action={printAction}
+			/>
 
 			{/* Status Scenario Content */}
 
@@ -165,7 +157,7 @@ const DashboardPage = (): JSX.Element => {
 
 			{/* 4/5/6. Announcement Result Card (Approve / Failed / Indent Failed) */}
 			<AnnouncementResultCard status={status} announcement={announcement} />
-		</div>
+		</RojaCard>
 	)
 }
 

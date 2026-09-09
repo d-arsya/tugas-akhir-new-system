@@ -91,8 +91,7 @@ const LoginPage = (): JSX.Element => {
 	}
 
 	return (
-		<div className="max-w-md mx-auto my-8">
-			<RojaCard className="flex flex-col gap-6 p-8 md:p-10">
+		<RojaCard className="flex flex-col gap-6 p-8 md:p-10 w-full max-w-md">
 				<div className="flex flex-col gap-2 items-center text-center">
 					<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
 					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Login Member Area</div>
@@ -173,7 +172,6 @@ const LoginPage = (): JSX.Element => {
 					</Link>
 				</div>
 			</RojaCard>
-		</div>
 	)
 }
 

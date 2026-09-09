@@ -36,7 +36,7 @@ const NeedVerifyPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md">
+		<PageLayout maxWidth="max-w-md" variant="center">
 			<NeedVerifyCard
 				email={email}
 				description={`Akun pendaftaran Anda belum diverifikasi. Silakan periksa kotak masuk email ${

@@ -6,8 +6,8 @@ export interface PageLayoutProps extends Omit<BasePageLayoutProps, "header"> {
 	children: ReactNode
 }
 
-export const PageLayout = (props: PageLayoutProps): JSX.Element => {
-	return <BasePageLayout header={<Header />} {...props} />
+export const PageLayout = ({ version = "1.1.1", ...props }: PageLayoutProps): JSX.Element => {
+	return <BasePageLayout header={<Header />} version={version} showVersion={false} {...props} />
 }
 
 export default PageLayout

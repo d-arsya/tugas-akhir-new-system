@@ -63,16 +63,14 @@ const LandingPage = (): JSX.Element => {
 
 	if (isLandingLoading) {
 		return (
-			<div className="max-w-4xl mx-auto my-8">
-				<RojaCard>
-					<div className="flex flex-col gap-6 py-6 items-center">
-						<Skeleton className="h-8 w-64 rounded-full" />
-						<Skeleton className="h-16 w-full max-w-2xl rounded-xl" />
-						<Skeleton className="h-12 w-full max-w-md rounded-xl" />
-						<Skeleton className="h-12 w-full max-w-md rounded-xl" />
-					</div>
-				</RojaCard>
-			</div>
+			<RojaCard className="w-full max-w-4xl">
+				<div className="flex flex-col gap-6 py-6 items-center">
+					<Skeleton className="h-8 w-64 rounded-full" />
+					<Skeleton className="h-16 w-full max-w-2xl rounded-xl" />
+					<Skeleton className="h-12 w-full max-w-md rounded-xl" />
+					<Skeleton className="h-12 w-full max-w-md rounded-xl" />
+				</div>
+			</RojaCard>
 		)
 	}
 
@@ -83,36 +81,33 @@ const LandingPage = (): JSX.Element => {
 
 	if (!isOpen) {
 		return (
-			<div className="max-w-md mx-auto my-8">
-				<RojaCard className="p-8 md:p-10 flex flex-col items-center text-center gap-6">
-					<div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-200">
-						<AlertTriangle className="w-8 h-8" />
-					</div>
+			<RojaCard className="w-full max-w-md p-8 md:p-10 flex flex-col items-center text-center gap-6">
+				<div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-200">
+					<AlertTriangle className="w-8 h-8" />
+				</div>
 
-					<div className="flex flex-col gap-2">
-						<div className="text-sm font-bold text-slate-800 m-0">Pendaftaran Ditutup</div>
-						<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
-							Saat ini Penerimaan Santri Baru (PSB) untuk {schoolName} sedang tidak dibuka.
-							Silakan hubungi kontak panitia atau kunjungi website utama untuk informasi lebih lanjut.
-						</p>
-					</div>
+				<div className="flex flex-col gap-2">
+					<div className="text-sm font-bold text-slate-800 m-0">Pendaftaran Ditutup</div>
+					<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
+						Saat ini Penerimaan Santri Baru (PSB) untuk {schoolName} sedang tidak dibuka.
+						Silakan hubungi kontak panitia atau kunjungi website utama untuk informasi lebih lanjut.
+					</p>
+				</div>
 
-					<div className="text-center text-xs border-t border-[var(--bg-form-border)] w-full pt-4">
-						Sudah pernah mendaftar?{" "}
-						<Link to="/login" className="text-[var(--secondary)] hover:underline font-semibold">
-							Masuk ke Member Area
-						</Link>
-					</div>
-				</RojaCard>
-			</div>
+				<div className="text-center text-xs border-t border-[var(--bg-form-border)] w-full pt-4">
+					Sudah pernah mendaftar?{" "}
+					<Link to="/login" className="text-[var(--secondary)] hover:underline font-semibold">
+						Masuk ke Member Area
+					</Link>
+				</div>
+			</RojaCard>
 		)
 	}
 
 	return (
-		<div className="max-w-4xl mx-auto my-8">
-			<RojaCard className="p-8 md:p-12">
-				{/* Stepper showing main step 1 */}
-				<WizardStepper mainStep={1} />
+		<RojaCard className="w-full max-w-4xl p-8 md:p-12">
+			{/* Stepper showing main step 1 */}
+			<WizardStepper mainStep={1} />
 
 				<form onSubmit={handleSubmit(onSubmit)} className="mt-8 flex flex-col gap-6">
 					{/* Info Alert Box */}
@@ -157,14 +152,13 @@ const LandingPage = (): JSX.Element => {
 						<Label className="text-center block text-sm font-semibold text-slate-600 mb-2">
 							Untuk informasi penerimaan, kami membutuhkan email kamu
 						</Label>
-						<div className="w-full max-w-md relative">
+						<div className="w-full max-w-md">
 							<Input
 								type="email"
-								className="h-12 rounded-xl pr-12 text-sm"
+								className="h-12 rounded-xl text-sm"
 								placeholder="yourmail.address@gmail.com"
 								{...register("email")}
 							/>
-							<Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
 						</div>
 						{errors.email && (
 							<p className="text-xs text-destructive text-center mt-1.5">{errors.email.message}</p>
@@ -193,7 +187,6 @@ const LandingPage = (): JSX.Element => {
 					</Link>
 				</div>
 			</RojaCard>
-		</div>
 	)
 }
 

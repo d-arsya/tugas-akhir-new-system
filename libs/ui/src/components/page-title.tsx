@@ -22,7 +22,7 @@ export const PageTitle = ({
 	className = "",
 }: PageTitleProps): JSX.Element => {
 	return (
-		<div className={`w-full bg-white/40 dark:bg-slate-900/40 border-b border-slate-200/50 dark:border-slate-800/50 py-3 backdrop-blur-md ${className}`}>
+		<div className={`w-full bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800/80 py-3.5 backdrop-blur-md shadow-xs ${className}`}>
 			<div className={`${maxWidth} mx-auto px-4 sm:px-6 flex items-center justify-between`}>
 				<h2
 					className="!text-[15px] !text-[#e4007e] !font-bold tracking-tight m-0 p-0"

@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
+import { isSameDay } from "date-fns"
 import {
 	RojaCard,
 	Badge,
@@ -10,6 +11,9 @@ import {
 	DropdownMenuTrigger,
 	DropdownMenuContent,
 	DropdownMenuItem,
+	SimpleSelect,
+	DatePicker,
+	type DateRange,
 } from "@roja/ui"
 import {
 	Wallet,
@@ -20,6 +24,7 @@ import {
 	Calendar,
 	Eye,
 	ChevronDown,
+	RotateCcw,
 } from "lucide-react"
 import TopUpModal from "./TopUpModal"
 import type { EwalletTransaction } from "@roja/types"
@@ -40,8 +45,7 @@ export const TransactionHistoryTable = ({
 	const [isTopUpOpen, setIsTopUpOpen] = useState<boolean>(false)
 	const [searchQuery, setSearchQuery] = useState<string>("")
 	const [statusFilter, setStatusFilter] = useState<string>("")
-	const [startDate, setStartDate] = useState<string>("")
-	const [endDate, setEndDate] = useState<string>("")
+	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
 	const formatRupiah = (val: number) => {
 		return new Intl.NumberFormat("id-ID", {
@@ -59,11 +63,27 @@ export const TransactionHistoryTable = ({
 			(t.paymentMethod && t.paymentMethod.toLowerCase().includes(searchQuery.toLowerCase()))
 
 		const matchesStatus = !statusFilter || t.status === statusFilter
-		const txDate = t.createdAt ? t.createdAt.split("T")[0] : ""
-		const matchesStart = !startDate || (txDate && txDate >= startDate)
-		const matchesEnd = !endDate || (txDate && txDate <= endDate)
 
-		return matchesSearch && matchesStatus && matchesStart && matchesEnd
+		const matchesDate = (() => {
+			if (!dateRange?.from) return true
+			const itemDateStr = t.createdAt ? t.createdAt.split("T")[0] : ""
+			if (!itemDateStr) return true
+			const itemDate = new Date(itemDateStr)
+
+			if (dateRange.from && !dateRange.to) {
+				return isSameDay(itemDate, dateRange.from)
+			}
+			if (dateRange.from && dateRange.to) {
+				const start = new Date(dateRange.from)
+				start.setHours(0, 0, 0, 0)
+				const end = new Date(dateRange.to)
+				end.setHours(23, 59, 59, 999)
+				return itemDate >= start && itemDate <= end
+			}
+			return true
+		})()
+
+		return matchesSearch && matchesStatus && matchesDate
 	})
 
 	return (
@@ -86,45 +106,41 @@ export const TransactionHistoryTable = ({
 								</div>
 							</div>
 						</div>
+
+						<div className="relative z-10">
+							<Badge className="bg-white/20 hover:bg-white/30 text-white border-0 px-3 py-1 text-xs">
+								Aktif
+							</Badge>
+						</div>
 					</div>
 				</div>
 
-				<div className="lg:col-span-6 flex items-center justify-start lg:justify-end gap-3 flex-wrap">
-					<Button
-						type="button"
-						variant="outline"
-						size="icon"
-						onClick={() => navigate({ to: "/e-wallet/edit-pin" as any })}
-						className="h-11 w-11 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-						title="Atur PIN"
-					>
-						<Settings className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-					</Button>
-
-					<DropdownMenu>
+				<div className="lg:col-span-6 flex flex-wrap sm:flex-nowrap gap-3 items-center justify-start lg:justify-end">
+					<DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
 							<Button
 								type="button"
-								className="h-11 rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-5 font-semibold shadow-sm hover:shadow-md flex items-center gap-2"
+								className="h-11 rounded-xl bg-[#8dc31e] hover:bg-[#7cb018] text-white px-5 font-semibold flex items-center gap-2 shadow-sm"
 							>
 								<PlusCircle className="w-4 h-4" />
 								Isi Saldo
-								<ChevronDown className="w-3.5 h-3.5 ml-1 opacity-80" />
+								<ChevronDown className="w-3.5 h-3.5 opacity-80 ml-0.5" />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-44 rounded-xl">
+						<DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg border-slate-100 p-1.5">
 							<DropdownMenuItem
 								onSelect={() => navigate({ to: "/e-wallet/top-up/cash" as any })}
-								className="cursor-pointer font-medium text-xs py-2"
+								className="rounded-lg text-xs py-2.5 font-medium cursor-pointer"
 							>
-								Cash (Kasir)
+								<Wallet className="w-4 h-4 mr-2 text-slate-500" />
+								Setor Tunai (Admin)
 							</DropdownMenuItem>
 							<DropdownMenuItem
 								onSelect={() => setIsTopUpOpen(true)}
-								onClick={() => setIsTopUpOpen(true)}
-								className="cursor-pointer font-medium text-xs py-2"
+								className="rounded-lg text-xs py-2.5 font-medium cursor-pointer"
 							>
-								Bank Transfer
+								<PlusCircle className="w-4 h-4 mr-2 text-slate-500" />
+								Transfer / Online
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
@@ -144,55 +160,62 @@ export const TransactionHistoryTable = ({
 			<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100">
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
 					<div>
-						<h3 className="text-lg font-bold text-slate-800 dark:text-white">Transaksi</h3>
+						<h3 className="text-lg font-bold text-slate-800 dark:text-white">Riwayat Transaksi</h3>
 						<p className="text-xs text-slate-500">Dari total {transactions.length} transaksi</p>
 					</div>
+					{(searchQuery || statusFilter || dateRange?.from) && (
+						<Button
+							type="button"
+							variant="ghost"
+							size="sm"
+							onClick={() => {
+								setSearchQuery("")
+								setStatusFilter("")
+								setDateRange(undefined)
+							}}
+							className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 self-start sm:self-auto"
+						>
+							<RotateCcw className="w-3.5 h-3.5" />
+							Reset Filter
+						</Button>
+					)}
 				</div>
 
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3">
-					<div className="lg:col-span-5 flex items-center gap-2">
-						<div className="relative flex-1">
-							<Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-							<Input
-								type="date"
-								value={startDate}
-								onChange={(e) => setStartDate(e.target.value)}
-								className="pl-9 text-xs h-10 rounded-xl border-slate-200"
-							/>
-						</div>
-						<span className="text-xs text-slate-400 font-medium">s/d</span>
-						<div className="relative flex-1">
-							<Calendar className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-							<Input
-								type="date"
-								value={endDate}
-								onChange={(e) => setEndDate(e.target.value)}
-								className="pl-9 text-xs h-10 rounded-xl border-slate-200"
-							/>
-						</div>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
+					{/* Date Picker Component */}
+					<div className="lg:col-span-4">
+						<DatePicker
+							mode="range"
+							value={dateRange}
+							onValueChange={(range) => setDateRange(range)}
+							placeholder="Pilih Tanggal..."
+							formatStr="dd/MM/yyyy"
+						/>
 					</div>
 
-					<div className="lg:col-span-3">
-						<select
+					{/* Status Select Component */}
+					<div className="lg:col-span-4">
+						<SimpleSelect
 							value={statusFilter}
-							onChange={(e) => setStatusFilter(e.target.value)}
-							className="w-full text-xs h-10 px-3 rounded-xl border border-slate-200 bg-white text-slate-700"
-						>
-							<option value="">Semua Status</option>
-							<option value="valid">Berhasil</option>
-							<option value="invalid">Gagal</option>
-							<option value="waiting">Menunggu</option>
-						</select>
+							onValueChange={setStatusFilter}
+							placeholder="Semua Status"
+							options={[
+								{ value: "", label: "Semua Status" },
+								{ value: "valid", label: "Berhasil" },
+								{ value: "invalid", label: "Gagal" },
+								{ value: "waiting", label: "Menunggu" },
+							]}
+						/>
 					</div>
 
-					<div className="lg:col-span-4 relative">
-						<Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+					{/* Search Input */}
+					<div className="lg:col-span-4">
 						<Input
 							type="text"
-							placeholder="Cari transaksi..."
+							placeholder="Cari transaksi (kode/nama)..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-9 text-xs h-10 rounded-xl border-slate-200"
+							className="text-xs h-10 rounded-xl border-slate-200"
 						/>
 					</div>
 				</div>

@@ -5,7 +5,7 @@ import { BannedCard } from "@roja/ui"
 
 const BannedPage = (): JSX.Element => {
 	return (
-		<PageLayout maxWidth="max-w-md">
+		<PageLayout maxWidth="max-w-md" variant="center">
 			<BannedCard contactInfo="Jika ini adalah kesalahan, hubungi sekretariat pendaftaran Pondok Roja." />
 		</PageLayout>
 	)

@@ -2,7 +2,7 @@ import type { JSX } from "react"
 import { Controller, type Control, type UseFormRegister, type FieldErrors } from "react-hook-form"
 import type { PersonalInput } from "@/schemas/register.schema"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
-import { SearchableSelect, Input, Label } from "@roja/ui"
+import { SearchableSelect, Input, DatePicker, Label } from "@roja/ui"
 
 export interface StudentPersonalFieldsProps {
 	control: Control<PersonalInput>
@@ -102,10 +102,17 @@ export const StudentPersonalFields = ({
 				{isFieldVisible(formSettings, 6) && (
 					<div className="form-group mb-0">
 						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 6, "Tanggal Lahir")}</Label>
-						<Input
-							type="date"
-							className={errors.dateOfBirth ? "border-destructive focus-visible:ring-destructive" : ""}
-							{...register("dateOfBirth")}
+						<Controller
+							control={control}
+							name="dateOfBirth"
+							render={({ field }) => (
+								<DatePicker
+									mode="single"
+									value={field.value}
+									onValueChange={(_, dateStr) => field.onChange(dateStr)}
+									className={errors.dateOfBirth ? "border-destructive" : ""}
+								/>
+							)}
 						/>
 						{errors.dateOfBirth && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.dateOfBirth.message}</span>}
 					</div>

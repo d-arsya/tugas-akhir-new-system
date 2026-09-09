@@ -19,7 +19,9 @@ export {
 	type DashboardScenario,
 }
 
-export const IS_DEV_HIJACK = import.meta.env.VITE_DEV_HIJACK === "true"
+export const IS_DEV_HIJACK =
+	import.meta.env.VITE_DEV_HIJACK === "true" ||
+	(import.meta.env.DEV && import.meta.env.VITE_DEV_HIJACK !== "false")
 
 export const getStoredScenario = (): DashboardScenario => {
 	if (typeof window === "undefined") return "approve"

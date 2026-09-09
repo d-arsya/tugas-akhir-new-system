@@ -2,12 +2,17 @@ import type { JSX } from "react"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { RojaCard } from "@roja/ui"
+import { Link } from "@tanstack/react-router"
+import { AlertCircle, X } from "lucide-react"
 import { santriApi } from "@/lib/api"
+import useAuthStore from "@/stores/auth.store"
 import type { Student } from "@roja/types"
 
 const ProfilePage = (): JSX.Element => {
-	const [student, setStudent] = useState<(Student & { gradeName?: string }) | null>(null)
+	const { user } = useAuthStore()
+	const [student, setStudent] = useState<(Student & { gradeName?: string; email?: string }) | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
+	const [dismissAlert, setDismissAlert] = useState<boolean>(false)
 
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -24,6 +29,8 @@ const ProfilePage = (): JSX.Element => {
 		fetchProfile()
 	}, [])
 
+	const hasNoEmail = !student?.email && !user?.email
+
 	if (loading || !student) {
 		return (
 			<div className="py-12 text-center text-slate-400 text-sm font-medium">
@@ -33,7 +40,30 @@ const ProfilePage = (): JSX.Element => {
 	}
 
 	return (
-		<div className="w-full">
+		<div className="w-full flex flex-col gap-5">
+			{hasNoEmail && !dismissAlert && (
+				<div className="p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-between gap-3 text-xs text-rose-800 shadow-sm">
+					<div className="flex items-center gap-2.5">
+						<div className="p-1.5 rounded-full bg-rose-200/60 shrink-0 text-rose-600">
+							<AlertCircle className="w-4 h-4" />
+						</div>
+						<span>
+							Kamu perlu menambahkan email agar suatu saat bisa memulihkan akun.{" "}
+							<Link to="/setting" className="text-rose-600 font-bold hover:underline">
+								Atur Sekarang
+							</Link>
+						</span>
+					</div>
+					<button
+						type="button"
+						onClick={() => setDismissAlert(true)}
+						className="p-1 text-rose-400 hover:text-rose-700 rounded-lg hover:bg-rose-100/60"
+					>
+						<X className="w-4 h-4" />
+					</button>
+				</div>
+			)}
+
 			{/* Main Profile Card (matching profile/index.blade.php) */}
 			<RojaCard className="p-6 md:p-8 rounded-2xl shadow-sm border-slate-100 bg-white">
 				{/* Intro Header */}

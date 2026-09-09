@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { RojaCard } from "@roja/ui"
 import WizardStepper from "@/components/wizard-stepper"
 import { InvalidPersonalStepContent } from "@/components/invalid-steps/invalid-personal-step"
 import { InvalidIdentityStepContent } from "@/components/invalid-steps/invalid-identity-step"
@@ -16,7 +17,7 @@ const InvalidDataPage = (): JSX.Element => {
 	const prevStep = (): void => setSubStep((prev) => Math.max(prev - 1, 1))
 
 	return (
-		<div>
+		<RojaCard className="w-full max-w-5xl p-6 md:p-10">
 			<WizardStepper mainStep={2} subStep={subStep} onStepClick={(step) => setSubStep(step)} />
 			<div className="tbr_wizard_content mt-8">
 				{subStep === 1 && <InvalidPersonalStepContent onNext={nextStep} />}
@@ -25,7 +26,7 @@ const InvalidDataPage = (): JSX.Element => {
 				{subStep === 4 && <InvalidGuardianStepContent onNext={nextStep} onPrev={prevStep} />}
 				{subStep === 5 && <InvalidAttachmentStepContent onPrev={prevStep} />}
 			</div>
-		</div>
+		</RojaCard>
 	)
 }
 

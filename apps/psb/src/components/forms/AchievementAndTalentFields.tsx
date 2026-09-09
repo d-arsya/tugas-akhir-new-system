@@ -1,17 +1,19 @@
 import type { JSX } from "react"
-import type { UseFormRegister } from "react-hook-form"
+import type { UseFormRegister, FieldErrors } from "react-hook-form"
 import type { IdentityInput } from "@/schemas/register.schema"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { Input, Label, Textarea } from "@roja/ui"
 
 export interface AchievementAndTalentFieldsProps {
 	register: UseFormRegister<IdentityInput>
+	errors?: FieldErrors<IdentityInput>
 	watchReading?: string
 	formSettings?: any
 }
 
 export const AchievementAndTalentFields = ({
 	register,
+	errors,
 	watchReading,
 	formSettings,
 }: AchievementAndTalentFieldsProps): JSX.Element => {
@@ -31,6 +33,7 @@ export const AchievementAndTalentFields = ({
 							placeholder="Tuliskan kejuaraan atau prestasi belajar yang pernah didapat"
 							{...register("learningAchievment")}
 						/>
+						{errors?.learningAchievment?.message && <p className="text-red-500 text-[11px] mt-1">{errors.learningAchievment.message}</p>}
 					</div>
 				</div>
 			)}
@@ -56,6 +59,7 @@ export const AchievementAndTalentFields = ({
 											</Label>
 										))}
 									</div>
+									{errors?.reading?.message && <p className="text-red-500 text-[11px] mt-1">{errors.reading.message}</p>}
 								</div>
 							)}
 
@@ -67,6 +71,7 @@ export const AchievementAndTalentFields = ({
 										placeholder="Contoh: Jilid 4"
 										{...register("jilidChapter")}
 									/>
+									{errors?.jilidChapter?.message && <p className="text-red-500 text-[11px] mt-1">{errors.jilidChapter.message}</p>}
 								</div>
 							)}
 						</div>
@@ -79,6 +84,7 @@ export const AchievementAndTalentFields = ({
 									placeholder="Contoh: Juz 30, Surat Al-Waqi'ah s.d. An-Naas"
 									{...register("quranMemorizing")}
 								/>
+								{errors?.quranMemorizing?.message && <p className="text-red-500 text-[11px] mt-1">{errors.quranMemorizing.message}</p>}
 							</div>
 						)}
 					</div>
@@ -99,6 +105,7 @@ export const AchievementAndTalentFields = ({
 							placeholder="Seni, olahraga, pidato, kepemimpinan, dll."
 							{...register("gift")}
 						/>
+						{errors?.gift?.message && <p className="text-red-500 text-[11px] mt-1">{errors.gift.message}</p>}
 					</div>
 				</div>
 			)}

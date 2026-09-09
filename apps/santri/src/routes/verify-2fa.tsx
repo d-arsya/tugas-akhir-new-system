@@ -93,7 +93,7 @@ const Verify2faPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md">
+		<PageLayout maxWidth="max-w-md" variant="center">
 			<RojaCard className="p-8 md:p-10 flex flex-col gap-6">
 				<div className="flex flex-col gap-2 items-center text-center">
 					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">

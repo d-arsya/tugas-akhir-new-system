@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_guest")({
 
 	component: (): JSX.Element => {
 		return (
-			<PageLayout maxWidth="max-w-6xl">
+			<PageLayout maxWidth="max-w-6xl" variant="center">
 				<Outlet />
 			</PageLayout>
 		)

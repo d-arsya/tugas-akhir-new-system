@@ -1,5 +1,5 @@
 import type { JSX } from "react"
-import { Controller, type Control, type UseFormRegister, type UseFieldArrayRemove } from "react-hook-form"
+import { Controller, type Control, type UseFormRegister, type FieldErrors, type UseFieldArrayRemove } from "react-hook-form"
 import type { IdentityInput } from "@/schemas/register.schema"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { SearchableSelect, Button, Input, Label } from "@roja/ui"
@@ -7,6 +7,7 @@ import { SearchableSelect, Button, Input, Label } from "@roja/ui"
 export interface HealthDataFieldsProps {
 	control: Control<IdentityInput>
 	register: UseFormRegister<IdentityInput>
+	errors?: FieldErrors<IdentityInput>
 	fields: Record<string, any>[]
 	append: (val: { name: string; status: string }) => void
 	remove: UseFieldArrayRemove
@@ -16,6 +17,7 @@ export interface HealthDataFieldsProps {
 export const HealthDataFields = ({
 	control,
 	register,
+	errors,
 	fields,
 	append,
 	remove,
@@ -41,6 +43,7 @@ export const HealthDataFields = ({
 									placeholder="Kg"
 									{...register("weight")}
 								/>
+								{errors?.weight?.message && <p className="text-red-500 text-[11px] mt-1">{errors.weight.message}</p>}
 							</div>
 
 							<div className="form-group mb-0">
@@ -50,6 +53,7 @@ export const HealthDataFields = ({
 									placeholder="Cm"
 									{...register("height")}
 								/>
+								{errors?.height?.message && <p className="text-red-500 text-[11px] mt-1">{errors.height.message}</p>}
 							</div>
 						</>
 					)}
@@ -72,6 +76,7 @@ export const HealthDataFields = ({
 									/>
 								)}
 							/>
+							{errors?.bloodType?.message && <p className="text-red-500 text-[11px] mt-1">{errors.bloodType.message}</p>}
 						</div>
 					)}
 				</div>
@@ -88,6 +93,7 @@ export const HealthDataFields = ({
 									</Label>
 								))}
 							</div>
+							{errors?.visualCondition?.message && <p className="text-red-500 text-[11px] mt-1">{errors.visualCondition.message}</p>}
 						</div>
 					)}
 
@@ -102,6 +108,7 @@ export const HealthDataFields = ({
 									</Label>
 								))}
 							</div>
+							{errors?.hearingCondition?.message && <p className="text-red-500 text-[11px] mt-1">{errors.hearingCondition.message}</p>}
 						</div>
 					)}
 
@@ -123,6 +130,7 @@ export const HealthDataFields = ({
 									/>
 								)}
 							/>
+							{errors?.immunizationGiven?.message && <p className="text-red-500 text-[11px] mt-1">{errors.immunizationGiven.message}</p>}
 						</div>
 					)}
 				</div>

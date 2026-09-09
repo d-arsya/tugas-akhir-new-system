@@ -87,20 +87,15 @@ export const TopUpModal = ({
 				{/* Form */}
 				<form onSubmit={handleSubmit} className="mt-6 space-y-5">
 					<div className="max-w-[280px] mx-auto">
-						<div className="relative flex items-center">
-							<span className="absolute left-4 text-slate-500 font-semibold text-sm">
-								Rp
-							</span>
-							<Input
-								type="text"
-								inputMode="numeric"
-								value={amount}
-								onChange={handleAmountChange}
-								placeholder="0"
-								className="pl-11 text-center font-bold text-xl h-12 rounded-xl border-slate-200 focus:border-[#e4007e] focus:ring-[#e4007e]/20"
-								autoFocus
-							/>
-						</div>
+						<Input
+							type="text"
+							inputMode="numeric"
+							value={amount}
+							onChange={handleAmountChange}
+							placeholder="Rp 0"
+							className="text-center font-bold text-xl h-12 rounded-xl border-slate-200 focus:border-[#e4007e] focus:ring-[#e4007e]/20"
+							autoFocus
+						/>
 					</div>
 
 					<div className="flex items-center justify-center gap-3 pt-2">

@@ -1,11 +1,12 @@
 import type { JSX } from "react"
 import { useState, useEffect } from "react"
 import { createFileRoute, useNavigate, useLocation, Outlet } from "@tanstack/react-router"
-import { RojaCard, Badge, Button, Input } from "@roja/ui"
+import { RojaCard, Badge, Button } from "@roja/ui"
 import { Wallet, FileText, Eye, WalletCards } from "lucide-react"
 import { santriApi } from "@/lib/api"
 import useEwalletStore from "@/stores/ewalletStore"
 import type { StudentInvoice } from "@roja/types"
+import TableToolbar from "@/components/table-toolbar"
 
 const PaymentHistoryPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -68,8 +69,8 @@ const PaymentHistoryPage = (): JSX.Element => {
 
 	const displayedInvoices = filteredInvoices.slice(0, entriesPerPage)
 
-	const isOverdue = (dueDateStr: string, status: string) => {
-		if (status === "paid") return false
+	const isOverdue = (dueDateStr: string | null | undefined, status: string) => {
+		if (!dueDateStr || status === "paid") return false
 		return new Date(dueDateStr) < new Date()
 	}
 
@@ -143,43 +144,22 @@ const PaymentHistoryPage = (): JSX.Element => {
 			<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100 bg-white">
 				<h3 className="text-lg font-bold text-slate-800">Pembayaran Santri</h3>
 
-				<div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-					<div className="sm:col-span-2">
-						<select
-							value={entriesPerPage}
-							onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-							className="w-full text-xs h-10 px-3 rounded-xl border border-slate-200 bg-white text-slate-700"
-						>
-							<option value={10}>10</option>
-							<option value={25}>25</option>
-							<option value={50}>50</option>
-							<option value={100}>100</option>
-						</select>
-					</div>
-
-					<div className="sm:col-span-4 sm:col-start-6">
-						<select
-							value={statusFilter}
-							onChange={(e) => setStatusFilter(e.target.value)}
-							className="w-full text-xs h-10 px-3 rounded-xl border border-slate-200 bg-white text-slate-700"
-						>
-							<option value="">Status</option>
-							<option value="sudah">Dibayar</option>
-							<option value="belum">Belum Dibayar</option>
-							<option value="angsur">Diangsur</option>
-						</select>
-					</div>
-
-					<div className="sm:col-span-3">
-						<Input
-							type="text"
-							placeholder="Search"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="h-10 text-xs rounded-xl border-slate-200"
-						/>
-					</div>
-				</div>
+				<TableToolbar
+					searchValue={searchQuery}
+					onSearchChange={setSearchQuery}
+					searchPlaceholder="Cari tagihan..."
+					filterValue={statusFilter}
+					onFilterChange={setStatusFilter}
+					filterOptions={[
+						{ value: "sudah", label: "Dibayar" },
+						{ value: "belum", label: "Belum Dibayar" },
+						{ value: "angsur", label: "Diangsur" },
+					]}
+					filterPlaceholder="Semua Status"
+					entriesValue={entriesPerPage}
+					onEntriesChange={setEntriesPerPage}
+					entriesOptions={[10, 25, 50, 100]}
+				/>
 
 				<div className="overflow-x-auto rounded-xl border border-slate-100">
 					<table className="w-full text-left text-xs">
@@ -214,7 +194,7 @@ const PaymentHistoryPage = (): JSX.Element => {
 											<td className="py-3 px-4 text-slate-500 font-medium">{index + 1}</td>
 											<td className="py-3 px-4 font-semibold text-slate-800">{inv.name}</td>
 											<td className="py-3 px-4 text-slate-600">
-												{new Date(inv.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+												{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
 											</td>
 											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.amount)}</td>
 											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.amountPaid)}</td>

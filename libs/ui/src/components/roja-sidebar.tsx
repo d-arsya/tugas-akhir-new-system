@@ -31,7 +31,7 @@ export const RojaSidebar = ({ navItems, className = "" }: RojaSidebarProps): JSX
 						<Link
 							key={item.to}
 							to={item.to as any}
-							className={`group relative flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white dark:bg-[#17283c] border border-slate-100/80 dark:border-slate-800/80 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden ${
+							className={`group relative flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white dark:bg-[#17283c] border-0 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden outline-none focus:outline-none focus-visible:outline-none ring-0 ${
 								isActive
 									? "text-slate-900 dark:text-white font-bold"
 									: "text-slate-500 dark:text-slate-400 font-medium hover:text-slate-800 dark:hover:text-slate-200"

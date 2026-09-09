@@ -1,16 +1,18 @@
 import type { JSX } from "react"
-import type { UseFormRegister } from "react-hook-form"
+import type { UseFormRegister, FieldErrors } from "react-hook-form"
 import type { IdentityInput } from "@/schemas/register.schema"
 import { isFieldVisible, getFieldLabel } from "@roja/utils"
 import { Input, Label } from "@roja/ui"
 
 export interface IdentityNumbersFieldsProps {
 	register: UseFormRegister<IdentityInput>
+	errors?: FieldErrors<IdentityInput>
 	formSettings?: any
 }
 
 export const IdentityNumbersFields = ({
 	register,
+	errors,
 	formSettings,
 }: IdentityNumbersFieldsProps): JSX.Element => {
 	return (
@@ -28,6 +30,7 @@ export const IdentityNumbersFields = ({
 							placeholder="16 digit NIK"
 							{...register("nik")}
 						/>
+						{errors?.nik?.message && <p className="text-red-500 text-[11px] mt-1">{errors.nik.message}</p>}
 					</div>
 				)}
 
@@ -39,6 +42,7 @@ export const IdentityNumbersFields = ({
 							placeholder="10 digit NISN"
 							{...register("nisn")}
 						/>
+						{errors?.nisn?.message && <p className="text-red-500 text-[11px] mt-1">{errors.nisn.message}</p>}
 					</div>
 				)}
 
@@ -50,6 +54,7 @@ export const IdentityNumbersFields = ({
 							placeholder="Nomor Ijazah Terakhir"
 							{...register("certificateNumber")}
 						/>
+						{errors?.certificateNumber?.message && <p className="text-red-500 text-[11px] mt-1">{errors.certificateNumber.message}</p>}
 					</div>
 				)}
 
@@ -61,6 +66,7 @@ export const IdentityNumbersFields = ({
 							placeholder="Nomor KSP jika ada"
 							{...register("ksp")}
 						/>
+						{errors?.ksp?.message && <p className="text-red-500 text-[11px] mt-1">{errors.ksp.message}</p>}
 					</div>
 				)}
 
@@ -72,6 +78,7 @@ export const IdentityNumbersFields = ({
 							placeholder="Nomor KIP jika ada"
 							{...register("kip")}
 						/>
+						{errors?.kip?.message && <p className="text-red-500 text-[11px] mt-1">{errors.kip.message}</p>}
 					</div>
 				)}
 			</div>

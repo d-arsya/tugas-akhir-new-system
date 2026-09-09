@@ -49,52 +49,50 @@ const CheckEmailPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md">
-			<div className="max-w-md mx-auto my-8">
-				<RojaCard className="flex flex-col gap-6 p-8 md:p-10">
-					<div className="flex flex-col gap-2 items-center text-center">
-						<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Tambahkan Email</div>
-						<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
-							Jika suatu saat kamu ingin memulihkan akun, kami memerlukan alamat email kamu.
-						</p>
+		<PageLayout maxWidth="max-w-md" variant="center">
+			<RojaCard className="flex flex-col gap-6 p-8 md:p-10 w-full">
+				<div className="flex flex-col gap-2 items-center text-center">
+					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Tambahkan Email</div>
+					<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
+						Jika suatu saat kamu ingin memulihkan akun, kami memerlukan alamat email kamu.
+					</p>
+				</div>
+
+				{errorMsg && (
+					<Alert variant="destructive">
+						<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
+					</Alert>
+				)}
+
+				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+					<div className="flex flex-col gap-1.5">
+					<Input
+						id="email"
+						type="email"
+						className="h-11"
+						placeholder="Email"
+						{...register("email")}
+					/>
+						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
 					</div>
 
-					{errorMsg && (
-						<Alert variant="destructive">
-							<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
-						</Alert>
-					)}
+					<Button
+						type="submit"
+						variant="roja-primary"
+						size="lg"
+						className="w-full mt-2"
+						disabled={isLoading}
+					>
+						{isLoading ? "Memproses..." : "Selanjutnya"}
+					</Button>
+				</form>
 
-					<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-						<div className="flex flex-col gap-1.5">
-						<Input
-							id="email"
-							type="email"
-							className="h-11"
-							placeholder="Email"
-							{...register("email")}
-						/>
-							{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
-						</div>
-
-						<Button
-							type="submit"
-							variant="roja-primary"
-							size="lg"
-							className="w-full mt-2"
-							disabled={isLoading}
-						>
-							{isLoading ? "Memproses..." : "Selanjutnya"}
-						</Button>
-					</form>
-
-					<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4">
-						<Link to="/dashboard" className="text-[var(--grey)] hover:underline">
-							Skip, lain kali saja
-						</Link>
-					</div>
-				</RojaCard>
-			</div>
+				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4">
+					<Link to="/dashboard" className="text-[var(--grey)] hover:underline">
+						Skip, lain kali saja
+					</Link>
+				</div>
+			</RojaCard>
 		</PageLayout>
 	)
 }

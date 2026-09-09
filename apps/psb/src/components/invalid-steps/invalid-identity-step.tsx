@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { SearchableSelect, Input, Label, Textarea } from "@roja/ui"
+import IdentityFormSections from "../forms/IdentityFormSections";
 
 export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
 	const queryClient = useQueryClient()
@@ -55,7 +56,7 @@ export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => v
 			reading: "quran",
 			jilidChapter: "",
 			quranMemorizing: "",
-			learningAchievement: "",
+			learningAchievment: "",
 			gift: "",
 		},
 	})
