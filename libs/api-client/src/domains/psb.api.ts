@@ -53,7 +53,7 @@ export type PsbApi = {
 	refreshToken: () => Promise<{ success: boolean }>
 	logout: () => Promise<{ success: boolean }>
 	forgotPassword: (email: string, clientUrl?: string) => Promise<{ success: boolean }>
-	resetPassword: (data: { token: string; password: string }) => Promise<{ success: boolean }>
+	resetPassword: (data: { token: string; password: string; passwordConfirmation: string; email: string }) => Promise<{ success: boolean }>
 	verifyEmail: (token: string) => Promise<{ message: string }>
 	resendVerification: (email: string, clientUrl?: string) => Promise<{ message: string }>
 	getDashboard: () => Promise<DashboardData>
@@ -509,10 +509,11 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		return { success: res.success }
 	},
 
-	resetPassword: async (data: { token: string; password: string }): Promise<{ success: boolean }> => {
+	resetPassword: async (data: { token: string; password: string, passwordConfirmation: string, email: string }): Promise<{ success: boolean }> => {
 		// ResetPasswordDto requires { token, password, passwordConfirmation }
 		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/reset-password", {
 			token: data.token,
+			email: data.email,
 			password: data.password,
 			passwordConfirmation: data.password, // match confirmation
 		})

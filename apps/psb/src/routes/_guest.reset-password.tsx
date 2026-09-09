@@ -3,9 +3,13 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { psbApi } from "@/lib/api"
-import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
+import { useNavigate, Link, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { Button, Input, Label, Alert, AlertDescription, RojaCard } from "@roja/ui"
+
+const searchSchema = z.object({
+	token: z.string().optional(),
+})
 
 const schema = z.object({
 	password: z.string().min(8, "Password minimal 8 karakter"),
@@ -19,6 +23,7 @@ type InputType = z.infer<typeof schema>
 
 const ResetPasswordPage = (): JSX.Element => {
 	const navigate = useNavigate()
+	const search = useSearch({ from: "/_guest/reset-password" }) as { token?: string, email?: string }
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
@@ -32,9 +37,20 @@ const ResetPasswordPage = (): JSX.Element => {
 	})
 
 	const onSubmit = async (data: InputType): Promise<void> => {
+		const token = search?.token
+		const email = search?.email
+		if (!token) {
+			alert("Token reset password tidak ditemukan.")
+			return
+		}
+		if (!email) {
+			alert("Email tidak ditemukan.")
+			return
+		}
+
 		setIsLoading(true)
 		try {
-			await psbApi.resetPassword({ token: "mock_token", password: data.password })
+			await psbApi.resetPassword({ token, password: data.password, passwordConfirmation: data.confirmPassword, email })
 			setSuccessMsg("Password Anda berhasil diperbarui.")
 			setTimeout(() => {
 				navigate({ to: "/login" })
@@ -107,6 +123,7 @@ const ResetPasswordPage = (): JSX.Element => {
 }
 
 export const Route = createFileRoute("/_guest/reset-password")({
+	validateSearch: searchSchema,
 	component: ResetPasswordPage,
 })
 

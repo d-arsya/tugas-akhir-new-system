@@ -13,4 +13,4 @@ export const PsbResetPasswordSchema = z
 		path: ["passwordConfirmation"],
 	})
 
-export class PsbResetPasswordDto extends createZodDto(PsbResetPasswordSchema) {}
+export class PsbResetPasswordDto extends createZodDto(PsbResetPasswordSchema) { }

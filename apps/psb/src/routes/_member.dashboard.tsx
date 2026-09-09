@@ -56,10 +56,10 @@ const DashboardPage = (): JSX.Element => {
 		status === "approve"
 			? "accepted"
 			: status === "failed"
-			? "rejected"
-			: status === "indent_failed"
-			? "indent-rejected"
-			: "registration"
+				? "rejected"
+				: status === "indent_failed"
+					? "indent-rejected"
+					: "registration"
 	const printLabel = status === "approve" ? "Cetak Surat Kelulusan" : "Cetak Bukti PSB"
 	const registrantIdParam = reg?.id ? String(reg.id) : ""
 
@@ -90,7 +90,7 @@ const DashboardPage = (): JSX.Element => {
 			{/* Status Scenario Content */}
 
 			{/* 1. Wait (Menunggu Verifikasi) */}
-			{status === "wait" && (
+			{(status === "wait" || status === "reserve") && (
 				<Alert variant="default" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-6 border-slate-200 bg-slate-50/50">
 					<div className="lg:col-span-7 flex flex-col gap-3">
 						<div className="flex items-center gap-2">
