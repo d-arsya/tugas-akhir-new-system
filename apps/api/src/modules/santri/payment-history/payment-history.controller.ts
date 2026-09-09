@@ -1,7 +1,8 @@
-import { Controller, Get, Param, ParseIntPipe, UseGuards } from "@nestjs/common"
+import { Controller, Get, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common"
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { CurrentUser } from "@core/auth/decorators/current-user.decorator"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
+import { PaginationQueryDto } from "@core/dto/pagination-query.dto"
 import { ActiveStudentGuard } from "@santri/guards/active-student.guard"
 import { SantriJwtAuthGuard } from "@santri/guards/santri-jwt-auth.guard"
 import { PaymentHistoryService } from "@santri/payment-history/payment-history.service"
@@ -11,12 +12,15 @@ import { PaymentHistoryService } from "@santri/payment-history/payment-history.s
 @UseGuards(SantriJwtAuthGuard, ActiveStudentGuard)
 @Controller("santri/payment-history")
 export class PaymentHistoryController {
-	constructor(private readonly paymentHistoryService: PaymentHistoryService) {}
+	constructor(private readonly paymentHistoryService: PaymentHistoryService) { }
 
 	@Get()
 	@ApiOperation({ summary: "Ringkasan tagihan & pembayaran SPP santri" })
-	async getSummary(@CurrentUser() user: JwtPayload) {
-		return this.paymentHistoryService.getSummary(user.sub)
+	async getSummary(
+		@CurrentUser() user: JwtPayload,
+		@Query() query: PaginationQueryDto,
+	) {
+		return this.paymentHistoryService.getSummary(user.sub, query.page, query.limit)
 	}
 
 	@Get(":studentId/list")
@@ -24,8 +28,9 @@ export class PaymentHistoryController {
 	async getInvoiceList(
 		@CurrentUser() user: JwtPayload,
 		@Param("studentId", ParseIntPipe) studentId: number,
+		@Query() query: PaginationQueryDto,
 	) {
-		return this.paymentHistoryService.getInvoiceList(studentId)
+		return this.paymentHistoryService.getInvoiceList(studentId, query.page, query.limit)
 	}
 
 	@Get("invoice/:invoiceId")
@@ -33,7 +38,8 @@ export class PaymentHistoryController {
 	async getInvoiceDetail(
 		@CurrentUser() user: JwtPayload,
 		@Param("invoiceId", ParseIntPipe) invoiceId: number,
+		@Query() query: PaginationQueryDto,
 	) {
-		return this.paymentHistoryService.getInvoiceDetail(invoiceId, user.sub)
+		return this.paymentHistoryService.getInvoiceDetail(invoiceId, user.sub, query.page, query.limit)
 	}
 }

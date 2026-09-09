@@ -1,22 +1,28 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { In, LessThan, Repository } from "typeorm"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
 import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 import { StudentTransaction } from "@santri/entities/student-transaction.entity"
+import { Student } from "@santri/entities/student.entity"
 
 @Injectable()
 export class PaymentHistoryService {
 	constructor(
+		@InjectRepository(Student)
+		private readonly studentRepository: Repository<Student>,
+		@InjectRepository(StudentGrade)
+		private readonly studentGradeRepository: Repository<StudentGrade>,
 		@InjectRepository(StudentInvoice)
 		private readonly invoiceRepository: Repository<StudentInvoice>,
 		@InjectRepository(StudentTransaction)
 		private readonly transactionRepository: Repository<StudentTransaction>,
 		@InjectRepository(StudentInvoiceTransaction)
 		private readonly invoiceTransactionRepository: Repository<StudentInvoiceTransaction>,
-	) {}
+	) { }
 
-	async getSummary(studentId: number) {
+	async getSummary(studentId: number, page = 1, limit = 10) {
 		const invoices = await this.invoiceRepository.find({
 			where: [
 				{ studentId, validityStatus: true, status: "paid" },
@@ -32,21 +38,33 @@ export class PaymentHistoryService {
 				totalPaid: 0,
 				remaining: 0,
 				invoices: [],
+				meta: {
+					page,
+					limit,
+					total: 0,
+					totalPages: 0,
+				},
 			}
 		}
 
-		const invoiceIds = invoices.map((inv) => inv.id)
+		const invoiceIds = invoices.map((inv) => Number(inv.id))
 		const invoiceTxns = await this.invoiceTransactionRepository.find({
 			where: { studentInvoiceId: In(invoiceIds) },
 		})
 
-		const txnIds = [...new Set(invoiceTxns.map((it) => it.studentTransactionId).filter((id): id is number => id !== null))]
+		const txnIds = [
+			...new Set(
+				invoiceTxns
+					.map((it) => (it.studentTransactionId !== null && it.studentTransactionId !== undefined ? Number(it.studentTransactionId) : null))
+					.filter((id): id is number => id !== null && !isNaN(id)),
+			),
+		]
 		const validTxns = txnIds.length
 			? await this.transactionRepository.find({
-					where: { id: In(txnIds), status: "valid" },
-			  })
+				where: { id: In(txnIds), status: "valid" },
+			})
 			: []
-		const validTxnIdSet = new Set(validTxns.map((t) => t.id))
+		const validTxnMap = new Map(validTxns.map((t) => [Number(t.id), t]))
 
 		let totalBilled = 0
 		let totalPaid = 0
@@ -56,7 +74,11 @@ export class PaymentHistoryService {
 			totalBilled += invAmount
 
 			const invTxns = invoiceTxns.filter(
-				(it) => it.studentInvoiceId === inv.id && it.studentTransactionId && validTxnIdSet.has(it.studentTransactionId),
+				(it) =>
+					it.studentInvoiceId !== null &&
+					it.studentTransactionId !== null &&
+					Number(it.studentInvoiceId) === Number(inv.id) &&
+					validTxnMap.has(Number(it.studentTransactionId)),
 			)
 
 			let paid = invTxns.reduce((sum, item) => sum + Number(item.pay ?? item.amount ?? 0), 0)
@@ -90,21 +112,33 @@ export class PaymentHistoryService {
 		})
 
 		const remaining = Math.max(0, totalBilled - totalPaid)
+		const total = formattedInvoices.length
+		const startIndex = (page - 1) * limit
+		const paginatedInvoices = formattedInvoices.slice(startIndex, startIndex + limit)
 
 		return {
 			totalBilled,
 			totalPaid,
 			remaining,
-			invoices: formattedInvoices,
+			invoices: paginatedInvoices,
+			meta: {
+				page,
+				limit,
+				total,
+				totalPages: Math.ceil(total / limit) || 1,
+			},
 		}
 	}
 
-	async getInvoiceList(studentId: number) {
-		const summary = await this.getSummary(studentId)
-		return summary.invoices
+	async getInvoiceList(studentId: number, page = 1, limit = 10) {
+		const summary = await this.getSummary(studentId, page, limit)
+		return {
+			data: summary.invoices,
+			meta: summary.meta,
+		}
 	}
 
-	async getInvoiceDetail(invoiceId: number, studentId: number) {
+	async getInvoiceDetail(invoiceId: number, studentId: number, page = 1, limit = 10) {
 		const invoice = await this.invoiceRepository.findOne({
 			where: { id: invoiceId, studentId, validityStatus: true },
 		})
@@ -113,30 +147,59 @@ export class PaymentHistoryService {
 			throw new NotFoundException("Tagihan tidak ditemukan")
 		}
 
+		const student = await this.studentRepository.findOne({
+			where: { id: studentId },
+		})
+
+		if (!student) {
+			throw new NotFoundException("Data santri tidak ditemukan")
+		}
+
+		const activeGrade = await this.studentGradeRepository.findOne({
+			where: { studentId, gradeStatus: "active" },
+			order: { id: "DESC" },
+		})
+
+		const studentName = activeGrade?.fullname ?? student.nis ?? "Santri"
+
 		const invoiceTxns = await this.invoiceTransactionRepository.find({
 			where: { studentInvoiceId: invoiceId },
 		})
 
-		const txnIds = [...new Set(invoiceTxns.map((it) => it.studentTransactionId).filter((id): id is number => id !== null))]
+		const txnIds = [
+			...new Set(
+				invoiceTxns
+					.map((it) => (it.studentTransactionId !== null && it.studentTransactionId !== undefined ? Number(it.studentTransactionId) : null))
+					.filter((id): id is number => id !== null && !isNaN(id)),
+			),
+		]
 		const validTxns = txnIds.length
 			? await this.transactionRepository.find({
-					where: { id: In(txnIds), status: "valid" },
-					order: { paidAt: "DESC" },
-			  })
+				where: { id: In(txnIds), status: "valid" },
+				order: { paidAt: "DESC" },
+			})
 			: []
 
-		const validTxnMap = new Map(validTxns.map((t) => [t.id, t]))
+		const validTxnMap = new Map(validTxns.map((t) => [Number(t.id), t]))
 
-		const transactions = invoiceTxns
-			.filter((it) => it.studentTransactionId && validTxnMap.has(it.studentTransactionId))
+		const allTransactions = invoiceTxns
+			.filter(
+				(it) =>
+					it.studentTransactionId !== null &&
+					it.studentTransactionId !== undefined &&
+					validTxnMap.has(Number(it.studentTransactionId)),
+			)
 			.map((it) => {
-				const parentTxn = validTxnMap.get(it.studentTransactionId!)!
-				const payAmount = Number(it.pay ?? it.amount ?? parentTxn.amount ?? 0)
+				const parentTxn = validTxnMap.get(Number(it.studentTransactionId))!
+				const totalTxnAmount = Number(parentTxn.amount ?? 0)
+				const invoicePayAmount = Number(it.pay ?? it.amount ?? parentTxn.amount ?? 0)
 				return {
 					id: parentTxn.id,
 					transactionCode: parentTxn.studentTransactionCode,
 					paidAt: parentTxn.paidAt,
-					amount: payAmount,
+					amount: totalTxnAmount,
+					invoicePayAmount,
+					desc: parentTxn.desc,
 					description: parentTxn.desc,
 					note: parentTxn.note,
 					status: parentTxn.status,
@@ -144,12 +207,15 @@ export class PaymentHistoryService {
 			})
 
 		const invAmount = Number(invoice.amount || 0)
-		let totalPaid = transactions.reduce((sum, t) => sum + t.amount, 0)
+		let totalPaid = invoiceTxns.reduce((sum, it) => sum + Number(it.pay ?? it.amount ?? 0), 0)
 		if (invoice.status === "paid" && totalPaid < invAmount) {
 			totalPaid = invAmount
 		}
 
 		const costRemain = Math.max(0, invAmount - totalPaid)
+		const totalTxnsCount = allTransactions.length
+		const startIndex = (page - 1) * limit
+		const paginatedTransactions = allTransactions.slice(startIndex, startIndex + limit)
 
 		return {
 			invoice: {
@@ -162,9 +228,22 @@ export class PaymentHistoryService {
 				reminder: invoice.reminder,
 				note: invoice.note,
 			},
-			transactions,
+			student: {
+				id: student.id,
+				nis: student.nis,
+				fullName: studentName,
+			},
+			studentName,
+			studentNis: student.nis ?? "",
+			transactions: paginatedTransactions,
 			totalPaid,
 			costRemain,
+			meta: {
+				page,
+				limit,
+				total: totalTxnsCount,
+				totalPages: Math.ceil(totalTxnsCount / limit) || 1,
+			},
 		}
 	}
 }

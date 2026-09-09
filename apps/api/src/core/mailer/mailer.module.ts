@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { MailerModule as NestMailerModule } from "@nestjs-modules/mailer"
-import { HandlebarsAdapter } from "@nestjs-modules/mailer/adapters/handlebars.adapter"
+import { SafeHandlebarsAdapter } from "./adapters/safe-handlebars.adapter"
 import { join } from "path"
 import { MailerService } from "@core/mailer/mailer.service"
 import { EmailListener } from "@core/mailer/listeners/email.listener"
@@ -29,7 +29,7 @@ import type { Env } from "@core/config/env.validation"
 				},
 				template: {
 					dir: join(__dirname, "templates"),
-					adapter: new HandlebarsAdapter(),
+					adapter: new SafeHandlebarsAdapter(),
 					options: { strict: true },
 				},
 			}),
