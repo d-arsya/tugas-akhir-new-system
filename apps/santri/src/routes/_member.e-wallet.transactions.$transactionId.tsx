@@ -1,41 +1,17 @@
 import type { JSX } from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { RojaCard, Badge, Button, Alert, AlertDescription } from "@roja/ui"
-import { AlertCircle, CheckCircle2, Clock, XCircle, Copy, Receipt } from "lucide-react"
-import { santriApi } from "@/lib/api"
-import type { SantriTransactionDetailResponse } from "@roja/api-client/src/domains/santri.api"
+import { formatRupiah } from "@roja/utils"
+import { AlertCircle, CheckCircle2, Clock, XCircle, Copy, Receipt, Info } from "lucide-react"
+import { useSantriTransactionDetail } from "@/hooks/use-santri-queries"
 
 const TransactionDetailPage = (): JSX.Element => {
 	const navigate = useNavigate()
 	const { transactionId } = useParams({ from: "/_member/e-wallet/transactions/$transactionId" })
 
-	const [loading, setLoading] = useState<boolean>(true)
-	const [tx, setTx] = useState<SantriTransactionDetailResponse | null>(null)
+	const { data: tx, isLoading } = useSantriTransactionDetail(Number(transactionId))
 	const [copied, setCopied] = useState<boolean>(false)
-
-	useEffect(() => {
-		const fetchDetail = async () => {
-			setLoading(true)
-			try {
-				const res = await santriApi.getTransactionDetail(Number(transactionId))
-				setTx(res)
-			} catch (err) {
-				// Fallback error
-			} finally {
-				setLoading(false)
-			}
-		}
-		fetchDetail()
-	}, [transactionId])
-
-	const formatRupiah = (val: number) => {
-		return new Intl.NumberFormat("id-ID", {
-			style: "currency",
-			currency: "IDR",
-			minimumFractionDigits: 0,
-		}).format(val)
-	}
 
 	const handleCopy = (text: string) => {
 		navigator.clipboard.writeText(text)
@@ -43,13 +19,16 @@ const TransactionDetailPage = (): JSX.Element => {
 		setTimeout(() => setCopied(false), 2000)
 	}
 
-	if (loading || !tx) {
+	if (isLoading || !tx) {
 		return (
 			<div className="py-12 text-center text-slate-400 text-sm font-medium">
 				Memuat detail transaksi...
 			</div>
 		)
 	}
+
+	const hasNewsNumber = Boolean(tx.transferNewsNumber && tx.transferNewsNumber > 0)
+	const totalTransfer = hasNewsNumber ? Number(tx.amount) + Number(tx.transferNewsNumber) : Number(tx.amount)
 
 	return (
 		<div className="flex items-start gap-4 w-full">
@@ -69,117 +48,148 @@ const TransactionDetailPage = (): JSX.Element => {
 
 				{/* Main Detail Receipt Card */}
 				<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100 bg-white">
-				{/* Receipt Header */}
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
-					<div className="flex items-center gap-3">
-						<div className="p-3 rounded-2xl bg-pink-50 text-[#e4007e]">
-							<Receipt className="w-7 h-7" />
+					{/* Receipt Header */}
+					<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+						<div className="flex items-center gap-3">
+							<div className="p-3 rounded-2xl bg-pink-50 text-[#e4007e]">
+								<Receipt className="w-7 h-7" />
+							</div>
+							<div>
+								<h3 className="text-lg font-bold text-slate-800">{tx.name}</h3>
+								<p className="text-xs text-slate-500">Kode Transaksi: {tx.code}</p>
+							</div>
 						</div>
-						<div>
-							<h3 className="text-lg font-bold text-slate-800">{tx.name}</h3>
-							<p className="text-xs text-slate-500">
-								{new Date(tx.createdAt).toLocaleDateString("id-ID", {
-									weekday: "long",
-									day: "numeric",
-									month: "long",
-									year: "numeric",
-									hour: "2-digit",
-									minute: "2-digit",
-								})}
-							</p>
-						</div>
-					</div>
 
-					<div>
-						{tx.status === "valid" && (
-							<Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 px-3 py-1 text-xs">
-								<CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Berhasil
-							</Badge>
-						)}
-						{tx.status === "invalid" && (
-							<Badge className="bg-rose-50 text-rose-600 border-rose-200 px-3 py-1 text-xs">
-								<XCircle className="w-3.5 h-3.5 mr-1" /> Gagal
-							</Badge>
-						)}
-						{tx.status === "waiting" && (
-							<Badge className="bg-amber-50 text-amber-600 border-amber-200 px-3 py-1 text-xs">
-								<Clock className="w-3.5 h-3.5 mr-1" /> Menunggu
-							</Badge>
-						)}
-					</div>
-				</div>
-
-				{/* Breakdown Attributes */}
-				<div className="bg-slate-50/70 p-5 rounded-xl space-y-3.5 text-xs text-slate-700">
-					<div className="flex items-center justify-between">
-						<span className="text-slate-500 font-medium">ID Transaksi</span>
 						<div className="flex items-center gap-2">
-							<span className="font-mono font-bold text-slate-900">{tx.code}</span>
-							<button
-								onClick={() => handleCopy(tx.code)}
-								className="text-slate-400 hover:text-slate-600 p-1"
-								title="Copy Kode"
-							>
-								<Copy className="w-3.5 h-3.5" />
-							</button>
-							{copied && <span className="text-[10px] text-emerald-600 font-bold">Tersalin!</span>}
+							{tx.status === "valid" && (
+								<Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 flex items-center gap-1.5 px-3 py-1 text-xs">
+									<CheckCircle2 className="w-3.5 h-3.5" /> Berhasil
+								</Badge>
+							)}
+							{tx.status === "waiting" && (
+								<Badge className="bg-amber-50 text-amber-600 border-amber-200 flex items-center gap-1.5 px-3 py-1 text-xs">
+									<Clock className="w-3.5 h-3.5" /> Menunggu Pembayaran
+								</Badge>
+							)}
+							{tx.status === "process" && (
+								<Badge className="bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1.5 px-3 py-1 text-xs">
+									<Clock className="w-3.5 h-3.5" /> Diproses
+								</Badge>
+							)}
+							{tx.status === "invalid" && (
+								<Badge className="bg-rose-50 text-rose-600 border-rose-200 flex items-center gap-1.5 px-3 py-1 text-xs">
+									<XCircle className="w-3.5 h-3.5" /> Gagal
+								</Badge>
+							)}
 						</div>
 					</div>
 
-					<div className="flex items-center justify-between">
-						<span className="text-slate-500 font-medium">Metode Pembayaran</span>
-						<span className="font-semibold text-slate-800">{tx.paymentMethod}</span>
+					{/* Amount Banner */}
+					<div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+						<div>
+							<span className="text-xs font-semibold text-slate-500 block">Nominal Top-Up (Saldo Masuk)</span>
+							{hasNewsNumber && (
+								<span className="text-[11px] text-slate-400">Total transfer + kode unik: {formatRupiah(totalTransfer)}</span>
+							)}
+						</div>
+						<span className="text-xl font-extrabold text-[#e4007e]">
+							{formatRupiah(tx.amount)}
+						</span>
 					</div>
 
-					{tx.bankAccount && (
-						<div className="flex items-center justify-between">
-							<span className="text-slate-500 font-medium">Rekening Tujuan</span>
-							<span className="font-semibold text-slate-800">{tx.bankAccount}</span>
+					{/* Explanatory Banner for Bank Transfer News Number */}
+					{hasNewsNumber && (
+						<div className="p-4 rounded-2xl bg-pink-50/70 border border-pink-100 text-slate-700 flex items-start gap-3 text-xs">
+							<Info className="w-5 h-5 text-[#e4007e] shrink-0 mt-0.5" />
+							<div>
+								<span className="font-bold block text-slate-800 mb-0.5">Penjelasan Kode Unik / Nomor Berita Transfer</span>
+								<p className="text-slate-600 leading-relaxed">
+									Nomor berita transfer (<strong>+{tx.transferNewsNumber}</strong>) ditambahkan ke nominal transfer sebagai kode unik untuk memudahkan verifikasi otomatis oleh admin. Saldo bersih yang ditambahkan ke akun E-Wallet Anda adalah sebesar <strong>{formatRupiah(tx.amount)}</strong>.
+								</p>
+							</div>
 						</div>
 					)}
 
-					<div className="border-t border-slate-200/80 pt-3 flex items-center justify-between text-sm">
-						<span className="font-bold text-slate-800">Total Nominal</span>
-						<span
-							className={`font-extrabold ${
-								tx.type === "income" ? "text-emerald-600" : "text-slate-900"
-							}`}
+					{/* Table Details */}
+					<div className="w-full">
+						<table className="w-full text-xs">
+							<tbody className="divide-y divide-slate-100">
+								<tr>
+									<td className="text-slate-400 font-medium py-3 w-48">Kode Transaksi</td>
+									<td className="text-slate-800 font-semibold py-3 flex items-center gap-2">
+										<span>{tx.code}</span>
+										<button
+											type="button"
+											onClick={() => handleCopy(tx.code)}
+											className="text-slate-400 hover:text-[#e4007e] p-1 rounded-md hover:bg-slate-100 transition-colors"
+										>
+											<Copy className="w-3.5 h-3.5" />
+										</button>
+										{copied && <span className="text-[10px] text-emerald-600 font-bold">Tersalin!</span>}
+									</td>
+								</tr>
+								<tr>
+									<td className="text-slate-400 font-medium py-3">Metode Pembayaran</td>
+									<td className="text-slate-800 font-semibold py-3">{tx.paymentMethod || "Bank Transfer"}</td>
+								</tr>
+								{hasNewsNumber && (
+									<tr>
+										<td className="text-slate-400 font-medium py-3">Kode Unik / Nomor Berita</td>
+										<td className="text-[#e4007e] font-bold py-3">+{tx.transferNewsNumber}</td>
+									</tr>
+								)}
+								{(tx.paymentAccount || tx.paymentOnBehalfOf) && (
+									<tr>
+										<td className="text-slate-400 font-medium py-3">Rekening Bank Tujuan</td>
+										<td className="text-slate-800 font-semibold py-3">
+											{tx.paymentAccount} {tx.paymentOnBehalfOf ? `a.n ${tx.paymentOnBehalfOf}` : ""}
+										</td>
+									</tr>
+								)}
+								{tx.paymentNote && (
+									<tr>
+										<td className="text-slate-400 font-medium py-3">Catatan Pembayaran</td>
+										<td className="text-slate-800 font-semibold py-3 italic">{tx.paymentNote}</td>
+									</tr>
+								)}
+							</tbody>
+						</table>
+					</div>
+
+					{/* Bottom Actions */}
+					<div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-2">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => navigate({ to: "/e-wallet" as any })}
+							className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
 						>
-							{tx.type === "income" ? "+" : "-"} {formatRupiah(tx.amount)}
-						</span>
-					</div>
-				</div>
+							Kembali ke Dashboard
+						</Button>
 
-				{/* User Note if exists */}
-				{tx.paymentNote && (
-					<div className="text-center p-4 rounded-xl border border-dashed border-slate-200">
-						<p className="text-xs text-slate-400 font-medium mb-1">Catatan Kamu</p>
-						<p className="text-xs text-slate-700 font-medium">{tx.paymentNote}</p>
+						{tx.status === "waiting" && (
+							<Button
+								type="button"
+								onClick={() =>
+									navigate({
+										to: "/e-wallet/top-up/bank-transfer" as any,
+										search: {
+											amount: tx.amount,
+											code: tx.code,
+											transactionId: tx.id,
+											transferNewsNumber: tx.transferNewsNumber,
+										} as any,
+									})
+								}
+								className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white text-xs font-semibold shadow-sm"
+							>
+								Konfirmasi Transfer
+							</Button>
+						)}
 					</div>
-				)}
-
-				<div className="border-t border-slate-100 pt-4 text-center">
-					<p className="text-xs text-slate-500">
-						Jika ada pertanyaan terkait transaksi ini, silakan langsung menghubungi bagian pembayaran Pondok ROJA.
-					</p>
-				</div>
-			</RojaCard>
+				</RojaCard>
+			</div>
 		</div>
-
-		{/* Floating Back Button (matching tbr_btn-back in transaction-detail.blade.php) */}
-		<button
-			type="button"
-			onClick={() => navigate({ to: "/e-wallet" as any })}
-			className="hidden lg:flex w-10 h-10 min-w-10 rounded-xl bg-white shadow-md border border-slate-100 items-center justify-center text-[#6866e9] hover:bg-slate-50 transition-colors"
-			title="Kembali"
-		>
-			<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-				<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
-				<rect width="2" height="14" rx="1" transform="translate(5 13) rotate(-90)" fill="#6866e9" opacity="0.3" />
-				<path d="M3.707,15.707a1,1,0,0,1-1.414-1.414l6-6a1,1,0,0,1,1.383-.03l6,5.5a1,1,0,1,1-1.351,1.474L9.03,10.384Z" transform="translate(-3 21) rotate(-90)" fill="#6866e9" />
-			</svg>
-		</button>
-	</div>
 	)
 }
 

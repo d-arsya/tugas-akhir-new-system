@@ -111,9 +111,9 @@ export class SantriEwalletController {
 	@ApiResponse({ status: 403, description: "Verifikasi PIN E-Wallet diperlukan" })
 	async getDashboard(
 		@CurrentUser() user: JwtPayload,
-		@Query() query: PaginationQueryDto,
+		@Query() query: TransactionFilterDto,
 	) {
-		return this.santriEwalletService.getDashboard(user.sub, query.page, query.limit)
+		return this.santriEwalletService.getDashboard(user.sub, query)
 	}
 
 	// ---------------- PIN Management Endpoints ----------------

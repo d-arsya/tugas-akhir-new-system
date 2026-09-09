@@ -58,43 +58,52 @@ export class EwalletService {
 	async calculateBalance(ewalletId: number): Promise<number> {
 		const ownTransactions = await this.ewalletTransactionRepository.findBy({
 			ewalletId: String(ewalletId),
+			status: "valid",
 		})
 
-		let totalBalance = 0
+		let totalIncome = 0
+		let totalExpense = 0
 
 		for (const txn of ownTransactions) {
-			if (txn.status === "valid" || txn.status === "process") {
-				const amt = Number(txn.amount ?? 0)
-				if (txn.type === "income") {
-					totalBalance += amt
-				} else if (txn.type === "expense") {
-					totalBalance -= amt
-				}
+			const amt = Number(txn.amount ?? 0)
+			if (txn.type === "income") {
+				totalIncome += amt
+			} else if (txn.type === "expense") {
+				totalExpense += amt
 			}
 		}
 
-		// Subtract purchase transactions where user is the buyer in transaction details
+		// Calculate purchase sum from transaction details where buyer is this ewalletId
 		const purchaseDetails = await this.ewalletTransactionDetailRepository.findBy({
 			ewalletId: String(ewalletId),
 		})
+
+		let totalPurchase = 0
 
 		for (const detail of purchaseDetails) {
 			if (detail.ewalletTransactionId) {
 				const txn = await this.ewalletTransactionRepository.findOneBy({
 					id: Number(detail.ewalletTransactionId),
 					status: "valid",
+					type: "purchase",
 				})
-				if (txn && txn.type === "purchase") {
+
+				if (txn) {
 					const items = await this.ewalletTransactionItemRepository.findBy({
 						ewalletTransactionId: String(txn.id),
 					})
-					const purchaseSum = items.reduce((acc, item) => acc + (item.price ?? 0), 0)
-					totalBalance -= purchaseSum
+
+					if (items.length > 0) {
+						const itemsSum = items.reduce((acc, item) => acc + Number(item.price ?? 0), 0)
+						totalPurchase += itemsSum
+					} else {
+						totalPurchase += Number(txn.amount ?? 0)
+					}
 				}
 			}
 		}
 
-		return totalBalance
+		return totalIncome - totalExpense - totalPurchase
 	}
 
 	async validateCurrentPin(

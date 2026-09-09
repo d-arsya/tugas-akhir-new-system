@@ -48,8 +48,8 @@ const LoginPage = (): JSX.Element => {
 					navigate({ to: "/verify-2fa" })
 					return
 				}
-				if (mock.user && mock.accessToken) {
-					login(mock.accessToken, mock.refreshToken, mock.user)
+				if (mock.user) {
+					login(mock.user as any)
 					navigate({ to: "/dashboard" })
 					return
 				}
@@ -60,8 +60,8 @@ const LoginPage = (): JSX.Element => {
 				localStorage.setItem("roja-2fa-email", res.email)
 				localStorage.setItem("roja-2fa-student-id", String(res.studentId))
 				navigate({ to: "/verify-2fa" })
-			} else if (!res.requires2fa && res.user && res.accessToken) {
-				login(res.accessToken, res.refreshToken, res.user)
+			} else if (!res.requires2fa && res.user) {
+				login(res.user as any)
 				navigate({ to: "/dashboard" })
 			}
 		} catch (err: unknown) {

@@ -5,6 +5,8 @@ import { Button } from "@roja/ui"
 import { Input } from "@roja/ui"
 import { Wallet, HelpCircle, X } from "lucide-react"
 
+import { useStoreTopUpBankTransferMutation } from "@/hooks/use-santri-queries"
+
 interface TopUpModalProps {
 	isOpen: boolean
 	onClose: () => void
@@ -18,6 +20,9 @@ export const TopUpModal = ({
 }: TopUpModalProps): JSX.Element | null => {
 	const navigate = useNavigate()
 	const [amount, setAmount] = useState<string>("")
+	const [error, setError] = useState<string>("")
+
+	const storeTopUpMutation = useStoreTopUpBankTransferMutation()
 
 	// Handle ESC key to close
 	useEffect(() => {
@@ -45,14 +50,33 @@ export const TopUpModal = ({
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault()
 		const numericAmount = Number(amount.replace(/\D/g, ""))
-		if (numericAmount > 0) {
-			if (onSuccess) onSuccess(numericAmount)
-			onClose()
-			navigate({
-				to: "/e-wallet/top-up/bank-transfer" as any,
-				search: { amount: numericAmount } as any,
-			})
+		if (numericAmount < 1000) {
+			setError("Nominal isi saldo minimal Rp 1.000")
+			return
 		}
+		setError("")
+		storeTopUpMutation.mutate(
+			{ amount: numericAmount },
+			{
+				onSuccess: (res) => {
+					if (onSuccess) onSuccess(numericAmount)
+					onClose()
+					navigate({
+						to: "/e-wallet/top-up/bank-transfer" as any,
+						search: {
+							transactionId: res.transactionId,
+							code: res.code,
+							amount: res.amount,
+							transferNewsNumber: res.transferNewsNumber,
+							totalAmount: res.totalAmount,
+						} as any,
+					})
+				},
+				onError: (err: any) => {
+					setError(err.message || "Gagal membuat transaksi isi saldo.")
+				},
+			},
+		)
 	}
 
 	return (
@@ -86,6 +110,11 @@ export const TopUpModal = ({
 
 				{/* Form */}
 				<form onSubmit={handleSubmit} className="mt-6 space-y-5">
+					{error && (
+						<div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl text-center">
+							{error}
+						</div>
+					)}
 					<div className="max-w-[280px] mx-auto">
 						<Input
 							type="text"
@@ -103,16 +132,17 @@ export const TopUpModal = ({
 							type="button"
 							variant="outline"
 							onClick={onClose}
+							disabled={storeTopUpMutation.isPending}
 							className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100 px-6 h-10 text-xs font-semibold"
 						>
 							Batal
 						</Button>
 						<Button
 							type="submit"
-							disabled={!amount || Number(amount.replace(/\D/g, "")) <= 0}
+							disabled={!amount || Number(amount.replace(/\D/g, "")) <= 0 || storeTopUpMutation.isPending}
 							className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-7 h-10 text-xs font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer"
 						>
-							Selanjutnya
+							{storeTopUpMutation.isPending ? "Memproses..." : "Selanjutnya"}
 						</Button>
 					</div>
 

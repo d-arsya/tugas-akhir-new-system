@@ -1,13 +1,18 @@
 import type { JSX } from "react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { createFileRoute, useLocation, Outlet } from "@tanstack/react-router"
+import type { DateRange } from "@roja/ui"
 import useEwalletStore from "@/stores/ewalletStore"
-import { santriApi } from "@/lib/api"
 import CreateEwalletView from "@/components/ewallet/CreateEwalletView"
 import InactiveEwalletView from "@/components/ewallet/InactiveEwalletView"
 import PinChallengeGate from "@/components/ewallet/PinChallengeGate"
 import TransactionHistoryTable from "@/components/ewallet/TransactionHistoryTable"
-import type { EwalletTransaction } from "@roja/types"
+import {
+	useSantriEwalletStatus,
+	useSantriEwalletDashboard,
+	useCreateEwalletMutation,
+} from "@/hooks/use-santri-queries"
+import { useDebounce } from "@/hooks/use-debounce"
 
 const EwalletPage = (): JSX.Element => {
 	const location = useLocation()
@@ -23,49 +28,52 @@ const EwalletPage = (): JSX.Element => {
 
 	// If current route is a sub-route under /e-wallet (e.g. /e-wallet/withdraw, /e-wallet/edit-pin, etc.), render Outlet
 	const isSubRoute = location.pathname !== "/e-wallet" && location.pathname !== "/e-wallet/"
-	if (isSubRoute) {
-		return <Outlet />
-	}
 
-	// Dashboard Data State
-	const [totalSaldo, setTotalSaldo] = useState<number>(0)
-	const [transactions, setTransactions] = useState<EwalletTransaction[]>([])
+	const [page, setPage] = useState<number>(1)
+	const [entriesPerPage, setEntriesPerPage] = useState<number>(10)
+	const [statusFilter, setStatusFilter] = useState<string>("")
+	const [searchQuery, setSearchQuery] = useState<string>("")
+	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
-	// Check status on mount
+	const debouncedSearch = useDebounce(searchQuery, 400)
+
+	// Check status via TanStack Query
+	const { data: statusData } = useSantriEwalletStatus()
+
 	useEffect(() => {
-		const fetchStatus = async () => {
-			try {
-				const res = await santriApi.getEwalletStatus()
-				setHasEwallet(res.hasEwallet)
-				setIsActive(res.isActive)
-			} catch (err) {
-				// Default fallback in dev
-			}
+		if (statusData) {
+			setHasEwallet(statusData.hasEwallet)
+			setIsActive(statusData.isActive)
 		}
-		fetchStatus()
-	}, [setHasEwallet, setIsActive])
+	}, [statusData, setHasEwallet, setIsActive])
+
+	const dateStart = dateRange?.from ? dateRange.from.toISOString().split("T")[0] : undefined
+	const dateEnd = dateRange?.to ? dateRange.to.toISOString().split("T")[0] : dateStart
 
 	// Fetch dashboard data when PIN is authenticated
-	useEffect(() => {
-		if (isPinAuthenticated && hasEwallet && isActive) {
-			const fetchDashboard = async () => {
-				try {
-					const data = await santriApi.getEwalletDashboard()
-					setTotalSaldo(data.totalSaldo)
-					setTransactions(data.transactions)
-				} catch (err) {
-					// Fallback
-				}
-			}
-			fetchDashboard()
-		}
-	}, [isPinAuthenticated, hasEwallet, isActive])
+	const { data: dashboardData } = useSantriEwalletDashboard(
+		{
+			page,
+			limit: entriesPerPage,
+			status: statusFilter || undefined,
+			search: debouncedSearch || undefined,
+			dateStart,
+			dateEnd,
+		},
+		isPinAuthenticated && hasEwallet && isActive,
+	)
+
+	const createEwalletMutation = useCreateEwalletMutation()
 
 	// Create E-Wallet Submission
 	const handleCreateEwallet = async (pin: string, pinConfirmation: string) => {
-		await santriApi.createEwallet({ pin, pinConfirmation })
+		await createEwalletMutation.mutateAsync({ pin, pinConfirmation })
 		setHasEwallet(true)
 		setPinAuthenticated(true)
+	}
+
+	if (isSubRoute) {
+		return <Outlet />
 	}
 
 	// State 1: User does not have E-Wallet
@@ -94,9 +102,37 @@ const EwalletPage = (): JSX.Element => {
 	// State 4: E-Wallet Core Dashboard
 	return (
 		<TransactionHistoryTable
-			totalSaldo={totalSaldo}
-			transactions={transactions}
-			onSaldoChange={(newSaldo) => setTotalSaldo(newSaldo)}
+			totalSaldo={dashboardData?.totalBalance ?? 0}
+			transactions={dashboardData?.transactions ?? []}
+			meta={dashboardData?.meta}
+			page={page}
+			limit={entriesPerPage}
+			searchQuery={searchQuery}
+			onSearchChange={(val) => {
+				setSearchQuery(val)
+				setPage(1)
+			}}
+			statusFilter={statusFilter}
+			onStatusChange={(val) => {
+				setStatusFilter(val)
+				setPage(1)
+			}}
+			dateRange={dateRange}
+			onDateRangeChange={(val) => {
+				setDateRange(val)
+				setPage(1)
+			}}
+			onResetFilters={() => {
+				setSearchQuery("")
+				setStatusFilter("")
+				setDateRange(undefined)
+				setPage(1)
+			}}
+			onPageChange={setPage}
+			onLimitChange={(newLimit) => {
+				setEntriesPerPage(newLimit)
+				setPage(1)
+			}}
 		/>
 	)
 }

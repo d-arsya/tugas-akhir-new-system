@@ -15,20 +15,16 @@ export type SantriLoginDto = {
 
 export type SantriLoginResponse =
 	| {
-			requires2fa: true
-			studentId: number
-			email: string | null
-	  }
+		requires2fa: true
+		studentId: number
+		email: string | null
+	}
 	| {
-			requires2fa: false
-			accessToken: string
-			refreshToken: string
-			user: {
-				id: number
-				nis: string | null
-				email: string | null
-			}
-	  }
+		requires2fa: false
+		accessToken: string
+		refreshToken: string
+		user: AuthUser
+	}
 
 export type SantriTwoFactorDto = {
 	code: string
@@ -67,12 +63,22 @@ export type SantriCreateEwalletDto = {
 }
 
 export type SantriEwalletDashboardResponse = {
-	totalSaldo: number
+	totalBalance: number
 	transactions: EwalletTransaction[]
+}
+
+export type SantriValidateCurrentPinDto = {
+	pin: string
 }
 
 export type SantriUpdatePinDto = {
 	prevPin: string
+	pin: string
+	pinConfirmation: string
+}
+
+export type SantriResetPinDto = {
+	token: string
 	pin: string
 	pinConfirmation: string
 }
@@ -90,22 +96,52 @@ export type SantriInvoiceTransactionItem = {
 	amount: number
 }
 
+export type PaginationMeta = {
+	page: number
+	limit: number
+	total: number
+	totalPages: number
+}
+
 export type SantriInvoiceDetailResponse = StudentInvoice & {
 	note?: string
+	student: {
+		id: number
+		nis: string | null
+		fullName: string
+	}
 	studentName: string
 	studentNis: string
 	transactions: SantriInvoiceTransactionItem[]
 	costRemain: number
+	totalPaid: number
+	meta?: PaginationMeta
 }
 
-export type SantriUpdateAccountSettingsDto = {
-	email: string
-	password?: string
-	passwordConfirmation?: string
+export type SantriPaymentSummaryResponse = {
+	totalBilled: number
+	totalPaid: number
+	remaining: number
+	invoices: StudentInvoice[]
 }
 
-export type SantriUpdateTwoFactorDto = {
-	enabled2fa: number // 1 or 0
+export type SantriChangePasswordDto = {
+	password: string
+	passwordConfirmation: string
+}
+
+export type SantriToggle2faDto = {
+	enabled: boolean
+}
+
+export type SantriSettingPageResponse = {
+	email: string | null
+	emailVerifiedAt: string | null
+	enabled2fa: boolean
+}
+
+export type SantriTopUpBankTransferDto = {
+	amount: number
 }
 
 export type SantriApi = {
@@ -119,20 +155,39 @@ export type SantriApi = {
 	getEmail: () => Promise<SantriEmailStatusResponse>
 	updateEmail: (data: SantriUpdateEmailDto) => Promise<{ message: string }>
 	logout: () => Promise<{ message: string }>
-	getProfile: () => Promise<Student & { gradeName?: string }>
-	getEwallet: () => Promise<Ewallet>
+	refreshToken: () => Promise<{ success: boolean }>
+	getProfile: () => Promise<Student & { gradeName?: string; school?: any }>
 	getEwalletStatus: () => Promise<SantriEwalletStatusResponse>
-	loginEwalletPin: (pin: string) => Promise<{ success: boolean; message: string }>
-	validatePrevPin: (pin: string) => Promise<{ success: boolean; message: string }>
-	updatePin: (data: SantriUpdatePinDto) => Promise<{ success: boolean; message: string }>
-	createEwallet: (data: SantriCreateEwalletDto) => Promise<{ success: boolean; message: string }>
-	getEwalletDashboard: () => Promise<SantriEwalletDashboardResponse>
+	loginEwalletPin: (pin: string) => Promise<{ message: string }>
+	createEwallet: (data: SantriCreateEwalletDto) => Promise<{ message: string }>
+	showInactivePage: () => Promise<{ message: string }>
+	getEwalletDashboard: (params?: { page?: number; limit?: number; status?: string; search?: string; dateStart?: string; dateEnd?: string }) => Promise<SantriEwalletDashboardResponse>
+	validateCurrentPin: (pin: string) => Promise<{ message: string }>
+	updatePin: (data: SantriUpdatePinDto) => Promise<{ message: string }>
+	sendPinResetEmail: () => Promise<{ message: string }>
+	validatePinResetToken: (token: string) => Promise<{ message: string }>
+	resetPin: (data: SantriResetPinDto) => Promise<{ message: string }>
+	getTransactions: (params?: Record<string, any>) => Promise<EwalletTransaction[]>
 	getTransactionDetail: (id: number) => Promise<SantriTransactionDetailResponse>
-	getTransactions: () => Promise<EwalletTransaction[]>
-	getInvoices: () => Promise<StudentInvoice[]>
-	getInvoiceDetail: (id: number) => Promise<SantriInvoiceDetailResponse>
-	updateAccountSettings: (data: SantriUpdateAccountSettingsDto) => Promise<{ message: string }>
-	updateTwoFactor: (data: SantriUpdateTwoFactorDto) => Promise<{ message: string }>
+	getTopUpBankInfo: () => Promise<any>
+	storeTopUpBankTransfer: (data: SantriTopUpBankTransferDto) => Promise<{
+		transactionId: number
+		code: string
+		amount: number
+		transferNewsNumber: number
+		totalAmount: number
+		paymentAccount: string
+		paymentOnBehalfOf: string
+		message: string
+	}>
+	getConfirmForm: (id: number) => Promise<SantriTransactionDetailResponse>
+	confirmTopUp: (id: number, formData: FormData) => Promise<{ message: string }>
+	getPaymentSummary: (params?: { page?: number; limit?: number; status?: string; search?: string }) => Promise<SantriPaymentSummaryResponse>
+	getInvoiceList: (studentId: number, params?: { page?: number; limit?: number }) => Promise<StudentInvoice[]>
+	getInvoiceDetail: (invoiceId: number, params?: { page?: number; limit?: number }) => Promise<SantriInvoiceDetailResponse>
+	getSettingPage: () => Promise<SantriSettingPageResponse>
+	changePassword: (data: SantriChangePasswordDto) => Promise<{ message: string }>
+	toggle2fa: (data: SantriToggle2faDto) => Promise<{ message: string }>
 	resendSettingEmailVerification: () => Promise<{ message: string }>
 }
 
@@ -197,64 +252,124 @@ export const createSantriApi = (client: AxiosInstance): SantriApi => ({
 		const { data: res } = await client.post<ApiResponse<{ message: string }>>("/santri/auth/logout")
 		return res.data
 	},
-	getProfile: async (): Promise<Student> => {
-		const { data: res } = await client.get<ApiResponse<Student>>("/santri/profile")
-		return res.data
+	refreshToken: async (): Promise<{ success: boolean }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/santri/auth/refresh")
+		return { success: res.success }
 	},
-	getEwallet: async (): Promise<Ewallet> => {
-		const { data: res } = await client.get<ApiResponse<Ewallet>>("/santri/ewallet")
+	getProfile: async (): Promise<Student & { gradeName?: string; school?: any }> => {
+		const { data: res } = await client.get<ApiResponse<Student>>("/santri/profile")
 		return res.data
 	},
 	getEwalletStatus: async (): Promise<SantriEwalletStatusResponse> => {
 		const { data: res } = await client.get<ApiResponse<SantriEwalletStatusResponse>>("/santri/ewallet/status")
 		return res.data
 	},
-	loginEwalletPin: async (pin: string): Promise<{ success: boolean; message: string }> => {
-		const { data: res } = await client.post<ApiResponse<{ success: boolean; message: string }>>("/santri/ewallet/login-pin", { pin })
+	loginEwalletPin: async (pin: string): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<{ message: string }>>("/santri/ewallet/pin/login", { pin })
 		return res.data
 	},
-	validatePrevPin: async (pin: string): Promise<{ success: boolean; message: string }> => {
-		const { data: res } = await client.post<ApiResponse<{ success: boolean; message: string }>>("/santri/ewallet/validate-prev-pin", { pin })
+	createEwallet: async (data: SantriCreateEwalletDto): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<{ message: string }>>("/santri/ewallet/pin/create", data)
 		return res.data
 	},
-	updatePin: async (data: SantriUpdatePinDto): Promise<{ success: boolean; message: string }> => {
-		const { data: res } = await client.post<ApiResponse<{ success: boolean; message: string }>>("/santri/ewallet/update-pin", data)
+	showInactivePage: async (): Promise<{ message: string }> => {
+		const { data: res } = await client.get<ApiResponse<{ message: string }>>("/santri/ewallet/inactive")
 		return res.data
 	},
-	createEwallet: async (data: SantriCreateEwalletDto): Promise<{ success: boolean; message: string }> => {
-		const { data: res } = await client.post<ApiResponse<{ success: boolean; message: string }>>("/santri/ewallet/create", data)
+	getEwalletDashboard: async (params?: { page?: number; limit?: number; status?: string; search?: string; dateStart?: string; dateEnd?: string }): Promise<SantriEwalletDashboardResponse> => {
+		const { data: res } = await client.get<ApiResponse<SantriEwalletDashboardResponse>>("/santri/ewallet", { params })
+		return {
+			...res.data,
+			meta: res.meta || (res.data as any)?.meta,
+		}
+	},
+	validateCurrentPin: async (pin: string): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<{ message: string }>>("/santri/ewallet/pin/validate-current", { pin })
 		return res.data
 	},
-	getEwalletDashboard: async (): Promise<SantriEwalletDashboardResponse> => {
-		const { data: res } = await client.get<ApiResponse<SantriEwalletDashboardResponse>>("/santri/ewallet/dashboard")
+	updatePin: async (data: SantriUpdatePinDto): Promise<{ message: string }> => {
+		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/ewallet/pin", data)
+		return res.data
+	},
+	sendPinResetEmail: async (): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<{ message: string }>>("/santri/ewallet/pin/reset-email")
+		return res.data
+	},
+	validatePinResetToken: async (token: string): Promise<{ message: string }> => {
+		const { data: res } = await client.get<ApiResponse<{ message: string }>>(`/santri/ewallet/pin/reset/${token}`)
+		return res.data
+	},
+	resetPin: async (data: SantriResetPinDto): Promise<{ message: string }> => {
+		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/ewallet/pin/reset", data)
+		return res.data
+	},
+	getTransactions: async (params?: Record<string, any>): Promise<EwalletTransaction[]> => {
+		const { data: res } = await client.get<ApiResponse<EwalletTransaction[]>>("/santri/ewallet/transactions", { params })
 		return res.data
 	},
 	getTransactionDetail: async (id: number): Promise<SantriTransactionDetailResponse> => {
 		const { data: res } = await client.get<ApiResponse<SantriTransactionDetailResponse>>(`/santri/ewallet/transactions/${id}`)
 		return res.data
 	},
-	getTransactions: async (): Promise<EwalletTransaction[]> => {
-		const { data: res } = await client.get<ApiResponse<EwalletTransaction[]>>("/santri/ewallet/transactions")
+	getTopUpBankInfo: async (): Promise<any> => {
+		const { data: res } = await client.get<ApiResponse<any>>("/santri/ewallet/top-up/bank-transfer")
 		return res.data
 	},
-	getInvoices: async (): Promise<StudentInvoice[]> => {
-		const { data: res } = await client.get<ApiResponse<StudentInvoice[]>>("/santri/payment-history")
+	storeTopUpBankTransfer: async (data: SantriTopUpBankTransferDto): Promise<{
+		transactionId: number
+		code: string
+		amount: number
+		transferNewsNumber: number
+		totalAmount: number
+		paymentAccount: string
+		paymentOnBehalfOf: string
+		message: string
+	}> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/santri/ewallet/top-up/bank-transfer", data)
 		return res.data
 	},
-	getInvoiceDetail: async (id: number): Promise<SantriInvoiceDetailResponse> => {
-		const { data: res } = await client.get<ApiResponse<SantriInvoiceDetailResponse>>(`/santri/payment-history/${id}`)
+	getConfirmForm: async (id: number): Promise<SantriTransactionDetailResponse> => {
+		const { data: res } = await client.get<ApiResponse<SantriTransactionDetailResponse>>(`/santri/ewallet/top-up/confirm/${id}`)
 		return res.data
 	},
-	updateAccountSettings: async (data: SantriUpdateAccountSettingsDto): Promise<{ message: string }> => {
-		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/setting/update", data)
+	confirmTopUp: async (id: number, formData: FormData): Promise<{ message: string }> => {
+		const { data: res } = await client.patch<ApiResponse<{ message: string }>>(`/santri/ewallet/top-up/confirm/${id}`, formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		})
 		return res.data
 	},
-	updateTwoFactor: async (data: SantriUpdateTwoFactorDto): Promise<{ message: string }> => {
-		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/setting/update/twofactor", data)
+	getPaymentSummary: async (params?: { page?: number; limit?: number; status?: string; search?: string }): Promise<SantriPaymentSummaryResponse> => {
+		const { data: res } = await client.get<ApiResponse<SantriPaymentSummaryResponse>>("/santri/payment-history", { params })
+		return {
+			...res.data,
+			meta: res.meta || (res.data as any)?.meta,
+		}
+	},
+	getInvoiceList: async (studentId: number, params?: { page?: number; limit?: number }): Promise<StudentInvoice[]> => {
+		const { data: res } = await client.get<ApiResponse<StudentInvoice[]>>(`/santri/payment-history/${studentId}/list`, { params })
+		return res.data
+	},
+	getInvoiceDetail: async (invoiceId: number, params?: { page?: number; limit?: number }): Promise<SantriInvoiceDetailResponse> => {
+		const { data: res } = await client.get<ApiResponse<SantriInvoiceDetailResponse>>(`/santri/payment-history/invoice/${invoiceId}`, { params })
+		return {
+			...res.data,
+			meta: res.meta || (res.data as any)?.meta,
+		}
+	},
+	getSettingPage: async (): Promise<SantriSettingPageResponse> => {
+		const { data: res } = await client.get<ApiResponse<SantriSettingPageResponse>>("/santri/setting")
+		return res.data
+	},
+	changePassword: async (data: SantriChangePasswordDto): Promise<{ message: string }> => {
+		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/setting/password", data)
+		return res.data
+	},
+	toggle2fa: async (data: SantriToggle2faDto): Promise<{ message: string }> => {
+		const { data: res } = await client.patch<ApiResponse<{ message: string }>>("/santri/setting/2fa", data)
 		return res.data
 	},
 	resendSettingEmailVerification: async (): Promise<{ message: string }> => {
-		const { data: res } = await client.get<ApiResponse<{ message: string }>>("/santri/setting/email/verify/resend")
+		const { data: res } = await client.get<ApiResponse<{ message: string }>>("/santri/setting/email/resend")
 		return res.data
 	},
 })

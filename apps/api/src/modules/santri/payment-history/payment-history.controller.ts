@@ -6,6 +6,7 @@ import { PaginationQueryDto } from "@core/dto/pagination-query.dto"
 import { ActiveStudentGuard } from "@santri/guards/active-student.guard"
 import { SantriJwtAuthGuard } from "@santri/guards/santri-jwt-auth.guard"
 import { PaymentHistoryService } from "@santri/payment-history/payment-history.service"
+import { PaymentHistoryFilterDto } from "@santri/payment-history/dto/payment-history-filter.dto"
 
 @ApiTags("Santri — Payment History (SPP)")
 @ApiBearerAuth()
@@ -18,9 +19,9 @@ export class PaymentHistoryController {
 	@ApiOperation({ summary: "Ringkasan tagihan & pembayaran SPP santri" })
 	async getSummary(
 		@CurrentUser() user: JwtPayload,
-		@Query() query: PaginationQueryDto,
+		@Query() query: PaymentHistoryFilterDto,
 	) {
-		return this.paymentHistoryService.getSummary(user.sub, query.page, query.limit)
+		return this.paymentHistoryService.getSummary(user.sub, query.page, query.limit, query.status, query.search)
 	}
 
 	@Get(":studentId/list")

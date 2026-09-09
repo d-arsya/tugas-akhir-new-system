@@ -47,7 +47,8 @@ export type StudentInvoice = {
 	studentId: number
 	name: string
 	amount: number
-	amountPaid: number
+	paidAmount: number
+	remainingAmount: number
 	status: "paid" | "partial" | "unpaid" | "installment"
 	dueDate: string | null
 	createdAt: string

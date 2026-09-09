@@ -17,24 +17,27 @@ export const PinChallengeGate = ({ onSuccess }: PinChallengeGateProps): JSX.Elem
 	const [pinError, setPinError] = useState<string>("")
 	const [pinLoading, setPinLoading] = useState<boolean>(false)
 
-	const handlePinSubmit = async () => {
-		if (pinInputVal.length < 6) {
+	const submitPin = async (pinValue: string) => {
+		if (pinValue.length < 6) {
 			setPinError("Masukkan 6 digit PIN terlebih dahulu.")
 			return
 		}
 		setPinError("")
 		setPinLoading(true)
 		try {
-			const res = await santriApi.loginEwalletPin(pinInputVal)
-			if (res.success) {
-				setPinAuthenticated(true)
-				onSuccess?.()
-			}
+			await santriApi.loginEwalletPin(pinValue)
+			setPinAuthenticated(true)
+			onSuccess?.()
 		} catch (err: any) {
 			setPinError(err.message || "PIN yang kamu masukkan salah.")
+			setPinInputVal("")
 		} finally {
 			setPinLoading(false)
 		}
+	}
+
+	const handlePinSubmit = () => {
+		submitPin(pinInputVal)
 	}
 
 	return (
@@ -63,7 +66,10 @@ export const PinChallengeGate = ({ onSuccess }: PinChallengeGateProps): JSX.Elem
 							value={pinInputVal}
 							onChange={(val) => {
 								setPinInputVal(val)
-								if (val.length === 6) setPinError("")
+								if (val.length === 6) {
+									setPinError("")
+									submitPin(val)
+								}
 							}}
 							disabled={pinLoading}
 							error={!!pinError}

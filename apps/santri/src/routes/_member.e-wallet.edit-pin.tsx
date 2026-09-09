@@ -5,9 +5,11 @@ import { RojaCard, Button, Alert, AlertDescription } from "@roja/ui"
 import { KeyRound, ArrowLeft } from "lucide-react"
 import PinInput from "@/components/ewallet/PinInput"
 import { santriApi } from "@/lib/api"
+import { useUpdatePinMutation } from "@/hooks/use-santri-queries"
 
 const EditPinPage = (): JSX.Element => {
 	const navigate = useNavigate()
+	const updatePinMutation = useUpdatePinMutation()
 
 	const [step, setStep] = useState<1 | 2 | 3>(1)
 	const [prevPin, setPrevPin] = useState<string>("")
@@ -17,7 +19,7 @@ const EditPinPage = (): JSX.Element => {
 	const [error, setError] = useState<string>("")
 	const [loading, setLoading] = useState<boolean>(false)
 
-	// Validate Prev PIN
+	// Validate Current PIN
 	const handleStep1Next = async () => {
 		if (prevPin.length < 6) {
 			setError("Masukkan 6 digit PIN lama terlebih dahulu.")
@@ -26,7 +28,7 @@ const EditPinPage = (): JSX.Element => {
 		setError("")
 		setLoading(true)
 		try {
-			await santriApi.validatePrevPin(prevPin)
+			await santriApi.validateCurrentPin(prevPin)
 			setStep(2)
 		} catch (err: any) {
 			setError(err.message || "PIN lama yang kamu masukkan salah.")
@@ -64,15 +66,17 @@ const EditPinPage = (): JSX.Element => {
 			return
 		}
 		setError("")
-		setLoading(true)
-		try {
-			await santriApi.updatePin({ prevPin, pin: newPin, pinConfirmation: confirmPin })
-			navigate({ to: "/e-wallet" as any })
-		} catch (err: any) {
-			setError(err.message || "Gagal mengupdate PIN. Silakan coba lagi.")
-		} finally {
-			setLoading(false)
-		}
+		updatePinMutation.mutate(
+			{ prevPin, pin: newPin, pinConfirmation: confirmPin },
+			{
+				onSuccess: () => {
+					navigate({ to: "/e-wallet" as any })
+				},
+				onError: (err: any) => {
+					setError(err.message || "Gagal mengupdate PIN. Silakan coba lagi.")
+				},
+			},
+		)
 	}
 
 	return (
@@ -99,36 +103,27 @@ const EditPinPage = (): JSX.Element => {
 									</Alert>
 								)}
 
-								<div className="my-8">
-									<PinInput
-										value={prevPin}
-										onChange={(val) => {
-											setPrevPin(val)
-											if (error) setError("")
-										}}
-										error={!!error}
-										disabled={loading}
-									/>
+								<div className="my-8 flex justify-center w-full">
+									<PinInput value={prevPin} onChange={setPrevPin} length={6} />
 								</div>
 
-								<div className="flex items-center justify-between w-full pt-4 border-t border-slate-100">
-									<p className="text-xs text-slate-500">
-										Kamu lupa?{" "}
-										<button
-											type="button"
-											onClick={() => alert("Instruksi reset PIN dikirim ke email kamu.")}
-											className="text-[#e4007e] font-semibold hover:underline cursor-pointer"
-										>
-											reset pin
-										</button>
-									</p>
+								<div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-xs mt-2">
+									<Button
+										type="button"
+										variant="outline"
+										onClick={() => navigate({ to: "/e-wallet" as any })}
+										className="w-full rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold py-2.5 flex items-center justify-center gap-2"
+									>
+										<ArrowLeft className="w-4 h-4" />
+										Batal
+									</Button>
 									<Button
 										type="button"
 										onClick={handleStep1Next}
-										disabled={prevPin.length < 6 || loading}
-										className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-8 font-semibold shadow-md hover:shadow-lg transition-all"
+										disabled={loading || prevPin.length < 6}
+										className="w-full rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white text-xs font-semibold py-2.5 shadow-sm"
 									>
-										{loading ? "Memverifikasi..." : "Selanjutnya"}
+										{loading ? "Memeriksa..." : "Lanjut"}
 									</Button>
 								</div>
 							</>
@@ -137,10 +132,10 @@ const EditPinPage = (): JSX.Element => {
 						{step === 2 && (
 							<>
 								<h3 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
-									Pengaturan Pin
+									Masukkan pin baru
 								</h3>
 								<p className="text-sm text-slate-500 mt-2 max-w-md">
-									Biar dompet kamu aman, pastikan kamu menggantinya secara berkala ya.
+									Masukkan 6 digit PIN baru untuk dompet digital kamu.
 								</p>
 
 								{error && (
@@ -149,33 +144,18 @@ const EditPinPage = (): JSX.Element => {
 									</Alert>
 								)}
 
-								<div className="my-8">
-									<PinInput
-										value={newPin}
-										onChange={(val) => {
-											setNewPin(val)
-											if (error) setError("")
-										}}
-										error={!!error}
-									/>
+								<div className="my-8 flex justify-center w-full">
+									<PinInput value={newPin} onChange={setNewPin} length={6} />
 								</div>
 
-								<div className="flex items-center justify-between w-full pt-4 border-t border-slate-100">
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() => navigate({ to: "/e-wallet" as any })}
-										className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100"
-									>
-										Batal
-									</Button>
+								<div className="flex justify-center w-full max-w-xs mt-2">
 									<Button
 										type="button"
 										onClick={handleStep2Next}
 										disabled={newPin.length < 6}
-										className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-8 font-semibold shadow-md hover:shadow-lg transition-all"
+										className="w-full rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white text-xs font-semibold py-2.5 shadow-sm"
 									>
-										Selanjutnya
+										Lanjut
 									</Button>
 								</div>
 							</>
@@ -184,10 +164,10 @@ const EditPinPage = (): JSX.Element => {
 						{step === 3 && (
 							<>
 								<h3 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
-									Konfirmasi pin
+									Ulangi pin baru
 								</h3>
 								<p className="text-sm text-slate-500 mt-2 max-w-md">
-									Untuk memastikan kamu ingat, masukkan ulang pin di bawah ini ya.
+									Ketik ulang 6 digit PIN baru kamu untuk mengkonfirmasi.
 								</p>
 
 								{error && (
@@ -196,34 +176,26 @@ const EditPinPage = (): JSX.Element => {
 									</Alert>
 								)}
 
-								<div className="my-8">
-									<PinInput
-										value={confirmPin}
-										onChange={(val) => {
-											setConfirmPin(val)
-											if (error) setError("")
-										}}
-										error={!!error}
-										disabled={loading}
-									/>
+								<div className="my-8 flex justify-center w-full">
+									<PinInput value={confirmPin} onChange={setConfirmPin} length={6} />
 								</div>
 
-								<div className="flex items-center justify-between w-full pt-4 border-t border-slate-100">
+								<div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-xs mt-2">
 									<Button
 										type="button"
 										variant="outline"
 										onClick={handleReset}
-										className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100"
+										className="w-full rounded-xl border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold py-2.5 flex items-center justify-center gap-2"
 									>
-										Ulangi
+										Reset
 									</Button>
 									<Button
 										type="button"
 										onClick={handleStep3Submit}
-										disabled={confirmPin.length < 6 || loading}
-										className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-8 font-semibold shadow-md hover:shadow-lg transition-all"
+										disabled={updatePinMutation.isPending || confirmPin.length < 6}
+										className="w-full rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white text-xs font-semibold py-2.5 shadow-sm"
 									>
-										{loading ? "Menyimpan..." : "Selanjutnya"}
+										{updatePinMutation.isPending ? "Menyimpan..." : "Simpan PIN"}
 									</Button>
 								</div>
 							</>

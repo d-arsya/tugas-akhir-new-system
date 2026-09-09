@@ -56,9 +56,9 @@ export const createApiClient = (
 					if (
 						requestUrl.includes("/auth/login") ||
 						requestUrl.includes("/auth/two-factor") ||
-						requestUrl.includes("/auth/refresh")
+						requestUrl.includes("/auth/refresh") ||
+						requestUrl.includes("/ewallet/pin")
 					) {
-						authStoreGetter?.().logout()
 						return Promise.reject(error)
 					}
 

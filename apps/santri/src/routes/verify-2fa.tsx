@@ -49,8 +49,8 @@ const Verify2faPage = (): JSX.Element => {
 			if (isDevHijackMode()) {
 				await new Promise((res) => setTimeout(res, 500))
 				const mock = mockSantriAuth.verify2fa(data.code)
-				if (mock.user && mock.accessToken) {
-					login(mock.accessToken, mock.refreshToken, mock.user)
+				if (mock.user) {
+					login(mock.user as any)
 					localStorage.removeItem("roja-2fa-email")
 					localStorage.removeItem("roja-2fa-student-id")
 					navigate({ to: "/dashboard" })
@@ -59,8 +59,8 @@ const Verify2faPage = (): JSX.Element => {
 			}
 
 			const res = await santriApi.verify2fa({ code: data.code }, studentId)
-			if (!res.requires2fa && res.user && res.accessToken) {
-				login(res.accessToken, res.refreshToken, res.user)
+			if (!res.requires2fa && res.user) {
+				login(res.user as any)
 				localStorage.removeItem("roja-2fa-email")
 				localStorage.removeItem("roja-2fa-student-id")
 				navigate({ to: "/dashboard" })

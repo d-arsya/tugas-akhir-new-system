@@ -12,6 +12,7 @@ import type {
 	ResetPinDto,
 	SantriCreateEwalletDto,
 	SantriLoginPinDto,
+	TransactionFilterDto,
 	UpdatePinDto,
 	ValidateCurrentPinDto,
 } from "@modules/ewallet/dto"
@@ -89,17 +90,14 @@ export class SantriEwalletService {
 		}
 	}
 
-	async getDashboard(studentId: number, page = 1, limit = 10) {
+	async getDashboard(studentId: number, filters?: TransactionFilterDto) {
 		const ewallet = await this.ewalletFacade.findEwallet(EWALLETABLE_TYPE, studentId)
 		if (!ewallet) {
 			throw new NotFoundException("E-Wallet belum terdaftar.")
 		}
 
 		const totalBalance = await this.ewalletFacade.calculateBalance(ewallet.id)
-		const txListResult = await this.ewalletFacade.getTransactionList(ewallet.id, {
-			page,
-			limit,
-		})
+		const txListResult = await this.ewalletFacade.getTransactionList(ewallet.id, filters ?? ({} as TransactionFilterDto))
 
 		return {
 			data: {

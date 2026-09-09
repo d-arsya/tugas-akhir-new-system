@@ -81,6 +81,17 @@ export class EwalletTransactionService {
 
 		let allTxns = Array.from(map.values())
 
+		// Filter by search query if provided
+		if (filters.search) {
+			const q = filters.search.toLowerCase()
+			allTxns = allTxns.filter(
+				(txn) =>
+					(txn.code && txn.code.toLowerCase().includes(q)) ||
+					(txn.name && txn.name.toLowerCase().includes(q)) ||
+					(txn.paymentMethod && txn.paymentMethod.toLowerCase().includes(q)),
+			)
+		}
+
 		// Filter by status if provided
 		if (filters.status) {
 			allTxns = allTxns.filter((txn) => txn.status === filters.status)
@@ -191,11 +202,39 @@ export class EwalletTransactionService {
 	async getTopUpBankInfo() {
 		return {
 			bankName: "BSI (Bank Syariah Indonesia)",
-			accountNumber: "9898 6652 2522 888",
+			accountNumber: "7192852646",
 			accountName: "Tabungan Pondok ROJA",
 			minAmount: 1000,
 			note: "Transfer sesuai nominal lalu sertakan bukti transfer saat melakukan konfirmasi.",
 		}
+	}
+
+	private async generateTransactionCode(type: string): Promise<string> {
+		let prefix = "00"
+		if (type === "income") prefix = "01"
+		else if (type === "expense") prefix = "02"
+		else if (type === "purchase") prefix = "03"
+
+		const now = new Date()
+		const year = now.getFullYear()
+		const month = String(now.getMonth() + 1).padStart(2, "0")
+		const day = String(now.getDate()).padStart(2, "0")
+		const dateStr = `${year}${month}${day}`
+
+		let increment = 1
+		let code = ""
+		while (true) {
+			const seq = String(increment).padStart(4, "0")
+			code = `${prefix}${dateStr}${seq}`
+
+			const existing = await this.ewalletTransactionRepository.findOneBy({ code })
+			if (!existing) {
+				break
+			}
+			increment++
+		}
+
+		return code
 	}
 
 	async createTopUpBankTransfer(ewalletId: number, amount: number) {
@@ -203,9 +242,7 @@ export class EwalletTransactionService {
 			throw new BadRequestException("Nominal top-up minimal Rp 1.000")
 		}
 
-		const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, "")
-		const randomInt = Math.floor(1000 + Math.random() * 9000)
-		const code = `INC-${nowStr}-${randomInt}`
+		const code = await this.generateTransactionCode("income")
 		const transferNewsNumber = Math.floor(10 + Math.random() * 90)
 
 		const txn = this.ewalletTransactionRepository.create({
@@ -216,7 +253,7 @@ export class EwalletTransactionService {
 			amount: String(amount),
 			status: "waiting",
 			paymentMethod: "Bank Transfer (Manual)",
-			paymentAccount: "BSI 9898 6652 2522 888",
+			paymentAccount: "BSI 7192852646",
 			paymentOnBehalfOf: "Tabungan Pondok ROJA",
 			transferNewsNumber,
 		})
@@ -228,7 +265,8 @@ export class EwalletTransactionService {
 			code: txn.code,
 			amount,
 			transferNewsNumber,
-			paymentAccount: "BSI 9898 6652 2522 888",
+			totalAmount: amount + transferNewsNumber,
+			paymentAccount: "BSI 7192852646",
 			paymentOnBehalfOf: "Tabungan Pondok ROJA",
 			message:
 				"Transaksi isi saldo berhasil dibuat. Silakan lakukan transfer bank lalu unggah bukti pembayaran.",

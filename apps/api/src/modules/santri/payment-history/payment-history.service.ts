@@ -22,7 +22,7 @@ export class PaymentHistoryService {
 		private readonly invoiceTransactionRepository: Repository<StudentInvoiceTransaction>,
 	) { }
 
-	async getSummary(studentId: number, page = 1, limit = 10) {
+	async getSummary(studentId: number, page = 1, limit = 10, status?: string, search?: string) {
 		const invoices = await this.invoiceRepository.find({
 			where: [
 				{ studentId, validityStatus: true, status: "paid" },
@@ -34,10 +34,12 @@ export class PaymentHistoryService {
 
 		if (!invoices.length) {
 			return {
-				totalBilled: 0,
-				totalPaid: 0,
-				remaining: 0,
-				invoices: [],
+				data: {
+					totalBilled: 0,
+					totalPaid: 0,
+					remaining: 0,
+					invoices: [],
+				},
 				meta: {
 					page,
 					limit,
@@ -112,15 +114,37 @@ export class PaymentHistoryService {
 		})
 
 		const remaining = Math.max(0, totalBilled - totalPaid)
-		const total = formattedInvoices.length
+
+		let filteredInvoices = formattedInvoices
+		if (search) {
+			const q = search.toLowerCase()
+			filteredInvoices = filteredInvoices.filter(
+				(inv) =>
+					(inv.name && inv.name.toLowerCase().includes(q)) ||
+					(inv.status && String(inv.status).toLowerCase().includes(q)),
+			)
+		}
+		if (status) {
+			filteredInvoices = filteredInvoices.filter((inv) => {
+				const st = String(inv.status)
+				if (status === "sudah") return st === "paid"
+				if (status === "belum") return st === "unpaid"
+				if (status === "angsur") return st === "installment" || inv.paymentMethod === "installment" || inv.statusLabel === "Cicilan"
+				return st === status
+			})
+		}
+
+		const total = filteredInvoices.length
 		const startIndex = (page - 1) * limit
-		const paginatedInvoices = formattedInvoices.slice(startIndex, startIndex + limit)
+		const paginatedInvoices = filteredInvoices.slice(startIndex, startIndex + limit)
 
 		return {
-			totalBilled,
-			totalPaid,
-			remaining,
-			invoices: paginatedInvoices,
+			data: {
+				totalBilled,
+				totalPaid,
+				remaining,
+				invoices: paginatedInvoices,
+			},
 			meta: {
 				page,
 				limit,
@@ -133,7 +157,7 @@ export class PaymentHistoryService {
 	async getInvoiceList(studentId: number, page = 1, limit = 10) {
 		const summary = await this.getSummary(studentId, page, limit)
 		return {
-			data: summary.invoices,
+			data: summary.data.invoices,
 			meta: summary.meta,
 		}
 	}

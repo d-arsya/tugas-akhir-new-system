@@ -1,38 +1,72 @@
 import type { JSX, FormEvent, ChangeEvent } from "react"
 import { useState, useRef } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { RojaCard, Button, Input, DatePicker, Alert, AlertDescription } from "@roja/ui"
+import { RojaCard, Button, Input, DatePicker } from "@roja/ui"
 import {
-	ArrowLeft,
-	Calendar,
 	Send,
 	CheckCircle2,
 	Upload,
 	FileText,
 	X,
+	Info,
+	Copy,
 } from "lucide-react"
+import { useSantriTopUpBankInfo, useSantriConfirmForm, useConfirmTopUpMutation } from "@/hooks/use-santri-queries"
 
 const EwalletConfirmationPage = (): JSX.Element => {
 	const navigate = useNavigate()
-	const searchParams = (Route.useSearch() || {}) as { amount?: number; code?: string }
+	const searchParams = (Route.useSearch() || {}) as {
+		amount?: number
+		code?: string
+		transactionId?: number
+		transferNewsNumber?: number
+		totalAmount?: number
+	}
+	const targetId = Number(searchParams.transactionId) || 0
 
 	const fileInputRef = useRef<HTMLInputElement>(null)
 
-	const defaultAmount = searchParams.amount
-		? new Intl.NumberFormat("id-ID").format(Number(searchParams.amount))
-		: "100.000"
+	const { data: bankInfo } = useSantriTopUpBankInfo()
+	const { data: confirmData, isLoading: isConfirmLoading } = useSantriConfirmForm(targetId, targetId > 0)
+	const confirmTopUpMutation = useConfirmTopUpMutation()
 
-	// Form State matching legacy confirmation.blade.php
-	const [ewalletId] = useState<string>("EW-2026001")
-	const [trxCode] = useState<string>(searchParams.code || "TRX-2026001")
-	const [amount] = useState<string>(defaultAmount)
-	const [bankDestination] = useState<string>("BSI 7192852646 a.n Tabungan Pondok ROJA")
+	const baseAmount = Number(confirmData?.amount || searchParams.amount || 0)
+	const newsNumber = Number(confirmData?.transferNewsNumber || searchParams.transferNewsNumber || 0)
+	const totalTransferAmount = searchParams.totalAmount
+		? Number(searchParams.totalAmount)
+		: baseAmount + newsNumber
+
+	const formattedBaseAmount = new Intl.NumberFormat("id-ID").format(baseAmount)
+	const formattedTotalAmount = new Intl.NumberFormat("id-ID").format(totalTransferAmount)
+
+	const trxCode = confirmData?.code || searchParams.code || "-"
+	const bankDestination = confirmData?.paymentAccount
+		? `${confirmData.paymentAccount} a.n ${confirmData.paymentOnBehalfOf || "Tabungan Pondok ROJA"}`
+		: bankInfo?.bankAccount || "BSI 7192852646 a.n Tabungan Pondok ROJA"
+
+	const rawAccountNumber = (confirmData?.paymentAccount || bankInfo?.accountNumber || "7192852646").replace(/\D/g, "")
+
+	const [copiedAccount, setCopiedAccount] = useState<boolean>(false)
+	const [copiedAmount, setCopiedAmount] = useState<boolean>(false)
+
+	const handleCopyAccount = () => {
+		navigator.clipboard.writeText(rawAccountNumber)
+		setCopiedAccount(true)
+		setTimeout(() => setCopiedAccount(false), 2000)
+	}
+
+	const handleCopyAmount = () => {
+		navigator.clipboard.writeText(String(totalTransferAmount))
+		setCopiedAmount(true)
+		setTimeout(() => setCopiedAmount(false), 2000)
+	}
+
 	const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split("T")[0])
 	const [paymentNote, setPaymentNote] = useState<string>("")
 	const [file, setFile] = useState<File | null>(null)
 
 	const [submitted, setSubmitted] = useState<boolean>(false)
-	const [loading, setLoading] = useState<boolean>(false)
+	const [error, setError] = useState<string>("")
 
 	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const selected = e.target.files?.[0]
@@ -50,11 +84,37 @@ const EwalletConfirmationPage = (): JSX.Element => {
 
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault()
-		setLoading(true)
-		setTimeout(() => {
-			setLoading(false)
-			setSubmitted(true)
-		}, 600)
+		if (!targetId) {
+			setError("Transaksi top-up belum dibuat. Silakan lakukan isi saldo terlebih dahulu.")
+			return
+		}
+		if (!file) {
+			setError("Pilih file bukti transfer terlebih dahulu.")
+			return
+		}
+		setError("")
+
+		const formData = new FormData()
+		formData.append("paymentDate", paymentDate)
+		formData.append("payment_date", paymentDate)
+		if (paymentNote) {
+			formData.append("paymentNote", paymentNote)
+			formData.append("payment_note", paymentNote)
+		}
+		formData.append("payment_attachment", file)
+		formData.append("file", file)
+
+		confirmTopUpMutation.mutate(
+			{ id: targetId, formData },
+			{
+				onSuccess: () => {
+					setSubmitted(true)
+				},
+				onError: (err: any) => {
+					setError(err.message || "Gagal mengirimkan konfirmasi transfer.")
+				},
+			},
+		)
 	}
 
 	return (
@@ -86,45 +146,70 @@ const EwalletConfirmationPage = (): JSX.Element => {
 						</p>
 					</div>
 
+					{error && (
+						<div className="p-3 mb-6 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl">
+							{error}
+						</div>
+					)}
+
 					{/* Form matching confirmation.blade.php */}
 					<form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
-						{/* Row 1: ID eWallet & Transaction */}
+						{/* Row 1: Kode Transaksi */}
 						<div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
 							<label className="md:col-span-4 md:text-right font-medium text-xs text-slate-700">
-								ID eWallet & Transaction
-							</label>
-							<div className="md:col-span-8 grid grid-cols-12 gap-3">
-								<div className="col-span-5">
-									<Input
-										type="text"
-										value={ewalletId}
-										readOnly
-										className="bg-slate-50 text-slate-600 font-mono text-xs h-10 rounded-xl border-slate-200"
-									/>
-								</div>
-								<div className="col-span-7">
-									<Input
-										type="text"
-										value={trxCode}
-										readOnly
-										className="bg-slate-50 text-slate-600 font-mono text-xs h-10 rounded-xl border-slate-200"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Row 2: Nominal yang ditransfer */}
-						<div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-							<label className="md:col-span-4 md:text-right font-medium text-xs text-slate-700">
-								Nominal yang ditransfer
+								Kode Transaksi
 							</label>
 							<div className="md:col-span-8">
 								<Input
 									type="text"
-									value={amount ? `Rp ${amount}` : ""}
+									value={trxCode}
 									readOnly
-									className="bg-slate-50 text-slate-800 font-bold text-sm h-10 rounded-xl border-slate-200"
+									className="bg-slate-50 text-slate-700 font-mono font-semibold text-xs h-10 rounded-xl border-slate-200"
 								/>
+							</div>
+						</div>
+
+						{/* Row 2: Nominal yang ditransfer */}
+						<div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+							<label className="md:col-span-4 md:text-right font-medium text-xs text-slate-700 pt-2.5">
+								Nominal yang ditransfer
+							</label>
+							<div className="md:col-span-8 space-y-2">
+								<div className="flex items-center gap-2">
+									<Input
+										type="text"
+										value={totalTransferAmount > 0 ? `Rp ${formattedTotalAmount}` : ""}
+										readOnly
+										className="bg-slate-50 text-[#e4007e] font-bold text-base h-11 rounded-xl border-slate-200 flex-1"
+									/>
+									{totalTransferAmount > 0 && (
+										<Button
+											type="button"
+											variant="outline"
+											onClick={handleCopyAmount}
+											className="h-11 px-3.5 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold shrink-0 flex items-center gap-1.5 cursor-pointer"
+											title="Salin Nominal Transfer"
+										>
+											<Copy className="w-3.5 h-3.5 text-[#e4007e]" />
+											{copiedAmount ? "Tersalin!" : "Salin Nominal"}
+										</Button>
+									)}
+								</div>
+
+								{newsNumber > 0 && (
+									<div className="p-3.5 bg-pink-50/60 border border-pink-100 rounded-xl text-xs space-y-1.5 text-slate-700">
+										<div className="flex items-center gap-1.5 font-semibold text-[#e4007e]">
+											<Info className="w-4 h-4 text-[#e4007e] shrink-0" />
+											<span>Penjelasan Kode Unik Berita Transfer:</span>
+										</div>
+										<p className="text-[11px] leading-relaxed text-slate-600">
+											Nominal isi saldo dasar adalah <strong>Rp {formattedBaseAmount}</strong> ditambah <strong>Rp {newsNumber}</strong> (kode unik berita transfer).
+										</p>
+										<p className="text-[11px] leading-relaxed text-slate-600">
+											Mohon lakukan transfer tepat sebesar <strong>Rp {formattedTotalAmount}</strong> agar transaksi dapat langsung terverifikasi secara otomatis oleh sistem. Saldo E-Wallet yang akan masuk ke akun Anda tetap sebesar <strong>Rp {formattedBaseAmount}</strong>.
+										</p>
+									</div>
+								)}
 							</div>
 						</div>
 
@@ -133,13 +218,23 @@ const EwalletConfirmationPage = (): JSX.Element => {
 							<label className="md:col-span-4 md:text-right font-medium text-xs text-slate-700">
 								Bank Tujuan
 							</label>
-							<div className="md:col-span-8">
+							<div className="md:col-span-8 flex items-center gap-2">
 								<Input
 									type="text"
 									value={bankDestination}
 									readOnly
-									className="bg-slate-50 text-slate-800 font-medium text-xs h-10 rounded-xl border-slate-200"
+									className="bg-slate-50 text-slate-800 font-semibold text-xs h-10 rounded-xl border-slate-200 flex-1"
 								/>
+								<Button
+									type="button"
+									variant="outline"
+									onClick={handleCopyAccount}
+									className="h-10 px-3.5 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold shrink-0 flex items-center gap-1.5 cursor-pointer"
+									title="Salin No. Rekening"
+								>
+									<Copy className="w-3.5 h-3.5 text-[#e4007e]" />
+									{copiedAccount ? "Tersalin!" : "Salin Rekening"}
+								</Button>
 							</div>
 						</div>
 
@@ -223,11 +318,11 @@ const EwalletConfirmationPage = (): JSX.Element => {
 							<div className="md:col-span-8">
 								<Button
 									type="submit"
-									disabled={loading}
+									disabled={confirmTopUpMutation.isPending}
 									className="w-full h-11 rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white font-semibold text-xs shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
 								>
 									<Send className="w-4 h-4" />
-									{loading ? "Mengirim..." : "Kirim Sekarang"}
+									{confirmTopUpMutation.isPending ? "Mengirim..." : "Kirim Sekarang"}
 								</Button>
 							</div>
 						</div>

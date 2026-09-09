@@ -2,11 +2,13 @@ import type { JSX } from "react"
 import { useState, useEffect } from "react"
 import { createFileRoute, useNavigate, useLocation, Outlet } from "@tanstack/react-router"
 import { RojaCard, Badge, Button } from "@roja/ui"
+import { formatRupiah } from "@roja/utils"
 import { Wallet, FileText, Eye, WalletCards } from "lucide-react"
-import { santriApi } from "@/lib/api"
 import useEwalletStore from "@/stores/ewalletStore"
-import type { StudentInvoice } from "@roja/types"
 import TableToolbar from "@/components/table-toolbar"
+import TablePagination from "@/components/table-pagination"
+import { useSantriPaymentSummary } from "@/hooks/use-santri-queries"
+import { useDebounce } from "@/hooks/use-debounce"
 
 const PaymentHistoryPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -16,58 +18,32 @@ const PaymentHistoryPage = (): JSX.Element => {
 	const isSubRoute = location.pathname !== "/payment-history" && location.pathname !== "/payment-history/"
 	if (isSubRoute) return <Outlet />
 
-	const [invoices, setInvoices] = useState<StudentInvoice[]>([])
-	const [loading, setLoading] = useState<boolean>(true)
-	const [hideNotif, setHideNotif] = useState<boolean>(false)
-
+	const [page, setPage] = useState<number>(1)
+	const [entriesPerPage, setEntriesPerPage] = useState<number>(10)
 	const [statusFilter, setStatusFilter] = useState<string>("")
 	const [searchQuery, setSearchQuery] = useState<string>("")
-	const [entriesPerPage, setEntriesPerPage] = useState<number>(10)
+	const [hideNotif, setHideNotif] = useState<boolean>(false)
 
-	useEffect(() => {
-		const fetchInvoices = async () => {
-			setLoading(true)
-			try {
-				const res = await santriApi.getInvoices()
-				setInvoices(res)
-			} catch {
-				// Fallback
-			} finally {
-				setLoading(false)
-			}
-		}
-		fetchInvoices()
-	}, [])
+	const debouncedSearch = useDebounce(searchQuery, 400)
 
-	const formatRupiah = (num: number): string => {
-		return new Intl.NumberFormat("id-ID", {
-			style: "currency",
-			currency: "IDR",
-			minimumFractionDigits: 0,
-		}).format(num)
-	}
+	const { data: summary, isLoading } = useSantriPaymentSummary({
+		page,
+		limit: entriesPerPage,
+		status: statusFilter,
+		search: debouncedSearch,
+	})
 
-	const totalUnpaid = invoices
+	const invoices = summary?.invoices || []
+	const totalUnpaid = summary?.remaining ?? invoices
 		.filter((inv) => inv.status !== "paid")
-		.reduce((sum, inv) => sum + (inv.amount - inv.amountPaid), 0)
+		.reduce((sum, inv) => sum + (inv.amount - (inv.paidAmount || 0)), 0)
 
 	const countUnpaid = invoices.filter((inv) => inv.status === "unpaid").length
 	const countInstallment = invoices.filter((inv) => inv.status === "installment").length
 
-	const filteredInvoices = invoices.filter((inv) => {
-		const matchSearch =
-			!searchQuery ||
-			inv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			inv.status.toLowerCase().includes(searchQuery.toLowerCase())
-		const matchStatus =
-			!statusFilter ||
-			(statusFilter === "sudah" && inv.status === "paid") ||
-			(statusFilter === "belum" && inv.status === "unpaid") ||
-			(statusFilter === "angsur" && inv.status === "installment")
-		return matchSearch && matchStatus
-	})
-
-	const displayedInvoices = filteredInvoices.slice(0, entriesPerPage)
+	const total = summary?.meta?.total ?? invoices.length
+	const totalPages = summary?.meta?.totalPages ?? Math.max(1, Math.ceil(total / entriesPerPage))
+	const displayedInvoices = invoices
 
 	const isOverdue = (dueDateStr: string | null | undefined, status: string) => {
 		if (!dueDateStr || status === "paid") return false
@@ -146,19 +122,22 @@ const PaymentHistoryPage = (): JSX.Element => {
 
 				<TableToolbar
 					searchValue={searchQuery}
-					onSearchChange={setSearchQuery}
+					onSearchChange={(val) => {
+						setSearchQuery(val)
+						setPage(1)
+					}}
 					searchPlaceholder="Cari tagihan..."
 					filterValue={statusFilter}
-					onFilterChange={setStatusFilter}
+					onFilterChange={(val) => {
+						setStatusFilter(val)
+						setPage(1)
+					}}
 					filterOptions={[
 						{ value: "sudah", label: "Dibayar" },
 						{ value: "belum", label: "Belum Dibayar" },
 						{ value: "angsur", label: "Diangsur" },
 					]}
 					filterPlaceholder="Semua Status"
-					entriesValue={entriesPerPage}
-					onEntriesChange={setEntriesPerPage}
-					entriesOptions={[10, 25, 50, 100]}
 				/>
 
 				<div className="overflow-x-auto rounded-xl border border-slate-100">
@@ -175,7 +154,7 @@ const PaymentHistoryPage = (): JSX.Element => {
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-100">
-							{loading ? (
+							{isLoading ? (
 								<tr>
 									<td colSpan={7} className="py-8 text-center text-slate-400">Memuat data...</td>
 								</tr>
@@ -186,18 +165,19 @@ const PaymentHistoryPage = (): JSX.Element => {
 							) : (
 								displayedInvoices.map((inv, index) => {
 									const overdue = isOverdue(inv.dueDate, inv.status)
+									const rowNum = (page - 1) * entriesPerPage + index + 1
 									return (
 										<tr
 											key={inv.id}
 											className={`transition-colors ${overdue ? "bg-rose-50/70 hover:bg-rose-100/50" : "hover:bg-slate-50/60"}`}
 										>
-											<td className="py-3 px-4 text-slate-500 font-medium">{index + 1}</td>
+											<td className="py-3 px-4 text-slate-500 font-medium">{rowNum}</td>
 											<td className="py-3 px-4 font-semibold text-slate-800">{inv.name}</td>
 											<td className="py-3 px-4 text-slate-600">
 												{inv.dueDate ? new Date(inv.dueDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "-"}
 											</td>
 											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.amount)}</td>
-											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.amountPaid)}</td>
+											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.paidAmount || 0)}</td>
 											<td className="py-3 px-4">
 												{inv.status === "paid" && <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200">Lunas</Badge>}
 												{inv.status === "unpaid" && <Badge className="bg-rose-50 text-rose-600 border-rose-200">Belum Dibayar</Badge>}
@@ -221,6 +201,20 @@ const PaymentHistoryPage = (): JSX.Element => {
 						</tbody>
 					</table>
 				</div>
+
+				<TablePagination
+					page={page}
+					limit={entriesPerPage}
+					total={total}
+					totalPages={totalPages}
+					onPageChange={setPage}
+					entriesValue={entriesPerPage}
+					onEntriesChange={(val) => {
+						setEntriesPerPage(val)
+						setPage(1)
+					}}
+					entriesOptions={[10, 25, 50, 100]}
+				/>
 			</RojaCard>
 		</div>
 	)
@@ -231,4 +225,3 @@ export const Route = createFileRoute("/_member/payment-history")({
 })
 
 export default PaymentHistoryPage
-

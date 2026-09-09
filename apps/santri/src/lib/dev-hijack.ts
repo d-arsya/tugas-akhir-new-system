@@ -73,7 +73,7 @@ export const mockTransactions: EwalletTransaction[] = [
 		amount: 200000,
 		status: "valid",
 		paymentMethod: "Bank Transfer",
-		paymentAccount: "BSI 7123456789",
+		paymentAccount: "BSI 7192852646",
 		transferNewsNumber: "TOPUP-2026001",
 		attachment: "/assets/sample-receipt.png",
 		createdAt: "2026-09-01T14:00:00Z",

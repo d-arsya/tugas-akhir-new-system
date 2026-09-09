@@ -1,37 +1,19 @@
 import type { JSX } from "react"
-import { useState, useEffect } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { RojaCard } from "@roja/ui"
-import { Link } from "@tanstack/react-router"
 import { AlertCircle, X } from "lucide-react"
-import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
-import type { Student } from "@roja/types"
+import { useSantriProfile } from "@/hooks/use-santri-queries"
 
 const ProfilePage = (): JSX.Element => {
 	const { user } = useAuthStore()
-	const [student, setStudent] = useState<(Student & { gradeName?: string; email?: string }) | null>(null)
-	const [loading, setLoading] = useState<boolean>(true)
+	const { data: student, isLoading } = useSantriProfile()
 	const [dismissAlert, setDismissAlert] = useState<boolean>(false)
-
-	useEffect(() => {
-		const fetchProfile = async () => {
-			setLoading(true)
-			try {
-				const res = await santriApi.getProfile()
-				setStudent(res)
-			} catch (err) {
-				// Fallback
-			} finally {
-				setLoading(false)
-			}
-		}
-		fetchProfile()
-	}, [])
 
 	const hasNoEmail = !student?.email && !user?.email
 
-	if (loading || !student) {
+	if (isLoading || !student) {
 		return (
 			<div className="py-12 text-center text-slate-400 text-sm font-medium">
 				Memuat data profil...
@@ -83,7 +65,7 @@ const ProfilePage = (): JSX.Element => {
 									Nama Lengkap
 								</td>
 								<td className="text-slate-800 font-semibold py-3.5 align-top">
-									{student.fullName}
+									{student.activeGrade.fullname || user?.name || "Santri"}
 								</td>
 							</tr>
 							<tr className="border-b border-slate-100/70">
@@ -91,7 +73,7 @@ const ProfilePage = (): JSX.Element => {
 									Kelas
 								</td>
 								<td className="text-slate-800 font-semibold py-3.5 align-top">
-									{student.gradeName || "10 Aliyah"}
+									{student.activeGrade.grade || "10 Aliyah"} {student.activeGrade.subgrade || ""}
 								</td>
 							</tr>
 							<tr>
@@ -99,7 +81,7 @@ const ProfilePage = (): JSX.Element => {
 									Nomor Induk Santri
 								</td>
 								<td className="text-slate-800 font-semibold py-3.5 align-top">
-									{student.nis}
+									{student.student.nis || "-"}
 								</td>
 							</tr>
 						</tbody>
