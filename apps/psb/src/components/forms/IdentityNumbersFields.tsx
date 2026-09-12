@@ -26,7 +26,7 @@ export const IdentityNumbersFields = ({
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 				{isFieldVisible(formSettings, 15) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 15, "NIK (Nomor Induk Kependudukan)")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 15,"NIK (Nomor Induk Kependudukan)")}</Label>
 						<Input
 							type="text"
 							maxLength={16}
@@ -39,7 +39,7 @@ export const IdentityNumbersFields = ({
 
 				{isFieldVisible(formSettings, 14) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 14, "NISN (Nomor Induk Siswa Nasional)")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 14,"NISN (Nomor Induk Siswa Nasional)")}</Label>
 						<Input
 							type="text"
 							placeholder="10 digit NISN"
@@ -51,7 +51,7 @@ export const IdentityNumbersFields = ({
 
 				{isFieldVisible(formSettings, 18) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 18, "No. Ijazah / SKL")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 18,"No. Ijazah / SKL")}</Label>
 						<Input
 							type="text"
 							placeholder="Nomor Ijazah Terakhir"
@@ -63,7 +63,7 @@ export const IdentityNumbersFields = ({
 
 				{isFieldVisible(formSettings, 16) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 16, "No. KSP (Kartu Sejahtera)")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 16,"No. KSP (Kartu Sejahtera)")}</Label>
 						<Input
 							type="text"
 							placeholder="Nomor KSP jika ada"
@@ -75,7 +75,7 @@ export const IdentityNumbersFields = ({
 
 				{isFieldVisible(formSettings, 17) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 17, "No. KIP (Kartu Indonesia Pintar)")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 17,"No. KIP (Kartu Indonesia Pintar)")}</Label>
 						<Input
 							type="text"
 							placeholder="Nomor KIP jika ada"

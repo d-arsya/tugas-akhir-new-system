@@ -39,7 +39,7 @@ export const StudentAddressFields = ({
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kelurahan</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Kelurahan</Label>
 						<Input
 							type="text"
 							className={errors.village ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -50,7 +50,7 @@ export const StudentAddressFields = ({
 					</div>
 
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Jalan</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Jalan</Label>
 						<Input
 							type="text"
 							className={errors.street ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -63,7 +63,7 @@ export const StudentAddressFields = ({
 
 				<div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RT</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">RT</Label>
 						<Input
 							type="text"
 							className={errors.rt ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -73,7 +73,7 @@ export const StudentAddressFields = ({
 						{errors.rt && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.rt.message}</span>}
 					</div>
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RW</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">RW</Label>
 						<Input
 							type="text"
 							className={errors.rw ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -83,7 +83,7 @@ export const StudentAddressFields = ({
 						{errors.rw && <span className="text-[11px] font-medium text-destructive mt-1 block">{errors.rw.message}</span>}
 					</div>
 					<div className="form-group mb-0 col-span-2 md:col-span-1">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Dusun</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Dusun</Label>
 						<Input
 							type="text"
 							className={errors.subVillage ? "border-destructive focus-visible:ring-destructive" : ""}

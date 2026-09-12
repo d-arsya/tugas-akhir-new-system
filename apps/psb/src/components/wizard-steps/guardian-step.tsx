@@ -77,7 +77,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 						{isFieldVisible(formSettings, 54) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 54, "Nama Lengkap Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 54,"Nama Lengkap Wali")}</Label>
 								<Input
 									type="text"
 									className={errors.guardianName ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -90,7 +90,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 55) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 55, "Agama Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 55,"Agama Wali")}</Label>
 								<Controller
 									control={control}
 									name="guardianReligion"
@@ -112,7 +112,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 56) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 56, "Kewarganegaraan Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 56,"Kewarganegaraan Wali")}</Label>
 								<div className="flex gap-6 items-center h-10 px-1">
 									{getFieldOptions(formSettings, 56, ["WNI", "WNA"]).map((opt) => (
 										<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -126,7 +126,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 57) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 57, "Pendidikan Terakhir Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 57,"Pendidikan Terakhir Wali")}</Label>
 								<Controller
 									control={control}
 									name="guardianLastEducation"
@@ -148,7 +148,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 58) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 58, "Nomor Telepon Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 58,"Nomor Telepon Wali")}</Label>
 								<Input
 									type="text"
 									className={errors.guardianPhone ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -160,7 +160,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 59) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 59, "Nomor WhatsApp Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 59,"Nomor WhatsApp Wali")}</Label>
 								<Input
 									type="text"
 									className=""
@@ -172,7 +172,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 						{isFieldVisible(formSettings, 60) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 60, "Pekerjaan Wali")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 60,"Pekerjaan Wali")}</Label>
 								<Input
 									type="text"
 									className={errors.guardianOccupation ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -198,26 +198,26 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kelurahan</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Kelurahan</Label>
 									<Input type="text" className="" placeholder="Kelurahan" {...register("guardianVillage")} />
 								</div>
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Jalan</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Jalan</Label>
 									<Input type="text" className="" placeholder="Nama Jalan" {...register("guardianStreet")} />
 								</div>
 							</div>
 
 							<div className="grid grid-cols-2 md:grid-cols-3 gap-y-5 gap-x-6">
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RT</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">RT</Label>
 									<Input type="text" className="" placeholder="001" {...register("guardianRt")} />
 								</div>
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">RW</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">RW</Label>
 									<Input type="text" className="" placeholder="002" {...register("guardianRw")} />
 								</div>
 								<div className="form-group mb-0 col-span-2 md:col-span-1">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Dusun</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Dusun</Label>
 									<Input type="text" className="" placeholder="Dusun" {...register("guardianSubVillage")} />
 								</div>
 							</div>

@@ -46,7 +46,7 @@ export const MotherDataFields = ({
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 				{isNameVisible && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 44, "Nama Lengkap Ibu")}
 						</Label>
 						<Input
@@ -61,7 +61,7 @@ export const MotherDataFields = ({
 
 				{(isNameVisible || isNationalityVisible) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Status Ibu</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Status Ibu</Label>
 						<div className="flex gap-6 items-center h-10 px-1">
 							<Label className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
 								<input type="radio" value="hidup" className="accent-[#059669] w-4 h-4" {...register("motherStatus")} />
@@ -77,7 +77,7 @@ export const MotherDataFields = ({
 
 				{isReligionVisible && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 45, "Agama Ibu")}
 						</Label>
 						<Controller
@@ -100,7 +100,7 @@ export const MotherDataFields = ({
 
 				{isEducationVisible && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 47, "Pendidikan Terakhir Ibu")}
 						</Label>
 						<Controller
@@ -123,7 +123,7 @@ export const MotherDataFields = ({
 
 				{isOccupationVisible && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 50, "Pekerjaan Ibu")}
 						</Label>
 						<Input
@@ -140,7 +140,7 @@ export const MotherDataFields = ({
 
 				{isPhoneVisible && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 48, "Nomor Telepon Ibu")}
 						</Label>
 						<Input

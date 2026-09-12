@@ -33,7 +33,7 @@ export const PreviousSchoolFields = ({
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 					{isFieldVisible(formSettings, 19) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 19, "Nama Sekolah Asal")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 19,"Nama Sekolah Asal")}</Label>
 							<Input
 								type="text"
 								className={errors.previousSchoolName ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -48,7 +48,7 @@ export const PreviousSchoolFields = ({
 
 					{isFieldVisible(formSettings, 20) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 20, "No. Telp / HP Sekolah Asal")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 20,"No. Telp / HP Sekolah Asal")}</Label>
 							<Input
 								type="text"
 								className=""
@@ -74,7 +74,7 @@ export const PreviousSchoolFields = ({
 
 						<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 							<div className="form-group mb-0 md:col-span-2">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Alamat Detail Sekolah Asal</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Alamat Detail Sekolah Asal</Label>
 								<Input
 									type="text"
 									className=""
@@ -83,7 +83,7 @@ export const PreviousSchoolFields = ({
 								/>
 							</div>
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Kode POS Sekolah Asal</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Kode POS Sekolah Asal</Label>
 								<Input
 									type="text"
 									className=""

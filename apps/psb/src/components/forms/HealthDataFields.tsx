@@ -37,7 +37,7 @@ export const HealthDataFields = ({
 					{isFieldVisible(formSettings, 23) && (
 						<>
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Berat Badan (Kg)</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Berat Badan (Kg)</Label>
 								<Input
 									type="number"
 									placeholder="Kg"
@@ -47,7 +47,7 @@ export const HealthDataFields = ({
 							</div>
 
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Tinggi Badan (Cm)</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Tinggi Badan (Cm)</Label>
 								<Input
 									type="number"
 									placeholder="Cm"
@@ -60,7 +60,7 @@ export const HealthDataFields = ({
 
 					{isFieldVisible(formSettings, 24) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 24, "Golongan Darah")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 24,"Golongan Darah")}</Label>
 							<Controller
 								control={control}
 								name="bloodType"
@@ -84,7 +84,7 @@ export const HealthDataFields = ({
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 					{isFieldVisible(formSettings, 25) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 25, "Kondisi Penglihatan")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 25,"Kondisi Penglihatan")}</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
 								{getFieldOptions(formSettings, 25, ["Normal", "Berkacamata"]).map((opt) => (
 									<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -99,7 +99,7 @@ export const HealthDataFields = ({
 
 					{isFieldVisible(formSettings, 26) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 26, "Kondisi Pendengaran")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 26,"Kondisi Pendengaran")}</Label>
 							<div className="flex gap-6 items-center h-10 px-1">
 								{getFieldOptions(formSettings, 26, ["Normal", "Kurang Peka Suara"]).map((opt) => (
 									<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -114,7 +114,7 @@ export const HealthDataFields = ({
 
 					{isFieldVisible(formSettings, 27) && (
 						<div className="form-group mb-0">
-							<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 27, "Imunisasi yang Diterima")}</Label>
+							<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 27,"Imunisasi yang Diterima")}</Label>
 							<Controller
 								control={control}
 								name="immunizationGiven"

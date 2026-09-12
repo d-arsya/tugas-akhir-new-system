@@ -34,11 +34,11 @@ const SuccessPage = (): JSX.Element => {
 		<PageLayout header={header}>
 			<main className="flex-1 relative z-10 px-4 py-8 max-w-xl mx-auto w-full flex items-center justify-center">
 				<RojaCard className="w-full p-8 md:p-10 flex flex-col gap-6 items-center text-center">
-					<div className="relative z-10 w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+					<div className="relative z-10 w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
 						<CheckCircle2 className="w-8 h-8" />
 					</div>
 					<div className="relative z-10 flex flex-col gap-1">
-						<div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tracking-wide m-0">
+						<div className="text-sm font-bold text-emerald-600 tracking-wide m-0">
 							Pendaftaran Berhasil!
 						</div>
 						<p className="text-xs text-muted-foreground m-0">
@@ -59,12 +59,12 @@ const SuccessPage = (): JSX.Element => {
 							<span className="text-muted-foreground">Email Terdaftar</span>
 							<span className="font-semibold text-foreground">{info?.email || user?.email}</span>
 						</div>
-						<div className="flex flex-col gap-1.5 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg p-3.5 text-[11px] text-emerald-900 dark:text-emerald-200 leading-relaxed mt-2">
-							<div className="flex items-center gap-2 font-bold text-emerald-800 dark:text-emerald-300">
-								<Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+						<div className="flex flex-col gap-1.5 bg-emerald-50/80 border border-emerald-200 rounded-lg p-3.5 text-[11px] text-emerald-900 leading-relaxed mt-2">
+							<div className="flex items-center gap-2 font-bold text-emerald-800">
+								<Mail className="w-4 h-4 text-emerald-600 shrink-0"/>
 								<span>Informasi Akun & Kata Sandi</span>
 							</div>
-							<p className="m-0 text-emerald-800 dark:text-emerald-300 text-[11px]">
+							<p className="m-0 text-emerald-800 text-[11px]">
 								Kata sandi dan detail akun pendaftaran Anda telah dikirimkan ke email terdaftar (<strong>{info?.email || user?.email}</strong>). Silakan periksa kotak masuk atau folder spam email Anda.
 							</p>
 						</div>

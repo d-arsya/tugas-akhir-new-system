@@ -31,7 +31,7 @@ export const StudentPersonalFields = ({
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 				{isFieldVisible(formSettings, 1) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">
 							{getFieldLabel(formSettings, 1, "Nama Lengkap")}
 							{reqMark(1)}
 						</Label>
@@ -47,7 +47,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 2) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 2, "Nama Panggilan")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 2,"Nama Panggilan")}</Label>
 						<Input
 							type="text"
 							className={errors.shortName ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -59,7 +59,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 3) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 3, "Agama")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 3,"Agama")}</Label>
 						<Controller
 							control={control}
 							name="religion"
@@ -82,7 +82,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 4) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 4, "Jenis Kelamin")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 4,"Jenis Kelamin")}</Label>
 						<div className="flex gap-6 items-center h-10 px-1">
 							{getFieldOptions(formSettings, 4, ["Laki-laki", "Perempuan"]).map((opt) => (
 								<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -97,7 +97,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 5) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 5, "Tempat Lahir")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 5,"Tempat Lahir")}</Label>
 						<Input
 							type="text"
 							className={errors.placeOfBirth ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -110,7 +110,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 6) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 6, "Tanggal Lahir")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 6,"Tanggal Lahir")}</Label>
 						<Controller
 							control={control}
 							name="dateOfBirth"
@@ -129,7 +129,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 7) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 7, "Kewarganegaraan")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 7,"Kewarganegaraan")}</Label>
 						<div className="flex gap-6 items-center h-10 px-1">
 							{getFieldOptions(formSettings, 7, ["WNI", "WNA"]).map((opt) => (
 								<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -144,7 +144,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 8) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 8, "Tinggal Bersama")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 8,"Tinggal Bersama")}</Label>
 						<div className="flex gap-6 items-center h-10 px-1">
 							{getFieldOptions(formSettings, 8, ["Orang Tua", "Wali"]).map((opt) => (
 								<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -159,7 +159,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 12) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 12, "Nomor HP / WhatsApp")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 12,"Nomor HP / WhatsApp")}</Label>
 						<Input
 							type="text"
 							className={errors.phone ? "border-destructive focus-visible:ring-destructive" : ""}
@@ -172,7 +172,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 9) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 9, "Anak Ke")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 9,"Anak Ke")}</Label>
 						<div className="flex gap-2">
 							<Input
 								type="number"
@@ -196,7 +196,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 10) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 10, "Keadaan Orang Tua")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 10,"Keadaan Orang Tua")}</Label>
 						<Controller
 							control={control}
 							name="parentStatus"
@@ -218,7 +218,7 @@ export const StudentPersonalFields = ({
 
 				{isFieldVisible(formSettings, 11) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 11, "Status dalam Keluarga")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 11,"Status dalam Keluarga")}</Label>
 						<Controller
 							control={control}
 							name="childStatus"

@@ -50,7 +50,7 @@ export const AchievementAndTalentFields = ({
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
 							{isFieldVisible(formSettings, 32) && (
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 32, "Kemampuan Membaca")}</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 32,"Kemampuan Membaca")}</Label>
 									<div className="flex gap-6 items-center h-10 px-1">
 										{getFieldOptions(formSettings, 32, ["Jilid", "Al-Quran"]).map((opt) => (
 											<Label key={opt} className="inline-flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
@@ -65,7 +65,7 @@ export const AchievementAndTalentFields = ({
 
 							{watchReading === "jilid" && (
 								<div className="form-group mb-0">
-									<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">Sudah Jilid Berapa?</Label>
+									<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">Sudah Jilid Berapa?</Label>
 									<Input
 										type="text"
 										placeholder="Contoh: Jilid 4"
@@ -78,7 +78,7 @@ export const AchievementAndTalentFields = ({
 
 						{isFieldVisible(formSettings, 33) && (
 							<div className="form-group mb-0">
-								<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 33, "Hafalan Al-Qur'an (Juz / Surat)")}</Label>
+								<Label className="text-xs font-semibold text-slate-700 mb-1.5 inline-block">{getFieldLabel(formSettings, 33,"Hafalan Al-Qur'an (Juz / Surat)")}</Label>
 								<Textarea
 									rows={2}
 									placeholder="Contoh: Juz 30, Surat Al-Waqi'ah s.d. An-Naas"

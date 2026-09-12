@@ -61,7 +61,7 @@ const Verify2faPage = (): JSX.Element => {
 				description={
 					<>
 						Masukkan 6 digit kode verifikasi yang telah dikirim ke email{" "}
-						<strong className="text-slate-700 dark:text-slate-200">{email}</strong>.
+						<strong className="text-slate-700">{email}</strong>.
 					</>
 				}
 				errorMsg={errorMsg}
