@@ -32,10 +32,10 @@ export default defineConfig(() => ({
 		react(),
 		tailwindcss(),
 		nxViteTsPaths(),
-		nxCopyAssetsPlugin(["*.md"]),
+		nxCopyAssetsPlugin(["*.md", "vercel.json"]),
 	],
 	build: {
-		outDir: "dist",
+		outDir: `../../dist/apps/psb`,
 		emptyOutDir: true,
 		reportCompressedSize: true,
 		commonjsOptions: { transformMixedEsModules: true },
