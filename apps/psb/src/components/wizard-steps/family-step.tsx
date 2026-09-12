@@ -1,8 +1,8 @@
 import type { JSX } from "react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { familySchema, type FamilyInput } from "@/schemas/register.schema"
+import { createFamilySchema, type FamilyInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import { useNavigate } from "@tanstack/react-router"
@@ -10,6 +10,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@roja/ui"
 import { toast } from "sonner"
+import { isGroupAllInvisible } from "@roja/utils"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 import { FamilyFormSections } from "../forms/FamilyFormSections"
 
 export const FamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
@@ -23,6 +25,9 @@ export const FamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "family data")
+
+	const dynamicSchema = useMemo(() => createFamilySchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading, error } = useQuery({
 		queryKey: ["wizardStep", "family", sessionId],
@@ -46,9 +51,7 @@ export const FamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 			onNext()
 		},
 		onError: (err: any) => {
-			clearSession()
-			toast.error(err instanceof Error ? err.message : "Sesi pendaftaran Anda telah berakhir.")
-			navigate({ to: "/" })
+			toast.error(err instanceof Error ? err.message : "Gagal menyimpan formulir data keluarga.")
 		},
 	})
 
@@ -60,7 +63,7 @@ export const FamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 		watch,
 		formState: { errors },
 	} = useForm<FamilyInput>({
-		resolver: zodResolver(familySchema) as unknown as import("react-hook-form").Resolver<FamilyInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<FamilyInput>,
 		values: (initialData || {}) as FamilyInput,
 		defaultValues: {
 			fatherName: "",
@@ -91,12 +94,18 @@ export const FamilyStepContent = ({ onNext, onPrev }: { onNext: () => void; onPr
 		},
 	})
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Family):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs">Memuat data...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			<FamilyFormSections
 				control={control}
 				register={register}

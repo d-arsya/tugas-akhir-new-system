@@ -1,6 +1,6 @@
 import type { JSX } from "react"
 import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { psbApi } from "@/lib/api"
 import PageLayout from "@/components/page-layout"
 import { z } from "zod"
@@ -17,17 +17,22 @@ const EmailVerifyPage = (): JSX.Element => {
 	const search = useSearch({ from: "/email-verify" }) as { token?: string; email?: string }
 	const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying")
 	const [message, setMessage] = useState<string>("")
+	const hasCalledRef = useRef(false)
 
 	useEffect(() => {
 		const token = search?.token
+		const email = search?.email
 		if (!token) {
 			setStatus("error")
 			setMessage("Token verifikasi email tidak ditemukan.")
 			return
 		}
 
+		if (hasCalledRef.current) return
+		hasCalledRef.current = true
+
 		psbApi
-			.verifyEmail(token)
+			.verifyEmail(token, email)
 			.then((res: { message?: string }) => {
 				setStatus("success")
 				setMessage(res.message || "Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke Member Area.")
@@ -36,7 +41,7 @@ const EmailVerifyPage = (): JSX.Element => {
 				setStatus("error")
 				setMessage(err instanceof Error ? err.message : "Gagal memverifikasi email.")
 			})
-	}, [search?.token])
+	}, [search?.token, search?.email])
 
 	return (
 		<PageLayout maxWidth="max-w-md">

@@ -54,7 +54,7 @@ export type PsbApi = {
 	logout: () => Promise<{ success: boolean }>
 	forgotPassword: (email: string, clientUrl?: string) => Promise<{ success: boolean }>
 	resetPassword: (data: { token: string; password: string; passwordConfirmation: string; email: string }) => Promise<{ success: boolean }>
-	verifyEmail: (token: string) => Promise<{ message: string }>
+	verifyEmail: (token: string, email?: string) => Promise<{ message: string }>
 	resendVerification: (email: string, clientUrl?: string) => Promise<{ message: string }>
 	getDashboard: () => Promise<DashboardData>
 	getInvalidData: () => Promise<unknown>
@@ -520,8 +520,8 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		return { success: res.success }
 	},
 
-	verifyEmail: async (token: string): Promise<{ message: string }> => {
-		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/verify-email", { token })
+	verifyEmail: async (token: string, email?: string): Promise<{ message: string }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/verify-email", { token, email })
 		return { message: res.message || "Email berhasil diverifikasi." }
 	},
 

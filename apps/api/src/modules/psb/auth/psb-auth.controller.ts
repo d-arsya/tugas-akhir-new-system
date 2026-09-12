@@ -90,8 +90,11 @@ export class PsbAuthController {
 	@Post("verify-email")
 	@ApiOperation({ summary: "Verifikasi email akun pendaftar menggunakan token link email" })
 	@ApiResponseWrapped({ status: 200, description: "Email berhasil diverifikasi", type: MessageResponseDto })
-	async verifyEmail(@Body("token") token: string): Promise<MessageResponseDto> {
-		return this.psbAuthService.verifyEmail(token)
+	async verifyEmail(
+		@Body("token") token: string,
+		@Body("email") email?: string,
+	): Promise<MessageResponseDto> {
+		return this.psbAuthService.verifyEmail(token, email)
 	}
 
 	@Public()

@@ -43,12 +43,12 @@ export function mapWizardDataToRegistrant(input: MapRegistrantInput): Partial<Re
 		registrationPath: academicYear?.type === "indent" ? "indent" : "reguler",
 
 		// Personal
-		fullname: personalData.fullname,
+		fullname: personalData.fullname ?? null,
 		shortname: personalData.shortname ?? null,
 		religion: personalData.religion ?? "islam",
 		gender: personalData.gender ?? null,
 		placeOfBirth: personalData.placeOfBirth ?? null,
-		dateOfBirth: personalData.dateOfBirth ?? null,
+		dateOfBirth: personalData.dateOfBirth || null,
 		nationality: personalData.nationality ?? "wni",
 		liveWith: personalData.liveWith ?? "parent",
 		siblingOrder: personalData.siblingOrder ?? null,
@@ -65,7 +65,7 @@ export function mapWizardDataToRegistrant(input: MapRegistrantInput): Partial<Re
 		rw: personalData.rw ?? null,
 		street: personalData.street ?? null,
 		schoolName: personalData.schoolName ?? null,
-		schoolPhone: personalData.schoolPhone ?? null,
+		schoolPhone: personalData.schoolPhone || null,
 		schoolProvinceId: personalData.schoolProvinceId || null,
 		schoolRegencyId: personalData.schoolRegencyId || null,
 		schoolDistrictId: personalData.schoolDistrictId || null,

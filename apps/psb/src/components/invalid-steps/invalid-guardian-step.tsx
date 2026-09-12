@@ -1,13 +1,15 @@
 import type { JSX } from "react"
+import { useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { guardianSchema, type GuardianInput } from "@/schemas/register.schema"
+import { createGuardianSchema, type GuardianInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import LocationSelect from "@/components/location-select"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { SearchableSelect, Input, Label } from "@roja/ui"
+import { toast } from "sonner"
 
 export const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
 	const queryClient = useQueryClient()
@@ -17,6 +19,8 @@ export const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => v
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+
+	const dynamicSchema = useMemo(() => createGuardianSchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading } = useQuery({
 		queryKey: ["invalidData"],
@@ -39,7 +43,7 @@ export const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => v
 		watch,
 		formState: { errors },
 	} = useForm<GuardianInput>({
-		resolver: zodResolver(guardianSchema) as unknown as import("react-hook-form").Resolver<GuardianInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<GuardianInput>,
 		values: (initialData ? (initialData as Record<string, unknown>).guardian : {}) as GuardianInput,
 		defaultValues: {
 			guardianName: "",
@@ -55,12 +59,17 @@ export const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => v
 		},
 	})
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Invalid Guardian):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs font-medium text-[var(--grey)]">Memuat data pendaftaran...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
 			<div className="border-l-4 border-l-[#ffa800] pl-4 py-1 mb-2">
 				<div className="text-xs font-bold text-[#ffa800] tracking-wide m-0">Perbaiki Data: Sub-step 4 (Data Wali)</div>
 				<div className="text-[10px] text-[var(--grey)] mt-0.5">Opsional: Perbarui data wali jika calon santri tinggal bersama wali.</div>

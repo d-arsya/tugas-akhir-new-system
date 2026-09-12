@@ -4,11 +4,14 @@ import type { FamilyInput } from "@/schemas/register.schema"
 import LocationSelect from "@/components/location-select"
 import { Input, Label } from "@roja/ui"
 
+import { isFieldVisible } from "@roja/utils"
+
 export interface FamilyAddressFieldsProps {
 	register: UseFormRegister<FamilyInput>
 	errors: FieldErrors<FamilyInput>
 	setValue: UseFormSetValue<FamilyInput>
 	watch: UseFormWatch<FamilyInput>
+	formSettings?: any
 }
 
 export const FamilyAddressFields = ({
@@ -16,7 +19,9 @@ export const FamilyAddressFields = ({
 	errors,
 	setValue,
 	watch,
-}: FamilyAddressFieldsProps): JSX.Element => {
+	formSettings,
+}: FamilyAddressFieldsProps): JSX.Element | null => {
+	if (!isFieldVisible(formSettings, 52)) return null
 	return (
 		<div>
 			<div className="border-l-4 border-l-[var(--primary)] pl-4 py-1 mb-6">

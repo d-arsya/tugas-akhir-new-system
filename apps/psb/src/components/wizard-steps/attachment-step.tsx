@@ -1,8 +1,8 @@
 import type { JSX } from "react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { attachmentSchema, type AttachmentInput } from "@/schemas/register.schema"
+import { createAttachmentSchema, type AttachmentInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import useAuthStore from "@/stores/auth.store"
@@ -12,6 +12,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@roja/ui"
 import { toast } from "sonner"
+import { isFieldVisible, getFieldLabel, isFieldRequired, isGroupAllInvisible } from "@roja/utils"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 
 export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.Element => {
 	const navigate = useNavigate()
@@ -19,6 +21,15 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 	const sessionId = useWizardStore((s) => s.sessionId) || ""
 	const login = useAuthStore((s) => s.login)
 	const clearSession = useWizardStore((s) => s.clearSession)
+
+	const { data: landingData } = useQuery({
+		queryKey: ["landingInfo"],
+		queryFn: () => psbApi.getLanding(),
+	})
+	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "attachment data")
+
+	const dynamicSchema = useMemo(() => createAttachmentSchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading, error } = useQuery({
 		queryKey: ["wizardStep", "attachment", sessionId],
@@ -56,7 +67,7 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 		handleSubmit,
 		formState: { errors },
 	} = useForm<AttachmentInput>({
-		resolver: zodResolver(attachmentSchema) as unknown as import("react-hook-form").Resolver<AttachmentInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<AttachmentInput>,
 		values: (initialData || {}) as AttachmentInput,
 		defaultValues: {
 			ijazah: undefined,
@@ -73,12 +84,18 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 		mutation.mutate(data)
 	}
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Attachment):", formErrors)
+		toast.error("Mohon unggah semua dokumen berkas wajib yang belum diunggah.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs">Memuat data...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit(onSubmit, onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			{/* Section A: Unggah Berkas */}
 			<div>
 				<div className="border-l-4 border-l-[var(--primary)] pl-4 py-1 mb-6">
@@ -89,96 +106,110 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 				</p>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-y-5 gap-x-6">
-					<Controller
-						control={control}
-						name="ijazah"
-						render={({ field }) => (
-							<FileUploadField
-								label="Salinan Ijazah Terakhir / SKL"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.ijazah?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 63) && (
+						<Controller
+							control={control}
+							name="ijazah"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 63, "Salinan Ijazah Terakhir / SKL")}${isFieldRequired(formSettings, 63) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.ijazah?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="photo"
-						render={({ field }) => (
-							<FileUploadField
-								label="Pas Foto Calon Santri (Ukuran 3x4)"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.photo?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 64) && (
+						<Controller
+							control={control}
+							name="photo"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 64, "Pas Foto Calon Santri (Ukuran 3x4)")}${isFieldRequired(formSettings, 64) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.photo?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="kk"
-						render={({ field }) => (
-							<FileUploadField
-								label="Salinan Kartu Keluarga (KK)"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.kk?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 65) && (
+						<Controller
+							control={control}
+							name="kk"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 65, "Salinan Kartu Keluarga (KK)")}${isFieldRequired(formSettings, 65) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.kk?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="birthCert"
-						render={({ field }) => (
-							<FileUploadField
-								label="Salinan Akta Kelahiran"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.birthCert?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 69) && (
+						<Controller
+							control={control}
+							name="birthCert"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 69, "Salinan Akta Kelahiran")}${isFieldRequired(formSettings, 69) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.birthCert?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="reportCard"
-						render={({ field }) => (
-							<FileUploadField
-								label="Salinan Rapor Terakhir (Optional)"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.reportCard?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 68) && (
+						<Controller
+							control={control}
+							name="reportCard"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 68, "Salinan Rapor Terakhir")}${isFieldRequired(formSettings, 68) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.reportCard?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="ksp"
-						render={({ field }) => (
-							<FileUploadField
-								label="Kartu Sejahtera / KSP (Jika ada)"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.ksp?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 66) && (
+						<Controller
+							control={control}
+							name="ksp"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 66, "Kartu Sejahtera / KSP")}${isFieldRequired(formSettings, 66) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.ksp?.message}
+								/>
+							)}
+						/>
+					)}
 
-					<Controller
-						control={control}
-						name="kip"
-						render={({ field }) => (
-							<FileUploadField
-								label="Kartu Indonesia Pintar / KIP (Jika ada)"
-								value={field.value}
-								onChange={field.onChange}
-								error={errors.kip?.message}
-							/>
-						)}
-					/>
+					{isFieldVisible(formSettings, 67) && (
+						<Controller
+							control={control}
+							name="kip"
+							render={({ field }) => (
+								<FileUploadField
+									label={`${getFieldLabel(formSettings, 67, "Kartu Indonesia Pintar / KIP")}${isFieldRequired(formSettings, 67) ? " *" : ""}`}
+									value={field.value}
+									onChange={field.onChange}
+									error={errors.kip?.message}
+								/>
+							)}
+						/>
+					)}
 				</div>
 			</div>
 

@@ -1,7 +1,7 @@
 import type { JSX } from "react"
 import { Controller, type Control, type UseFormRegister, type FieldErrors } from "react-hook-form"
 import type { PersonalInput } from "@/schemas/register.schema"
-import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
+import { isFieldVisible, isFieldRequired, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { SearchableSelect, Input, DatePicker, Label } from "@roja/ui"
 
 export interface StudentPersonalFieldsProps {
@@ -16,7 +16,13 @@ export const StudentPersonalFields = ({
 	register,
 	errors,
 	formSettings,
-}: StudentPersonalFieldsProps): JSX.Element => {
+}: StudentPersonalFieldsProps): JSX.Element | null => {
+	const fieldIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+	const hasAnyVisible = fieldIds.some((id) => isFieldVisible(formSettings, id))
+	if (!hasAnyVisible) return null
+
+	const reqMark = (id: number) => (isFieldRequired(formSettings, id) ? <span className="text-destructive ml-1">*</span> : null)
+
 	return (
 		<div>
 			<div className="border-l-4 border-l-[var(--primary)] pl-4 py-1 mb-6">
@@ -25,7 +31,10 @@ export const StudentPersonalFields = ({
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-y-5 gap-x-6">
 				{isFieldVisible(formSettings, 1) && (
 					<div className="form-group mb-0">
-						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">{getFieldLabel(formSettings, 1, "Nama Lengkap")}</Label>
+						<Label className="text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5 inline-block">
+							{getFieldLabel(formSettings, 1, "Nama Lengkap")}
+							{reqMark(1)}
+						</Label>
 						<Input
 							type="text"
 							className={errors.fullName ? "border-destructive focus-visible:ring-destructive" : ""}

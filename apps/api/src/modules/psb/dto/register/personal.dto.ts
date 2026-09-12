@@ -2,7 +2,7 @@ import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 
 export const PersonalSchema = z.object({
-	fullname: z.string().min(1, "Nama lengkap wajib diisi"),
+	fullname: z.string().optional(),
 	shortname: z.string().optional(),
 	religion: z.enum(["islam", "kristen", "katolik", "hindu", "buddha", "konghucu"]).optional(),
 	gender: z.enum(["male", "female"]).optional(),
@@ -15,9 +15,9 @@ export const PersonalSchema = z.object({
 	parentStatus: z.enum(["father&mother", "fatherless", "motherless", "orphan"]).optional(),
 	childStatus: z.enum(["biological_child", "step_child", "adopted_child"]).optional(),
 	phone: z.string().optional(),
-	provinceId: z.coerce.number().int().positive().optional(),
-	regencyId: z.coerce.number().int().positive().optional(),
-	districtId: z.coerce.number().int().positive().optional(),
+	provinceId: z.coerce.number().int().optional(),
+	regencyId: z.coerce.number().int().optional(),
+	districtId: z.coerce.number().int().optional(),
 	village: z.string().optional(),
 	subVillage: z.string().optional(),
 	rt: z.string().optional(),

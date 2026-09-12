@@ -3,14 +3,20 @@ export type FormSetting = {
 	type: string
 	helper: string | null
 	group: string
-	subGroup: string | null
+	subGroup?: string | null
+	sub_group?: string | null
 	default: string
-	customName: string | null
-	status: boolean
-	visibility: boolean
-	registrantRequired: boolean
-	adminRequired: boolean
+	customName?: string | null
+	custom_name?: string | null
+	status: boolean | number
+	visibility: boolean | number
+	registrantRequired?: boolean | number
+	registrant_required?: boolean | number
+	adminRequired?: boolean | number
+	admin_required?: boolean | number
 }
+
+export const ACCORDION_LABEL_IDS = [22, 29, 31, 34, 36, 51, 53, 61]
 
 export const getFieldSetting = (settings: FormSetting[] | undefined, id: number): FormSetting | undefined => {
 	return settings?.find((s) => s.id === id)
@@ -19,13 +25,62 @@ export const getFieldSetting = (settings: FormSetting[] | undefined, id: number)
 export const isFieldVisible = (settings: FormSetting[] | undefined, id: number): boolean => {
 	if (!settings || settings.length === 0) return true
 	const setting = getFieldSetting(settings, id)
-	return setting ? setting.status && setting.visibility : false
+	if (!setting) return false
+
+	const isStatusTrue = Boolean(setting.status)
+	const isVisibilityTrue = Boolean(setting.visibility)
+
+	if (ACCORDION_LABEL_IDS.includes(id)) {
+		const settingSubGroup = setting.subGroup ?? setting.sub_group
+		const childSettings = settings.filter((s) => {
+			if (ACCORDION_LABEL_IDS.includes(s.id)) return false
+			const sSubGroup = s.subGroup ?? s.sub_group
+			if (settingSubGroup && sSubGroup) {
+				return sSubGroup === settingSubGroup
+			}
+			return s.group === setting.group
+		})
+		if (childSettings.length === 0) return true
+		return childSettings.some((s) => Boolean(s.status) && Boolean(s.visibility))
+	}
+
+	return isStatusTrue && isVisibilityTrue
+}
+
+export const GROUP_ID_RANGES: Record<string, number[]> = {
+	"personal data": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+	"identity data": [22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35],
+	"family data": [36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52],
+	"guardian data": [53, 54, 55, 56, 57, 58, 59, 60, 61, 62],
+	"attachment data": [63, 64, 65, 66, 67, 68, 69],
+}
+
+export const isGroupAllInvisible = (settings: FormSetting[] | undefined, groupOrIds: string | number[]): boolean => {
+	let idsToCheck: number[] = []
+	if (Array.isArray(groupOrIds)) {
+		idsToCheck = groupOrIds
+	} else if (GROUP_ID_RANGES[groupOrIds]) {
+		idsToCheck = GROUP_ID_RANGES[groupOrIds]
+	} else if (settings && settings.length > 0) {
+		idsToCheck = settings.filter((s) => s.group === groupOrIds || s.subGroup === groupOrIds || s.sub_group === groupOrIds).map((s) => s.id)
+	}
+
+	if (idsToCheck.length === 0) return false
+	return idsToCheck.every((id) => !isFieldVisible(settings, id))
+}
+
+export const isFieldRequired = (settings: FormSetting[] | undefined, id: number, fallback = false): boolean => {
+	if (!settings) return fallback
+	const setting = getFieldSetting(settings, id)
+	if (!setting) return false
+	const req = setting.registrantRequired ?? setting.registrant_required ?? false
+	return Boolean(setting.status) && Boolean(setting.visibility) && Boolean(req)
 }
 
 export const getFieldLabel = (settings: FormSetting[] | undefined, id: number, fallback = ""): string => {
 	const setting = getFieldSetting(settings, id)
 	if (!setting) return fallback
-	return setting.customName || setting.default || fallback
+	return setting.customName || setting.custom_name || setting.default || fallback
 }
 
 export const getFieldOptions = (

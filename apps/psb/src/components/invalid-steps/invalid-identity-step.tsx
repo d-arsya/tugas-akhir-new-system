@@ -1,12 +1,14 @@
 import type { JSX } from "react"
+import { useMemo } from "react"
 import { useForm, Controller, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { identitySchema, type IdentityInput } from "@/schemas/register.schema"
+import { createIdentitySchema, type IdentityInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
 import { SearchableSelect, Input, Label, Textarea } from "@roja/ui"
+import { toast } from "sonner"
 import IdentityFormSections from "../forms/IdentityFormSections";
 
 export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
@@ -17,6 +19,8 @@ export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => v
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+
+	const dynamicSchema = useMemo(() => createIdentitySchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading } = useQuery({
 		queryKey: ["invalidData"],
@@ -38,7 +42,7 @@ export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => v
 		watch,
 		formState: { errors },
 	} = useForm<IdentityInput>({
-		resolver: zodResolver(identitySchema) as unknown as import("react-hook-form").Resolver<IdentityInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<IdentityInput>,
 		values: (initialData ? (initialData as Record<string, unknown>).identity : {}) as IdentityInput,
 		defaultValues: {
 			nik: "",
@@ -68,12 +72,17 @@ export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => v
 
 	const watchReading = watch("reading")
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Invalid Identity):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs font-medium text-[var(--grey)]">Memuat data pendaftaran...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
 			<div className="border-l-4 border-l-[#ffa800] pl-4 py-1 mb-2">
 				<div className="text-xs font-bold text-[#ffa800] tracking-wide m-0">Perbaiki Data: Sub-step 2 (Identitas & Kesehatan)</div>
 				<div className="text-[10px] text-[var(--grey)] mt-0.5">Perbarui nomor identitas dan data kesehatan yang ditandai tidak valid.</div>

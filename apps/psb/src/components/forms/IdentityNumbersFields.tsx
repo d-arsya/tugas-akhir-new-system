@@ -14,7 +14,10 @@ export const IdentityNumbersFields = ({
 	register,
 	errors,
 	formSettings,
-}: IdentityNumbersFieldsProps): JSX.Element => {
+}: IdentityNumbersFieldsProps): JSX.Element | null => {
+	const fieldIds = [14, 15, 16, 17, 18]
+	const hasAnyVisible = fieldIds.some((id) => isFieldVisible(formSettings, id))
+	if (!hasAnyVisible) return null
 	return (
 		<div>
 			<div className="border-l-4 border-l-[var(--primary)] pl-4 py-1 mb-6">

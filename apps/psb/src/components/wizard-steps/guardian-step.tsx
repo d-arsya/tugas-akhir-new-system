@@ -1,13 +1,17 @@
 import type { JSX } from "react"
+import { useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
-import { type GuardianInput } from "@/schemas/register.schema"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { createGuardianSchema, type GuardianInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import LocationSelect from "@/components/location-select"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
-import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue } from "@roja/utils"
+import { isFieldVisible, getFieldLabel, getFieldOptions, getOptionValue, isGroupAllInvisible } from "@roja/utils"
 import { SearchableSelect, Button, Input, Label } from "@roja/ui"
+import { toast } from "sonner"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 
 export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
 	const queryClient = useQueryClient()
@@ -18,6 +22,9 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "guardian data")
+
+	const dynamicSchema = useMemo(() => createGuardianSchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading } = useQuery({
 		queryKey: ["wizardStep", "guardian", sessionId],
@@ -41,6 +48,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 		watch,
 		formState: { errors },
 	} = useForm<GuardianInput>({
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<GuardianInput>,
 		values: (initialData || {}) as GuardianInput,
 	})
 
@@ -48,12 +56,18 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 		mutation.mutate(data)
 	}
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Guardian):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs">Memuat data...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit(onSubmit, onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			{/* Section A: Data Wali */}
 			<div>
 				<div className="border-l-4 border-l-[var(--primary)] pl-4 py-1 mb-6">

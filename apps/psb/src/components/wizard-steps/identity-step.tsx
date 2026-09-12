@@ -1,8 +1,8 @@
 import type { JSX } from "react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { identitySchema, type IdentityInput } from "@/schemas/register.schema"
+import { createIdentitySchema, type IdentityInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import { useNavigate } from "@tanstack/react-router"
@@ -10,6 +10,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@roja/ui"
 import { toast } from "sonner"
+import { isGroupAllInvisible } from "@roja/utils"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 import { IdentityFormSections } from "../forms/IdentityFormSections"
 
 export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; onPrev: () => void }): JSX.Element => {
@@ -23,6 +25,9 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "identity data")
+
+	const dynamicSchema = useMemo(() => createIdentitySchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading: stepLoading, error } = useQuery({
 		queryKey: ["wizardStep", "identity", sessionId],
@@ -46,9 +51,7 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 			onNext()
 		},
 		onError: (err: any) => {
-			clearSession()
-			toast.error(err instanceof Error ? err.message : "Sesi pendaftaran Anda telah berakhir.")
-			navigate({ to: "/" })
+			toast.error(err instanceof Error ? err.message : "Gagal menyimpan formulir data identitas.")
 		},
 	})
 
@@ -59,7 +62,7 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 		watch,
 		formState: { errors },
 	} = useForm<IdentityInput>({
-		resolver: zodResolver(identitySchema) as unknown as import("react-hook-form").Resolver<IdentityInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<IdentityInput>,
 		values: (initialData || {}) as IdentityInput,
 		defaultValues: {
 			nisn: "",
@@ -73,7 +76,7 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 			visualCondition: undefined,
 			hearingCondition: undefined,
 			immunizationGiven: undefined,
-			diseaseHistories: [{ name: "", status: "sembuh" }],
+			diseaseHistories: [],
 			learningAchievment: "",
 			reading: "jilid",
 			jilidChapter: "",
@@ -89,12 +92,18 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 	const watchReading = watch("reading")
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Identity):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (landingLoading || stepLoading) {
 		return <div className="text-center py-10 text-xs font-medium text-slate-500">Memuat data...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			<IdentityFormSections
 				control={control}
 				register={register}

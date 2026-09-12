@@ -26,7 +26,7 @@ export const FamilyFormSections = ({
 		<>
 			<FatherDataFields control={control} register={register} errors={errors} formSettings={formSettings} />
 			<MotherDataFields control={control} register={register} errors={errors} formSettings={formSettings} />
-			<FamilyAddressFields register={register} errors={errors} setValue={setValue} watch={watch} />
+			<FamilyAddressFields register={register} errors={errors} setValue={setValue} watch={watch} formSettings={formSettings} />
 		</>
 	)
 }

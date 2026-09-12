@@ -1,12 +1,16 @@
 import type { JSX } from "react"
+import { useMemo } from "react"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { personalSchema, type PersonalInput } from "@/schemas/register.schema"
+import { createPersonalSchema, type PersonalInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import { useNavigate } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight, ArrowLeft } from "lucide-react"
 import { Button } from "@roja/ui"
+import { toast } from "sonner"
+import { isGroupAllInvisible } from "@roja/utils"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 import { PersonalFormSections } from "../forms/PersonalFormSections"
 
 export const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Element => {
@@ -18,6 +22,9 @@ export const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): 
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "personal data")
+
+	const dynamicSchema = useMemo(() => createPersonalSchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading } = useQuery({
 		queryKey: ["invalidData"],
@@ -40,7 +47,7 @@ export const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): 
 		watch,
 		formState: { errors },
 	} = useForm<PersonalInput>({
-		resolver: zodResolver(personalSchema) as unknown as import("react-hook-form").Resolver<PersonalInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<PersonalInput>,
 		values: (initialData ? (initialData as Record<string, unknown>).personal : {}) as PersonalInput,
 		defaultValues: {
 			fullName: "",
@@ -81,12 +88,18 @@ export const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): 
 		},
 	})
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Invalid Personal):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (isLoading) {
 		return <div className="text-center py-10 text-xs font-medium text-[var(--grey)]">Memuat data pendaftaran...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			<PersonalFormSections
 				control={control}
 				register={register}

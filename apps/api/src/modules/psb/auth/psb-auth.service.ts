@@ -175,20 +175,28 @@ export class PsbAuthService {
 		return { message: "Email verifikasi telah dikirimkan. Silakan cek kotak masuk email Anda." }
 	}
 
-	async verifyEmail(token: string): Promise<{ message: string }> {
-		const email = await this.redisService.get(`email-verify:${token}`)
-		if (!email) {
+	async verifyEmail(token: string, emailParam?: string): Promise<{ message: string }> {
+		const redisEmail = await this.redisService.get(`email-verify:${token}`)
+		const targetEmail = redisEmail || emailParam
+
+		if (!targetEmail) {
 			throw new BadRequestException("Token verifikasi email tidak valid atau telah kadaluarsa.")
 		}
 
-		const registrant = await this.registrantRepository.findOneBy({ email })
+		const registrant = await this.registrantRepository.findOneBy({ email: targetEmail })
 		if (!registrant) {
 			throw new BadRequestException("Akun pendaftaran tidak ditemukan.")
 		}
 
+		if (registrant.emailVerifiedAt) {
+			return { message: "Email Anda telah berhasil diverifikasi! Silakan login untuk melanjutkan." }
+		}
+
 		registrant.emailVerifiedAt = new Date()
 		await this.registrantRepository.save(registrant)
-		await this.redisService.del(`email-verify:${token}`)
+		if (redisEmail) {
+			await this.redisService.del(`email-verify:${token}`)
+		}
 
 		return { message: "Email Anda telah berhasil diverifikasi! Silakan login untuk melanjutkan." }
 	}

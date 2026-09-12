@@ -1,8 +1,8 @@
 import type { JSX } from "react"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { personalSchema, type PersonalInput } from "@/schemas/register.schema"
+import { createPersonalSchema, type PersonalInput } from "@/schemas/register.schema"
 import { psbApi } from "@/lib/api"
 import useWizardStore from "@/stores/wizard.store"
 import { useNavigate } from "@tanstack/react-router"
@@ -10,6 +10,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChevronRight } from "lucide-react"
 import { Button } from "@roja/ui"
 import { toast } from "sonner"
+import { isGroupAllInvisible } from "@roja/utils"
+import { NoNeedDataDisclaimer } from "../no-need-data-disclaimer"
 import { PersonalFormSections } from "../forms/PersonalFormSections"
 
 export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Element => {
@@ -23,6 +25,9 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 		queryFn: () => psbApi.getLanding(),
 	})
 	const formSettings = landingData?.formSettings
+	const isAllInvisible = isGroupAllInvisible(formSettings, "personal data")
+
+	const dynamicSchema = useMemo(() => createPersonalSchema(formSettings), [formSettings])
 
 	const { data: initialData, isLoading: stepLoading, error } = useQuery({
 		queryKey: ["wizardStep", "personal", sessionId],
@@ -46,9 +51,7 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 			onNext()
 		},
 		onError: (err: any) => {
-			clearSession()
-			toast.error(err instanceof Error ? err.message : "Sesi pendaftaran Anda telah berakhir.")
-			navigate({ to: "/" })
+			toast.error(err instanceof Error ? err.message : "Gagal menyimpan formulir data diri.")
 		},
 	})
 
@@ -60,7 +63,7 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 		watch,
 		formState: { errors },
 	} = useForm<PersonalInput>({
-		resolver: zodResolver(personalSchema) as unknown as import("react-hook-form").Resolver<PersonalInput>,
+		resolver: zodResolver(dynamicSchema) as unknown as import("react-hook-form").Resolver<PersonalInput>,
 		values: (initialData || {}) as PersonalInput,
 		defaultValues: {
 			fullName: "",
@@ -101,12 +104,18 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 		},
 	})
 
+	const onFormError = (formErrors: Record<string, any>): void => {
+		console.error("Form Validation Errors (Personal):", formErrors)
+		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+	}
+
 	if (landingLoading || stepLoading) {
 		return <div className="text-center py-10 text-xs">Memuat data...</div>
 	}
 
 	return (
-		<form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="flex flex-col gap-8">
+		<form onSubmit={handleSubmit((d) => mutation.mutate(d), onFormError)} className="flex flex-col gap-8">
+			{isAllInvisible && <NoNeedDataDisclaimer />}
 			<PersonalFormSections
 				control={control}
 				register={register}
