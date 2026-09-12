@@ -73,7 +73,7 @@ const ProfilePage = (): JSX.Element => {
 									Kelas
 								</td>
 								<td className="text-slate-800 font-semibold py-3.5 align-top">
-									{parseInt(student.activeGrade.grade) + 6 || "10"} {student.activeGrade.subGrade || ""} {student.activeGrade.majorName ? `(${student.activeGrade.majorName})` : ""}
+									{parseInt(student.activeGrade.grade) + 6 || ""} {student.activeGrade.subGrade == "undefined" ? "" : (student.activeGrade.subGrade || "")} {student.activeGrade.majorName ? `(${student.activeGrade.majorName})` : ""}
 								</td>
 							</tr>
 							<tr>

@@ -53,17 +53,17 @@ const PaymentHistoryPage = (): JSX.Element => {
 	return (
 		<div className="flex flex-col w-full gap-6">
 			{!hasEwallet && !hideNotif && (
-				<RojaCard className="p-5 bg-pink-50/60 border-pink-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+				<RojaCard className="bg-pink-50/60 border-pink-100 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
 					<div className="flex items-center gap-3">
 						<div className="p-3 rounded-2xl bg-[#e4007e] text-white">
 							<WalletCards className="w-6 h-6" />
 						</div>
 						<div>
-							<h4 className="font-bold text-slate-800 text-sm">Sekarang sudah ada dompet digital</h4>
+							<h6 className="font-bold text-slate-800 text-sm">Sekarang sudah ada dompet digital</h6>
 							<p className="text-xs text-slate-600 mt-0.5">Gunakan dompet digital kamu agar dapat melakukan transaksi.</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2 self-end sm:self-auto">
+					<div className="flex items-center gap-2 self-end sm:self-auto mt-4">
 						<Button
 							type="button"
 							variant="outline"
@@ -118,8 +118,6 @@ const PaymentHistoryPage = (): JSX.Element => {
 			</div>
 
 			<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100 bg-white">
-				<h3 className="text-lg font-bold text-slate-800">Pembayaran Santri</h3>
-
 				<TableToolbar
 					searchValue={searchQuery}
 					onSearchChange={(val) => {
@@ -140,7 +138,7 @@ const PaymentHistoryPage = (): JSX.Element => {
 					filterPlaceholder="Semua Status"
 				/>
 
-				<div className="overflow-x-auto rounded-xl border border-slate-100">
+				<div className="overflow-x-auto rounded-xl border border-slate-100 mt-4">
 					<table className="w-full text-left text-xs">
 						<thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
 							<tr>
@@ -180,8 +178,8 @@ const PaymentHistoryPage = (): JSX.Element => {
 											<td className="py-3 px-4 font-medium text-slate-800">{formatRupiah(inv.paidAmount || 0)}</td>
 											<td className="py-3 px-4">
 												{inv.status === "paid" && <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200">Lunas</Badge>}
-												{inv.status === "unpaid" && <Badge className="bg-rose-50 text-rose-600 border-rose-200">Belum Dibayar</Badge>}
-												{inv.status === "installment" && <Badge className="bg-amber-50 text-amber-600 border-amber-200">Diangsur</Badge>}
+												{(inv.status === "unpaid" && inv.paymentMethod !== "installment") && <Badge className="bg-rose-50 text-rose-600 border-rose-200">Belum Dibayar</Badge>}
+												{(inv.status === "unpaid" && inv.paymentMethod === "installment") && <Badge className="bg-amber-50 text-amber-600 border-amber-200">Diangsur</Badge>}
 											</td>
 											<td className="py-3 px-4 text-right">
 												<Button

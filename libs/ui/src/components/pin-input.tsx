@@ -97,13 +97,12 @@ export const PinInput = ({
 					onChange={(e) => handleChange(index, e.target.value)}
 					onKeyDown={(e) => handleKeyDown(index, e)}
 					onPaste={handlePaste}
-					className={`w-10 h-12 sm:w-12 sm:h-14 text-center text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none shadow-sm ${
-						error
-							? "border-red-500 text-red-600 bg-red-50 focus:ring-2 focus:ring-red-200"
-							: digits[index]
+					className={`w-10 h-10 sm:w-12 sm:h-12 text-center text-xl font-bold font-mono rounded-xl border-2 transition-all outline-none shadow-sm ${error
+						? "border-red-500 text-red-600 bg-red-50 focus:ring-2 focus:ring-red-200"
+						: digits[index]
 							? "border-[#e4007e] text-slate-800 bg-pink-50/20 focus:ring-2 focus:ring-[#e4007e]/30"
 							: "border-slate-200 text-slate-800 bg-white hover:border-slate-300 focus:border-[#e4007e] focus:ring-2 focus:ring-[#e4007e]/20"
-					} ${disabled ? "opacity-50 cursor-not-allowed bg-slate-100" : ""}`}
+						} ${disabled ? "opacity-50 cursor-not-allowed bg-slate-100" : ""}`}
 					aria-label={`PIN box ${index + 1}`}
 				/>
 			))}

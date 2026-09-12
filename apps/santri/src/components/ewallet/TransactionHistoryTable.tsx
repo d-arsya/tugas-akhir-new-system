@@ -178,7 +178,7 @@ export const TransactionHistoryTable = ({
 				</div>
 			)}
 
-			<div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+			<div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
 				<div className="lg:col-span-6">
 					<div className="bg-[#e4007e] text-white p-6 rounded-2xl shadow-lg relative overflow-hidden flex items-center justify-between">
 						<div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/10 pointer-events-none" />
@@ -205,7 +205,7 @@ export const TransactionHistoryTable = ({
 					</div>
 				</div>
 
-				<div className="lg:col-span-6 flex flex-wrap sm:flex-nowrap gap-3 items-center justify-start lg:justify-end">
+				<div className="lg:col-span-6 flex flex-wrap sm:flex-nowrap gap-3 justify-start lg:justify-end">
 					<DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
 							<Button
@@ -250,7 +250,7 @@ export const TransactionHistoryTable = ({
 			<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100">
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
 					<div>
-						<h3 className="text-lg font-bold text-slate-800 dark:text-white">Riwayat Transaksi</h3>
+						<h5 className="text-lg font-bold text-slate-800 dark:text-white">Riwayat Transaksi</h5>
 						<p className="text-xs text-slate-500">Dari total {meta?.total} transaksi</p>
 					</div>
 					{(searchQuery || statusFilter || dateRange?.from) && (
@@ -307,7 +307,7 @@ export const TransactionHistoryTable = ({
 					</div>
 				</div>
 
-				<div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800">
+				<div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800 mt-4">
 					<table className="w-full text-left text-xs">
 						<thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
 							<tr>
@@ -343,8 +343,8 @@ export const TransactionHistoryTable = ({
 										</td>
 										<td className="py-3 px-4">
 											{tx.status === "valid" && <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200">Berhasil</Badge>}
-											{tx.status === "process" && <Badge className="bg-blue-50 text-blue-600 border-blue-200">Diproses Admin</Badge>}
-											{tx.status === "waiting" && <Badge className="bg-amber-50 text-amber-700 border-amber-200">Menunggu Konfirmasi</Badge>}
+											{tx.status === "process" && <Badge className="bg-blue-50 text-blue-600 border-blue-200">Diproses</Badge>}
+											{tx.status === "waiting" && <Badge className="bg-amber-50 text-amber-700 border-amber-200">Tertunda</Badge>}
 											{tx.status === "invalid" && <Badge className="bg-rose-50 text-rose-600 border-rose-200">Gagal</Badge>}
 										</td>
 										<td className="py-3 px-4 text-right">

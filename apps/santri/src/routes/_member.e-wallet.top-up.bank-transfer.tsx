@@ -120,11 +120,11 @@ const EwalletConfirmationPage = (): JSX.Element => {
 	return (
 		<div className="w-full">
 			{submitted ? (
-				<RojaCard className="p-8 text-center max-w-lg mx-auto rounded-2xl border-slate-100 bg-white shadow-xl">
-					<div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
-						<CheckCircle2 className="w-10 h-10" />
+				<RojaCard className="p-8 text-center w-full mx-auto rounded-2xl border-slate-100 bg-white shadow-xl">
+					<div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4">
+						<CheckCircle2 className="w-8 h-8" />
 					</div>
-					<h3 className="text-xl font-bold text-slate-800">Konfirmasi Berhasil Terkirim!</h3>
+					<h4 className="text-xl font-bold text-slate-800">Konfirmasi Berhasil Terkirim!</h4>
 					<p className="text-xs text-slate-500 mt-2 leading-relaxed">
 						Konfirmasi akan kami proses maksimal 1 x 24 jam. Bila ada pertanyaan segera hubungi pihak Pondok ROJA.
 					</p>

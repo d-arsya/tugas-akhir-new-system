@@ -45,16 +45,16 @@ export const PinChallengeGate = ({
 	}
 
 	return (
-		<div className="py-6 max-w-xl mx-auto w-full">
+		<div className="mx-auto w-full">
 			<RojaCard className={`p-8 sm:p-12 text-center shadow-sm rounded-2xl border-slate-100 bg-white dark:bg-[#17283c] ${className}`}>
 				<div className="flex flex-col items-center">
-					<div className="w-16 h-16 rounded-2xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center mb-6 shadow-inner">
+					<div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center mb-6 shadow-inner">
 						<KeyRound className="w-8 h-8 text-[#e4007e]" />
 					</div>
 
-					<h3 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+					<h5 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
 						{title}
-					</h3>
+					</h5>
 					<p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md">
 						{description}
 					</p>
@@ -80,15 +80,6 @@ export const PinChallengeGate = ({
 							length={6}
 						/>
 					</div>
-
-					<button
-						type="button"
-						onClick={() => submitPin(pinInputVal)}
-						disabled={pinLoading || pinInputVal.length < 6}
-						className="w-full max-w-xs py-3.5 px-6 rounded-xl bg-[#e4007e] hover:bg-[#c9006f] text-white font-semibold text-sm shadow-md shadow-[#e4007e]/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{pinLoading ? submittingText : buttonText}
-					</button>
 				</div>
 			</RojaCard>
 		</div>

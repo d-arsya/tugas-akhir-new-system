@@ -13,6 +13,7 @@ import {
 	useCreateEwalletMutation,
 } from "@/hooks/use-santri-queries"
 import { useDebounce } from "@/hooks/use-debounce"
+import { santriApi } from "@/lib/api";
 
 const EwalletPage = (): JSX.Element => {
 	const location = useLocation()

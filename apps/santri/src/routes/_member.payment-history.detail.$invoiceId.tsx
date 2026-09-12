@@ -83,7 +83,7 @@ const PaymentDetailPage = (): JSX.Element => {
 										Metode Pembayaran
 									</td>
 									<td className="text-slate-800 font-semibold py-1.5 align-top">
-										{invoice.invoice.paymentMethod || "Diangsur"}
+										{(invoice.invoice.paymentMethod === "installment") ? "Diangsur" : "Cash"}
 									</td>
 								</tr>
 								<tr>
