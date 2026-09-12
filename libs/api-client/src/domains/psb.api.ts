@@ -503,9 +503,8 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		return { success: res.success }
 	},
 
-	forgotPassword: async (email: string, clientUrl?: string): Promise<{ success: boolean }> => {
-		const origin = clientUrl || (typeof window !== "undefined" ? window.location.origin : undefined)
-		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/forgot-password", { email, clientUrl: origin })
+	forgotPassword: async (email: string): Promise<{ success: boolean }> => {
+		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/forgot-password", { email })
 		return { success: res.success }
 	},
 

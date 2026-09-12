@@ -114,9 +114,8 @@ export class PsbAuthController {
 	@ApiResponseWrapped({ status: 200, description: "Instruksi reset password dikirimkan jika email terdaftar", type: MessageResponseDto })
 	async forgotPassword(
 		@Body() dto: PsbForgotPasswordDto,
-		@Body("clientUrl") clientUrl?: string,
 	): Promise<MessageResponseDto> {
-		return this.psbAuthService.forgotPassword(dto, clientUrl)
+		return this.psbAuthService.forgotPassword(dto)
 	}
 
 	@Public()

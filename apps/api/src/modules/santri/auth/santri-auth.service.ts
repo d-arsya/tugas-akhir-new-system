@@ -26,15 +26,15 @@ import { TwoFactorStudent } from "@santri/entities/two-factor-student.entity"
 export type SantriAuthResult =
 	| { requires2fa: true; studentId: number; email: string | null }
 	| {
-			requires2fa: false
-			accessToken: string
-			refreshToken: string
-			user: {
-				id: number
-				nis: string | null
-				email: string | null
-			}
-	  }
+		requires2fa: false
+		accessToken: string
+		refreshToken: string
+		user: {
+			id: number
+			nis: string | null
+			email: string | null
+		}
+	}
 
 @Injectable()
 export class SantriAuthService {
@@ -49,7 +49,7 @@ export class SantriAuthService {
 		private readonly configService: ConfigService<Env, true>,
 		private readonly redisService: RedisService,
 		private readonly mailerService: MailerService,
-	) {}
+	) { }
 
 	private async generateTokens(student: Student) {
 		const tokenId = crypto.randomUUID()
@@ -224,7 +224,7 @@ export class SantriAuthService {
 		})
 		await this.passwordResetRepository.save(resetRecord)
 
-		const resetUrl = `${this.configService.get("APP_URL", { infer: true })}/santri/reset-password?token=${token}&email=${encodeURIComponent(dto.email)}`
+		const resetUrl = `${this.configService.get("SANTRI_URL", { infer: true })}/reset-password?token=${token}&email=${encodeURIComponent(dto.email)}`
 
 		await this.mailerService.sendForgotPassword(dto.email, {
 			name: student.nis ?? "Santri",

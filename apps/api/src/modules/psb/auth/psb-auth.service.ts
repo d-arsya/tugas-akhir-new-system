@@ -201,7 +201,7 @@ export class PsbAuthService {
 		return { message: "Email Anda telah berhasil diverifikasi! Silakan login untuk melanjutkan." }
 	}
 
-	async forgotPassword(dto: PsbForgotPasswordDto, clientUrl?: string): Promise<{ message: string }> {
+	async forgotPassword(dto: PsbForgotPasswordDto): Promise<{ message: string }> {
 		const registrant = await this.registrantRepository.findOneBy({ email: dto.email })
 		if (registrant && registrant.email) {
 			const token = crypto.randomBytes(32).toString("hex")
@@ -211,7 +211,7 @@ export class PsbAuthService {
 			})
 			await this.passwordResetRepository.save(resetRecord)
 
-			const baseUrl = (clientUrl || this.configService.get("APP_URL", { infer: true }) || "http://localhost:4200").replace(/\/+$/, "")
+			const baseUrl = (this.configService.get("PSB_URL", { infer: true }) || "http://localhost:4200").replace(/\/+$/, "")
 			const resetUrl = `${baseUrl}/reset-password?token=${token}&email=${encodeURIComponent(registrant.email)}`
 
 			await this.mailerService.sendForgotPassword(registrant.email, {
