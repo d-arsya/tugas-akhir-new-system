@@ -2,6 +2,7 @@ import type { JSX } from "react"
 import { useState, useEffect } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { RojaCard, Button, Input, Label, Alert, AlertDescription } from "@roja/ui"
+import { toast } from "sonner"
 import useAuthStore from "@/stores/auth.store"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import {
@@ -39,57 +40,49 @@ const SettingPage = (): JSX.Element => {
 		}
 	}, [settingData, user])
 
-	const handleAccountSubmit = async (e: React.FormEvent) => {
+	const handleAccountSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		setAccountMessage(null)
 		if (!password) {
-			setAccountMessage({ type: "error", text: "Masukkan password baru jika ingin mengubah password." })
+			toast.error("Validasi Gagal", { description: "Masukkan password baru jika ingin mengubah password." })
 			return
 		}
 		if (password !== passwordConfirmation) {
-			setAccountMessage({ type: "error", text: "Konfirmasi password tidak cocok." })
+			toast.error("Konfirmasi Tidak Cocok", { description: "Konfirmasi password tidak cocok." })
 			return
 		}
 
-		changePasswordMutation.mutate(
-			{ password, passwordConfirmation },
-			{
-				onSuccess: (res) => {
-					setAccountMessage({ type: "success", text: res.message || "Password berhasil diperbarui." })
-					setPassword("")
-					setPasswordConfirmation("")
-				},
-				onError: (err: any) => {
-					setAccountMessage({ type: "error", text: err.message || "Gagal memperbarui password." })
-				},
-			},
-		)
+		const promise = changePasswordMutation.mutateAsync({ password, passwordConfirmation }).then((res) => {
+			setPassword("")
+			setPasswordConfirmation("")
+			return res
+		})
+
+		toast.promise(promise, {
+			loading: "Memperbarui password...",
+			success: (res) => res.message || "Password berhasil diperbarui.",
+			error: (err: any) => (err instanceof Error ? err.message : "Gagal memperbarui password."),
+		})
 	}
 
-	const handleSecuritySubmit = async (e: React.FormEvent) => {
+	const handleSecuritySubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		setSecurityMessage(null)
-		toggle2faMutation.mutate(
-			{ enabled: enabled2fa },
-			{
-				onSuccess: (res) => {
-					setSecurityMessage({ type: "success", text: res.message || "Pengaturan 2FA berhasil diperbarui." })
-				},
-				onError: (err: any) => {
-					setSecurityMessage({ type: "error", text: err.message || "Gagal memperbarui 2FA." })
-				},
-			},
-		)
+		const promise = toggle2faMutation.mutateAsync({ enabled: enabled2fa })
+
+		toast.promise(promise, {
+			loading: "Memperbarui pengaturan 2FA...",
+			success: (res) => res.message || "Pengaturan 2FA berhasil diperbarui.",
+			error: (err: any) => (err instanceof Error ? err.message : "Gagal memperbarui 2FA."),
+		})
 	}
 
-	const handleResendVerification = async () => {
-		resendVerificationMutation.mutate(undefined, {
-			onSuccess: (res) => {
-				setAccountMessage({ type: "success", text: res.message || "Link verifikasi telah dikirim ke email." })
-			},
-			onError: (err: any) => {
-				setAccountMessage({ type: "error", text: err.message || "Gagal mengirim link verifikasi." })
-			},
+	const handleResendVerification = () => {
+		const promise = resendVerificationMutation.mutateAsync(undefined)
+		toast.promise(promise, {
+			loading: "Mengirim link verifikasi...",
+			success: (res) => res.message || "Link verifikasi telah dikirim ke email.",
+			error: (err: any) => (err instanceof Error ? err.message : "Gagal mengirim link verifikasi."),
 		})
 	}
 

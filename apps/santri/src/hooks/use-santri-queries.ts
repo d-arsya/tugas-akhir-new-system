@@ -111,7 +111,7 @@ export function useSantriEwalletDashboard(
 		queryKey: santriKeys.ewalletDashboard(filters),
 		queryFn: () => santriApi.getEwalletDashboard(filters),
 		enabled,
-		staleTime: 1000 * 60 * 2,
+		staleTime: 0,
 	})
 }
 
@@ -120,7 +120,7 @@ export function useSantriTransactions(filters?: Record<string, any>, enabled = t
 		queryKey: santriKeys.transactions(filters),
 		queryFn: () => santriApi.getTransactions(filters),
 		enabled,
-		staleTime: 1000 * 60 * 2,
+		staleTime: 0,
 	})
 }
 
@@ -129,7 +129,7 @@ export function useSantriTransactionDetail(id: number, enabled = true) {
 		queryKey: santriKeys.transactionDetail(id),
 		queryFn: () => santriApi.getTransactionDetail(id),
 		enabled: enabled && !!id,
-		staleTime: 1000 * 60 * 5,
+		staleTime: 1000 * 60 * 2,
 	})
 }
 
@@ -156,7 +156,7 @@ export function useLoginEwalletPinMutation() {
 	return useMutation({
 		mutationFn: (pin: string) => santriApi.loginEwalletPin(pin),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: santriKeys.ewalletDashboard() })
+			queryClient.invalidateQueries({ queryKey: santriKeys.all })
 		},
 	})
 }
@@ -166,8 +166,7 @@ export function useCreateEwalletMutation() {
 	return useMutation({
 		mutationFn: (data: SantriCreateEwalletDto) => santriApi.createEwallet(data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: santriKeys.ewalletStatus() })
-			queryClient.invalidateQueries({ queryKey: santriKeys.ewalletDashboard() })
+			queryClient.invalidateQueries({ queryKey: santriKeys.all })
 		},
 	})
 }
@@ -183,7 +182,7 @@ export function useStoreTopUpBankTransferMutation() {
 	return useMutation({
 		mutationFn: (data: SantriTopUpBankTransferDto) => santriApi.storeTopUpBankTransfer(data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: santriKeys.ewalletDashboard() })
+			queryClient.invalidateQueries({ queryKey: santriKeys.all })
 		},
 	})
 }
@@ -193,7 +192,7 @@ export function useConfirmTopUpMutation() {
 	return useMutation({
 		mutationFn: ({ id, formData }: { id: number; formData: FormData }) => santriApi.confirmTopUp(id, formData),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: santriKeys.ewalletDashboard() })
+			queryClient.invalidateQueries({ queryKey: santriKeys.all })
 		},
 	})
 }

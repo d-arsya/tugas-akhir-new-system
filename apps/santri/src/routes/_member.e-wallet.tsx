@@ -11,12 +11,13 @@ import {
 	useSantriEwalletStatus,
 	useSantriEwalletDashboard,
 	useCreateEwalletMutation,
+	useLoginEwalletPinMutation,
 } from "@/hooks/use-santri-queries"
 import { useDebounce } from "@/hooks/use-debounce"
-import { santriApi } from "@/lib/api";
 
 const EwalletPage = (): JSX.Element => {
 	const location = useLocation()
+	const loginPinMutation = useLoginEwalletPinMutation()
 
 	const {
 		isPinAuthenticated,
@@ -100,7 +101,7 @@ const EwalletPage = (): JSX.Element => {
 		return (
 			<PinChallengeGate
 				onSubmitPin={async (pin) => {
-					await santriApi.loginEwalletPin(pin)
+					await loginPinMutation.mutateAsync(pin)
 					setPinAuthenticated(true)
 				}}
 			/>

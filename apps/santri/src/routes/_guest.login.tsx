@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { useState } from "react"
 import axios from "axios"
 import { LoginCard, type LoginSubmitValues } from "@roja/ui"
+import { toast } from "sonner"
 import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
 import { isDevHijackMode, mockSantriAuth } from "@/lib/dev-hijack"
@@ -22,11 +23,13 @@ const LoginPage = (): JSX.Element => {
 				if (mock.requires2fa && mock.email) {
 					localStorage.setItem("roja-2fa-email", mock.email)
 					localStorage.setItem("roja-2fa-student-id", String(mock.studentId))
+					toast.info("Verifikasi 2FA Diperlukan", { description: "Kode 2FA telah dikirim ke email terdaftar." })
 					navigate({ to: "/verify-2fa" })
 					return
 				}
 				if (mock.user) {
 					login(mock.user as any)
+					toast.success("Login Berhasil", { description: `Selamat datang kembali, ${mock.user.name}!` })
 					navigate({ to: "/dashboard" })
 					return
 				}
@@ -36,9 +39,11 @@ const LoginPage = (): JSX.Element => {
 			if (res.requires2fa && res.email) {
 				localStorage.setItem("roja-2fa-email", res.email)
 				localStorage.setItem("roja-2fa-student-id", String(res.studentId))
+				toast.info("Verifikasi 2FA Diperlukan", { description: "Kode 2FA telah dikirim ke email terdaftar." })
 				navigate({ to: "/verify-2fa" })
 			} else if (!res.requires2fa && res.user) {
 				login(res.user as any)
+				toast.success("Login Berhasil", { description: `Selamat datang kembali, ${res.user.name}!` })
 				navigate({ to: "/dashboard" })
 			}
 		} catch (err: unknown) {
@@ -49,6 +54,7 @@ const LoginPage = (): JSX.Element => {
 				msg = err.message
 			}
 			setErrorMsg(msg)
+			toast.error("Login Gagal", { description: msg })
 		} finally {
 			setIsLoading(false)
 		}

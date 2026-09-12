@@ -239,7 +239,7 @@ export const TransactionHistoryTable = ({
 						type="button"
 						variant="outline"
 						onClick={() => navigate({ to: "/e-wallet/withdraw" as any })}
-						className="h-11 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 px-5 font-semibold flex items-center gap-2"
+						className="h-11 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 px-5 font-semibold flex items-center gap-2"
 					>
 						<ArrowUpRight className="w-4 h-4 text-slate-500" />
 						Tarik Saldo
@@ -248,9 +248,9 @@ export const TransactionHistoryTable = ({
 			</div>
 
 			<RojaCard className="p-6 md:p-8 flex flex-col gap-6 rounded-2xl shadow-sm border-slate-100">
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
 					<div>
-						<h5 className="text-lg font-bold text-slate-800 dark:text-white">Riwayat Transaksi</h5>
+						<h5 className="text-lg font-bold text-slate-800">Riwayat Transaksi</h5>
 						<p className="text-xs text-slate-500">Dari total {meta?.total} transaksi</p>
 					</div>
 					{(searchQuery || statusFilter || dateRange?.from) && (
@@ -259,7 +259,7 @@ export const TransactionHistoryTable = ({
 							variant="ghost"
 							size="sm"
 							onClick={handleReset}
-							className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 gap-1.5 self-start sm:self-auto"
+							className="text-xs text-rose-500 hover:text-rose-600 hover:bg-rose-50 gap-1.5 self-start sm:self-auto"
 						>
 							<RotateCcw className="w-3.5 h-3.5" />
 							Reset Filter
@@ -307,7 +307,7 @@ export const TransactionHistoryTable = ({
 					</div>
 				</div>
 
-				<div className="overflow-x-auto rounded-xl border border-slate-100 dark:border-slate-800 mt-4">
+				<div className="overflow-x-auto rounded-xl border border-slate-100 mt-4">
 					<table className="w-full text-left text-xs">
 						<thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100 uppercase tracking-wider text-[11px]">
 							<tr>
@@ -321,7 +321,7 @@ export const TransactionHistoryTable = ({
 								<th className="py-3 px-4 text-right">Actions</th>
 							</tr>
 						</thead>
-						<tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+						<tbody className="divide-y divide-slate-100">
 							{((onSearchChange || onStatusChange || onDateRangeChange) ? transactions : filteredTransactions).length === 0 ? (
 								<tr>
 									<td colSpan={8} className="py-8 text-center text-slate-400">Belum ada data transaksi.</td>
