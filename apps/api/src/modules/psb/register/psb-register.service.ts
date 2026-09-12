@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import { EventEmitter2 } from "@nestjs/event-emitter"
 import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "crypto"
 import { DataSource, Like, Repository } from "typeorm"
-import { MailerService } from "@core/mailer/mailer.service"
+import { RegistrantPasswordEvent } from "@core/mailer/events/email.events"
 import { RedisService } from "@core/redis/redis.service"
 import { StorageService } from "@core/storage/storage.service"
 import { PsbAuthService } from "@psb/auth/psb-auth.service"
@@ -46,11 +47,11 @@ export class PsbRegisterService {
 		private readonly diseaseHistoryRepository: Repository<DiseaseHistory>,
 		private readonly redisService: RedisService,
 		private readonly storageService: StorageService,
-		private readonly mailerService: MailerService,
+		private readonly eventEmitter: EventEmitter2,
 		private readonly configService: ConfigService<Env, true>,
 		private readonly psbAuthService: PsbAuthService,
 		private readonly dataSource: DataSource,
-	) {}
+	) { }
 
 	async getLandingInfo(): Promise<{
 		academicYear: AcademicYear | null
@@ -220,14 +221,17 @@ export class PsbRegisterService {
 
 			try {
 				const appUrl = this.configService.get("APP_URL", { infer: true })
-				await this.mailerService.sendRegistrantPassword(savedRegistrant.email!, {
-					fullName: savedRegistrant.fullname ?? "Calon Santri",
-					registrantId,
-					password: generatedPassword,
-					loginUrl: `${appUrl}/login`,
-				})
+				this.eventEmitter.emit(
+					"registrant.password.created",
+					new RegistrantPasswordEvent(savedRegistrant.email!, {
+						fullName: savedRegistrant.fullname ?? "Calon Santri",
+						registrantId,
+						password: generatedPassword,
+						loginUrl: `${appUrl}/login`,
+					}),
+				)
 			} catch (mailError) {
-				console.error("Failed to send registrant password email:", mailError)
+				console.error("Failed to emit registrant password event:", mailError)
 			}
 
 			await Promise.all([
