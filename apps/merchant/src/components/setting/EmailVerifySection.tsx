@@ -1,10 +1,8 @@
 import { type JSX, useState, useEffect } from "react"
 import { Mail, CheckCircle2, RefreshCw } from "lucide-react"
-import { RojaCard, Button, toast } from "@roja/ui"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { RojaCard, Button } from "@roja/ui"
+import { toast } from "sonner"
+import { useResendVerificationMutation } from "@/hooks/use-merchant-queries"
 
 export interface EmailVerifySectionProps {
 	email?: string
@@ -12,11 +10,11 @@ export interface EmailVerifySectionProps {
 }
 
 export const EmailVerifySection = ({
-	email = "merchant@pondokroja.ac.id",
+	email = "",
 	isVerified = true,
 }: EmailVerifySectionProps): JSX.Element => {
 	const [cooldown, setCooldown] = useState(0)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const resendVerificationMutation = useResendVerificationMutation()
 
 	useEffect(() => {
 		if (cooldown <= 0) return
@@ -24,20 +22,19 @@ export const EmailVerifySection = ({
 		return () => clearInterval(timer)
 	}, [cooldown])
 
-	const handleResend = async () => {
-		if (cooldown > 0 || isSubmitting) return
-		setIsSubmitting(true)
+	const handleResend = () => {
+		if (cooldown > 0 || resendVerificationMutation.isPending) return
 
-		try {
-			const res = await merchantApi.resendVerification()
-			toast.success("Verifikasi Terkirim", { description: res.message })
+		const promise = resendVerificationMutation.mutateAsync(undefined).then((res) => {
 			setCooldown(60)
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : "Gagal mengiri email verifikasi"
-			toast.error("Gagal", { description: msg })
-		} finally {
-			setIsSubmitting(false)
-		}
+			return res
+		})
+
+		toast.promise(promise, {
+			loading: "Mengirim link verifikasi...",
+			success: (res) => res.message || "Verifikasi Terkirim",
+			error: (err: unknown) => (err instanceof Error ? err.message : "Gagal mengirim email verifikasi"),
+		})
 	}
 
 	return (
@@ -75,7 +72,7 @@ export const EmailVerifySection = ({
 							<button
 								type="button"
 								onClick={handleResend}
-								disabled={cooldown > 0 || isSubmitting}
+								disabled={cooldown > 0 || resendVerificationMutation.isPending}
 								className="text-[#e4007e] font-medium hover:underline ml-0.5"
 							>
 								{cooldown > 0 ? `Kirim Ulang (${cooldown}s)` : "Kirim Ulang Link"}

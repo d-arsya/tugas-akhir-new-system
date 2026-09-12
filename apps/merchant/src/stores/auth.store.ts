@@ -9,21 +9,37 @@ type AuthState = {
 }
 
 type AuthActions = {
-	login: (accessToken: string, refreshToken: string, user: AuthUser) => void
+	login: (arg1: AuthUser | string, arg2?: string, arg3?: AuthUser) => void
 	logout: () => void
 	setAccessToken: (token: string) => void
 }
 
-const useAuthStore = create<AuthState & AuthActions>()(
+export const useAuthStore = create<AuthState & AuthActions>()(
 	persist(
 		(set) => ({
 			user: null,
 			accessToken: null,
 			isAuthenticated: false,
 
-			login: (accessToken, refreshToken, user) => {
-				localStorage.setItem("roja-refresh-token", refreshToken)
-				set({ accessToken, user, isAuthenticated: true })
+			login: (arg1, arg2, arg3) => {
+				let user: AuthUser | null = null
+				let accessToken: string | null = null
+
+				if (typeof arg1 === "string") {
+					accessToken = arg1
+					if (arg2) {
+						localStorage.setItem("roja-refresh-token", arg2)
+					}
+					user = arg3 ?? null
+				} else if (arg1 && typeof arg1 === "object") {
+					user = arg1 as AuthUser
+				}
+
+				if (user && !user.domain) {
+					user.domain = "merchant"
+				}
+
+				set({ user, accessToken, isAuthenticated: true })
 			},
 
 			logout: () => {
@@ -34,10 +50,11 @@ const useAuthStore = create<AuthState & AuthActions>()(
 			setAccessToken: (accessToken) => set({ accessToken }),
 		}),
 		{
-			name: "roja-auth",
+			name: "roja-merchant-auth",
 			partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
 		},
 	),
 )
 
 export default useAuthStore
+

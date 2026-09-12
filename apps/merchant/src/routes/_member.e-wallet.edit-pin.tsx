@@ -1,16 +1,15 @@
 import { type JSX, useState } from "react"
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { KeyRound, ArrowLeft, CheckCircle2 } from "lucide-react"
-import { RojaCard, Button, PinInput, toast } from "@roja/ui"
+import { RojaCard, Button, PinInput } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
 
 export const Route = createFileRoute("/_member/e-wallet/edit-pin")({
 	component: EditPinRouteComponent,
 })
+
 
 function EditPinRouteComponent(): JSX.Element {
 	const navigate = useNavigate()
@@ -74,13 +73,13 @@ function EditPinRouteComponent(): JSX.Element {
 				Kembali ke Dompet Digital
 			</Link>
 
-			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center space-y-5 shadow-sm">
+			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 text-center space-y-5 shadow-sm">
 				<div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#6866e9]/10 text-[#6866e9] mb-1">
 					<KeyRound className="w-6 h-6" />
 				</div>
 
 				<div>
-					<h5 className="text-lg font-bold text-slate-800 dark:text-white">Ubah PIN E-Wallet</h5>
+					<h5 className="text-lg font-bold text-slate-800">Ubah PIN E-Wallet</h5>
 					<p className="text-xs text-slate-500 mt-1">
 						{step === "current" ? "Masukkan PIN lama Anda terlebih dahulu" : "Masukkan 6 digit PIN baru dan konfirmasi"}
 					</p>

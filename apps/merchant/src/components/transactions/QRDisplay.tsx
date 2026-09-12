@@ -19,12 +19,12 @@ export const QRDisplay = ({
 	className = "",
 }: QRDisplayProps): JSX.Element => {
 	return (
-		<RojaCard className={`p-6 md:p-8 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center max-w-sm mx-auto shadow-sm ${className}`}>
+		<RojaCard className={`p-6 md:p-8 rounded-2xl border border-slate-200/80 text-center max-w-sm mx-auto shadow-sm ${className}`}>
 			<div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#e4007e]/10 text-[#e4007e] mb-3">
 				<QrIcon className="w-6 h-6" />
 			</div>
 
-			<h3 className="text-base font-bold text-slate-800 dark:text-white mb-1">
+			<h3 className="text-base font-bold text-slate-800 mb-1">
 				Scan QR Untuk Pembayaran
 			</h3>
 			<p className="text-xs text-slate-500 mb-5">
@@ -42,8 +42,8 @@ export const QRDisplay = ({
 			</div>
 
 			{/* Transaction Info Footer */}
-			<div className="space-y-1 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-xs">
-				<div className="flex items-center justify-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
+			<div className="space-y-1 bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
+				<div className="flex items-center justify-center gap-1.5 font-semibold text-slate-700">
 					<Store className="w-3.5 h-3.5 text-[#e4007e]" />
 					{merchantName}
 				</div>

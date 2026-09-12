@@ -38,11 +38,13 @@ export type StoreTransactionDto = {
 
 export type CheckoutDataResponse = {
 	id: number
+	transactionId: number
 	code: string
 	status: string
 	totalAmount: number
+	totalPrice: number
 	buyerName: string
-	buyerEwalletId: number
+	buyerEwalletId?: number
 	items: Array<{ id: number; description: string; price: number }>
 }
 
@@ -57,6 +59,46 @@ export type ChangePasswordDto = {
 	passwordConfirmation: string
 }
 
+export type MerchantTransactionFilterParams = {
+	page?: number
+	limit?: number
+	status?: string
+	search?: string
+	dateStart?: string
+	dateEnd?: string
+}
+
+export type MerchantEwalletDashboardResponse = {
+	totalBalance: number
+	totalSaldo: number
+	ewallet?: {
+		id: number
+		uniqueId: string | null
+		merchantName: string | null
+		isActive: boolean | null
+	}
+	transactions: EwalletTransaction[]
+	meta?: {
+		page: number
+		limit: number
+		total: number
+		totalPages: number
+	}
+}
+
+export type MerchantValidatePinResponse = {
+	success?: boolean
+	message: string
+	wrongPin?: boolean
+	isWrongPin?: boolean
+	attempts?: number
+	remainingAttempts?: number
+	blocked?: boolean
+	isBlocked?: boolean
+	insufficientBalance?: boolean
+	isBalanceInsufficient?: boolean
+}
+
 export type MerchantApi = {
 	login: (data: MerchantLoginDto) => Promise<MerchantLoginResponse>
 	verify2fa: (data: MerchantTwoFactorDto, merchantId: number) => Promise<MerchantLoginResponse>
@@ -68,16 +110,16 @@ export type MerchantApi = {
 	getEwalletStatus: () => Promise<MerchantEwalletStatusResponse>
 	loginEwalletPin: (pin: string) => Promise<{ success: boolean; message: string }>
 	createEwallet: (data: MerchantCreateEwalletDto) => Promise<{ success: boolean; message: string }>
-	getEwalletDashboard: () => Promise<{ totalSaldo: number; transactions: EwalletTransaction[] }>
+	getEwalletDashboard: (params?: MerchantTransactionFilterParams) => Promise<MerchantEwalletDashboardResponse>
 
 	// Transactions
-	createTransaction: (data: StoreTransactionDto) => Promise<{ transactionId: number; code: string }>
-	getQRPageData: (id: number) => Promise<{ transactionId: number; code: string; totalAmount: number; merchantUniqueNumber: string }>
-	validateScan: (id: number, scannedQrValue: string) => Promise<{ transactionId: number; studentName: string }>
+	createTransaction: (data: StoreTransactionDto) => Promise<{ transactionId: number; code: string; totalAmount?: number; message?: string }>
+	getQRPageData: (id: number) => Promise<{ transactionId: number; code: string; totalAmount: number; amount?: number; merchantUniqueNumber: string }>
+	validateScan: (id: number, scannedQrValue: string) => Promise<{ transactionId: number; studentName?: string; message?: string }>
 	getCheckoutData: (id: number) => Promise<CheckoutDataResponse>
-	updateTransactionItem: (itemId: number, data: { description: string; price: number }) => Promise<{ success: boolean; totalAmount: number }>
-	validatePin: (transactionId: number, pin: string) => Promise<{ success: boolean; message: string; wrongPin?: boolean; attempts?: number; blocked?: boolean }>
-	getTransactions: () => Promise<EwalletTransaction[]>
+	updateTransactionItem: (itemId: number, data: { description: string; price: number }) => Promise<{ success: boolean; totalAmount: number; currentTotal?: number; message?: string }>
+	validatePin: (transactionId: number, pin: string) => Promise<MerchantValidatePinResponse>
+	getTransactions: (params?: MerchantTransactionFilterParams) => Promise<EwalletTransaction[]>
 	getTransactionDetail: (id: number) => Promise<EwalletTransaction & { items?: Array<{ id: number; description: string; price: number }>; buyerName?: string }>
 
 	// Profile & Settings
@@ -93,26 +135,114 @@ export type MerchantApi = {
 export const createMerchantApi = (client?: AxiosInstance): MerchantApi => {
 	const c = client as AxiosInstance
 	return {
-		login: async (data) => (await c.post("/merchant/auth/login", data)).data.data,
-		verify2fa: async (data, merchantId) => (await c.post(`/merchant/auth/2fa/verify?merchant_id=${merchantId}`, data)).data.data,
+		login: async (data) => {
+			const res = (await c.post("/merchant/auth/login", data)).data
+			const payload = res.data ?? res
+			if (payload.user && !payload.user.domain) {
+				payload.user.domain = "merchant"
+			}
+			return payload
+		},
+		verify2fa: async (data, merchantId) => {
+			const res = (await c.post(`/merchant/auth/2fa/verify?merchant_id=${merchantId}`, data)).data
+			const payload = res.data ?? res
+			if (payload.user && !payload.user.domain) {
+				payload.user.domain = "merchant"
+			}
+			return payload
+		},
 		resend2fa: async (merchantId) => (await c.get(`/merchant/auth/2fa/resend?merchant_id=${merchantId}`)).data,
 		forgotPassword: async (data) => (await c.post("/merchant/auth/forgot-password", data)).data,
 		resetPassword: async (data) => (await c.post("/merchant/auth/reset-password", data)).data,
 		logout: async () => (await c.post("/merchant/auth/logout")).data,
 		getProfile: async () => (await c.get("/merchant/profile")).data.data,
 		getEwalletStatus: async () => (await c.get("/merchant/ewallet/status")).data.data,
-		loginEwalletPin: async (pin) => (await c.post("/merchant/ewallet/pin/login", { pin })).data.data,
-		createEwallet: async (data) => (await c.post("/merchant/ewallet/pin/create", data)).data.data,
-		getEwalletDashboard: async () => (await c.get("/merchant/ewallet")).data.data,
+		loginEwalletPin: async (pin) => {
+			const res = (await c.post("/merchant/ewallet/pin/login", { pin })).data
+			return { success: true, message: res.message || "PIN terverifikasi" }
+		},
+		createEwallet: async (data) => {
+			const res = (await c.post("/merchant/ewallet/pin/create", data)).data
+			return { success: true, message: res.message || "E-Wallet berhasil dibuat" }
+		},
+		getEwalletDashboard: async (params) => {
+			const res = (await c.get("/merchant/ewallet", { params })).data
+			const raw = res.data ?? res
+			const total = Number(raw.totalBalance ?? raw.totalSaldo ?? 0)
+			return {
+				totalBalance: total,
+				totalSaldo: total,
+				ewallet: raw.ewallet,
+				transactions: Array.isArray(raw.transactions) ? raw.transactions : [],
+				meta: res.meta,
+			}
+		},
 
 		// Transactions
 		createTransaction: async (data) => (await c.post("/merchant/transactions", data)).data.data,
-		getQRPageData: async (id) => (await c.get(`/merchant/transactions/${id}/scan-qr`)).data.data,
+		getQRPageData: async (id) => {
+			const raw = (await c.get(`/merchant/transactions/${id}/scan-qr`)).data.data
+			const total = Number(raw.amount ?? raw.totalAmount ?? 0)
+			return {
+				transactionId: raw.transactionId ?? id,
+				code: raw.code,
+				totalAmount: total,
+				amount: total,
+				merchantUniqueNumber: raw.merchantUniqueNumber || "",
+			}
+		},
 		validateScan: async (id, scannedQrValue) => (await c.post(`/merchant/transactions/${id}/validate-scan`, { scannedQrValue })).data.data,
-		getCheckoutData: async (id) => (await c.get(`/merchant/transactions/${id}/checkout`)).data.data,
-		updateTransactionItem: async (itemId, data) => (await c.patch(`/merchant/transactions/items/${itemId}`, data)).data.data,
-		validatePin: async (transactionId, pin) => (await c.post(`/merchant/transactions/${transactionId}/validate-pin`, { pin })).data.data,
-		getTransactions: async () => (await c.get("/merchant/transactions")).data.data,
+		getCheckoutData: async (id) => {
+			const raw = (await c.get(`/merchant/transactions/${id}/checkout`)).data.data
+			const total = Number(raw.totalPrice ?? raw.totalAmount ?? 0)
+			return {
+				id: raw.transactionId ?? raw.id ?? id,
+				transactionId: raw.transactionId ?? raw.id ?? id,
+				code: raw.code,
+				status: raw.status || "waiting",
+				totalAmount: total,
+				totalPrice: total,
+				buyerName: raw.buyerName || "Santri",
+				buyerEwalletId: raw.buyerEwalletId,
+				items: Array.isArray(raw.items) ? raw.items : [],
+			}
+		},
+		updateTransactionItem: async (itemId, data) => {
+			const res = (await c.patch(`/merchant/transactions/items/${itemId}`, data)).data
+			const raw = res.data ?? res
+			const total = Number(raw.currentTotal ?? raw.totalAmount ?? 0)
+			return {
+				success: true,
+				totalAmount: total,
+				currentTotal: total,
+				message: res.message || "Item berhasil diperbarui",
+			}
+		},
+		validatePin: async (transactionId, pin) => {
+			const res = (await c.post(`/merchant/transactions/${transactionId}/validate-pin`, { pin })).data
+			const raw = res.data ?? res
+			const isWrong = Boolean(raw.wrongPin || raw.isWrongPin)
+			const isBlocked = Boolean(raw.blocked || raw.isBlocked)
+			const isInsufficient = Boolean(raw.insufficientBalance || raw.isBalanceInsufficient)
+			const isSuccess = Boolean(raw.success || (!isWrong && !isBlocked && !isInsufficient))
+
+			return {
+				success: isSuccess,
+				message: res.message || raw.message || (isSuccess ? "Pembayaran berhasil dikonfirmasi" : "Gagal memproses"),
+				wrongPin: isWrong,
+				isWrongPin: isWrong,
+				blocked: isBlocked,
+				isBlocked,
+				insufficientBalance: isInsufficient,
+				isBalanceInsufficient: isInsufficient,
+				attempts: raw.attempts,
+				remainingAttempts: raw.remainingAttempts,
+			}
+		},
+		getTransactions: async (params) => {
+			const res = (await c.get("/merchant/transactions", { params })).data
+			return Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : []
+		},
 		getTransactionDetail: async (id) => (await c.get(`/merchant/transactions/${id}`)).data.data,
 
 		// Settings & Profile
@@ -125,3 +255,4 @@ export const createMerchantApi = (client?: AxiosInstance): MerchantApi => {
 		resetPin: async (data) => (await c.patch("/merchant/ewallet/pin/reset", data)).data,
 	}
 }
+

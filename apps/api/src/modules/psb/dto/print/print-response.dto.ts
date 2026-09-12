@@ -9,17 +9,18 @@ import {
 } from "@psb/dto/common/entity-schemas.dto"
 
 export const RegistrationProofResponseSchema = z.object({
-	registrant: RegistrantSchema.optional().nullable(),
-	academicYear: AcademicYearSchema.optional().nullable(),
-	school: SettingSchoolSchema.optional().nullable(),
-	level: LevelSchema.optional().nullable(),
+	registrant: RegistrantSchema.nullish(),
+	academicYear: AcademicYearSchema.nullish(),
+	school: SettingSchoolSchema.nullish(),
+	level: LevelSchema.nullish(),
 })
 export class RegistrationProofResponseDto extends createZodDto(RegistrationProofResponseSchema) {}
 
 export const DecisionProofResponseSchema = z.object({
-	registrant: RegistrantSchema.optional().nullable(),
-	academicYear: AcademicYearSchema.optional().nullable(),
-	school: SettingSchoolSchema.optional().nullable(),
-	announcement: SettingAnncSchema.optional().nullable(),
+	registrant: RegistrantSchema.nullish(),
+	academicYear: AcademicYearSchema.nullish(),
+	school: SettingSchoolSchema.nullish(),
+	announcement: SettingAnncSchema.nullish(),
 })
 export class DecisionProofResponseDto extends createZodDto(DecisionProofResponseSchema) {}
+

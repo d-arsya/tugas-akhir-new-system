@@ -10,7 +10,7 @@ export const StatusBadge = ({ status, className = "" }: StatusBadgeProps): JSX.E
 		case "valid":
 			return (
 				<span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 ${className}`}>
-					Berhasil (Valid)
+					Berhasil
 				</span>
 			)
 		case "waiting":

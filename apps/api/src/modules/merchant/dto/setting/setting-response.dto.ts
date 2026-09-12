@@ -2,22 +2,22 @@ import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 
 export const MerchantSettingOverviewSchema = z.object({
-	merchantName: z.string().nullable(),
-	phone: z.string().nullable(),
-	address: z.string().nullable(),
-	email: z.string().nullable(),
-	photo: z.string().nullable(),
+	merchantName: z.string().nullish(),
+	phone: z.string().nullish(),
+	address: z.string().nullish(),
+	email: z.string().nullish(),
+	photo: z.string().nullish(),
 	enabled2fa: z.boolean(),
-	emailVerifiedAt: z.string().nullable(),
+	emailVerifiedAt: z.string().nullish(),
 })
 
 export class MerchantSettingOverviewDto extends createZodDto(MerchantSettingOverviewSchema) {}
 
 export const UpdateProfileResponseDataSchema = z.object({
-	merchantName: z.string().nullable(),
-	phone: z.string().nullable(),
-	address: z.string().nullable(),
-	photo: z.string().nullable(),
+	merchantName: z.string().nullish(),
+	phone: z.string().nullish(),
+	address: z.string().nullish(),
+	photo: z.string().nullish(),
 })
 
 export const UpdateProfileResponseSchema = z.object({

@@ -1,10 +1,8 @@
-import { type JSX, useState } from "react"
+import { type JSX, useState, useEffect } from "react"
 import { ShieldCheck } from "lucide-react"
-import { RojaCard, Switch, toast } from "@roja/ui"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { RojaCard, Switch } from "@roja/ui"
+import { toast } from "sonner"
+import { useToggle2faMutation } from "@/hooks/use-merchant-queries"
 
 export interface TwoFactorSectionProps {
 	initialEnabled?: boolean
@@ -12,20 +10,23 @@ export interface TwoFactorSectionProps {
 
 export const TwoFactorSection = ({ initialEnabled = true }: TwoFactorSectionProps): JSX.Element => {
 	const [enabled, setEnabled] = useState(initialEnabled)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const toggle2faMutation = useToggle2faMutation()
 
-	const handleToggle = async (checked: boolean) => {
-		setIsSubmitting(true)
-		try {
-			const res = await merchantApi.toggle2fa(checked)
+	useEffect(() => {
+		setEnabled(initialEnabled)
+	}, [initialEnabled])
+
+	const handleToggle = (checked: boolean) => {
+		const promise = toggle2faMutation.mutateAsync(checked).then((res) => {
 			setEnabled(checked)
-			toast.success("Pengaturan 2FA Disimpan", { description: res.message })
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : "Gagal memperbarui 2FA"
-			toast.error("Gagal", { description: msg })
-		} finally {
-			setIsSubmitting(false)
-		}
+			return res
+		})
+
+		toast.promise(promise, {
+			loading: "Memperbarui pengaturan 2FA...",
+			success: (res) => res.message || "Pengaturan 2FA disimpan",
+			error: (err: unknown) => (err instanceof Error ? err.message : "Gagal memperbarui 2FA"),
+		})
 	}
 
 	return (
@@ -49,7 +50,7 @@ export const TwoFactorSection = ({ initialEnabled = true }: TwoFactorSectionProp
 								name="enabled2fa"
 								checked={enabled}
 								onChange={() => handleToggle(true)}
-								disabled={isSubmitting}
+								disabled={toggle2faMutation.isPending}
 								className="text-[#e4007e] focus:ring-[#e4007e] accent-[#e4007e] w-4 h-4 cursor-pointer"
 							/>
 							Aktif
@@ -60,7 +61,7 @@ export const TwoFactorSection = ({ initialEnabled = true }: TwoFactorSectionProp
 								name="enabled2fa"
 								checked={!enabled}
 								onChange={() => handleToggle(false)}
-								disabled={isSubmitting}
+								disabled={toggle2faMutation.isPending}
 								className="text-[#e4007e] focus:ring-[#e4007e] accent-[#e4007e] w-4 h-4 cursor-pointer"
 							/>
 							Nonaktif

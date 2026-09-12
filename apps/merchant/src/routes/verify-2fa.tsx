@@ -1,14 +1,13 @@
 import { type JSX, useState } from "react"
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { toast, TwoFactorCard, PageLayout, RojaHeader } from "@roja/ui"
+import { TwoFactorCard, PageLayout, RojaHeader } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-import useAuthStore from "@/stores/authStore"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
+import useAuthStore from "@/stores/auth.store"
 
 type Verify2faSearch = {
+
 	merchantId?: string
 }
 
@@ -29,11 +28,14 @@ function Verify2faRouteComponent(): JSX.Element {
 	const onSubmit = async (code: string) => {
 		setIsLoading(true)
 		try {
-			const merchantIdNum = Number(search.merchantId) || 301
+			const merchantIdNum = Number(search.merchantId) || 0
 			const res = await merchantApi.verify2fa({ code }, merchantIdNum)
-			login(res.user)
-			toast.success("Verifikasi Berhasil", { description: "Selamat datang kembali!" })
-			navigate({ to: "/e-wallet" })
+			if (!res.requires2fa && res.user) {
+				login(res.user)
+				toast.success("Verifikasi Berhasil", { description: "Selamat datang kembali!" })
+				navigate({ to: "/e-wallet" })
+			}
+
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : "Kode verifikasi 2FA salah"
 			toast.error("Verifikasi Gagal", { description: message })

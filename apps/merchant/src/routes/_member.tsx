@@ -1,9 +1,10 @@
 import type { JSX } from "react"
 import { createFileRoute, redirect, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
-import useAuthStore from "@/stores/authStore"
+import useAuthStore from "@/stores/auth.store"
 import { PageTitle, PageLayout, RojaHeader } from "@roja/ui"
 import Sidebar from "@/components/layout/Sidebar"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
+import { merchantApi } from "@/lib/api"
 
 const getTitleFromPath = (pathname: string): string => {
 	if (pathname.includes("/transactions/") && pathname.includes("/detail")) return "Detail Transaksi"
@@ -65,7 +66,12 @@ export const Route = createFileRoute("/_member")({
 		const title = getTitleFromPath(location.pathname)
 		const breadcrumbs = getBreadcrumbsFromPath(location.pathname)
 
-		const handleLogout = (): void => {
+		const handleLogout = async (): Promise<void> => {
+			try {
+				await merchantApi.logout()
+			} catch {
+				// ignore
+			}
 			auth.logout()
 			navigate({ to: "/login" })
 		}

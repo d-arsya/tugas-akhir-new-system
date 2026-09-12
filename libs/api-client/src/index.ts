@@ -4,4 +4,6 @@ export { createSharedApi } from "./domains/shared.api"
 export { createPsbApi } from "./domains/psb.api"
 export { createSantriApi } from "./domains/santri.api"
 export { createMerchantApi } from "./domains/merchant.api"
+export * from "./domains/merchant.api"
 export { createAdminApi } from "./domains/admin.api"
+

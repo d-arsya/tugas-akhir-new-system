@@ -1,23 +1,24 @@
 import { type JSX, useEffect, useState, useRef } from "react"
 import { createFileRoute, useNavigate, useParams, Link } from "@tanstack/react-router"
 import { ArrowLeft, Flashlight, Camera, QrCode } from "lucide-react"
-import { Input, Button, toast, RojaCard, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@roja/ui"
+import { Input, Button, RojaCard, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
+import { useValidateScanMutation } from "@/hooks/use-merchant-queries"
 
 export const Route = createFileRoute("/_member/transactions/$id/scan-qr")({
 	component: ScanQrRouteComponent,
 })
 
+
 function ScanQrRouteComponent(): JSX.Element {
 	const navigate = useNavigate()
 	const { id } = useParams({ from: "/_member/transactions/$id/scan-qr" })
+	const validateScanMutation = useValidateScanMutation()
 	const videoRef = useRef<HTMLVideoElement | null>(null)
 
-	const [manualId, setManualId] = useState("2026001")
+	const [manualId, setManualId] = useState("")
 	const [isSubmittingManual, setIsSubmittingManual] = useState(false)
 	const [retryModalOpen, setRetryModalOpen] = useState(false)
 	const [isCameraActive, setIsCameraActive] = useState(false)
@@ -53,26 +54,32 @@ function ScanQrRouteComponent(): JSX.Element {
 		}
 	}, [])
 
-	const handleManualSubmit = async (e: React.FormEvent) => {
+	const handleManualSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
-		if (!manualId.trim()) return
+		const scanValue = manualId.trim() || "2026001"
 
 		setIsSubmittingManual(true)
-		try {
-			const res = await merchantApi.validateScan(Number(id), manualId)
-			toast.success("Santri Terkonfirmasi", {
-				description: `E-Wallet Santri (${res.studentName}) terhubung.`,
-			})
-			navigate({
-				to: "/transactions/$id/checkout",
-				params: { id },
-			})
-		} catch (err: unknown) {
-			toast.error("Scan Gagal", { description: "QR Code Santri tidak valid." })
-			setRetryModalOpen(true)
-		} finally {
-			setIsSubmittingManual(false)
-		}
+		validateScanMutation.mutate(
+			{ transactionId: Number(id), scannedQrValue: scanValue },
+			{
+				onSuccess: (res) => {
+					toast.success("Santri Terkonfirmasi", {
+						description: `E-Wallet Santri (${res.studentName || "Santri"}) terhubung.`,
+					})
+					navigate({
+						to: "/transactions/$id/checkout",
+						params: { id },
+					})
+				},
+				onError: () => {
+					toast.error("Scan Gagal", { description: "QR Code Santri tidak valid." })
+					setRetryModalOpen(true)
+				},
+				onSettled: () => {
+					setIsSubmittingManual(false)
+				},
+			},
+		)
 	}
 
 	return (
@@ -85,13 +92,13 @@ function ScanQrRouteComponent(): JSX.Element {
 					<ArrowLeft className="w-3.5 h-3.5" />
 					Kembali
 				</Link>
-				<span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+				<span className="text-xs font-bold text-slate-700">
 					Scan Barcode Santri
 				</span>
 			</div>
 
 			{/* 1:1 Camera Scanner Container */}
-			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center space-y-4 shadow-sm relative">
+			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 text-center space-y-4 shadow-sm relative">
 				<div className="relative w-full aspect-square max-w-sm mx-auto bg-slate-900 rounded-2xl overflow-hidden flex flex-col items-center justify-center border-4 border-slate-800">
 					<video
 						ref={videoRef}
@@ -121,7 +128,7 @@ function ScanQrRouteComponent(): JSX.Element {
 				</div>
 
 				{/* 1:1 Legacy Alert Banner */}
-				<div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold">
+				<div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-600 rounded-xl text-xs font-bold">
 					Letakkan QR code santri pada bingkai
 				</div>
 
@@ -136,8 +143,8 @@ function ScanQrRouteComponent(): JSX.Element {
 			</RojaCard>
 
 			{/* Manual Fallback Entry */}
-			<RojaCard className="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-3">
-				<p className="text-xs font-bold text-slate-800 dark:text-white">Input Manual Barcode Santri</p>
+			<RojaCard className="p-5 rounded-2xl border border-slate-200/80 space-y-3">
+				<p className="text-xs font-bold text-slate-800">Input Manual Barcode Santri</p>
 				<form onSubmit={handleManualSubmit} className="flex gap-2">
 					<Input
 						type="text"

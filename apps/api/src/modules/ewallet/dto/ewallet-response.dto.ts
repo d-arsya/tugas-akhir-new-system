@@ -10,13 +10,13 @@ export class EwalletStatusDto extends createZodDto(EwalletStatusSchema) {}
 
 export const EwalletTransactionSummarySchema = z.object({
 	id: z.number(),
-	code: z.string().nullable(),
-	name: z.string().nullable(),
-	type: z.enum(["income", "expense", "purchase"]).nullable(),
-	amount: z.string().nullable(),
-	status: z.string().nullable(),
-	paymentMethod: z.string().nullable(),
-	paymentDate: z.string().nullable(),
+	code: z.string().nullish(),
+	name: z.string().nullish(),
+	type: z.enum(["income", "expense", "purchase"]).nullish(),
+	amount: z.string().nullish(),
+	status: z.string().nullish(),
+	paymentMethod: z.string().nullish(),
+	paymentDate: z.string().nullish(),
 	createdAt: z.string(),
 })
 
@@ -26,11 +26,11 @@ export const EwalletDashboardSchema = z.object({
 	totalBalance: z.number(),
 	ewallet: z.object({
 		id: z.number(),
-		uniqueId: z.string().nullable(),
-		studentName: z.string().nullable(),
-		studentGradeLevel: z.string().nullable(),
-		studentGradeNumber: z.string().nullable(),
-		isActive: z.boolean().nullable(),
+		uniqueId: z.string().nullish(),
+		studentName: z.string().nullish(),
+		studentGradeLevel: z.string().nullish(),
+		studentGradeNumber: z.string().nullish(),
+		isActive: z.boolean().nullish(),
 	}),
 	transactions: z.array(EwalletTransactionSummarySchema),
 })

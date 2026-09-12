@@ -36,17 +36,17 @@ export default function ItemsSection({ items, onUpdateItem }: ItemsSectionProps)
 	return (
 		<div className="p-4 sm:p-5 space-y-3">
 			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide">
+				<div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wide">
 					<ShoppingBag className="w-4 h-4 text-[#8dc31e]" />
 					<span>Rincian Belanja ({items.length} Item)</span>
 				</div>
 				<span className="text-[11px] text-slate-400">Klik icon pensil untuk koreksi</span>
 			</div>
 
-			<div className="divide-y divide-slate-100 dark:divide-slate-800/60 border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
+			<div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden">
 				{items.map((item, idx) => (
-					<div key={item.id} className="p-3 bg-slate-50/40 dark:bg-slate-800/20 flex items-center justify-between gap-3 text-xs">
-						<span className="w-5 h-5 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
+					<div key={item.id} className="p-3 bg-slate-50/40 flex items-center justify-between gap-3 text-xs">
+						<span className="w-5 h-5 rounded-md bg-slate-200 text-slate-600 text-[10px] font-mono font-bold flex items-center justify-center shrink-0">
 							{idx + 1}
 						</span>
 
@@ -89,10 +89,10 @@ export default function ItemsSection({ items, onUpdateItem }: ItemsSectionProps)
 						) : (
 							<>
 								<div className="flex-1 min-w-0">
-									<p className="font-semibold text-slate-800 dark:text-slate-100 truncate">{item.description}</p>
+									<p className="font-semibold text-slate-800 truncate">{item.description}</p>
 								</div>
 								<div className="flex items-center gap-3">
-									<span className="font-mono font-bold text-slate-700 dark:text-slate-200">
+									<span className="font-mono font-bold text-slate-700">
 										{formatRupiah(item.price)}
 									</span>
 									<button

@@ -14,8 +14,8 @@ export const QrPageDataResponseSchema = z.object({
 	transactionId: z.number(),
 	code: z.string(),
 	amount: z.number(),
-	status: z.string().nullable(),
-	merchantUniqueNumber: z.string().nullable(),
+	status: z.string().nullish(),
+	merchantUniqueNumber: z.string().nullish(),
 })
 
 export class QrPageDataResponseDto extends createZodDto(QrPageDataResponseSchema) {}
@@ -29,15 +29,15 @@ export class ValidateScanResponseDto extends createZodDto(ValidateScanResponseSc
 
 export const CheckoutItemSchema = z.object({
 	id: z.number(),
-	description: z.string().nullable(),
-	price: z.number().nullable(),
+	description: z.string().nullish(),
+	price: z.number().nullish(),
 })
 
 export const CheckoutDataResponseSchema = z.object({
 	transactionId: z.number(),
 	code: z.string(),
-	status: z.string().nullable(),
-	paymentMethod: z.string().nullable(),
+	status: z.string().nullish(),
+	paymentMethod: z.string().nullish(),
 	buyerName: z.string(),
 	totalPrice: z.number(),
 	items: z.array(CheckoutItemSchema),
@@ -66,15 +66,15 @@ export class ValidatePinResponseDto extends createZodDto(ValidatePinResponseSche
 
 export const MerchantTransactionListItemSchema = z.object({
 	id: z.number(),
-	code: z.string().nullable(),
-	name: z.string().nullable(),
-	type: z.string().nullable(),
+	code: z.string().nullish(),
+	name: z.string().nullish(),
+	type: z.string().nullish(),
 	typeLabel: z.string(),
-	amount: z.string().nullable(),
-	status: z.string().nullable(),
+	amount: z.string().nullish(),
+	status: z.string().nullish(),
 	statusLabel: z.string(),
-	paymentMethod: z.string().nullable(),
-	paymentDate: z.string().nullable(),
+	paymentMethod: z.string().nullish(),
+	paymentDate: z.string().nullish(),
 	createdAt: z.string(),
 })
 

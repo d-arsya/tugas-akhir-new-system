@@ -10,9 +10,9 @@ import {
 } from "@psb/dto/common/entity-schemas.dto"
 
 export const LandingInfoResponseSchema = z.object({
-	academicYear: AcademicYearSchema.optional().nullable(),
-	school: SettingSchoolSchema.optional().nullable(),
-	announcement: SettingAnncSchema.optional().nullable(),
+	academicYear: AcademicYearSchema.nullish(),
+	school: SettingSchoolSchema.nullish(),
+	announcement: SettingAnncSchema.nullish(),
 	levels: z.array(LevelSchema).optional(),
 	formSettings: z.array(SettingFormSchema).optional(),
 	isOpen: z.boolean().optional(),
@@ -32,11 +32,11 @@ export const CheckEmailResponseSchema = z.object({
 export class CheckEmailResponseDto extends createZodDto(CheckEmailResponseSchema) {}
 
 export const WizardStateResponseSchema = z.object({
-	email: z.object({ email: z.string() }).optional().nullable(),
-	personal: z.record(z.string(), z.any()).optional().nullable(),
-	identity: z.record(z.string(), z.any()).optional().nullable(),
-	family: z.record(z.string(), z.any()).optional().nullable(),
-	guardian: z.record(z.string(), z.any()).optional().nullable(),
+	email: z.object({ email: z.string() }).nullish(),
+	personal: z.record(z.string(), z.any()).nullish(),
+	identity: z.record(z.string(), z.any()).nullish(),
+	family: z.record(z.string(), z.any()).nullish(),
+	guardian: z.record(z.string(), z.any()).nullish(),
 })
 export class WizardStateResponseDto extends createZodDto(WizardStateResponseSchema) {}
 
@@ -44,10 +44,11 @@ export const SubmitAttachmentResponseSchema = z.object({
 	success: z.boolean(),
 	registrantId: z.string(),
 	password: z.string().optional(),
-	registrant: RegistrantSchema.optional().nullable(),
+	registrant: RegistrantSchema.nullish(),
 	auth: z.object({
 		accessToken: z.string(),
 		refreshToken: z.string(),
 	}).optional(),
 })
 export class SubmitAttachmentResponseDto extends createZodDto(SubmitAttachmentResponseSchema) {}
+

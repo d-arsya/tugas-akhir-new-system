@@ -7,9 +7,9 @@ import {
 } from "@psb/dto/common/entity-schemas.dto"
 
 export const DashboardResponseSchema = z.object({
-	registrant: RegistrantSchema.optional().nullable(),
-	school: SettingSchoolSchema.optional().nullable(),
-	announcement: SettingAnncSchema.optional().nullable(),
+	registrant: RegistrantSchema.nullish(),
+	school: SettingSchoolSchema.nullish(),
+	announcement: SettingAnncSchema.nullish(),
 	statusInfo: z.object({
 		status: z.string(),
 		label: z.string(),
@@ -17,3 +17,4 @@ export const DashboardResponseSchema = z.object({
 	}).optional(),
 })
 export class DashboardResponseDto extends createZodDto(DashboardResponseSchema) {}
+

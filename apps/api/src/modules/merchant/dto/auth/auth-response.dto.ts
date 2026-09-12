@@ -4,9 +4,9 @@ import { z } from "zod"
 export const MerchantUserPayloadSchema = z.object({
 	id: z.number(),
 	uniqueNumber: z.string(),
-	email: z.string().nullable(),
-	name: z.string().nullable(),
-	merchantName: z.string().nullable(),
+	email: z.string().nullish(),
+	name: z.string().nullish(),
+	merchantName: z.string().nullish(),
 })
 
 export class MerchantUserPayloadDto extends createZodDto(MerchantUserPayloadSchema) {}
@@ -14,7 +14,7 @@ export class MerchantUserPayloadDto extends createZodDto(MerchantUserPayloadSche
 export const MerchantAuthResultSchema = z.object({
 	requires2fa: z.boolean(),
 	merchantId: z.number().optional(),
-	email: z.string().nullable().optional(),
+	email: z.string().nullish(),
 	accessToken: z.string().optional(),
 	refreshToken: z.string().optional(),
 	user: MerchantUserPayloadSchema.optional(),

@@ -15,15 +15,15 @@ export default function VoidConfirmDialog({
 }: VoidConfirmDialogProps): JSX.Element {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="sm:max-w-sm text-center space-y-4 bg-white dark:bg-slate-900 rounded-2xl p-6">
+			<DialogContent className="sm:max-w-sm text-center space-y-4 bg-white rounded-2xl p-6">
 				<div className="mx-auto w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
 					<AlertCircle className="w-6 h-6" />
 				</div>
 				<DialogHeader>
-					<DialogTitle className="text-center text-base font-bold text-slate-800 dark:text-white">
+					<DialogTitle className="text-center text-base font-bold text-slate-800">
 						Batalkan Transaksi Ini?
 					</DialogTitle>
-					<DialogDescription className="text-center text-xs text-slate-500 dark:text-slate-400">
+					<DialogDescription className="text-center text-xs text-slate-500">
 						Apakah Anda yakin ingin membatalkan transaksi belanja ini? Data keranjang yang belum terbayar akan dibuang.
 					</DialogDescription>
 				</DialogHeader>

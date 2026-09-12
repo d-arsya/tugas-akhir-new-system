@@ -1,16 +1,15 @@
 import { useState } from "react"
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
-import { toast, LoginCard, type LoginSubmitValues } from "@roja/ui"
+import { LoginCard, type LoginSubmitValues } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-import useAuthStore from "@/stores/authStore"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
+import useAuthStore from "@/stores/auth.store"
 
 export const Route = createFileRoute("/_guest/login")({
 	component: LoginRouteComponent,
 })
+
 
 function LoginRouteComponent(): JSX.Element {
 	const navigate = useNavigate()
@@ -56,7 +55,6 @@ function LoginRouteComponent(): JSX.Element {
 			title="Login Merchant Area"
 			description="Masuk untuk mengelola transaksi kantin & e-wallet merchant."
 			identifierPlaceholder="Nomor Merchant (e.g. MRC-2026-001)"
-			defaultIdentifier="MRC-2026-001"
 			showRememberMe
 			forgotPasswordHref="/forgot-password"
 			isLoading={isLoading}

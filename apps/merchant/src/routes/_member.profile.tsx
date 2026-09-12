@@ -1,34 +1,16 @@
 import type { JSX } from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { RojaCard } from "@roja/ui"
 import { AlertCircle, X } from "lucide-react"
-import useAuthStore from "@/stores/authStore"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-import type { Merchant } from "@roja/types"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import useAuthStore from "@/stores/auth.store"
+import { useMerchantProfile } from "@/hooks/use-merchant-queries"
 
 const ProfilePage = (): JSX.Element => {
 	const { user } = useAuthStore()
-	const [profile, setProfile] = useState<Merchant | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
+	const { data: profile, isLoading } = useMerchantProfile()
 	const [dismissAlert, setDismissAlert] = useState(false)
 
-	useEffect(() => {
-		const loadProfile = async () => {
-			try {
-				const res = await merchantApi.getProfile()
-				setProfile(res)
-			} catch (err) {
-				// handled silently
-			} finally {
-				setIsLoading(false)
-			}
-		}
-		loadProfile()
-	}, [])
 
 	const hasNoEmail = !profile?.email && !user?.email
 

@@ -1,10 +1,8 @@
-import { type JSX, useState } from "react"
+import { type JSX, useState, useEffect } from "react"
 import { Store, Phone, MapPin, CheckCircle2 } from "lucide-react"
-import { RojaCard, Input, Textarea, Button, toast } from "@roja/ui"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { RojaCard, Input, Textarea, Button } from "@roja/ui"
+import { toast } from "sonner"
+import { useUpdateProfileMutation } from "@/hooks/use-merchant-queries"
 
 export interface ProfileSectionProps {
 	initialMerchantName?: string
@@ -13,32 +11,35 @@ export interface ProfileSectionProps {
 }
 
 export const ProfileSection = ({
-	initialMerchantName = "Kantin Utama Roja",
-	initialPhone = "081234567890",
-	initialAddress = "Gedung Utama Lt 1, Pesantren Pondok Roja",
+	initialMerchantName = "",
+	initialPhone = "",
+	initialAddress = "",
 }: ProfileSectionProps): JSX.Element => {
 	const [merchantName, setMerchantName] = useState(initialMerchantName)
 	const [phone, setPhone] = useState(initialPhone)
 	const [address, setAddress] = useState(initialAddress)
-	const [isSubmitting, setIsSubmitting] = useState(false)
+	const updateProfileMutation = useUpdateProfileMutation()
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	useEffect(() => {
+		setMerchantName(initialMerchantName)
+		setPhone(initialPhone)
+		setAddress(initialAddress)
+	}, [initialMerchantName, initialPhone, initialAddress])
+
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		if (!merchantName.trim() || !phone.trim() || !address.trim()) {
 			toast.error("Validasi Gagal", { description: "Semua bidang profil wajib diisi." })
 			return
 		}
 
-		setIsSubmitting(true)
-		try {
-			const res = await merchantApi.updateProfile({ merchantName, phone, address })
-			toast.success("Profil Diperbarui", { description: res.message })
-		} catch (err: unknown) {
-			const msg = err instanceof Error ? err.message : "Gagal memperbarui profil"
-			toast.error("Gagal", { description: msg })
-		} finally {
-			setIsSubmitting(false)
-		}
+		const promise = updateProfileMutation.mutateAsync({ merchantName, phone, address })
+
+		toast.promise(promise, {
+			loading: "Memperbarui profil merchant...",
+			success: (res) => res.message || "Profil berhasil diperbarui",
+			error: (err: unknown) => (err instanceof Error ? err.message : "Gagal memperbarui profil"),
+		})
 	}
 
 	return (
@@ -97,10 +98,10 @@ export const ProfileSection = ({
 					<div className="md:col-start-5 md:col-span-7">
 						<Button
 							type="submit"
-							disabled={isSubmitting}
+							disabled={updateProfileMutation.isPending}
 							className="rounded-xl bg-[#e4007e] hover:bg-[#c3006c] text-white px-8 h-10 font-semibold text-xs shadow-sm flex items-center gap-1.5 cursor-pointer"
 						>
-							{isSubmitting ? "Menyimpan..." : "Simpan Perubahan Profil"}
+							{updateProfileMutation.isPending ? "Menyimpan..." : "Simpan Perubahan Profil"}
 							<CheckCircle2 className="w-4 h-4" />
 						</Button>
 					</div>

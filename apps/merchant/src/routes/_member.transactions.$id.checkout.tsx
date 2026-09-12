@@ -1,9 +1,12 @@
 import { type JSX, useState, useEffect, useCallback } from "react"
 import { createFileRoute, useNavigate, useParams, Link } from "@tanstack/react-router"
 import { ArrowLeft, ShieldCheck, XCircle, ArrowRight, Copy, CheckCircle2 } from "lucide-react"
-import { RojaCard, Button, toast } from "@roja/ui"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi, type CheckoutDataResponse } from "@roja/api-client"
+import { RojaCard, Button } from "@roja/ui"
+import { toast } from "sonner"
+import { merchantApi } from "@/lib/api"
+import { useValidateCheckoutPinMutation, useUpdateTransactionItemMutation } from "@/hooks/use-merchant-queries"
+
+import type { CheckoutDataResponse } from "@roja/api-client"
 
 import SantriSection from "@/components/checkout/SantriSection"
 import ItemsSection from "@/components/checkout/ItemsSection"
@@ -13,15 +16,16 @@ import InsufficientBalanceDialog from "@/components/checkout/InsufficientBalance
 import BlockedWalletDialog from "@/components/checkout/BlockedWalletDialog"
 import VoidConfirmDialog from "@/components/checkout/VoidConfirmDialog"
 
-const merchantApi = hijackMerchantApi(createMerchantApi())
-
 export const Route = createFileRoute("/_member/transactions/$id/checkout")({
 	component: CheckoutRouteComponent,
 })
 
+
 function CheckoutRouteComponent(): JSX.Element {
 	const navigate = useNavigate()
 	const { id } = useParams({ from: "/_member/transactions/$id/checkout" })
+	const validatePinMutation = useValidateCheckoutPinMutation()
+	const updateItemMutation = useUpdateTransactionItemMutation()
 
 	const [data, setData] = useState<CheckoutDataResponse | null>(null)
 	const [pin, setPin] = useState("")
@@ -47,64 +51,75 @@ function CheckoutRouteComponent(): JSX.Element {
 		loadData()
 	}, [id])
 
-	const handleUpdateItem = async (itemId: number, description: string, price: number) => {
-		try {
-			const res = await merchantApi.updateTransactionItem(itemId, { description, price })
-			if (data) {
-				setData({
-					...data,
-					totalAmount: res.totalAmount,
-					items: data.items.map((i) => (i.id === itemId ? { ...i, description, price } : i)),
-				})
-			}
-			toast.success("Item Berhasil Diperbarui")
-		} catch (err) {
-			toast.error("Gagal Memperbarui Item")
-		}
+	const handleUpdateItem = (itemId: number, description: string, price: number) => {
+		updateItemMutation.mutate(
+			{ itemId, data: { description, price } },
+			{
+				onSuccess: (res) => {
+					if (data) {
+						setData({
+							...data,
+							totalAmount: res.totalAmount,
+							items: data.items.map((i) => (i.id === itemId ? { ...i, description, price } : i)),
+						})
+					}
+					toast.success("Item Berhasil Diperbarui")
+				},
+				onError: () => {
+					toast.error("Gagal Memperbarui Item")
+				},
+			},
+		)
 	}
 
-	const handleSubmitPayment = useCallback(async () => {
+	const handleSubmitPayment = useCallback(() => {
 		if (pin.length !== 6 || isSubmitting) return
 
 		setIsSubmitting(true)
 		setPinError(false)
 
-		try {
-			const res = await merchantApi.validatePin(Number(id), pin)
-			if (res.success) {
-				toast.success("Transaksi Berhasil!", { description: res.message || "Pembayaran e-wallet berhasil dikonfirmasi." })
-				navigate({ to: "/e-wallet" })
-				return
-			}
+		validatePinMutation.mutate(
+			{ transactionId: Number(id), pin },
+			{
+				onSuccess: (res) => {
+					if (res.success) {
+						toast.success("Transaksi Berhasil!", { description: res.message || "Pembayaran e-wallet berhasil dikonfirmasi." })
+						navigate({ to: "/e-wallet" })
+						return
+					}
 
-			if (res.blocked) {
-				setBlockedOpen(true)
-				return
-			}
+					if (res.blocked) {
+						setBlockedOpen(true)
+						return
+					}
 
-			if (res.insufficientBalance) {
-				setInsufficientOpen(true)
-				setPin("")
-				return
-			}
+					if (res.insufficientBalance) {
+						setInsufficientOpen(true)
+						setPin("")
+						return
+					}
 
-			if (res.wrongPin) {
-				setPinError(true)
-				setPin("")
-				const newAttempts = res.attempts ? 3 - res.attempts : Math.max(0, attemptsLeft - 1)
-				setAttemptsLeft(newAttempts)
-				toast.error("PIN Tidak Cocok!", { description: res.message || `Sisa kesempatan: ${newAttempts} kali.` })
-				setTimeout(() => setPinError(false), 800)
-			}
-		} catch (err: unknown) {
-			setPinError(true)
-			setPin("")
-			toast.error("Gagal Memproses Pembayaran")
-			setTimeout(() => setPinError(false), 800)
-		} finally {
-			setIsSubmitting(false)
-		}
-	}, [pin, isSubmitting, id, attemptsLeft, navigate])
+					if (res.wrongPin) {
+						setPinError(true)
+						setPin("")
+						const newAttempts = res.attempts ? 3 - res.attempts : Math.max(0, attemptsLeft - 1)
+						setAttemptsLeft(newAttempts)
+						toast.error("PIN Tidak Cocok!", { description: res.message || `Sisa kesempatan: ${newAttempts} kali.` })
+						setTimeout(() => setPinError(false), 800)
+					}
+				},
+				onError: () => {
+					setPinError(true)
+					setPin("")
+					toast.error("Gagal Memproses Pembayaran")
+					setTimeout(() => setPinError(false), 800)
+				},
+				onSettled: () => {
+					setIsSubmitting(false)
+				},
+			},
+		)
+	}, [pin, isSubmitting, id, attemptsLeft, navigate, validatePinMutation])
 
 	// Keyboard shortcut listener
 	useEffect(() => {
@@ -147,7 +162,7 @@ function CheckoutRouteComponent(): JSX.Element {
 			<div className="flex items-center justify-between">
 				<Link
 					to="/e-wallet"
-					className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white font-medium transition-colors"
+					className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 font-medium transition-colors"
 				>
 					<ArrowLeft className="w-4 h-4" />
 					Kembali ke Dompet Digital
@@ -156,7 +171,7 @@ function CheckoutRouteComponent(): JSX.Element {
 				<button
 					type="button"
 					onClick={() => copyCode(data.code)}
-					className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-mono font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+					className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-[11px] font-mono font-semibold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
 					title="Klik untuk salin kode"
 				>
 					<span>{data.code}</span>
@@ -165,7 +180,7 @@ function CheckoutRouteComponent(): JSX.Element {
 			</div>
 
 			{/* Single Unified Card Container */}
-			<RojaCard className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
+			<RojaCard className="rounded-2xl border border-slate-200/80 bg-white shadow-sm overflow-hidden divide-y divide-slate-100">
 				{/* Section 2: Data Santri */}
 				<SantriSection buyerName={data.buyerName} />
 
@@ -191,7 +206,7 @@ function CheckoutRouteComponent(): JSX.Element {
 						variant="outline"
 						onClick={() => setVoidOpen(true)}
 						disabled={isSubmitting}
-						className="w-full sm:w-1/3 h-11 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-center gap-1.5"
+						className="w-full sm:w-1/3 h-11 text-slate-600 text-xs font-semibold rounded-xl cursor-pointer hover:bg-slate-50 flex items-center justify-center gap-1.5"
 					>
 						<span>Batalkan</span>
 					</Button>

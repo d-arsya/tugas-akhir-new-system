@@ -1,17 +1,16 @@
 import { type JSX, useState } from "react"
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { Wallet, ArrowLeft, CheckCircle2 } from "lucide-react"
-import { RojaCard, Button, PinInput, toast } from "@roja/ui"
+import { RojaCard, Button, PinInput } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
+import { merchantApi } from "@/lib/api"
 import useEwalletStore from "@/stores/ewalletStore"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
 
 export const Route = createFileRoute("/_member/e-wallet/create")({
 	component: CreateEwalletRouteComponent,
 })
+
 
 function CreateEwalletRouteComponent(): JSX.Element {
 	const navigate = useNavigate()
@@ -50,13 +49,13 @@ function CreateEwalletRouteComponent(): JSX.Element {
 				Kembali ke Profil
 			</Link>
 
-			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-center space-y-5 shadow-sm">
+			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 text-center space-y-5 shadow-sm">
 				<div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#8dc31e]/10 text-[#8dc31e] mb-1">
 					<Wallet className="w-6 h-6" />
 				</div>
 
 				<div>
-					<h2 className="text-lg font-bold text-slate-800 dark:text-white">Aktivasi Dompet Digital Merchant</h2>
+					<h2 className="text-lg font-bold text-slate-800">Aktivasi Dompet Digital Merchant</h2>
 					<p className="text-xs text-slate-500 mt-1">Buat 6 digit PIN E-Wallet untuk mengamankan akun e-wallet Anda</p>
 				</div>
 

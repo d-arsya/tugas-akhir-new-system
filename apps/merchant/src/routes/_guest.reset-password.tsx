@@ -1,13 +1,12 @@
 import { type JSX, useState } from "react"
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
-import { toast, ResetPasswordCard, type ResetPasswordSubmitValues } from "@roja/ui"
+import { ResetPasswordCard, type ResetPasswordSubmitValues } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
 
 type ResetPasswordSearch = {
+
 	email?: string
 	token?: string
 }
@@ -31,8 +30,8 @@ function ResetPasswordRouteComponent(): JSX.Element {
 		setErrorMsg(null)
 		try {
 			const res = await merchantApi.resetPassword({
-				email: search.email || "merchant@pondokroja.ac.id",
-				token: search.token || "mock-token",
+				email: search.email || "",
+				token: search.token || "",
 				password: data.password,
 				passwordConfirmation: data.passwordConfirmation,
 			})

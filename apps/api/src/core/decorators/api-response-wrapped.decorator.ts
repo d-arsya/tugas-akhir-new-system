@@ -6,6 +6,7 @@ export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 	description?: string
 	type?: TModel
 	isArray?: boolean
+	isPaginated?: boolean
 	schema?: any
 }) => {
 	const decorators = []
@@ -25,25 +26,30 @@ export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 		dataSchema = options.schema
 	}
 
+	const properties: any = {
+		success: { type: "boolean", example: true },
+		message: { type: "string", example: "OK" },
+		data: dataSchema,
+	}
+
+	if (options.isArray || options.isPaginated) {
+		properties.meta = {
+			type: "object",
+			properties: {
+				page: { type: "number", example: 1 },
+				limit: { type: "number", example: 10 },
+				total: { type: "number", example: 25 },
+				totalPages: { type: "number", example: 3 },
+			},
+			nullable: true,
+		}
+	}
+
 	const apiResponseOptions: any = {
 		status: options.status,
 		schema: {
 			type: "object",
-			properties: {
-				success: { type: "boolean", example: true },
-				message: { type: "string", example: "OK" },
-				data: dataSchema,
-				meta: {
-					type: "object",
-					properties: {
-						page: { type: "number", example: 1 },
-						limit: { type: "number", example: 10 },
-						total: { type: "number", example: 25 },
-						totalPages: { type: "number", example: 3 },
-					},
-					nullable: true,
-				},
-			},
+			properties,
 			required: ["success", "message", "data"],
 		},
 	}

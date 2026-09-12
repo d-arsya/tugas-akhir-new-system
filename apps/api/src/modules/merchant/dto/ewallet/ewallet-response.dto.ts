@@ -13,9 +13,9 @@ export const MerchantEwalletDashboardSchema = z.object({
 	totalBalance: z.number(),
 	ewallet: z.object({
 		id: z.number(),
-		uniqueId: z.string().nullable(),
-		merchantName: z.string().nullable(),
-		isActive: z.boolean().nullable(),
+		uniqueId: z.string().nullish(),
+		merchantName: z.string().nullish(),
+		isActive: z.boolean().nullish(),
 	}),
 	transactions: z.array(EwalletTransactionSummarySchema),
 })

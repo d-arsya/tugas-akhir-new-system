@@ -15,15 +15,15 @@ export default function BlockedWalletDialog({
 }: BlockedWalletDialogProps): JSX.Element {
 	return (
 		<Dialog open={open} onOpenChange={() => {}}>
-			<DialogContent className="sm:max-w-md bg-white dark:bg-slate-900 rounded-2xl p-6 text-center">
+			<DialogContent className="sm:max-w-md bg-white rounded-2xl p-6 text-center">
 				<div className="mx-auto w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3">
 					<ShieldX className="w-6 h-6" />
 				</div>
 				<DialogHeader>
-					<DialogTitle className="text-center text-base font-bold text-rose-600 dark:text-rose-400">
+					<DialogTitle className="text-center text-base font-bold text-rose-600">
 						E-Wallet Santri Diblokir
 					</DialogTitle>
-					<DialogDescription className="text-center text-xs text-slate-500 dark:text-slate-400 mt-2">
+					<DialogDescription className="text-center text-xs text-slate-500 mt-2">
 						{message} Demi keamanan, akun santri telah dinonaktifkan sementara. Santri dapat menghubungi pihak admin pondok untuk membuka blokir.
 					</DialogDescription>
 				</DialogHeader>

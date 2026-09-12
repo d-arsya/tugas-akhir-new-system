@@ -1,4 +1,4 @@
-import { type JSX, useEffect, useState } from "react"
+import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { User, Settings as SettingsIcon, ShieldCheck } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger, TabsContent, RojaCard } from "@roja/ui"
@@ -7,30 +7,15 @@ import ProfileSection from "@/components/setting/ProfileSection"
 import PasswordSection from "@/components/setting/PasswordSection"
 import TwoFactorSection from "@/components/setting/TwoFactorSection"
 import EmailVerifySection from "@/components/setting/EmailVerifySection"
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-import type { Merchant } from "@roja/types"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { useMerchantProfile } from "@/hooks/use-merchant-queries"
 
 export const Route = createFileRoute("/_member/setting")({
 	component: SettingRouteComponent,
 })
 
 function SettingRouteComponent(): JSX.Element {
-	const [profile, setProfile] = useState<Merchant | null>(null)
+	const { data: profile } = useMerchantProfile()
 
-	useEffect(() => {
-		const loadSettingData = async () => {
-			try {
-				const res = await merchantApi.getProfile()
-				setProfile(res)
-			} catch (err) {
-				// handled silently
-			}
-		}
-		loadSettingData()
-	}, [])
 
 	const hasUnverifiedEmail = !profile?.emailVerifiedAt && Boolean(profile?.email)
 
@@ -39,7 +24,7 @@ function SettingRouteComponent(): JSX.Element {
 			<RojaCard className="p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100 bg-white">
 				{/* 1:1 Legacy Icon-Only Tabs (`tbr_tabs`) */}
 				<Tabs defaultValue="merchant" className="w-full space-y-6">
-					<TabsList className="flex w-auto inline-flex bg-transparent border-b border-slate-200 dark:border-slate-800 p-0 rounded-none gap-6 pb-2">
+					<TabsList className="flex w-auto inline-flex bg-transparent border-b border-slate-200 p-0 rounded-none gap-6 pb-2">
 						{/* Tab 1: Merchant Profile Icon */}
 						<TabsTrigger
 							value="merchant"
@@ -74,16 +59,16 @@ function SettingRouteComponent(): JSX.Element {
 					{/* Tab 1: Merchant Profile Info */}
 					<TabsContent value="merchant" className="mt-0 pt-2">
 						<ProfileSection
-							initialMerchantName={profile?.merchantName || "Kantin Utama Roja"}
-							initialPhone={profile?.phone || "081234567890"}
-							initialAddress={profile?.address || "Gedung Utama Lt 1, Pesantren Pondok Roja"}
+							initialMerchantName={profile?.merchantName || ""}
+							initialPhone={profile?.phone || ""}
+							initialAddress={profile?.address || ""}
 						/>
 					</TabsContent>
 
 					{/* Tab 2: Personal Info & Email */}
 					<TabsContent value="personal" className="mt-0 pt-2">
 						<EmailVerifySection
-							email={profile?.email || "merchant@pondokroja.ac.id"}
+							email={profile?.email || ""}
 							isVerified={Boolean(profile?.emailVerifiedAt)}
 						/>
 					</TabsContent>

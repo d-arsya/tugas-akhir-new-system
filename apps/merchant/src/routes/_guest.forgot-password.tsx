@@ -1,15 +1,14 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { toast, ForgotPasswordCard } from "@roja/ui"
+import { ForgotPasswordCard } from "@roja/ui"
+import { toast } from "sonner"
 
-import { hijackMerchantApi } from "@/lib/dev-hijack"
-import { createMerchantApi } from "@roja/api-client"
-
-const merchantApi = hijackMerchantApi(createMerchantApi())
+import { merchantApi } from "@/lib/api"
 
 export const Route = createFileRoute("/_guest/forgot-password")({
 	component: ForgotPasswordRouteComponent,
 })
+
 
 function ForgotPasswordRouteComponent(): JSX.Element {
 	const [isLoading, setIsLoading] = useState(false)

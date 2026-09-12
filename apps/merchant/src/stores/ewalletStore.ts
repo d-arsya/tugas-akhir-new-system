@@ -1,4 +1,5 @@
 import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
 
 type EwalletState = {
 	isPinAuthenticated: boolean
@@ -9,10 +10,18 @@ type EwalletActions = {
 	clearPin: () => void
 }
 
-export const useEwalletStore = create<EwalletState & EwalletActions>((set) => ({
-	isPinAuthenticated: false,
-	setPinAuthenticated: (val) => set({ isPinAuthenticated: val }),
-	clearPin: () => set({ isPinAuthenticated: false }),
-}))
+export const useEwalletStore = create<EwalletState & EwalletActions>()(
+	persist(
+		(set) => ({
+			isPinAuthenticated: false,
+			setPinAuthenticated: (val) => set({ isPinAuthenticated: val }),
+			clearPin: () => set({ isPinAuthenticated: false }),
+		}),
+		{
+			name: "roja-merchant-ewallet-pin",
+			storage: createJSONStorage(() => sessionStorage),
+		},
+	),
+)
 
 export default useEwalletStore

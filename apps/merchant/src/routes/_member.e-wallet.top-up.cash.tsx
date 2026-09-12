@@ -15,8 +15,8 @@ function CashTopUpRouteComponent(): JSX.Element {
 				Kembali ke Dompet Digital
 			</Link>
 
-			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-4 shadow-sm text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-				<div className="flex items-center gap-2 font-bold text-slate-800 dark:text-white text-sm">
+			<RojaCard className="p-6 rounded-2xl border border-slate-200/80 space-y-4 shadow-sm text-xs leading-relaxed text-slate-600">
+				<div className="flex items-center gap-2 font-bold text-slate-800 text-sm">
 					<Store className="w-4 h-4 text-[#ffa800]" />
 					Prosedur Top-Up Kasir Pesantren:
 				</div>

@@ -15,19 +15,19 @@ function InactiveEwalletRouteComponent(): JSX.Element {
 				Kembali ke Profil
 			</Link>
 
-			<RojaCard className="p-6 md:p-8 rounded-2xl border border-rose-200/80 dark:border-rose-900/40 text-center space-y-4 shadow-sm">
+			<RojaCard className="p-6 md:p-8 rounded-2xl border border-rose-200/80 text-center space-y-4 shadow-sm">
 				<div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-500 mb-1">
 					<ShieldAlert className="w-7 h-7" />
 				</div>
 
 				<div>
-					<h5 className="text-lg font-bold text-slate-800 dark:text-white">E-Wallet Merchant Non-Aktif</h5>
+					<h5 className="text-lg font-bold text-slate-800">E-Wallet Merchant Non-Aktif</h5>
 					<p className="text-xs text-slate-500 mt-1 leading-relaxed">
 						Layanan dompet digital merchant Anda saat ini sedang dinonaktifkan oleh administrator sistem.
 					</p>
 				</div>
 
-				<div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl text-xs text-slate-600 dark:text-slate-300">
+				<div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-600">
 					Silakan hubungi bagian Sekretariat / Keuangan Pondok Roja untuk mengaktifkan kembali status dompet digital Anda.
 				</div>
 
