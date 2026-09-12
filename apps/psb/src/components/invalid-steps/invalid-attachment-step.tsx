@@ -30,8 +30,13 @@ export const InvalidAttachmentStepContent = ({ onPrev }: { onPrev: () => void })
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["invalidData"] })
 			queryClient.invalidateQueries({ queryKey: ["dashboard"] })
-			toast.success("Perbaikan data Anda telah tersimpan.")
+			toast.success("Perbaikan Data Berhasil Disimpan", { description: "Data Anda akan segera diverifikasi kembali oleh panitia." })
 			navigate({ to: "/dashboard" })
+		},
+		onError: (err: any) => {
+			toast.error("Gagal Menyimpan Perbaikan Berkas", {
+				description: err instanceof Error ? err.message : "Terjadi kesalahan saat mengunggah berkas perbaikan.",
+			})
 		},
 	})
 
@@ -45,7 +50,7 @@ export const InvalidAttachmentStepContent = ({ onPrev }: { onPrev: () => void })
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Invalid Attachment):", formErrors)
-		toast.error("Mohon unggah dokumen berkas wajib yang belum diunggah.")
+		toast.error("Dokumen Belum Lengkap", { description: "Mohon unggah dokumen berkas wajib yang belum diunggah." })
 	}
 
 	return (

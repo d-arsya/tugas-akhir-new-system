@@ -74,7 +74,7 @@ export const InvalidIdentityStepContent = ({ onNext, onPrev }: { onNext: () => v
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Invalid Identity):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (isLoading) {

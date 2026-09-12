@@ -39,7 +39,9 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 	useEffect(() => {
 		if (error) {
 			clearSession()
-			toast.error(error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir.")
+			toast.error("Sesi Pendaftaran Berakhir", {
+				description: error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir. Silakan mulai kembali.",
+			})
 			navigate({ to: "/" })
 		}
 	}, [error, clearSession, navigate])
@@ -51,7 +53,9 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 			onNext()
 		},
 		onError: (err: any) => {
-			toast.error(err instanceof Error ? err.message : "Gagal menyimpan formulir data identitas.")
+			toast.error("Gagal Menyimpan Data Identitas", {
+				description: err instanceof Error ? err.message : "Silakan periksa kembali data yang diisi.",
+			})
 		},
 	})
 
@@ -94,7 +98,7 @@ export const IdentityStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Identity):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (landingLoading || stepLoading) {

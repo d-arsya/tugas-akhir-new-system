@@ -69,7 +69,7 @@ export const TransactionModal = ({
 			{ items: items.map((i) => ({ description: i.description, price: i.price })) },
 			{
 				onSuccess: (res) => {
-					toast.success("Transaksi Dibuat", {
+					toast.success("Transaksi Berhasil Dibuat", {
 						description: `Kode: ${res.code}. Silakan scan QR santri.`,
 					})
 					onOpenChange(false)
@@ -81,7 +81,7 @@ export const TransactionModal = ({
 				},
 				onError: (err: unknown) => {
 					const msg = err instanceof Error ? err.message : "Gagal membuat transaksi"
-					toast.error("Gagal", { description: msg })
+					toast.error("Gagal Membuat Transaksi", { description: msg })
 				},
 			},
 		)

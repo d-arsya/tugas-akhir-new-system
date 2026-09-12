@@ -29,13 +29,13 @@ function EwalletLoginRouteComponent(): JSX.Element {
 		try {
 			const res = await merchantApi.loginEwalletPin(pin)
 			setPinAuthenticated(true)
-			toast.success("PIN Terverifikasi", { description: res.message })
+			toast.success("PIN Terverifikasi", { description: res.message || "Dompet digital berhasil dibuka." })
 			navigate({ to: "/e-wallet" })
 		} catch (err: unknown) {
 			setHasError(true)
 			setPin("")
 			const msg = err instanceof Error ? err.message : "PIN E-Wallet salah"
-			toast.error("Gagal", { description: msg })
+			toast.error("Verifikasi PIN Gagal", { description: msg })
 		} finally {
 			setIsSubmitting(false)
 		}

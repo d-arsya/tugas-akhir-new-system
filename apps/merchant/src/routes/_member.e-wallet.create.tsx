@@ -24,7 +24,9 @@ function CreateEwalletRouteComponent(): JSX.Element {
 		if (pin.length !== 6 || confirmPin.length !== 6) return
 
 		if (pin !== confirmPin) {
-			toast.error("Konfirmasi PIN Tidak Cocok")
+			toast.error("Konfirmasi PIN Tidak Cocok", {
+				description: "Pastikan PIN dan konfirmasi PIN sama persis.",
+			})
 			return
 		}
 
@@ -32,11 +34,11 @@ function CreateEwalletRouteComponent(): JSX.Element {
 		try {
 			const res = await merchantApi.createEwallet({ pin, pinConfirmation: confirmPin })
 			setPinAuthenticated(true)
-			toast.success("E-Wallet Aktif!", { description: res.message })
+			toast.success("E-Wallet Berhasil Dibuat", { description: res.message || "Dompet digital merchant Anda telah aktif." })
 			navigate({ to: "/e-wallet" })
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : "Gagal mengaktifkan E-Wallet"
-			toast.error("Gagal", { description: msg })
+			toast.error("Gagal Membuat E-Wallet", { description: msg })
 		} finally {
 			setIsSubmitting(false)
 		}

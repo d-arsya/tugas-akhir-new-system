@@ -90,7 +90,7 @@ export const InvalidPersonalStepContent = ({ onNext }: { onNext: () => void }): 
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Invalid Personal):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (isLoading) {

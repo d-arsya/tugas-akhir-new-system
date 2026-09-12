@@ -30,11 +30,11 @@ function EditPinRouteComponent(): JSX.Element {
 		try {
 			await merchantApi.loginEwalletPin(currentPin)
 			setStep("new")
-			toast.info("PIN Lama Terverifikasi", { description: "Masukkan 6 digit PIN baru Anda." })
+			toast.info("PIN Lama Terverifikasi", { description: "Silakan masukkan 6 digit PIN baru Anda." })
 		} catch (err: unknown) {
 			setHasError(true)
 			setCurrentPin("")
-			toast.error("PIN Lama Salah!")
+			toast.error("PIN Lama Salah", { description: "PIN lama yang Anda masukkan tidak sesuai." })
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -45,7 +45,7 @@ function EditPinRouteComponent(): JSX.Element {
 		if (newPin.length !== 6 || confirmPin.length !== 6) return
 
 		if (newPin !== confirmPin) {
-			toast.error("Konfirmasi PIN Tidak Cocok")
+			toast.error("Konfirmasi PIN Tidak Cocok", { description: "Pastikan PIN baru dan konfirmasi PIN sama persis." })
 			return
 		}
 
@@ -56,11 +56,11 @@ function EditPinRouteComponent(): JSX.Element {
 				pin: newPin,
 				pinConfirmation: confirmPin,
 			})
-			toast.success("PIN Diperbarui", { description: res.message })
+			toast.success("PIN Berhasil Diperbarui", { description: res.message || "PIN E-Wallet Anda berhasil diubah." })
 			navigate({ to: "/e-wallet" })
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : "Gagal memperbarui PIN"
-			toast.error("Gagal", { description: msg })
+			toast.error("Gagal Memperbarui PIN", { description: msg })
 		} finally {
 			setIsSubmitting(false)
 		}

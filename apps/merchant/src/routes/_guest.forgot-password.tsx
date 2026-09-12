@@ -20,12 +20,12 @@ function ForgotPasswordRouteComponent(): JSX.Element {
 		setErrorMsg(null)
 		try {
 			const res = await merchantApi.forgotPassword({ email })
-			toast.success("Permintaan Diterima", { description: res.message })
+			toast.success("Instruksi Reset Password Terkirim", { description: res.message || "Silakan periksa kotak masuk email Anda." })
 			setIsSubmitSuccessful(true)
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : "Gagal mengirim email reset password"
 			setErrorMsg(message)
-			toast.error("Gagal Mengirim", { description: message })
+			toast.error("Gagal Mengirim Email", { description: message })
 		} finally {
 			setIsLoading(false)
 		}

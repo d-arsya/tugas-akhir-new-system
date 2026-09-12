@@ -53,6 +53,10 @@ const SettingsPage = (): JSX.Element => {
 			queryClient.invalidateQueries({ queryKey: ["profile"] })
 			toast.success("Nama profil berhasil diperbarui")
 		},
+		onError: (err: unknown) => {
+			const msg = err instanceof Error ? err.message : "Gagal memperbarui profil"
+			toast.error("Gagal Memperbarui Profil", { description: msg })
+		},
 	})
 
 	const updatePasswordMutation = useMutation({
@@ -61,6 +65,10 @@ const SettingsPage = (): JSX.Element => {
 			toast.success("Password berhasil diperbarui")
 			resetPasswordForm()
 		},
+		onError: (err: unknown) => {
+			const msg = err instanceof Error ? err.message : "Gagal memperbarui password"
+			toast.error("Gagal Memperbarui Password", { description: msg })
+		},
 	})
 
 	const toggle2faMutation = useMutation({
@@ -68,6 +76,10 @@ const SettingsPage = (): JSX.Element => {
 		onSuccess: (_, enabled) => {
 			setStatus2fa(enabled)
 			toast.success(`Dua Faktor Otentikasi (2FA) berhasil ${enabled ? "diaktifkan" : "dinonaktifkan"}`)
+		},
+		onError: (err: unknown) => {
+			const msg = err instanceof Error ? err.message : "Gagal mengubah pengaturan 2FA"
+			toast.error("Gagal Mengubah Pengaturan 2FA", { description: msg })
 		},
 	})
 

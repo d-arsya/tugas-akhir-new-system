@@ -32,13 +32,13 @@ function Verify2faRouteComponent(): JSX.Element {
 			const res = await merchantApi.verify2fa({ code }, merchantIdNum)
 			if (!res.requires2fa && res.user) {
 				login(res.user)
-				toast.success("Verifikasi Berhasil", { description: "Selamat datang kembali!" })
+				toast.success("Verifikasi 2FA Berhasil", { description: "Selamat datang kembali!" })
 				navigate({ to: "/e-wallet" })
 			}
 
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : "Kode verifikasi 2FA salah"
-			toast.error("Verifikasi Gagal", { description: message })
+			toast.error("Verifikasi 2FA Gagal", { description: message })
 		} finally {
 			setIsLoading(false)
 		}
@@ -49,10 +49,10 @@ function Verify2faRouteComponent(): JSX.Element {
 		try {
 			const merchantIdNum = Number(search.merchantId) || 301
 			const res = await merchantApi.resend2fa(merchantIdNum)
-			toast.success("Kode Dikirim Ulang", { description: res.message })
+			toast.success("Kode 2FA Berhasil Dikirim Ulang", { description: res.message || "Cek kotak masuk email Anda." })
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : "Gagal mengirim ulang kode"
-			toast.error("Gagal Mengirim", { description: message })
+			toast.error("Gagal Mengirim Ulang Kode 2FA", { description: message })
 		} finally {
 			setIsResending(false)
 		}

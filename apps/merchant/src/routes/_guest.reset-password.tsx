@@ -35,12 +35,12 @@ function ResetPasswordRouteComponent(): JSX.Element {
 				password: data.password,
 				passwordConfirmation: data.passwordConfirmation,
 			})
-			toast.success("Password Diperbarui", { description: res.message })
+			toast.success("Password Berhasil Diperbarui", { description: res.message || "Silakan login menggunakan password baru Anda." })
 			navigate({ to: "/login" })
 		} catch (err: unknown) {
 			const message = err instanceof Error ? err.message : "Gagal memperbarui password"
 			setErrorMsg(message)
-			toast.error("Reset Gagal", { description: message })
+			toast.error("Gagal Reset Password", { description: message })
 		} finally {
 			setIsLoading(false)
 		}

@@ -39,7 +39,9 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 	useEffect(() => {
 		if (error) {
 			clearSession()
-			toast.error(error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir.")
+			toast.error("Sesi Pendaftaran Berakhir", {
+				description: error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir. Silakan mulai kembali.",
+			})
 			navigate({ to: "/" })
 		}
 	}, [error, clearSession, navigate])
@@ -51,7 +53,9 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 			onNext()
 		},
 		onError: (err: any) => {
-			toast.error(err instanceof Error ? err.message : "Gagal menyimpan formulir data diri.")
+			toast.error("Gagal Menyimpan Data Diri", {
+				description: err instanceof Error ? err.message : "Silakan periksa kembali data yang diisi.",
+			})
 		},
 	})
 
@@ -106,7 +110,7 @@ export const PersonalStepContent = ({ onNext }: { onNext: () => void }): JSX.Ele
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Personal):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (landingLoading || stepLoading) {

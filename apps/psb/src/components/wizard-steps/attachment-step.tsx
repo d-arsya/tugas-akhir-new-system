@@ -40,7 +40,9 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 	useEffect(() => {
 		if (error) {
 			clearSession()
-			toast.error(error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir.")
+			toast.error("Sesi Pendaftaran Berakhir", {
+				description: error instanceof Error ? error.message : "Sesi pendaftaran Anda telah berakhir. Silakan mulai kembali.",
+			})
 			navigate({ to: "/" })
 		}
 	}, [error, clearSession, navigate])
@@ -57,7 +59,9 @@ export const AttachmentStepContent = ({ onPrev }: { onPrev: () => void }): JSX.E
 			})
 		},
 		onError: (err: any) => {
-			toast.error(err instanceof Error ? err.message : "Gagal mengirimkan pendaftaran")
+			toast.error("Gagal Mengirim Pendaftaran", {
+				description: err instanceof Error ? err.message : "Terjadi kesalahan saat memproses berkas pendaftaran.",
+			})
 		},
 	})
 

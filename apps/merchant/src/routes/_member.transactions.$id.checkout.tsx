@@ -63,10 +63,10 @@ function CheckoutRouteComponent(): JSX.Element {
 							items: data.items.map((i) => (i.id === itemId ? { ...i, description, price } : i)),
 						})
 					}
-					toast.success("Item Berhasil Diperbarui")
+					toast.success("Item Transaksi Diperbarui", { description: "Perubahan item berhasil disimpan." })
 				},
 				onError: () => {
-					toast.error("Gagal Memperbarui Item")
+					toast.error("Gagal Memperbarui Item", { description: "Terjadi kesalahan saat memperbarui item transaksi." })
 				},
 			},
 		)
@@ -111,7 +111,7 @@ function CheckoutRouteComponent(): JSX.Element {
 				onError: () => {
 					setPinError(true)
 					setPin("")
-					toast.error("Gagal Memproses Pembayaran")
+					toast.error("Pembayaran Gagal", { description: "Terjadi kesalahan saat memproses transaksi pembayaran." })
 					setTimeout(() => setPinError(false), 800)
 				},
 				onSettled: () => {

@@ -36,7 +36,9 @@ export const FileUploadField = ({
 			const file = files[0]
 			if (file) {
 				if (file.size > maxSizeMb * 1024 * 1024) {
-					toast.error(`Ukuran berkas maksimal ${maxSizeMb}MB`)
+					toast.error("Ukuran Berkas Terlalu Besar", {
+						description: `Ukuran berkas maksimal ${maxSizeMb}MB.`,
+					})
 					return
 				}
 				setFileName(file.name)

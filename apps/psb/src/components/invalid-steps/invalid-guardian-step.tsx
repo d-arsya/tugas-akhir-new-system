@@ -61,7 +61,7 @@ export const InvalidGuardianStepContent = ({ onNext, onPrev }: { onNext: () => v
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Invalid Guardian):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (isLoading) {

@@ -38,6 +38,11 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 			queryClient.invalidateQueries({ queryKey: ["wizardStep", "guardian", sessionId] })
 			onNext()
 		},
+		onError: (err: any) => {
+			toast.error("Gagal Menyimpan Data Wali", {
+				description: err instanceof Error ? err.message : "Silakan periksa kembali data yang diisi.",
+			})
+		},
 	})
 
 	const {
@@ -58,7 +63,7 @@ export const GuardianStepContent = ({ onNext, onPrev }: { onNext: () => void; on
 
 	const onFormError = (formErrors: Record<string, any>): void => {
 		console.error("Form Validation Errors (Guardian):", formErrors)
-		toast.error("Mohon periksa kembali kolom yang wajib diisi.")
+		toast.error("Validasi Formulir Gagal", { description: "Mohon periksa kembali kolom yang wajib diisi." })
 	}
 
 	if (isLoading) {

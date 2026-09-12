@@ -22,7 +22,7 @@ function ResetPinRouteComponent(): JSX.Element {
 		if (pin.length !== 6 || confirmPin.length !== 6) return
 
 		if (pin !== confirmPin) {
-			toast.error("Konfirmasi PIN Tidak Cocok")
+			toast.error("Konfirmasi PIN Tidak Cocok", { description: "Pastikan PIN baru dan konfirmasi PIN sama persis." })
 			return
 		}
 
@@ -34,11 +34,11 @@ function ResetPinRouteComponent(): JSX.Element {
 				pin,
 				pinConfirmation: confirmPin,
 			})
-			toast.success("Reset PIN Berhasil", { description: res.message })
+			toast.success("PIN Berhasil Direset", { description: res.message || "PIN baru telah aktif. Silakan login." })
 			navigate({ to: "/e-wallet/login" })
 		} catch (err: unknown) {
 			const msg = err instanceof Error ? err.message : "Gagal me-reset PIN"
-			toast.error("Gagal", { description: msg })
+			toast.error("Gagal Reset PIN", { description: msg })
 		} finally {
 			setIsSubmitting(false)
 		}
