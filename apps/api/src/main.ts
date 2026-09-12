@@ -21,7 +21,7 @@ async function bootstrap(): Promise<void> {
   // Global prefix for API endpoints
   app.setGlobalPrefix("api")
 
-  // Global pipes
+  // Global pip
   app.useGlobalPipes(new ZodValidationPipe())
 
   // Global filters
