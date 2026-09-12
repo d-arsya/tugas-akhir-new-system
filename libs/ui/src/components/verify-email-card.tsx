@@ -22,7 +22,7 @@ export const VerifyEmailCard = ({
 	className = "",
 }: VerifyEmailCardProps): JSX.Element => {
 	return (
-		<RojaCard className={`p-8 md:p-10 flex flex-col gap-6 items-center text-center w-full max-w-md mx-auto my-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 ${className}`}>
+		<RojaCard className={`p-8 md:p-10 flex flex-col gap-6 items-center text-center w-full max-w-md mx-auto my-8 bg-white rounded-2xl shadow-sm border border-slate-100 ${className}`}>
 			{status === "verifying" && (
 				<div className="flex flex-col gap-4 items-center w-full">
 					<Skeleton className="w-12 h-12 rounded-full" />
@@ -35,7 +35,7 @@ export const VerifyEmailCard = ({
 
 			{status === "success" && (
 				<div className="flex flex-col gap-4 items-center w-full">
-					<Alert variant="success" className="flex flex-col items-center text-center gap-2 border-emerald-200 bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:border-emerald-800 dark:text-emerald-200">
+					<Alert variant="success"className="flex flex-col items-center text-center gap-2 border-emerald-200 bg-emerald-50 text-emerald-800">
 						<CheckCircle2 className="w-8 h-8 text-emerald-600 mb-1" />
 						<AlertDescription className="text-xs leading-relaxed font-medium">
 							{message || "Alamat email Anda telah berhasil diverifikasi. Silakan masuk ke akun Anda."}

@@ -26,7 +26,7 @@ export const AuthCard = ({
 	children,
 }: AuthCardProps): JSX.Element => {
 	return (
-		<RojaCard className={`flex flex-col gap-6 p-8 md:p-10 w-full max-w-md mx-auto my-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 ${className}`}>
+		<RojaCard className={`flex flex-col gap-6 p-8 md:p-10 w-full max-w-md mx-auto my-8 bg-white rounded-2xl shadow-sm border border-slate-100 ${className}`}>
 			{/* Logo & Header */}
 			<div className="flex flex-col gap-2 items-center text-center">
 				{logoSrc && (
@@ -36,7 +36,7 @@ export const AuthCard = ({
 					{title}
 				</div>
 				{description && (
-					<div className="text-xs text-[var(--body-txt-inverse)] text-slate-500 dark:text-slate-400 m-0 leading-relaxed">
+					<div className="text-xs text-[var(--body-txt-inverse)] text-slate-500 m-0 leading-relaxed">
 						{description}
 					</div>
 				)}
@@ -66,7 +66,7 @@ export const AuthCard = ({
 
 			{/* Footer */}
 			{footer && (
-				<div className="text-center text-xs border-t border-[var(--bg-form-border)] border-slate-100 dark:border-slate-800 pt-4 text-slate-500 dark:text-slate-400">
+				<div className="text-center text-xs border-t border-[var(--bg-form-border)] border-slate-100 pt-4 text-slate-500">
 					{footer}
 				</div>
 			)}

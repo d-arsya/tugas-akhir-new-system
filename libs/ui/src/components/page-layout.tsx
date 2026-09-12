@@ -77,9 +77,9 @@ export const PageLayout = ({
 
 			{/* Redesigned Modern Centered Footer */}
 			{showFooter && (
-				<footer className="w-full bg-white/70 dark:bg-[#17283c]/80 backdrop-blur-md border-t border-[var(--bg-form-border)] py-2 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
+				<footer className="w-full bg-white/70 backdrop-blur-md border-t border-[var(--bg-form-border)] py-2 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
 					<div className="w-full max-w-[1140px] mx-auto px-4 sm:px-6 flex flex-col items-center justify-center gap-2 text-center">
-						<div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+						<div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
 							<span className="w-2 h-2 rounded-full bg-[#e4007e]" />
 							<span>TMQ PONDOK ROJA</span>
 						</div>

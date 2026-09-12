@@ -42,19 +42,19 @@ export const TwoFactorCard = ({
 	}
 
 	return (
-		<RojaCard className={`flex flex-col gap-6 p-8 md:p-10 w-full max-w-md mx-auto my-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 ${className}`}>
+		<RojaCard className={`flex flex-col gap-6 p-8 md:p-10 w-full max-w-md mx-auto my-8 bg-white rounded-2xl shadow-sm border border-slate-100 ${className}`}>
 			{/* Logo & Header */}
 			<div className="flex flex-col gap-2 items-center text-center">
 				<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
 				<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">
 					{title}
 				</div>
-				<div className="text-xs text-[var(--body-txt-inverse)] text-slate-500 dark:text-slate-400 m-0 leading-relaxed">
+				<div className="text-xs text-[var(--body-txt-inverse)] text-slate-500 m-0 leading-relaxed">
 					{description ?? (
 						<>
 							Masukkan 6 digit kode verifikasi yang telah dikirim ke email{" "}
 							{email ? (
-								<strong className="text-slate-700 dark:text-slate-200">{email}</strong>
+								<strong className="text-slate-700">{email}</strong>
 							) : (
 								"Anda"
 							)}
@@ -88,7 +88,7 @@ export const TwoFactorCard = ({
 						value={code}
 						onChange={(e) => setCode(e.target.value)}
 						placeholder="Kode OTP (6 digit)"
-						className="h-12 text-center tracking-widest text-lg font-bold font-mono w-full rounded-xl border-slate-200 dark:border-slate-700"
+						className="h-12 text-center tracking-widest text-lg font-bold font-mono w-full rounded-xl border-slate-200"
 						required
 						autoFocus
 					/>
@@ -107,7 +107,7 @@ export const TwoFactorCard = ({
 
 			{/* Resend Action */}
 			{onResend && (
-				<div className="text-center text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+				<div className="text-center text-xs text-slate-500 border-t border-slate-100 pt-4 flex justify-between items-center">
 					<span>Tidak menerima kode?</span>
 					<Button
 						type="button"

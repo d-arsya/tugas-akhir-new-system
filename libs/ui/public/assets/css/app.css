@@ -307,7 +307,7 @@ strong, b {
 	transform-origin: center;
 }
 
-[anim=ripple].tbr_ripple-dark:before {
+[anim=ripple].tbr_ripple-{
 	background: var(--ripple-background, var(--dark));
 	opacity: calc(var(--o, 1) * var(--ripple-opacity, 0.05));
 }
@@ -575,12 +575,12 @@ strong, b {
 	box-shadow: var(--box-shadow-h-offset) var(--box-shadow-v-offset) var(--box-shadow-blur) rgba(var(--rgb-dark), var(--box-shadow-opacity));
 }
 
-.tbr_btn-dark:hover,
-.tbr_btn-dark:focus,
-.tbr_btn-dark:active,
-.tbr_btn-light-dark:hover,
-.tbr_btn-light-dark:focus,
-.tbr_btn-light-dark:active {
+.tbr_btn-
+.tbr_btn-
+.tbr_btn-
+.tbr_btn-light-
+.tbr_btn-light-
+.tbr_btn-light-{
 	background-color: var(--dark);
 	color: #FFFFFF;
 	transition: all 0.3s ease;

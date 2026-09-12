@@ -251,7 +251,7 @@ export function Calendar({
 					onClick={handleTitleClick}
 					disabled={viewMode === "years"}
 					className={cn(
-						"px-3 py-1 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 transition-all",
+"px-3 py-1 rounded-xl text-xs font-bold text-slate-800 transition-all",
 						viewMode !== "years"
 							? "hover:bg-[#8dc31e]/15 hover:text-[#8dc31e] cursor-pointer"
 							: "cursor-default",
@@ -278,7 +278,7 @@ export function Calendar({
 						{WEEKDAY_NAMES.map((weekday) => (
 							<div
 								key={weekday}
-								className="text-[11px] font-medium italic text-slate-400 dark:text-slate-500 h-6 flex items-center justify-center"
+								className="text-[11px] font-medium italic text-slate-400 h-6 flex items-center justify-center"
 							>
 								{weekday}
 							</div>
@@ -317,8 +317,8 @@ export function Calendar({
 									onClick={() => !isDisabled && handleDayClick(date)}
 									className={cn(
 										"h-8 w-8 mx-auto flex items-center justify-center text-xs font-semibold rounded-xl transition-all cursor-pointer",
-										!isCurrentMonth && "opacity-35 text-slate-400 dark:text-slate-600",
-										isCurrentMonth && "text-slate-700 dark:text-slate-200",
+										!isCurrentMonth &&"opacity-35 text-slate-400",
+										isCurrentMonth &&"text-slate-700",
 										!isSelectedSingle &&
 											!isRangeStart &&
 											!isRangeEnd &&
@@ -337,7 +337,7 @@ export function Calendar({
 										isRangeEnd &&
 											"!bg-[#8dc31e] !text-white font-bold rounded-r-xl rounded-l-none shadow-md shadow-[#8dc31e]/30",
 										isInRange &&
-											"!bg-[#8dc31e]/15 dark:!bg-[#8dc31e]/25 !text-[#4a6b0c] dark:!text-[#a8e038] font-semibold !rounded-none",
+"!bg-[#8dc31e]/15 !text-[#4a6b0c] font-semibold !rounded-none",
 										isDisabled && "pointer-events-none opacity-20 cursor-not-allowed",
 									)}
 								>
@@ -370,7 +370,7 @@ export function Calendar({
 									"h-10 text-xs font-semibold rounded-xl flex items-center justify-center transition-all cursor-pointer",
 									isSelectedMonth
 										? "!bg-[#8dc31e] !text-white font-bold shadow-md shadow-[#8dc31e]/30"
-										: "text-slate-700 dark:text-slate-200 hover:bg-[#8dc31e]/15 hover:text-[#8dc31e]",
+										:"text-slate-700 hover:bg-[#8dc31e]/15 hover:text-[#8dc31e]",
 								)}
 							>
 								{mName}
@@ -397,8 +397,8 @@ export function Calendar({
 								onClick={() => handleYearSelect(year)}
 								className={cn(
 									"h-10 text-xs font-semibold rounded-xl flex items-center justify-center transition-all cursor-pointer",
-									isOutsideDecade && "opacity-40 text-slate-400 dark:text-slate-600",
-									!isOutsideDecade && "text-slate-700 dark:text-slate-200",
+									isOutsideDecade &&"opacity-40 text-slate-400",
+									!isOutsideDecade &&"text-slate-700",
 									isSelectedYear
 										? "!bg-[#8dc31e] !text-white font-bold shadow-md shadow-[#8dc31e]/30"
 										: "hover:bg-[#8dc31e]/15 hover:text-[#8dc31e]",

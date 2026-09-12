@@ -13,7 +13,7 @@ const buttonVariants = cva(
         destructive: "roja_btn roja_btn-danger font-semibold",
         outline: "roja_btn roja_btn-secondary font-semibold",
         secondary: "roja_btn roja_btn-secondary font-semibold",
-        ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100",
+        ghost:"hover:bg-slate-100 hover:text-slate-900",
         link: "text-[var(--primary)] underline-offset-4 hover:underline",
         "roja-primary": "roja_btn roja_btn-primary font-semibold",
         "roja-secondary": "roja_btn roja_btn-secondary font-semibold",

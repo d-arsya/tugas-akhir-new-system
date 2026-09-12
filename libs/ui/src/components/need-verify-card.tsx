@@ -38,14 +38,14 @@ export const NeedVerifyCard = ({
 				<div className="w-14 h-14 rounded-full bg-amber-50 text-[var(--secondary)] flex items-center justify-center border border-amber-200">
 					<Mail className="w-7 h-7 text-[var(--secondary)]" />
 				</div>
-				<div className="text-sm font-bold text-slate-800 dark:text-white tracking-wide m-0">
+				<div className="text-sm font-bold text-slate-800 tracking-wide m-0">
 					{title}
 				</div>
 				<p className="text-xs text-[var(--body-txt-inverse)] leading-relaxed m-0">
 					{description || (
 						<>
 							Akun Anda belum diverifikasi. Silakan periksa kotak masuk email{" "}
-							{email ? <strong className="text-slate-800 dark:text-slate-200">{email}</strong> : "Anda"} dan klik link verifikasi untuk mengaktifkan akun Anda.
+							{email ? <strong className="text-slate-800">{email}</strong> :"Anda"} dan klik link verifikasi untuk mengaktifkan akun Anda.
 						</>
 					)}
 				</p>

@@ -93,7 +93,7 @@ export const LoginCard = ({
 						value={identifier}
 						onChange={(e) => setIdentifier(e.target.value)}
 						placeholder={identifierPlaceholder}
-						className="h-11 text-xs rounded-xl border-slate-200 dark:border-slate-700"
+						className="h-11 text-xs rounded-xl border-slate-200"
 						required
 						autoFocus
 					/>
@@ -106,7 +106,7 @@ export const LoginCard = ({
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						placeholder={passwordPlaceholder}
-						className="h-11 text-xs rounded-xl border-slate-200 dark:border-slate-700"
+						className="h-11 text-xs rounded-xl border-slate-200"
 						required
 					/>
 					<div className="flex justify-between items-center text-xs pt-0.5">
@@ -117,7 +117,7 @@ export const LoginCard = ({
 									checked={remember}
 									onCheckedChange={(checked) => setRemember(Boolean(checked))}
 								/>
-								<label htmlFor="login-remember" className="text-slate-600 dark:text-slate-400 font-medium cursor-pointer text-xs">
+								<label htmlFor="login-remember"className="text-slate-600 font-medium cursor-pointer text-xs">
 									Remember Me
 								</label>
 							</div>

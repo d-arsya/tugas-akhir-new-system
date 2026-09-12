@@ -92,7 +92,7 @@ export const SearchableSelect = React.forwardRef<HTMLButtonElement, SearchableSe
 						sideOffset={4}
 						style={{ width: "var(--radix-popover-trigger-width)", zIndex: 99999 }}
 						className={cn(
-							"w-[var(--radix-popover-trigger-width)] max-w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#17283c] p-2 text-slate-900 dark:text-slate-100 shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
+"w-[var(--radix-popover-trigger-width)] max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 text-slate-900 shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
 							contentClassName,
 						)}
 					>
@@ -107,7 +107,7 @@ export const SearchableSelect = React.forwardRef<HTMLButtonElement, SearchableSe
 									value={searchQuery}
 									onValueChange={setSearchQuery}
 									placeholder={searchPlaceholder}
-									className="flex h-7 w-full rounded-none border-0 border-none bg-transparent p-0 text-xs text-slate-800 dark:text-slate-100 outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:ring-0 focus-visible:outline-none shadow-none placeholder:text-slate-500/80 disabled:cursor-not-allowed disabled:opacity-50"
+									className="flex h-7 w-full rounded-none border-0 border-none bg-transparent p-0 text-xs text-slate-800 outline-none focus:outline-none focus:ring-0 focus:border-none focus-visible:ring-0 focus-visible:outline-none shadow-none placeholder:text-slate-500/80 disabled:cursor-not-allowed disabled:opacity-50"
 								/>
 							</div>
 
@@ -135,7 +135,7 @@ export const SearchableSelect = React.forwardRef<HTMLButtonElement, SearchableSe
 											disabled={Boolean(option.disabled)}
 											onSelect={() => handleSelect(optValueStr)}
 											className={cn(
-												"relative flex cursor-pointer select-none items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium outline-none transition-all duration-150 text-slate-700 dark:text-slate-200",
+"relative flex cursor-pointer select-none items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium outline-none transition-all duration-150 text-slate-700",
 												isSelected && "roja_item_selected",
 												option.disabled && "pointer-events-none opacity-50",
 											)}

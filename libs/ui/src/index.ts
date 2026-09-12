@@ -1,4 +1,3 @@
-export { useDarkMode } from "./hooks/use-dark-mode"
 export { useToast, toast } from "./hooks/use-toast"
 export { cn } from "@roja/utils"
 export { default as PageLoader } from "./components/page-loader"

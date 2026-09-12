@@ -46,16 +46,16 @@ export const PinChallengeGate = ({
 
 	return (
 		<div className="mx-auto w-full">
-			<RojaCard className={`p-8 sm:p-12 text-center shadow-sm rounded-2xl border-slate-100 bg-white dark:bg-[#17283c] ${className}`}>
+			<RojaCard className={`p-8 sm:p-12 text-center shadow-sm rounded-2xl border-slate-100 bg-white ${className}`}>
 				<div className="flex flex-col items-center">
-					<div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center mb-6 shadow-inner">
+					<div className="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center mb-6 shadow-inner">
 						<KeyRound className="w-8 h-8 text-[#e4007e]" />
 					</div>
 
-					<h5 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight">
+					<h5 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
 						{title}
 					</h5>
-					<p className="text-sm text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+					<p className="text-sm text-slate-500 mt-2 max-w-md">
 						{description}
 					</p>
 

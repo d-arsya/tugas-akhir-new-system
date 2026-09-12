@@ -11,7 +11,7 @@ export const RojaCard = React.forwardRef<HTMLDivElement, RojaCardProps>(
 			<div
 				ref={ref}
 				className={cn(
-					"roja_card_wizard relative bg-white/75 dark:bg-[#17283c]/85 backdrop-blur-xl rounded-3xl border border-white/40 dark:border-slate-700/50 shadow-[0_8px_32px_rgba(31,38,135,0.05)] p-8 md:p-12 transition-all duration-300",
+"roja_card_wizard relative bg-white/75 backdrop-blur-xl rounded-3xl border border-white/40 shadow-[0_8px_32px_rgba(31,38,135,0.05)] p-8 md:p-12 transition-all duration-300",
 					className,
 				)}
 				{...props}

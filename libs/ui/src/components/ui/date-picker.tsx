@@ -178,23 +178,23 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 						tabIndex={0}
 						aria-expanded={open}
 						className={cn(
-							"group flex h-10 w-full items-stretch rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#17283c] overflow-hidden cursor-pointer transition-all hover:border-[#8dc31e]/50 dark:hover:border-[#8dc31e]/50",
+"group flex h-10 w-full items-stretch rounded-xl border border-slate-200 bg-white overflow-hidden cursor-pointer transition-all hover:border-[#8dc31e]/50",
 							open && "!border-[#8dc31e] ring-0",
-							disabled && "pointer-events-none opacity-50 bg-slate-50 dark:bg-slate-900",
+							disabled &&"pointer-events-none opacity-50 bg-slate-50",
 							triggerClassName || className,
 						)}
 					>
 						{/* Calendar Icon Left Box */}
 						<div
 							className={cn(
-								"flex items-center justify-center px-3.5 bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-800 transition-colors",
+"flex items-center justify-center px-3.5 bg-slate-50 border-r border-slate-200 transition-colors",
 								(open || displayValue) && "bg-[#8dc31e]/10 text-[#8dc31e] border-r-[#8dc31e]/30",
 							)}
 						>
 							<CalendarIcon
 								className={cn(
-									"h-4 w-4 text-slate-500 dark:text-slate-400 group-hover:text-[#8dc31e] transition-colors",
-									(open || displayValue) && "text-[#8dc31e] dark:text-[#8dc31e]",
+"h-4 w-4 text-slate-500 group-hover:text-[#8dc31e] transition-colors",
+									(open || displayValue) &&"text-[#8dc31e]",
 								)}
 							/>
 						</div>
@@ -205,8 +205,8 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 								className={cn(
 									"truncate",
 									displayValue
-										? "text-slate-800 dark:text-slate-100 font-semibold"
-										: "text-slate-400 dark:text-slate-500 font-normal",
+										?"text-slate-800 font-semibold"
+										:"text-slate-400 font-normal",
 								)}
 							>
 								{displayValue || placeholder || defaultPlaceholder}
@@ -218,7 +218,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 							<div
 								role="button"
 								onClick={handleClear}
-								className="flex items-center justify-center px-2 text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+								className="flex items-center justify-center px-2 text-slate-400 hover:text-rose-500 transition-colors"
 							>
 								<X className="h-3.5 w-3.5" />
 							</div>
@@ -232,7 +232,7 @@ export const DatePicker = React.forwardRef<HTMLDivElement, DatePickerProps>(
 						sideOffset={6}
 						style={{ zIndex: 99999 }}
 						className={cn(
-							"w-auto overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#17283c] p-3 text-slate-900 dark:text-slate-100 shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
+"w-auto overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 text-slate-900 shadow-2xl outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=top]:slide-in-from-bottom-2",
 							contentClassName,
 						)}
 					>

@@ -63,7 +63,7 @@ export const ForgotPasswordCard = ({
 		>
 			{isSubmitSuccessful ? (
 				<div className="text-center py-2 space-y-4">
-					<div className="p-3 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-medium">
+					<div className="p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-medium">
 						{successMsg || "Tautan reset password telah dikirimkan ke email Anda. Silakan periksa kotak masuk atau spam."}
 					</div>
 					<Button
@@ -84,7 +84,7 @@ export const ForgotPasswordCard = ({
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							placeholder={emailPlaceholder}
-							className="h-11 text-xs rounded-xl border-slate-200 dark:border-slate-700"
+							className="h-11 text-xs rounded-xl border-slate-200"
 							required
 							autoFocus
 						/>

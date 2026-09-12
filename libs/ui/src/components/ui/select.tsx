@@ -77,7 +77,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative max-h-96 min-w-[8rem] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#17283c] text-slate-900 dark:text-slate-100 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+"relative max-h-96 min-w-[8rem] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className
@@ -121,7 +121,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-pointer select-none items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium outline-none transition-all duration-150 text-slate-700 dark:text-slate-200 focus:bg-slate-100 dark:focus:bg-slate-800/60 data-[state=checked]:bg-[#8dc31e]/15 dark:data-[state=checked]:bg-[#8dc31e]/25 data-[state=checked]:text-[#8dc31e] dark:data-[state=checked]:text-[#8dc31e] data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+"relative flex w-full cursor-pointer select-none items-center justify-between rounded-xl px-3 py-2.5 text-xs font-medium outline-none transition-all duration-150 text-slate-700 focus:bg-slate-100 data-[state=checked]:bg-[#8dc31e]/15 data-[state=checked]:text-[#8dc31e] data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}

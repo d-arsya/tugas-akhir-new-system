@@ -86,7 +86,7 @@ export const ResetPasswordCard = ({
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						placeholder={passwordPlaceholder}
-						className="h-11 text-xs rounded-xl border-slate-200 dark:border-slate-700"
+						className="h-11 text-xs rounded-xl border-slate-200"
 						required
 						autoFocus
 					/>
@@ -99,7 +99,7 @@ export const ResetPasswordCard = ({
 						value={passwordConfirmation}
 						onChange={(e) => setPasswordConfirmation(e.target.value)}
 						placeholder={confirmPasswordPlaceholder}
-						className="h-11 text-xs rounded-xl border-slate-200 dark:border-slate-700"
+						className="h-11 text-xs rounded-xl border-slate-200"
 						required
 					/>
 				</div>

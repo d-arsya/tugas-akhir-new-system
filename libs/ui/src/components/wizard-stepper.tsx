@@ -77,7 +77,7 @@ export const WizardStepper = ({
 
 			{/* Sub-Wizard Tab Bar (Visible when mainStep >= 2 and subSteps present) */}
 			{mainStep >= 2 && subSteps.length > 0 && (
-				<div className="w-full flex items-center justify-center gap-2 md:gap-6 mt-8 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto">
+				<div className="w-full flex items-center justify-center gap-2 md:gap-6 mt-8 border-b border-slate-200 pb-4 overflow-x-auto">
 					{subSteps.map((tab) => {
 						const Icon = tab.icon
 						const isActive = tab.id === subStep
@@ -88,8 +88,8 @@ export const WizardStepper = ({
 								onClick={() => onStepClick?.(tab.id)}
 								className={`flex items-center gap-2 text-xs md:text-sm font-medium transition-colors py-1.5 px-3 rounded-lg border-b-2 -mb-[17px] cursor-pointer select-none bg-transparent ${
 									isActive
-										? "text-[var(--warning)] border-[var(--warning)] font-bold bg-amber-50/50 dark:bg-amber-950/20"
-										: "text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"
+										?"text-[var(--warning)] border-[var(--warning)] font-bold bg-amber-50/50"
+										:"text-slate-400 border-transparent hover:text-slate-600 hover:bg-slate-50"
 								}`}
 							>
 								{Icon && (

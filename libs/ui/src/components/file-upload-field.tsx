@@ -50,14 +50,14 @@ export const FileUploadField = ({
 	return (
 		<div className={`flex flex-col gap-2 ${className}`}>
 			<Label>{label}</Label>
-			<div className="flex flex-col gap-2 bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+			<div className="flex flex-col gap-2 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
 				<div className="flex items-center gap-4">
 					<Button
 						type="button"
 						variant="outline"
 						size="sm"
 						asChild
-						className="cursor-pointer font-semibold border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+						className="cursor-pointer font-semibold border-slate-300 hover:bg-slate-100"
 					>
 						<label className="flex items-center gap-2 cursor-pointer">
 							<Upload className="w-4 h-4 text-slate-500" />
@@ -70,7 +70,7 @@ export const FileUploadField = ({
 							/>
 						</label>
 					</Button>
-					<span className="text-xs text-slate-600 dark:text-slate-300 font-medium flex items-center gap-1.5 truncate">
+					<span className="text-xs text-slate-600 font-medium flex items-center gap-1.5 truncate">
 						{fileName ? (
 							<>
 								<FileCheck className="w-4 h-4 text-emerald-600 shrink-0" />

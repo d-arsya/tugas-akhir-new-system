@@ -22,7 +22,7 @@ export const PageTitle = ({
 	className = "",
 }: PageTitleProps): JSX.Element => {
 	return (
-		<div className={`w-full bg-white/80 dark:bg-slate-900/80 border-b border-slate-200/80 dark:border-slate-800/80 py-3.5 backdrop-blur-md shadow-xs ${className}`}>
+		<div className={`w-full bg-white/80 border-b border-slate-200/80 py-3.5 backdrop-blur-md shadow-xs ${className}`}>
 			<div className={`${maxWidth} mx-auto px-4 sm:px-6 flex items-center justify-between`}>
 				<h2
 					className="!text-[15px] !text-[#e4007e] !font-bold tracking-tight m-0 p-0"
@@ -50,12 +50,12 @@ export const PageTitle = ({
 									{crumb.to ? (
 										<Link
 											to={crumb.to as any}
-											className="text-slate-600 dark:text-slate-300 hover:text-[var(--primary)] font-medium transition-colors"
+											className="text-slate-600 hover:text-[var(--primary)] font-medium transition-colors"
 										>
 											{crumb.label}
 										</Link>
 									) : (
-										<span className="text-slate-500 dark:text-slate-400 font-normal">
+										<span className="text-slate-500 font-normal">
 											{crumb.label}
 										</span>
 									)}
@@ -65,7 +65,7 @@ export const PageTitle = ({
 								</li>
 							))
 						) : (
-							<li className="text-slate-500 dark:text-slate-400 font-normal">{title}</li>
+							<li className="text-slate-500 font-normal">{title}</li>
 						)}
 					</ol>
 				</nav>
