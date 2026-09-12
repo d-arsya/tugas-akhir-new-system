@@ -35,7 +35,7 @@ export default defineConfig(() => ({
 		nxCopyAssetsPlugin(["*.md"]),
 	],
 	build: {
-		outDir: `../../dist/apps/psb`,
+		outDir: "dist",
 		emptyOutDir: true,
 		reportCompressedSize: true,
 		commonjsOptions: { transformMixedEsModules: true },
