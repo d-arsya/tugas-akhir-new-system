@@ -19,7 +19,7 @@ export class ProfileController {
 	@ApiOperation({ summary: "Informasi profil & data akademis santri" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Informasi profil & data akademis santri",
+		description: "Profil santri berhasil dimuat",
 		type: SantriProfileResponseDto,
 	})
 	async getProfile(@CurrentUser() user: JwtPayload) {

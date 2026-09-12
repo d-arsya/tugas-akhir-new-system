@@ -1,5 +1,5 @@
 import { Logger } from "@nestjs/common"
-import { NestFactory } from "@nestjs/core"
+import { NestFactory, Reflector } from "@nestjs/core"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import { cleanupOpenApiDoc, ZodValidationPipe } from "nestjs-zod"
 import { Logger as PinoLogger } from "nestjs-pino"
@@ -28,7 +28,8 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new HttpExceptionFilter())
 
   // Global interceptors
-  app.useGlobalInterceptors(new TransformInterceptor())
+  const reflector = app.get(Reflector)
+  app.useGlobalInterceptors(new TransformInterceptor(reflector))
 
   // CORS
   app.enableCors({

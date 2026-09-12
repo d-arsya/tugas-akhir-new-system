@@ -25,7 +25,7 @@ export class PaymentHistoryController {
 	@ApiOperation({ summary: "Ringkasan tagihan & pembayaran SPP santri" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Ringkasan tagihan & riwayat pembayaran SPP",
+		description: "Ringkasan tagihan & riwayat pembayaran SPP berhasil dimuat",
 		type: PaymentHistorySummaryDto,
 	})
 	async getSummary(
@@ -39,7 +39,7 @@ export class PaymentHistoryController {
 	@ApiOperation({ summary: "Daftar tagihan SPP santri" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Daftar tagihan SPP santri",
+		description: "Daftar tagihan SPP santri berhasil dimuat",
 		type: PaymentHistoryInvoiceDto,
 		isArray: true,
 	})
@@ -55,7 +55,7 @@ export class PaymentHistoryController {
 	@ApiOperation({ summary: "Rincian tagihan & riwayat transaksi pembayaran SPP" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Rincian tagihan & riwayat transaksi pembayaran SPP",
+		description: "Rincian tagihan & riwayat transaksi pembayaran SPP berhasil dimuat",
 		type: PaymentHistoryInvoiceDetailDto,
 	})
 	async getInvoiceDetail(

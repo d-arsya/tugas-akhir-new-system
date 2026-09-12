@@ -23,7 +23,7 @@ export class MerchantTransactionHistoryController {
 	@ApiOperation({ summary: "Riwayat semua transaksi merchant (Menunggu, Berhasil, Dibatalkan)" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Daftar transaksi merchant",
+		description: "Daftar transaksi merchant berhasil dimuat",
 		type: MerchantTransactionListItemDto,
 		isArray: true,
 	})
@@ -38,7 +38,7 @@ export class MerchantTransactionHistoryController {
 	@ApiOperation({ summary: "Detail transaksi merchant" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Detail transaksi merchant",
+		description: "Detail transaksi merchant berhasil dimuat",
 		type: TransactionDetailResponseDto,
 	})
 	async getTransactionDetail(
@@ -52,7 +52,7 @@ export class MerchantTransactionHistoryController {
 	@ApiOperation({ summary: "Riwayat penjualan merchant (hanya status valid/berhasil)" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Daftar riwayat penjualan merchant",
+		description: "Daftar riwayat penjualan merchant berhasil dimuat",
 		type: MerchantTransactionListItemDto,
 		isArray: true,
 	})
@@ -67,7 +67,7 @@ export class MerchantTransactionHistoryController {
 	@ApiOperation({ summary: "Detail riwayat penjualan merchant" })
 	@ApiResponseWrapped({
 		status: 200,
-		description: "Detail riwayat penjualan merchant",
+		description: "Detail riwayat penjualan merchant berhasil dimuat",
 		type: TransactionDetailResponseDto,
 	})
 	async getPurchaseHistoryDetail(

@@ -1,5 +1,6 @@
-import { applyDecorators, Type } from "@nestjs/common"
+import { applyDecorators, SetMetadata, Type } from "@nestjs/common"
 import { ApiExtraModels, ApiResponse, getSchemaPath } from "@nestjs/swagger"
+import { RESPONSE_MESSAGE_KEY } from "./response-message.decorator"
 
 export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 	status: number
@@ -28,7 +29,7 @@ export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 
 	const properties: any = {
 		success: { type: "boolean", example: true },
-		message: { type: "string", example: "OK" },
+		message: { type: "string", example: options.description || "Operasi berhasil" },
 		data: dataSchema,
 	}
 
@@ -56,6 +57,7 @@ export const ApiResponseWrapped = <TModel extends Type<any>>(options: {
 
 	if (options.description !== undefined) {
 		apiResponseOptions.description = options.description
+		decorators.push(SetMetadata(RESPONSE_MESSAGE_KEY, options.description))
 	}
 
 	decorators.push(ApiResponse(apiResponseOptions))
