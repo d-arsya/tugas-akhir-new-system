@@ -32,7 +32,7 @@ export default defineConfig(() => ({
 		react(),
 		tailwindcss(),
 		nxViteTsPaths(),
-		nxCopyAssetsPlugin(["*.md", "vercel.json"]),
+		nxCopyAssetsPlugin(["*.md"]),
 	],
 	build: {
 		outDir: `../../dist/apps/psb`,
