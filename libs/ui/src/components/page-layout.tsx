@@ -28,9 +28,9 @@ export const PageLayout = ({
 	maxWidth = "max-w-[1140px]",
 	useCardWrapper = false,
 	showFooter = true,
-	footerText = "© Copyright 2026 TMQ (TARBIYYATU MUHAFFIZHATIL QUR'AN) PONDOK ROJA. All Rights Reserved.",
+	footerText = "© Copyright 2026",
 	version = "1.1.2",
-	showVersion = true,
+	showVersion = false,
 	showBlobs = true,
 	className,
 	mainClassName,
@@ -52,7 +52,7 @@ export const PageLayout = ({
 			{showBlobs && <div className="roja_bg_blobs" />}
 
 			{/* Full Width Top Banner Strip */}
-			{topBanner && <div className="w-full relative z-10">{topBanner}</div>}
+			{topBanner && <div className="w-full relative z-10 -mt-5">{topBanner}</div>}
 
 			{/* Main Content Area: Supports "top" (flow from top) or "center" (vertically centered) */}
 			<main
@@ -77,13 +77,11 @@ export const PageLayout = ({
 
 			{/* Redesigned Modern Centered Footer */}
 			{showFooter && (
-				<footer className="w-full bg-white/70 dark:bg-[#17283c]/80 backdrop-blur-md border-t border-[var(--bg-form-border)] py-6 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
+				<footer className="w-full bg-white/70 dark:bg-[#17283c]/80 backdrop-blur-md border-t border-[var(--bg-form-border)] py-2 mt-auto relative z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]">
 					<div className="w-full max-w-[1140px] mx-auto px-4 sm:px-6 flex flex-col items-center justify-center gap-2 text-center">
 						<div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
 							<span className="w-2 h-2 rounded-full bg-[#e4007e]" />
 							<span>TMQ PONDOK ROJA</span>
-							<span className="text-[#abb4be] font-normal">•</span>
-							<span className="text-[11px] font-normal text-[#abb4be]">Tarbiyyatu Muhaffizhatil Qur'an</span>
 						</div>
 						<p className="text-[11px] text-[#abb4be] font-medium leading-relaxed m-0 max-w-2xl">
 							{footerText}

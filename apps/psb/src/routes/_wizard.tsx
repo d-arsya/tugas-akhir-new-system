@@ -1,7 +1,7 @@
 import type { JSX } from "react"
 import { createFileRoute, redirect, Outlet } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import PageLayout from "@/components/page-layout"
+import { PageLayout, RojaHeader } from "@roja/ui"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 export const Route = createFileRoute("/_wizard")({
@@ -15,7 +15,11 @@ export const Route = createFileRoute("/_wizard")({
 
 	component: (): JSX.Element => {
 		return (
-			<PageLayout maxWidth="max-w-5xl" useCardWrapper>
+			<PageLayout
+				header={<RojaHeader roleLabel="PENDAFTAR" isAuthenticated={false} />}
+				maxWidth="max-w-5xl"
+				useCardWrapper
+			>
 				<Outlet />
 			</PageLayout>
 		)

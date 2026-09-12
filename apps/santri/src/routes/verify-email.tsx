@@ -2,9 +2,8 @@ import type { JSX } from "react"
 import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { santriApi } from "@/lib/api"
-import PageLayout from "@/components/page-layout"
 import { z } from "zod"
-import { VerifyEmailCard } from "@roja/ui"
+import { VerifyEmailCard, PageLayout, RojaHeader } from "@roja/ui"
 
 const searchSchema = z.object({
 	id: z.coerce.number().optional(),
@@ -41,7 +40,7 @@ const VerifyEmailPage = (): JSX.Element => {
 	}, [search?.hash, search?.token, search?.id])
 
 	return (
-		<PageLayout maxWidth="max-w-md" variant="center">
+		<PageLayout header={<RojaHeader roleLabel="SANTRI" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
 			<VerifyEmailCard
 				status={status}
 				message={message}

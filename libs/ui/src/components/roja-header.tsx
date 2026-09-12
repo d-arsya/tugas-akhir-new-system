@@ -1,7 +1,7 @@
 import type { JSX, ReactNode } from "react"
 import { useState, useEffect } from "react"
 import { Link } from "@tanstack/react-router"
-import { LogIn, LogOut, Settings, LayoutDashboard, ChevronDown, User } from "lucide-react"
+import { LogIn, LogOut, Settings, LayoutDashboard, ChevronDown, User, ClipboardList, Wallet } from "lucide-react"
 import { Button } from "./ui/button"
 import {
 	DropdownMenu,
@@ -30,6 +30,87 @@ export interface RojaHeaderProps {
 	menuItems?: RojaHeaderMenuItem[]
 	onLogout?: () => void | Promise<void>
 	className?: string
+}
+
+const getRoleMenuItems = (roleLabel: string): RojaHeaderMenuItem[] => {
+	const normalized = roleLabel.toUpperCase()
+	if (normalized === "SANTRI") {
+		return [
+			{
+				label: "Dashboard",
+				href: "/dashboard",
+				icon: <LayoutDashboard className="w-4 h-4 text-[#e4007e]" />,
+			},
+			{
+				label: "Pembayaran Santri",
+				href: "/payment-history",
+				icon: <ClipboardList className="w-4 h-4 text-[#e4007e]" />,
+			},
+			{
+				label: "Dompet Digital",
+				href: "/e-wallet",
+				icon: <Wallet className="w-4 h-4 text-[#6866e9]" />,
+			},
+			{
+				label: "Profil Saya",
+				href: "/profile",
+				icon: <User className="w-4 h-4 text-[#ffa800]" />,
+			},
+			{
+				label: "Pengaturan",
+				href: "/setting",
+				icon: <Settings className="w-4 h-4 text-[#8dc31e]" />,
+			},
+		]
+	}
+
+	if (normalized === "MERCHANT") {
+		return [
+			{
+				label: "Profil Saya",
+				href: "/profile",
+				icon: <User className="w-4 h-4 text-[#ffa800]" />,
+			},
+			{
+				label: "Pengaturan",
+				href: "/setting",
+				icon: <Settings className="w-4 h-4 text-[#8dc31e]" />,
+			},
+			{
+				label: "Dompet Digital",
+				href: "/e-wallet",
+				icon: <Wallet className="w-4 h-4 text-[#6866e9]" />,
+			},
+		]
+	}
+
+	if (normalized === "PENDAFTAR" || normalized === "PSB") {
+		return [
+			{
+				label: "Dashboard",
+				href: "/dashboard",
+				icon: <LayoutDashboard className="w-4 h-4 text-[#e4007e]" />,
+			},
+			{
+				label: "Pengaturan Akun",
+				href: "/settings",
+				icon: <Settings className="w-4 h-4 text-[#8dc31e]" />,
+			},
+		]
+	}
+
+	return [
+		{
+			label: "Dashboard",
+			href: "/dashboard",
+			icon: <LayoutDashboard className="w-4 h-4 text-[#e4007e]" />,
+		},
+		{
+			label: "Pengaturan",
+			href: "/settings",
+			icon: <Settings className="w-4 h-4 text-[#8dc31e]" />,
+		},
+	]
 }
 
 export const RojaHeader = ({
@@ -75,22 +156,9 @@ export const RojaHeader = ({
 	}, [])
 
 	const userDisplayName = user?.name || user?.fullname || user?.email || "Account"
-	const resolvedHomeHref = homeHref || (isAuthenticated ? "/dashboard" : "/")
+	const resolvedHomeHref = homeHref || (isAuthenticated ? (roleLabel.toUpperCase() === "MERCHANT" ? "/profile" : "/dashboard") : (roleLabel.toUpperCase() === "PENDAFTAR" ? "/" : "/login"))
 
-	const defaultMenuItems: RojaHeaderMenuItem[] = [
-		{
-			label: "Dashboard",
-			href: "/dashboard",
-			icon: <LayoutDashboard className="w-4 h-4 text-[#e4007e]" />,
-		},
-		{
-			label: "Pengaturan",
-			href: roleLabel === "SANTRI" ? "/setting" : "/settings",
-			icon: <Settings className="w-4 h-4 text-[#8dc31e]" />,
-		},
-	]
-
-	const activeMenuItems = menuItems || defaultMenuItems
+	const activeMenuItems = menuItems || getRoleMenuItems(roleLabel)
 
 	return (
 		<header className={`roja_header ${isScrolled ? "scrolled" : ""} ${className}`}>

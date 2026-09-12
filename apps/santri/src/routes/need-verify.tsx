@@ -2,9 +2,8 @@ import type { JSX } from "react"
 import { createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { santriApi } from "@/lib/api"
-import PageLayout from "@/components/page-layout"
 import { z } from "zod"
-import { NeedVerifyCard } from "@roja/ui"
+import { NeedVerifyCard, PageLayout, RojaHeader } from "@roja/ui"
 import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const searchSchema = z.object({
@@ -37,7 +36,7 @@ const NeedVerifyPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md">
+		<PageLayout header={<RojaHeader roleLabel="SANTRI" isAuthenticated={false} />} maxWidth="max-w-md">
 			<NeedVerifyCard
 				email={email}
 				description={`Akun santri Anda belum diverifikasi. Silakan periksa kotak masuk email ${

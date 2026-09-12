@@ -1,9 +1,9 @@
 import type { JSX } from "react"
-import { createFileRoute, redirect, Outlet, useLocation } from "@tanstack/react-router"
+import { createFileRoute, redirect, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import PageLayout from "@/components/page-layout"
+import { santriApi } from "@/lib/api"
+import { PageLayout, RojaHeader, PageTitle } from "@roja/ui"
 import Sidebar from "@/components/layout/Sidebar"
-import PageTitle from "@/components/layout/PageTitle"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 const getTitleFromPath = (pathname: string): string => {
@@ -77,11 +77,27 @@ export const Route = createFileRoute("/_member")({
 
 	component: (): JSX.Element => {
 		const location = useLocation()
+		const auth = useAuthStore()
+		const navigate = useNavigate()
 		const title = getTitleFromPath(location.pathname)
 		const breadcrumbs = getBreadcrumbsFromPath(location.pathname)
 
+		const handleLogout = async (): Promise<void> => {
+			await santriApi.logout()
+			auth.logout()
+			navigate({ to: "/login" })
+		}
+
 		return (
 			<PageLayout
+				header={
+					<RojaHeader
+						user={auth.user}
+						roleLabel="SANTRI"
+						isAuthenticated={auth.isAuthenticated}
+						onLogout={handleLogout}
+					/>
+				}
 				showFooter={true}
 				topBanner={<PageTitle title={title} breadcrumbs={breadcrumbs} />}
 			>

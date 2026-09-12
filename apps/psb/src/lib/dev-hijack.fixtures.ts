@@ -8,7 +8,18 @@ export const hijackAuthUser: AuthUser = {
 	domain: "psb",
 }
 
-export type DashboardScenario = "wait" | "fixed" | "invalid" | "approve" | "failed" | "indent_failed"
+export type DashboardScenario =
+	| "wait"
+	| "fixed"
+	| "invalid"
+	| "data_valid"
+	| "regular_test_passed"
+	| "regular_test_failed"
+	| "indent_test_passed"
+	| "indent_failed"
+	| "reserve"
+	| "approve"
+	| "failed"
 
 export const mockRegistrantBase = {
 	id: 999,
@@ -16,9 +27,14 @@ export const mockRegistrantBase = {
 	fullname: "Ahmad Mujtaba",
 	fullName: "Ahmad Mujtaba",
 	email: "calonsantri@pondokroja.ac.id",
+	nis: "2026090999",
 	levelId: 1,
+	registrationPath: "reguler",
 	dataValidation: "valid" as const,
 	dataValidationNote: "",
+	indentTest: null,
+	regularTest: null,
+	testAnnouncement: null,
 	approvalStatus: "wait" as const,
 }
 
@@ -26,14 +42,14 @@ export const mockDashboardData: Record<DashboardScenario, any> = {
 	wait: {
 		registrant: {
 			...mockRegistrantBase,
-			dataValidation: "valid",
+			dataValidation: null,
 			approvalStatus: "wait",
 		},
 		announcement: null,
 		statusInfo: {
 			status: "wait",
 			label: "Menunggu Verifikasi",
-			description: "Data Anda sedang diverifikasi oleh panitia PSB.",
+			description: "Data dan berkas pendaftaran Anda sedang dalam antrean verifikasi oleh panitia PSB.",
 		},
 	},
 	fixed: {
@@ -61,6 +77,93 @@ export const mockDashboardData: Record<DashboardScenario, any> = {
 			status: "invalid",
 			label: "Data / Berkas Tidak Valid",
 			description: "Panitia menemukan beberapa data/berkas yang tidak valid. Silakan lakukan perbaikan data.",
+		},
+	},
+	data_valid: {
+		registrant: {
+			...mockRegistrantBase,
+			dataValidation: "valid",
+			approvalStatus: "wait",
+		},
+		announcement: null,
+		statusInfo: {
+			status: "data_valid",
+			label: "Berkas Terverifikasi",
+			description: "Data dan berkas Anda telah terverifikasi (Valid). Silakan persiapkan diri untuk tahapan tes seleksi.",
+		},
+	},
+	regular_test_passed: {
+		registrant: {
+			...mockRegistrantBase,
+			dataValidation: "valid",
+			regularTest: "success",
+			approvalStatus: "wait",
+		},
+		announcement: null,
+		statusInfo: {
+			status: "regular_test_passed",
+			label: "Lolos Tes Seleksi",
+			description: "Selamat! Anda dinyatakan lolos tes seleksi reguler. Menunggu penetapan pengumuman kelulusan akhir.",
+		},
+	},
+	regular_test_failed: {
+		registrant: {
+			...mockRegistrantBase,
+			dataValidation: "valid",
+			regularTest: "failed",
+			approvalStatus: "wait",
+		},
+		announcement: null,
+		statusInfo: {
+			status: "regular_test_failed",
+			label: "Hasil Tes Perlu Evaluasi",
+			description:
+				"Hasil tes seleksi reguler belum mencapai nilai ambang kelulusan langsung dan sedang dalam peninjauan sidang pleno dewan penguji untuk penetapan keputusan akhir.",
+		},
+	},
+	indent_test_passed: {
+		registrant: {
+			...mockRegistrantBase,
+			registrationPath: "indent",
+			dataValidation: "valid",
+			indentTest: "success",
+			approvalStatus: "wait",
+		},
+		announcement: null,
+		statusInfo: {
+			status: "indent_test_passed",
+			label: "Lolos Tes Indent",
+			description: "Selamat! Anda telah lulus tes seleksi jalur indent. Menunggu penetapan pengumuman kelulusan akhir.",
+		},
+	},
+	indent_failed: {
+		registrant: {
+			...mockRegistrantBase,
+			registrationPath: "indent",
+			dataValidation: "valid",
+			indentTest: "failed",
+			approvalStatus: "wait",
+		},
+		announcement: {
+			failedIndentTestDesc: "Hasil tes indent menyatakan calon santri belum memenuhi kriteria minimal pembacaan Al-Qur'an dan hafalan dasar. Anda masih dapat berkesempatan mengikuti tes jalur reguler.",
+		},
+		statusInfo: {
+			status: "indent_failed",
+			label: "Tes Indent Belum Lulus",
+			description: "Hasil tes indent pendaftaran santri baru menyatakan Anda belum lulus.",
+		},
+	},
+	reserve: {
+		registrant: {
+			...mockRegistrantBase,
+			dataValidation: "valid",
+			approvalStatus: "reserve",
+		},
+		announcement: null,
+		statusInfo: {
+			status: "reserve",
+			label: "Cadangan",
+			description: "Anda masuk dalam daftar cadangan santri baru. Panitia akan menginformasikan jika terdapat kuota yang tersedia.",
 		},
 	},
 	approve: {
@@ -95,21 +198,6 @@ export const mockDashboardData: Record<DashboardScenario, any> = {
 			status: "failed",
 			label: "Belum Diterima",
 			description: "Mohon maaf, Anda belum berhasil lulus pada seleksi PSB periode ini.",
-		},
-	},
-	indent_failed: {
-		registrant: {
-			...mockRegistrantBase,
-			dataValidation: "valid",
-			approvalStatus: "indent failed",
-		},
-		announcement: {
-			failedIndentTestDesc: "Hasil tes indent menyatakan calon santri belum memenuhi kriteria minimal pembacaan Al-Qur'an dan hafalan dasar.",
-		},
-		statusInfo: {
-			status: "indent_failed",
-			label: "Tes Indent Belum Lulus",
-			description: "Hasil tes indent pendaftaran santri baru menyatakan Anda belum lulus.",
 		},
 	},
 }

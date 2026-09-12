@@ -6,8 +6,7 @@ import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
 import { useNavigate, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import PageLayout from "@/components/page-layout"
-import { TwoFactorCard } from "@roja/ui"
+import { TwoFactorCard, PageLayout, RojaHeader } from "@roja/ui"
 import { isDevHijackMode, mockSantriAuth } from "@/lib/dev-hijack"
 
 const Verify2faPage = (): JSX.Element => {
@@ -78,7 +77,7 @@ const Verify2faPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md" variant="center">
+		<PageLayout header={<RojaHeader roleLabel="SANTRI" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
 			<TwoFactorCard
 				email={email}
 				title="Verifikasi Dua Faktor (2FA)"

@@ -2,9 +2,8 @@ import type { JSX } from "react"
 import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useEffect, useState, useRef } from "react"
 import { psbApi } from "@/lib/api"
-import PageLayout from "@/components/page-layout"
 import { z } from "zod"
-import { VerifyEmailCard } from "@roja/ui"
+import { VerifyEmailCard, PageLayout, RojaHeader } from "@roja/ui"
 
 const searchSchema = z.object({
 	token: z.string().optional(),
@@ -43,7 +42,7 @@ const VerifyEmailPage = (): JSX.Element => {
 	}, [search?.token, search?.email])
 
 	return (
-		<PageLayout maxWidth="max-w-md" variant="center">
+		<PageLayout header={<RojaHeader roleLabel="PENDAFTAR" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
 			<VerifyEmailCard
 				status={status}
 				message={message}

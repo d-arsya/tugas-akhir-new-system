@@ -1,23 +1,19 @@
 import type { JSX } from "react"
-import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
-import { AlertTriangle, Download, CheckCircle } from "lucide-react"
+import { Download } from "lucide-react"
 import {
 	Button,
-	Badge,
-	Alert,
-	AlertTitle,
-	AlertDescription,
 	Skeleton,
 	RojaCard,
 } from "@roja/ui"
+import { PsbJourneyTracker } from "@/components/dashboard/PsbJourneyTracker"
+import { StatusHeroCard } from "@/components/dashboard/StatusHeroCard"
 import { AnnouncementResultCard } from "@/components/dashboard/AnnouncementResultCard"
 import PageHeader from "@/components/page-header"
 
 const DashboardPage = (): JSX.Element => {
-	const navigate = useNavigate()
-
 	const { data, isLoading } = useQuery({
 		queryKey: ["dashboard"],
 		queryFn: () => psbApi.getDashboard(),
@@ -33,6 +29,7 @@ const DashboardPage = (): JSX.Element => {
 					</div>
 					<Skeleton className="h-10 w-36 rounded-lg" />
 				</div>
+				<Skeleton className="h-24 w-full rounded-2xl" />
 				<Skeleton className="h-40 w-full rounded-2xl" />
 			</RojaCard>
 		)
@@ -42,11 +39,25 @@ const DashboardPage = (): JSX.Element => {
 	const announcement = data?.announcement
 	const statusInfo = data?.statusInfo
 
-	// Determine active status: statusInfo.status -> reg.dataValidation -> reg.approvalStatus
-	let rawStatus =
-		statusInfo?.status ||
-		(reg?.dataValidation && reg.dataValidation !== "valid" ? reg.dataValidation : reg?.approvalStatus) ||
-		"wait"
+	// Determine active status: statusInfo.status -> fallback resolution
+	let rawStatus = statusInfo?.status
+	if (!rawStatus) {
+		if (reg?.approvalStatus && reg.approvalStatus !== "wait") {
+			rawStatus = reg.approvalStatus
+		} else if (reg?.dataValidation && reg.dataValidation !== "valid") {
+			rawStatus = reg.dataValidation
+		} else if (reg?.registrationPath === "indent") {
+			if (reg?.indentTest === "failed" && !reg?.regularTest) rawStatus = "indent_failed"
+			else if (reg?.indentTest === "success") rawStatus = "indent_test_passed"
+			else if (reg?.dataValidation === "valid") rawStatus = "data_valid"
+			else rawStatus = "wait"
+		} else {
+			if (reg?.regularTest === "success") rawStatus = "regular_test_passed"
+			else if (reg?.regularTest === "failed") rawStatus = "regular_test_failed"
+			else if (reg?.dataValidation === "valid") rawStatus = "data_valid"
+			else rawStatus = "wait"
+		}
+	}
 	if (rawStatus === "reject") rawStatus = "failed"
 	const status = rawStatus === "indent failed" ? "indent_failed" : rawStatus
 	const validationNote = statusInfo?.description || reg?.dataValidationNote
@@ -64,7 +75,7 @@ const DashboardPage = (): JSX.Element => {
 	const registrantIdParam = reg?.id ? String(reg.id) : ""
 
 	const printAction = registrantIdParam ? (
-		<Button asChild variant="roja-primary" size="sm">
+		<Button asChild variant="roja-primary" size="sm" className="shadow-xs font-semibold">
 			<Link
 				to="/print/$type/$registrantId"
 				params={{ type: printType, registrantId: registrantIdParam }}
@@ -77,86 +88,42 @@ const DashboardPage = (): JSX.Element => {
 		</Button>
 	) : undefined
 
+	const isFinalAnnouncement = status === "approve" || status === "failed" || status === "indent_failed"
+
 	return (
-		<RojaCard className="w-full flex flex-col gap-8 p-6 md:p-8">
+		<RojaCard className="w-full flex flex-col gap-6 md:gap-7 p-6 md:p-8">
 			<PageHeader
-				title={`Hallo, ${reg?.fullname || reg?.fullName || ""}`}
+				title={`Assalaamu'alaikum, ${reg?.fullname || reg?.fullName || ""}`}
 				subtitle={
 					reg ? `ID: ${reg.registrantId || "-"}  •  Jenjang: ${levelLabel}` : undefined
 				}
 				action={printAction}
 			/>
 
-			{/* Status Scenario Content */}
+			{/* 1. Admission Journey Progress Tracker */}
+			<PsbJourneyTracker
+				status={status}
+				registrationPath={reg?.registrationPath}
+				dataValidation={reg?.dataValidation}
+				regularTest={reg?.regularTest}
+				indentTest={reg?.indentTest}
+				approvalStatus={reg?.approvalStatus}
+			/>
 
-			{/* 1. Wait (Menunggu Verifikasi) */}
-			{(status === "wait" || status === "reserve") && (
-				<Alert variant="default" className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center p-6 border-slate-200 bg-slate-50/50">
-					<div className="lg:col-span-7 flex flex-col gap-3">
-						<div className="flex items-center gap-2">
-							<Badge variant="wait">Menunggu Verifikasi</Badge>
-							<AlertTitle className="text-sm font-bold text-slate-800 m-0">
-								Status Pendaftaran: In Review
-							</AlertTitle>
-						</div>
-						<AlertDescription className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
-							Data kamu sedang kami proses, mohon menunggu. Informasi penerimaan dan jika ada kelengkapan data akan kami tampilkan pada halaman ini.
-						</AlertDescription>
-					</div>
-					<div className="lg:col-span-5 flex justify-center items-center">
-						<img
-							src="/assets/svg/illustration/No-Activity.svg"
-							alt="Status Review"
-							className="max-w-xs w-full h-auto object-contain select-none pointer-events-none"
-						/>
-					</div>
-				</Alert>
+			{/* 2. Status Hero Card (Untuk status selain Final Announcement Card) */}
+			{!isFinalAnnouncement && (
+				<StatusHeroCard
+					status={status}
+					validationNote={validationNote}
+					registrationPath={reg?.registrationPath}
+					registrantName={reg?.fullname || reg?.fullName}
+				/>
 			)}
 
-			{/* 2. Fixed (Data Telah Diperbaiki) */}
-			{status === "fixed" && (
-				<Alert variant="info" className="flex flex-col gap-2 p-6">
-					<div className="flex items-center gap-2.5 font-bold text-sm">
-						<CheckCircle className="w-5 h-5 shrink-0" />
-						<span>Perbaikan Data Tersimpan</span>
-					</div>
-					<AlertDescription className="text-xs md:text-sm leading-relaxed font-medium">
-						Kamu berhasil melakukan update data. Silakan tunggu keputusan selanjutnya dari admin kami. Semoga proses pendaftaran kamu berjalan lancar ya.
-					</AlertDescription>
-				</Alert>
+			{/* 3. Final Announcement Result Card (Approve / Failed / Indent Failed) */}
+			{isFinalAnnouncement && (
+				<AnnouncementResultCard status={status} announcement={announcement} nis={reg?.nis} />
 			)}
-
-			{/* 3. Invalid (Data / Berkas Tidak Valid) */}
-			{status === "invalid" && (
-				<Alert variant="warning" className="flex flex-col gap-4 p-6">
-					<div className="flex items-center gap-2.5 font-bold text-sm">
-						<AlertTriangle className="w-5 h-5 shrink-0" />
-						<span>Data / Berkas Tidak Valid!</span>
-					</div>
-					<AlertDescription className="text-xs leading-relaxed font-medium flex flex-col gap-3">
-						<span>Panitia menemukan bahwa beberapa data/berkas yang Anda unggah tidak valid. Silakan lakukan perbaikan data.</span>
-						{validationNote && (
-							<div
-								className="bg-white/90 p-3.5 rounded-xl border border-amber-200 text-xs italic text-amber-900"
-								dangerouslySetInnerHTML={{ __html: validationNote }}
-							/>
-						)}
-					</AlertDescription>
-					<div>
-						<Button
-							onClick={() => navigate({ to: "/invalid" })}
-							variant="roja-warning"
-							size="sm"
-							className="font-bold"
-						>
-							Perbaiki Data Saya
-						</Button>
-					</div>
-				</Alert>
-			)}
-
-			{/* 4/5/6. Announcement Result Card (Approve / Failed / Indent Failed) */}
-			<AnnouncementResultCard status={status} announcement={announcement} />
 		</RojaCard>
 	)
 }

@@ -5,8 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { santriApi } from "@/lib/api"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import PageLayout from "@/components/page-layout"
-import { Button, Input, AuthCard } from "@roja/ui"
+import { Button, Input, AuthCard, PageLayout, RojaHeader } from "@roja/ui"
 import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const schema = z.object({
@@ -49,7 +48,7 @@ const CheckEmailPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md" variant="center">
+		<PageLayout header={<RojaHeader roleLabel="SANTRI" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
 			<AuthCard
 				title="Tambahkan Email"
 				description="Jika suatu saat kamu ingin memulihkan akun, kami memerlukan alamat email kamu."

@@ -2,9 +2,8 @@ import type { JSX } from "react"
 import { createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { psbApi } from "@/lib/api"
-import PageLayout from "@/components/page-layout"
 import { z } from "zod"
-import { NeedVerifyCard } from "@roja/ui"
+import { NeedVerifyCard, PageLayout, RojaHeader } from "@roja/ui"
 
 const searchSchema = z.object({
 	email: z.string().optional(),
@@ -36,7 +35,7 @@ const NeedVerifyPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout maxWidth="max-w-md" variant="center">
+		<PageLayout header={<RojaHeader roleLabel="PENDAFTAR" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
 			<NeedVerifyCard
 				email={email}
 				description={`Akun pendaftaran Anda belum diverifikasi. Silakan periksa kotak masuk email ${

@@ -15,12 +15,17 @@ import { CheckCircle2, ListOrdered } from "lucide-react"
 import { DevHijackPanel as BaseDevHijackPanel, type DevHijackRoute } from "@roja/ui"
 
 const scenarios: Array<{ id: DashboardScenario; label: string }> = [
-	{ id: "approve", label: "Lulus / Diterima" },
-	{ id: "wait", label: "Menunggu" },
-	{ id: "fixed", label: "Perbaikan" },
+	{ id: "wait", label: "Menunggu Berkas" },
 	{ id: "invalid", label: "Berkas Invalid" },
-	{ id: "failed", label: "Belum Lulus" },
-	{ id: "indent_failed", label: "Indent Gagal" },
+	{ id: "fixed", label: "Perbaikan Berkas" },
+	{ id: "data_valid", label: "Berkas Valid" },
+	{ id: "regular_test_passed", label: "Lolos Tes Reguler" },
+	{ id: "regular_test_failed", label: "Gagal Tes Reguler" },
+	{ id: "indent_test_passed", label: "Lolos Tes Indent" },
+	{ id: "indent_failed", label: "Gagal Tes Indent" },
+	{ id: "reserve", label: "Cadangan" },
+	{ id: "approve", label: "Lulus / Diterima" },
+	{ id: "failed", label: "Tidak Diterima" },
 ]
 
 const wizardSteps = [

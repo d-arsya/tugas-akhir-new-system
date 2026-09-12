@@ -1,8 +1,8 @@
 import type { JSX } from "react"
-import { createFileRoute, redirect, Outlet, useLocation } from "@tanstack/react-router"
+import { createFileRoute, redirect, Outlet, useLocation, useNavigate } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import PageLayout from "@/components/page-layout"
-import { PageTitle } from "@roja/ui"
+import { psbApi } from "@/lib/api"
+import { PageTitle, PageLayout, RojaHeader } from "@roja/ui"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 const getTitleFromPath = (pathname: string): string => {
@@ -31,11 +31,27 @@ export const Route = createFileRoute("/_member")({
 
 	component: (): JSX.Element => {
 		const location = useLocation()
+		const auth = useAuthStore()
+		const navigate = useNavigate()
 		const title = getTitleFromPath(location.pathname)
 		const breadcrumbs = getBreadcrumbsFromPath(location.pathname)
 
+		const handleLogout = async (): Promise<void> => {
+			await psbApi.logout()
+			auth.logout()
+			navigate({ to: "/login" })
+		}
+
 		return (
 			<PageLayout
+				header={
+					<RojaHeader
+						user={auth.user}
+						roleLabel="PENDAFTAR"
+						isAuthenticated={auth.isAuthenticated}
+						onLogout={handleLogout}
+					/>
+				}
 				maxWidth="max-w-6xl"
 				showFooter
 				topBanner={<PageTitle title={title} breadcrumbs={breadcrumbs} />}

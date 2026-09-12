@@ -3,8 +3,7 @@ import { useNavigate, useParams, Link, createFileRoute } from "@tanstack/react-r
 import { psbApi } from "@/lib/api"
 import { useQuery } from "@tanstack/react-query"
 import useAuthStore from "@/stores/auth.store"
-import PageLayout from "@/components/page-layout"
-import { Button, RojaCard } from "@roja/ui"
+import { Button, RojaCard, PageLayout, RojaHeader } from "@roja/ui"
 import { Mail, CheckCircle2, Printer, LayoutDashboard } from "lucide-react"
 
 const SuccessPage = (): JSX.Element => {
@@ -19,9 +18,11 @@ const SuccessPage = (): JSX.Element => {
 		enabled: !!currentUserId,
 	})
 
+	const header = <RojaHeader roleLabel="PENDAFTAR" isAuthenticated={false} />
+
 	if (isLoading) {
 		return (
-			<PageLayout>
+			<PageLayout header={header}>
 				<div className="min-h-[60vh] flex items-center justify-center text-xs font-medium text-muted-foreground">
 					Memuat data...
 				</div>
@@ -30,7 +31,7 @@ const SuccessPage = (): JSX.Element => {
 	}
 
 	return (
-		<PageLayout>
+		<PageLayout header={header}>
 			<main className="flex-1 relative z-10 px-4 py-8 max-w-xl mx-auto w-full flex items-center justify-center">
 				<RojaCard className="w-full p-8 md:p-10 flex flex-col gap-6 items-center text-center">
 					<div className="relative z-10 w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
