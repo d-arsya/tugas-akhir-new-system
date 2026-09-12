@@ -1,9 +1,8 @@
 import type { JSX } from "react"
 import { useState } from "react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { RojaCard, Button, Alert, AlertDescription } from "@roja/ui"
+import { RojaCard, Button, Alert, AlertDescription, PinInput } from "@roja/ui"
 import { KeyRound, ArrowLeft } from "lucide-react"
-import PinInput from "@/components/ewallet/PinInput"
 import { santriApi } from "@/lib/api"
 import { useUpdatePinMutation } from "@/hooks/use-santri-queries"
 

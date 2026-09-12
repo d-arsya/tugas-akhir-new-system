@@ -1,10 +1,7 @@
 import type { JSX } from "react"
 import { useState } from "react"
-import { RojaCard } from "@roja/ui"
-import { Button } from "@roja/ui"
-import { Alert, AlertDescription } from "@roja/ui"
+import { RojaCard, Button, Alert, AlertDescription, PinInput } from "@roja/ui"
 import { KeyRound, ArrowLeft, CheckCircle2 } from "lucide-react"
-import PinInput from "./PinInput"
 
 interface CreateEwalletViewProps {
 	onSubmit: (pin: string, pinConfirmation: string) => Promise<void>

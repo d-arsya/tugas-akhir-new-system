@@ -7,7 +7,7 @@ import useAuthStore from "@/stores/auth.store"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import axios from "axios"
-import { Button, Input, Label, Alert, AlertDescription, RojaCard } from "@roja/ui"
+import { Button, Input, AuthCard, Alert, AlertDescription } from "@roja/ui"
 
 const loginSchema = z.object({
 	email: z.string().email("Email tidak valid"),
@@ -91,87 +91,78 @@ const LoginPage = (): JSX.Element => {
 	}
 
 	return (
-		<RojaCard className="flex flex-col gap-6 p-8 md:p-10 w-full max-w-md">
-				<div className="flex flex-col gap-2 items-center text-center">
-					<img src="/assets/svg/etc/Logo.svg" alt="Pondok Roja" className="h-14 w-auto mb-2" />
-					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Login Member Area</div>
-					<p className="text-xs text-[var(--grey)] m-0">
-						Masuk untuk memantau status verifikasi pendaftaran dan informasi santri baru.
-					</p>
-				</div>
-
-				{errorMsg && (
-					<Alert variant="destructive" className="flex flex-col gap-2">
-						<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
-						{unverifiedEmail && (
-							<Button
-								type="button"
-								variant="link"
-								onClick={handleResendVerification}
-								disabled={isResending}
-								className="text-[11px] p-0 h-auto font-bold text-[var(--secondary)] text-left"
-							>
-								{isResending ? "Mengirim email verifikasi..." : "Kirim Ulang Link Verifikasi Email"}
-							</Button>
-						)}
-					</Alert>
-				)}
-
-				{infoMsg && (
-					<Alert variant="success">
-						<AlertDescription className="text-xs">{infoMsg}</AlertDescription>
-					</Alert>
-				)}
-
-				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-					<div className="flex flex-col gap-1.5">
-						<Input
-							id="email"
-							type="email"
-							className="h-11"
-							placeholder="Alamat Email"
-							{...register("email")}
-						/>
-						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
-					</div>
-
-					<div className="flex flex-col gap-1.5">
-						<Input
-							id="password"
-							type="password"
-							className="h-11"
-							placeholder="Password"
-							{...register("password")}
-						/>
-						<div className="flex justify-end">
-							<Link
-								to="/forgot-password"
-								className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
-							>
-								Lupa Password?
-							</Link>
-						</div>
-						{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
-					</div>
-
-					<Button
-						type="submit"
-						variant="roja-primary"
-						size="lg"
-						className="w-full mt-2"
-						disabled={isLoading}
-					>
-						{isLoading ? "Memproses..." : "Masuk"}
-					</Button>
-				</form>
-
-				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4 text-[var(--body-txt-inverse)]">
+		<AuthCard
+			title="Login Member Area"
+			description="Masuk untuk memantau status verifikasi pendaftaran dan informasi santri baru."
+			infoMsg={infoMsg}
+			footer={
+				<>
 					Belum mendaftar?{" "}
 					<Link to="/" className="text-[var(--secondary)] hover:underline font-semibold">
 						Mulai Pendaftaran Baru
 					</Link>
+				</>
+			}
+		>
+			{errorMsg && (
+				<Alert variant="destructive" className="flex flex-col gap-2">
+					<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
+					{unverifiedEmail && (
+						<Button
+							type="button"
+							variant="link"
+							onClick={handleResendVerification}
+							disabled={isResending}
+							className="text-[11px] p-0 h-auto font-bold text-[var(--secondary)] text-left"
+						>
+							{isResending ? "Mengirim email verifikasi..." : "Kirim Ulang Link Verifikasi Email"}
+						</Button>
+					)}
+				</Alert>
+			)}
+
+			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+				<div className="flex flex-col gap-1.5">
+					<Input
+						id="email"
+						type="email"
+						className="h-11"
+						placeholder="Alamat Email"
+						{...register("email")}
+					/>
+					{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
 				</div>
-			</RojaCard>
+
+				<div className="flex flex-col gap-1.5">
+					<Input
+						id="password"
+						type="password"
+						className="h-11"
+						placeholder="Password"
+						{...register("password")}
+					/>
+					<div className="flex justify-end">
+						<Link
+							to="/forgot-password"
+							className="text-[11px] text-[var(--secondary)] hover:underline font-medium"
+						>
+							Lupa Password?
+						</Link>
+					</div>
+					{errors.password && <p className="text-xs text-destructive mt-0.5">{errors.password.message}</p>}
+				</div>
+
+				<Button
+					type="submit"
+					variant="roja-primary"
+					size="lg"
+					className="w-full mt-2"
+					disabled={isLoading}
+				>
+					{isLoading ? "Memproses..." : "Masuk"}
+				</Button>
+			</form>
+		</AuthCard>
 	)
 }
 

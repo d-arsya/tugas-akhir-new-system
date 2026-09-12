@@ -6,7 +6,7 @@ import { santriApi } from "@/lib/api"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import PageLayout from "@/components/page-layout"
-import { Button, Input, Label, Alert, AlertDescription, RojaCard } from "@roja/ui"
+import { Button, Input, AuthCard } from "@roja/ui"
 import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const schema = z.object({
@@ -50,29 +50,25 @@ const CheckEmailPage = (): JSX.Element => {
 
 	return (
 		<PageLayout maxWidth="max-w-md" variant="center">
-			<RojaCard className="flex flex-col gap-6 p-8 md:p-10 w-full">
-				<div className="flex flex-col gap-2 items-center text-center">
-					<div className="text-xs font-bold text-[var(--primary)] tracking-wide m-0">Tambahkan Email</div>
-					<p className="text-xs text-[var(--body-txt-inverse)] m-0 leading-relaxed">
-						Jika suatu saat kamu ingin memulihkan akun, kami memerlukan alamat email kamu.
-					</p>
-				</div>
-
-				{errorMsg && (
-					<Alert variant="destructive">
-						<AlertDescription className="text-xs">{errorMsg}</AlertDescription>
-					</Alert>
-				)}
-
+			<AuthCard
+				title="Tambahkan Email"
+				description="Jika suatu saat kamu ingin memulihkan akun, kami memerlukan alamat email kamu."
+				errorMsg={errorMsg}
+				footer={
+					<Link to="/dashboard" className="text-[var(--grey)] hover:underline">
+						Skip, lain kali saja
+					</Link>
+				}
+			>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 					<div className="flex flex-col gap-1.5">
-					<Input
-						id="email"
-						type="email"
-						className="h-11"
-						placeholder="Email"
-						{...register("email")}
-					/>
+						<Input
+							id="email"
+							type="email"
+							className="h-11"
+							placeholder="Email"
+							{...register("email")}
+						/>
 						{errors.email && <p className="text-xs text-destructive mt-0.5">{errors.email.message}</p>}
 					</div>
 
@@ -86,13 +82,7 @@ const CheckEmailPage = (): JSX.Element => {
 						{isLoading ? "Memproses..." : "Selanjutnya"}
 					</Button>
 				</form>
-
-				<div className="text-center text-xs border-t border-[var(--bg-form-border)] pt-4">
-					<Link to="/dashboard" className="text-[var(--grey)] hover:underline">
-						Skip, lain kali saja
-					</Link>
-				</div>
-			</RojaCard>
+			</AuthCard>
 		</PageLayout>
 	)
 }

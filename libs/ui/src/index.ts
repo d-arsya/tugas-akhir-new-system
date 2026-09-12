@@ -14,7 +14,13 @@ export { default as BannedCard, type BannedCardProps } from "./components/banned
 export { default as NeedVerifyCard, type NeedVerifyCardProps } from "./components/need-verify-card"
 export { default as DevHijackPanel, type DevHijackPanelProps, type DevHijackRoute } from "./components/dev-hijack-panel"
 export { default as WizardStepper, type WizardStepperProps, type WizardSubStep } from "./components/wizard-stepper"
-
+export { default as PinChallengeGate, type PinChallengeGateProps } from "./components/pin-challenge-gate"
+export { default as AuthCard, type AuthCardProps } from "./components/auth-card"
+export { default as LoginCard, type LoginCardProps, type LoginSubmitValues } from "./components/login-card"
+export { default as ForgotPasswordCard, type ForgotPasswordCardProps } from "./components/forgot-password-card"
+export { default as ResetPasswordCard, type ResetPasswordCardProps, type ResetPasswordSubmitValues } from "./components/reset-password-card"
+export { default as TwoFactorCard, type TwoFactorCardProps } from "./components/two-factor-card"
+export { default as VerifyEmailCard, type VerifyEmailCardProps } from "./components/verify-email-card"
 
 export * from "./components/ui/accordion"
 export * from "./components/ui/alert-dialog"

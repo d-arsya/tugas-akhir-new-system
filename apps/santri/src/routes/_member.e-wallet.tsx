@@ -5,7 +5,7 @@ import type { DateRange } from "@roja/ui"
 import useEwalletStore from "@/stores/ewalletStore"
 import CreateEwalletView from "@/components/ewallet/CreateEwalletView"
 import InactiveEwalletView from "@/components/ewallet/InactiveEwalletView"
-import PinChallengeGate from "@/components/ewallet/PinChallengeGate"
+import { PinChallengeGate } from "@roja/ui"
 import TransactionHistoryTable from "@/components/ewallet/TransactionHistoryTable"
 import {
 	useSantriEwalletStatus,
@@ -96,7 +96,14 @@ const EwalletPage = (): JSX.Element => {
 
 	// State 3: PIN Challenge Gate
 	if (!isPinAuthenticated) {
-		return <PinChallengeGate />
+		return (
+			<PinChallengeGate
+				onSubmitPin={async (pin) => {
+					await santriApi.loginEwalletPin(pin)
+					setPinAuthenticated(true)
+				}}
+			/>
+		)
 	}
 
 	// State 4: E-Wallet Core Dashboard
