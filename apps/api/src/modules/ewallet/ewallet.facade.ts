@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common"
-import { EwalletService } from "@ewallet/ewallet.service"
+import { EwalletPurchaseService } from "@ewallet/ewallet-purchase.service"
 import { EwalletTransactionService } from "@ewallet/ewallet-transaction.service"
+import { EwalletService } from "@ewallet/ewallet.service"
 import type { Ewallet } from "@ewallet/entities/ewallet.entity"
 import type { TransactionFilterDto } from "@ewallet/dto/transaction-filter.dto"
 
@@ -9,6 +10,7 @@ export class EwalletFacade {
 	constructor(
 		private readonly ewalletService: EwalletService,
 		private readonly ewalletTransactionService: EwalletTransactionService,
+		private readonly ewalletPurchaseService: EwalletPurchaseService,
 	) {}
 
 	// --- Wallet Management ---
@@ -78,7 +80,7 @@ export class EwalletFacade {
 		return this.ewalletService.clearPinSession(prefix, id)
 	}
 
-	// --- Transactions ---
+	// --- Transactions & Top-Up ---
 	async getTransactionList(ewalletId: number, filters: TransactionFilterDto) {
 		return this.ewalletTransactionService.getTransactionList(ewalletId, filters)
 	}
@@ -125,5 +127,44 @@ export class EwalletFacade {
 
 	async getPurchaseDetail(transactionId: number, ewalletId: number) {
 		return this.ewalletTransactionService.getPurchaseDetail(transactionId, ewalletId)
+	}
+
+	// --- POS & Purchase Operations (Decoupled Engine) ---
+	async createPurchaseTransaction(
+		merchantEwalletId: number,
+		paymentAccount: string,
+		paymentOnBehalfOf: string,
+		items: Array<{ description: string; price: number }>,
+	) {
+		return this.ewalletPurchaseService.createPurchaseTransaction(
+			merchantEwalletId,
+			paymentAccount,
+			paymentOnBehalfOf,
+			items,
+		)
+	}
+
+	async getPurchaseQrData(transactionId: number, merchantEwalletId: number, uniqueNumber: string) {
+		return this.ewalletPurchaseService.getPurchaseQrData(transactionId, merchantEwalletId, uniqueNumber)
+	}
+
+	async validateBuyerQrScan(transactionId: number, merchantEwalletId: number, scannedQrValue: string) {
+		return this.ewalletPurchaseService.validateBuyerQrScan(transactionId, merchantEwalletId, scannedQrValue)
+	}
+
+	async getPurchaseCheckoutData(transactionId: number, merchantEwalletId: number) {
+		return this.ewalletPurchaseService.getPurchaseCheckoutData(transactionId, merchantEwalletId)
+	}
+
+	async updatePurchaseItem(
+		itemId: number,
+		merchantEwalletId: number,
+		data: { description: string; price: number },
+	) {
+		return this.ewalletPurchaseService.updatePurchaseItem(itemId, merchantEwalletId, data)
+	}
+
+	async validatePurchasePin(transactionId: number, merchantEwalletId: number, pin: string) {
+		return this.ewalletPurchaseService.validatePurchasePin(transactionId, merchantEwalletId, pin)
 	}
 }

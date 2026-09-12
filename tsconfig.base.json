@@ -33,6 +33,7 @@
       "@modules/*": ["./apps/api/src/modules/*"],
       "@psb/*": ["./apps/api/src/modules/psb/*"],
       "@santri/*": ["./apps/api/src/modules/santri/*"],
+      "@merchant/*": ["./apps/api/src/modules/merchant/*"],
       "@ewallet/*": ["./apps/api/src/modules/ewallet/*"]
     }
   },
