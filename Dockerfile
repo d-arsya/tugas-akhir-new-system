@@ -1,5 +1,5 @@
 # Stage 1: Build NestJS API using Nx
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ WORKDIR /app/dist/apps/api
 RUN pnpm install --prod --frozen-lockfile
 
 # Stage 2: Runtime image
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 
