@@ -9,13 +9,14 @@ import { resolve } from "path"
 
 export default defineConfig(() => ({
 	root: import.meta.dirname,
+	publicDir: resolve(import.meta.dirname, "../../libs/ui/public"),
 	cacheDir: `../../node_modules/.vite/apps/merchant`,
 	server: {
-		port: 4202,
+		port: 4302,
 		host: "localhost",
 	},
 	preview: {
-		port: 4202,
+		port: 4302,
 		host: "localhost",
 	},
 	resolve: {

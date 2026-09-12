@@ -1,27 +1,16 @@
 import type { JSX } from "react"
-import { createFileRoute } from "@tanstack/react-router"
-
-const IndexPage = (): JSX.Element => {
-	return (
-		<div
-			style={{
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				minHeight: "100vh",
-				fontFamily: "Montserrat, sans-serif",
-				flexDirection: "column",
-				gap: "8px",
-			}}
-		>
-			<h1 style={{ fontSize: "24px", color: "var(--primary)" }}>
-				Pondok Roja — Merchant
-			</h1>
-			<p style={{ color: "var(--muted-txt-color)" }}>Phase 0 bootstrap complete ✓</p>
-		</div>
-	)
-}
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import useAuthStore from "@/stores/authStore"
 
 export const Route = createFileRoute("/")({
-	component: IndexPage,
+	beforeLoad: () => {
+		const auth = useAuthStore.getState()
+		if (auth.isAuthenticated) {
+			throw redirect({ to: "/e-wallet" })
+		}
+		throw redirect({ to: "/login" })
+	},
+	component: (): JSX.Element => <div />,
 })
+
+export default Route

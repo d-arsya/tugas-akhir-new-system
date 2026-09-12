@@ -1,0 +1,17 @@
+import type { JSX } from "react"
+import { createFileRoute } from "@tanstack/react-router"
+import { BannedCard, PageLayout, RojaHeader } from "@roja/ui"
+
+const BannedPage = (): JSX.Element => {
+	return (
+		<PageLayout header={<RojaHeader roleLabel="MERCHANT" isAuthenticated={false} />} maxWidth="max-w-md" variant="center">
+			<BannedCard contactInfo="Jika ini adalah kesalahan, hubungi admin merchant Pondok Roja." />
+		</PageLayout>
+	)
+}
+
+export const Route = createFileRoute("/banned")({
+	component: BannedPage,
+})
+
+export default BannedPage

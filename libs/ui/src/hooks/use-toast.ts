@@ -171,6 +171,35 @@ function toast({ ...props }: Toast) {
   }
 }
 
+toast.error = (title: string, opts?: { description?: React.ReactNode }) => {
+  return toast({
+    title,
+    description: opts?.description,
+    variant: "destructive",
+  })
+}
+
+toast.success = (title: string, opts?: { description?: React.ReactNode }) => {
+  return toast({
+    title,
+    description: opts?.description,
+  })
+}
+
+toast.info = (title: string, opts?: { description?: React.ReactNode }) => {
+  return toast({
+    title,
+    description: opts?.description,
+  })
+}
+
+toast.warning = (title: string, opts?: { description?: React.ReactNode }) => {
+  return toast({
+    title,
+    description: opts?.description,
+  })
+}
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

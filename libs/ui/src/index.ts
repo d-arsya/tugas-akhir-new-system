@@ -1,5 +1,6 @@
 export { useDarkMode } from "./hooks/use-dark-mode"
 export { useToast, toast } from "./hooks/use-toast"
+export { cn } from "@roja/utils"
 export { default as PageLoader } from "./components/page-loader"
 export { default as RojaCard, type RojaCardProps } from "./components/roja-card"
 export { default as PinInput, type PinInputProps } from "./components/pin-input"
