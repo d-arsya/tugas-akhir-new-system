@@ -3,19 +3,52 @@ import os from "node:os"
 
 dns.setDefaultResultOrder("ipv4first")
 
-// Filter out IPv6 interfaces so libraries (like Nodemailer) that inspect os.networkInterfaces()
-// don't attempt IPv6 connections on NAT VPS / Docker environments without IPv6 routing
-const originalNetworkInterfaces = os.networkInterfaces.bind(os)
-os.networkInterfaces = () => {
-  const ifaces = originalNetworkInterfaces()
-  const filtered: NodeJS.Dict<os.NetworkInterfaceInfo[]> = {}
-  for (const [name, addrs] of Object.entries(ifaces)) {
-    if (addrs) {
-      filtered[name] = addrs.filter((addr) => addr.family === "IPv4" || addr.family === (4 as any))
-    }
+// ─── Nodemailer IPv6 Fix ──────────────────────────────────────────────────────
+// Root cause: Nodemailer's shared/index.js calls os.networkInterfaces() ONCE at
+// module-load time and stores the result as a static snapshot in
+// `module.exports.networkInterfaces`. This snapshot is what `isFamilySupported()`
+// checks to decide whether to run dns.resolve6(). On Docker/NAT VPS, the container
+// gets a link-local IPv6 (fe80::) on eth0, so Nodemailer sees IPv6 as "supported",
+// resolves AAAA records, and randomly picks an unroutable IPv6 address → ETIMEDOUT.
+//
+// Patching `os.networkInterfaces` here does NOT help because Nodemailer already
+// called it. We must overwrite the static snapshot on the shared module directly.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const nodemailerShared = require("nodemailer/lib/shared")
+
+// 1. Replace the static snapshot with only IPv4 interfaces
+const rawIfaces = os.networkInterfaces()
+const ipv4OnlyIfaces: NodeJS.Dict<os.NetworkInterfaceInfo[]> = {}
+for (const [name, addrs] of Object.entries(rawIfaces)) {
+  if (addrs) {
+    const ipv4 = addrs.filter((a) => a.family === "IPv4" || (a.family as unknown as number) === 4)
+    if (ipv4.length) ipv4OnlyIfaces[name] = ipv4
   }
-  return filtered
 }
+nodemailerShared.networkInterfaces = ipv4OnlyIfaces
+
+// 2. Also patch the exported dnsCache to intercept any cached IPv6-only results
+//    and strip IPv6 addresses before Nodemailer can randomly pick one.
+const originalResolveHostname = nodemailerShared.resolveHostname
+nodemailerShared.resolveHostname = (
+  options: Record<string, unknown>,
+  callback: (err: Error | null, result: Record<string, unknown>) => void,
+) => {
+  originalResolveHostname(options, (err: Error | null, result: Record<string, unknown>) => {
+    if (!err && result) {
+      if (Array.isArray(result["_addresses"])) {
+        result["_addresses"] = (result["_addresses"] as string[]).filter((addr) => !addr.includes(":"))
+      }
+      // Ensure the selected host is also IPv4
+      if (typeof result["host"] === "string" && result["host"].includes(":")) {
+        const v4 = (result["_addresses"] as string[] | undefined)?.[0]
+        if (v4) result["host"] = v4
+      }
+    }
+    callback(err, result)
+  })
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { Logger } from "@nestjs/common"
 import { NestFactory, Reflector } from "@nestjs/core"

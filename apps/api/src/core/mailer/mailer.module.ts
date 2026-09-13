@@ -26,6 +26,7 @@ import type { Env } from "@core/config/env.validation"
 						connectionTimeout: 10000,
 						greetingTimeout: 10000,
 						socketTimeout: 15000,
+						name: "pondokroja.com",
 						auth: {
 							user: configService.get("MAIL_USER", { infer: true }) || "",
 							pass: configService.get("MAIL_PASS", { infer: true }) || "",
@@ -49,4 +50,4 @@ import type { Env } from "@core/config/env.validation"
 	providers: [MailerService, EmailListener],
 	exports: [MailerService],
 })
-export class MailerModule {}
+export class MailerModule { }

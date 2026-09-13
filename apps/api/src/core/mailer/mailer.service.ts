@@ -15,6 +15,14 @@ export class MailerService implements OnModuleInit {
 	constructor(private readonly mailer: NestMailerService) {}
 
 	async onModuleInit(): Promise<void> {
+		// Log the interface snapshot Nodemailer is using — confirms IPv6 patch is active
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		const nodemailerShared = require("nodemailer/lib/shared")
+		const ifaceAddresses = Object.values(nodemailerShared.networkInterfaces ?? {})
+			.flat()
+			.map((i: any) => `${i.family}:${i.address}`)
+		this.logger.log(`Nodemailer network snapshot: [${ifaceAddresses.join(", ")}]`)
+
 		try {
 			const transporter = this.mailer.getTransporter()
 			if (transporter && typeof transporter.verify === "function") {
