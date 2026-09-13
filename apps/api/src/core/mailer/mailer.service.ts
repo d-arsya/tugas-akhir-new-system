@@ -121,8 +121,8 @@ export class MailerService implements OnModuleInit {
 			password: this.configService.get("MAIL_PASS", { infer: true }) || "",
 			host,
 			port,
-			ssl: isSecure,
-			tls: !isSecure ? { ciphers: "SSLv3" } : false,
+			ssl: isSecure ? { rejectUnauthorized: false, servername: host } : false,
+			tls: !isSecure ? { rejectUnauthorized: false, servername: host } : false,
 			timeout: 10000,
 		})
 
