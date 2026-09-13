@@ -23,6 +23,9 @@ import type { Env } from "@core/config/env.validation"
 						secure: isSecure,
 						requireTLS: !isSecure,
 						family: 4,
+						connectionTimeout: 10000,
+						greetingTimeout: 10000,
+						socketTimeout: 15000,
 						auth: {
 							user: configService.get("MAIL_USER", { infer: true }) || "",
 							pass: configService.get("MAIL_PASS", { infer: true }) || "",

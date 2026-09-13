@@ -1,6 +1,21 @@
 import dns from "node:dns"
+import os from "node:os"
 
 dns.setDefaultResultOrder("ipv4first")
+
+// Filter out IPv6 interfaces so libraries (like Nodemailer) that inspect os.networkInterfaces()
+// don't attempt IPv6 connections on NAT VPS / Docker environments without IPv6 routing
+const originalNetworkInterfaces = os.networkInterfaces.bind(os)
+os.networkInterfaces = () => {
+  const ifaces = originalNetworkInterfaces()
+  const filtered: NodeJS.Dict<os.NetworkInterfaceInfo[]> = {}
+  for (const [name, addrs] of Object.entries(ifaces)) {
+    if (addrs) {
+      filtered[name] = addrs.filter((addr) => addr.family === "IPv4" || addr.family === (4 as any))
+    }
+  }
+  return filtered
+}
 
 import { Logger } from "@nestjs/common"
 import { NestFactory, Reflector } from "@nestjs/core"
