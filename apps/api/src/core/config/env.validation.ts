@@ -22,6 +22,15 @@ export const EnvSchema = z.object({
 	LEGACY_FILES_BASE_PATH: z.string().optional(),
 	MAIL_HOST: z.string().default("smtp.gmail.com"),
 	MAIL_PORT: z.coerce.number().default(587),
+	MAIL_SECURE: z
+		.preprocess((val) => {
+			if (typeof val === "string") {
+				const lower = val.toLowerCase().trim()
+				return lower === "true" || lower === "1"
+			}
+			return Boolean(val)
+		}, z.boolean())
+		.optional(),
 	MAIL_USER: z.string().optional(),
 	MAIL_PASS: z.string().optional(),
 	MAIL_FROM_NAME: z.string().default("Pondok Roja"),

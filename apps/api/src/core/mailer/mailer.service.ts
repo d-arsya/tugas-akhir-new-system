@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common"
 import { MailerService as NestMailerService } from "@nestjs-modules/mailer"
 
 export type SendMailOptions = {
@@ -9,8 +9,22 @@ export type SendMailOptions = {
 }
 
 @Injectable()
-export class MailerService {
+export class MailerService implements OnModuleInit {
+	private readonly logger = new Logger(MailerService.name)
+
 	constructor(private readonly mailer: NestMailerService) {}
+
+	async onModuleInit(): Promise<void> {
+		try {
+			const transporter = this.mailer.getTransporter()
+			if (transporter && typeof transporter.verify === "function") {
+				await transporter.verify()
+				this.logger.log("SMTP connection verified successfully")
+			}
+		} catch (error) {
+			this.logger.error(`SMTP connection verification failed: ${error instanceof Error ? error.message : error}`)
+		}
+	}
 
 	async sendMail(options: SendMailOptions): Promise<void> {
 		await this.mailer.sendMail({

@@ -1,3 +1,7 @@
+import dns from "node:dns"
+
+dns.setDefaultResultOrder("ipv4first")
+
 import { Logger } from "@nestjs/common"
 import { NestFactory, Reflector } from "@nestjs/core"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"

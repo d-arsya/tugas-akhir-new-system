@@ -30,6 +30,7 @@ WORKDIR /app
 
 ENV PORT=3000
 ENV HOST=0.0.0.0
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
 # Copy built NestJS application
 COPY --from=builder /app/dist/apps/api ./
