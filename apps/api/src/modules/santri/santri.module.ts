@@ -9,6 +9,8 @@ import { SantriAuthService } from "@santri/auth/santri-auth.service"
 import { SantriPasswordResetService } from "@santri/auth/services/santri-password-reset.service"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentCostCapability } from "@santri/entities/student-cost-capability.entity"
 import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
 import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 import { StudentPasswordReset } from "@santri/entities/student-password-reset.entity"
@@ -38,6 +40,8 @@ import { SettingService } from "@santri/setting/setting.service"
 			TwoFactorStudent,
 			StudentPasswordReset,
 			StudentGrade,
+			StudentCapability,
+			StudentCostCapability,
 			StudentInvoice,
 			StudentTransaction,
 			StudentInvoiceTransaction,
