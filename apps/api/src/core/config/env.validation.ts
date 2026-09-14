@@ -20,6 +20,7 @@ export const EnvSchema = z.object({
 	AWS_S3_BUCKET: z.string().optional(),
 	AWS_S3_URL: z.string().optional(),
 	LEGACY_FILES_BASE_PATH: z.string().optional(),
+	COOKIE_DOMAIN: z.string().optional(),
 	MAIL_HOST: z.string().default("smtp.gmail.com"),
 	MAIL_PORT: z.coerce.number().default(587),
 	MAIL_SECURE: z

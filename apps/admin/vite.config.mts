@@ -12,11 +12,11 @@ export default defineConfig(() => ({
 	publicDir: resolve(import.meta.dirname, "../../libs/ui/public"),
 	cacheDir: `../../node_modules/.vite/apps/admin`,
 	server: {
-		port: 4203,
+		port: 4303,
 		host: "localhost",
 	},
 	preview: {
-		port: 4203,
+		port: 4303,
 		host: "localhost",
 	},
 	resolve: {
