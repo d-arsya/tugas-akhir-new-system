@@ -98,9 +98,6 @@ importers:
       dayjs:
         specifier: ^1.11.23
         version: 1.11.23
-      emailjs:
-        specifier: ^5.0.3
-        version: 5.0.3(typescript@6.0.3)
       framer-motion:
         specifier: ^13.1.1
         version: 13.1.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -5461,15 +5458,6 @@ packages:
 
   electron-to-chromium@1.5.416:
     resolution: {integrity: sha512-K6bvB2BjnNrugtIih6ewlbBI9DXa976jIdiIlRLHhBoEI9a4JaQjjHyF+A1IQI543aQYR4LnmOrT/K5fZj0aPA==}
-
-  emailjs@5.0.3:
-    resolution: {integrity: sha512-Y47oNF5Geurb8GnmST2b+EK8mDLKoDFySxsvZb6YMcNbvdxpjd9FaLQ80p38lUVhq50knveOhkH/c/4afJSFxQ==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      typescript: '>=5.0.0'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
   embla-carousel-react@8.6.0:
     resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
@@ -15777,10 +15765,6 @@ snapshots:
   ejs@5.0.1: {}
 
   electron-to-chromium@1.5.416: {}
-
-  emailjs@5.0.3(typescript@6.0.3):
-    optionalDependencies:
-      typescript: 6.0.3
 
   embla-carousel-react@8.6.0(react@19.2.8):
     dependencies:
