@@ -172,14 +172,31 @@ export class MailerService implements OnModuleInit {
 			headers["X-ROJA-EMAIL-KEY"] = mailApiKey
 		}
 
-		const payload = {
+		const payload: Record<string, any> = {
 			to: options.to,
 			subject: options.subject,
-			html: htmlContent,
-			text: options.text ?? options.subject,
-			attachments: options.attachments ?? [],
-			ccs: options.ccs ?? [],
-			bccs: options.bccs ?? [],
+		}
+
+		if (htmlContent && htmlContent.trim() !== "") {
+			payload["html"] = htmlContent
+		}
+
+		if (options.text && options.text.trim() !== "") {
+			payload["text"] = options.text
+		} else if (!payload["html"]) {
+			payload["text"] = options.subject
+		}
+
+		if (options.attachments && options.attachments.length > 0) {
+			payload["attachments"] = options.attachments
+		}
+
+		if (options.ccs && options.ccs.length > 0) {
+			payload["ccs"] = options.ccs
+		}
+
+		if (options.bccs && options.bccs.length > 0) {
+			payload["bccs"] = options.bccs
 		}
 
 		try {
