@@ -35,6 +35,8 @@ export const EnvSchema = z.object({
 	MAIL_PASS: z.string().optional(),
 	MAIL_FROM_NAME: z.string().default("Pondok Roja"),
 	MAIL_FROM_ADDRESS: z.string().email().optional(),
+	MAIL_SERVICE: z.string().url().optional(),
+	MAIL_API_KEY: z.string().optional(),
 })
 
 export type Env = z.infer<typeof EnvSchema>

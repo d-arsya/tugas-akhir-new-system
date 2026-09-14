@@ -1,16 +1,25 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { SMTPClient } from "emailjs"
+import axios from "axios"
 import * as handlebars from "handlebars"
 import * as fs from "node:fs"
 import * as path from "node:path"
 import type { Env } from "@core/config/env.validation"
 
+export type SendMailAttachment = {
+	filename?: string
+	url: string
+}
+
 export type SendMailOptions = {
-	to: string
+	to: string | string[]
 	subject: string
 	template: string
 	context?: Record<string, any>
+	text?: string
+	attachments?: SendMailAttachment[]
+	ccs?: string[]
+	bccs?: string[]
 }
 
 const EMBEDDED_TEMPLATES: Record<string, string> = {
@@ -106,27 +115,16 @@ const EMBEDDED_TEMPLATES: Record<string, string> = {
 @Injectable()
 export class MailerService implements OnModuleInit {
 	private readonly logger = new Logger(MailerService.name)
-	private client!: SMTPClient
 
-	constructor(private readonly configService: ConfigService<Env, true>) {}
+	constructor(private readonly configService: ConfigService<Env, true>) { }
 
 	onModuleInit(): void {
-		const host = this.configService.get("MAIL_HOST", { infer: true }) || "smtp.gmail.com"
-		const port = Number(this.configService.get("MAIL_PORT", { infer: true })) || 587
-		const mailSecure = this.configService.get("MAIL_SECURE", { infer: true })
-		const isSecure = mailSecure !== undefined ? mailSecure : port === 465
-
-		this.client = new SMTPClient({
-			user: this.configService.get("MAIL_USER", { infer: true }) || "",
-			password: this.configService.get("MAIL_PASS", { infer: true }) || "",
-			host,
-			port,
-			ssl: isSecure ? { rejectUnauthorized: false, servername: host } : false,
-			tls: !isSecure ? { rejectUnauthorized: false, servername: host } : false,
-			timeout: 10000,
-		})
-
-		this.logger.log(`SMTPClient (emailjs) configured for ${host}:${port} (ssl: ${isSecure})`)
+		const mailServiceUrl = this.configService.get("MAIL_SERVICE", { infer: true })
+		if (mailServiceUrl) {
+			this.logger.log(`MailerService initialized with REST email service: ${mailServiceUrl}`)
+		} else {
+			this.logger.warn("MAIL_SERVICE is not configured. Outgoing emails will fail unless MAIL_SERVICE is set.")
+		}
 	}
 
 	private renderTemplate(templateName: string, context: Record<string, any>): string {
@@ -157,25 +155,47 @@ export class MailerService implements OnModuleInit {
 	}
 
 	async sendMail(options: SendMailOptions): Promise<void> {
-		const fromName = this.configService.get("MAIL_FROM_NAME", { infer: true }) || "Pondok Roja"
-		const fromAddress =
-			this.configService.get("MAIL_FROM_ADDRESS", { infer: true }) ||
-			this.configService.get("MAIL_USER", { infer: true }) ||
-			"noreply@pondokroja.com"
+		const mailServiceUrl = this.configService.get("MAIL_SERVICE", { infer: true })
+		if (!mailServiceUrl) {
+			this.logger.error("Cannot send email: MAIL_SERVICE endpoint is not configured in environment")
+			throw new Error("MAIL_SERVICE endpoint is not configured")
+		}
 
+		const mailApiKey = this.configService.get("MAIL_API_KEY", { infer: true })
 		const htmlContent = this.renderTemplate(options.template, options.context ?? {})
 
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		}
+
+		if (mailApiKey) {
+			headers["X-ROJA-EMAIL-KEY"] = mailApiKey
+		}
+
+		const payload = {
+			to: options.to,
+			subject: options.subject,
+			html: htmlContent,
+			text: options.text ?? options.subject,
+			attachments: options.attachments ?? [],
+			ccs: options.ccs ?? [],
+			bccs: options.bccs ?? [],
+		}
+
 		try {
-			await this.client.sendAsync({
-				text: options.subject,
-				from: `"${fromName}" <${fromAddress}>`,
-				to: options.to,
-				subject: options.subject,
-				attachment: [{ data: htmlContent, alternative: true }],
+			await axios.post(mailServiceUrl, payload, {
+				headers,
+				timeout: 10000,
 			})
-			this.logger.log(`Email successfully sent to ${options.to}`)
+			this.logger.log(`Email successfully sent to ${options.to} via REST service`)
 		} catch (error) {
-			this.logger.error(`Failed to send email to ${options.to}: ${error instanceof Error ? error.message : error}`)
+			const errorMsg = axios.isAxiosError(error)
+				? `status ${error.response?.status}: ${JSON.stringify(error.response?.data) || error.message}`
+				: error instanceof Error
+					? error.message
+					: String(error)
+
+			this.logger.error(`Failed to send email to ${options.to} via REST service: ${errorMsg}`)
 			throw error
 		}
 	}
