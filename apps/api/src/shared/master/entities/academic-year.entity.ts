@@ -1,5 +1,5 @@
 import { Column, Entity } from "typeorm"
-import { BaseEntity } from "@core/database/base.entity"
+import { BaseEntity } from "../../../core/database/base.entity"
 
 @Entity({ name: "tbr_academic_years" })
 export class AcademicYear extends BaseEntity {

@@ -10,6 +10,9 @@ import { EwalletPurchaseService } from "@ewallet/ewallet-purchase.service"
 import { EwalletTransactionService } from "@ewallet/ewallet-transaction.service"
 import { EwalletService } from "@ewallet/ewallet.service"
 import { EwalletFacade } from "@ewallet/ewallet.facade"
+import { EwalletTopUpService } from "./services/ewallet-topup.service"
+import { EwalletTransactionQueryService } from "./services/ewallet-transaction-query.service"
+import { EwalletPurchaseQrService } from "./services/ewallet-purchase-qr.service"
 
 @Module({
 	imports: [
@@ -27,6 +30,9 @@ import { EwalletFacade } from "@ewallet/ewallet.facade"
 		EwalletTransactionService,
 		EwalletPurchaseService,
 		EwalletFacade,
+		EwalletTopUpService,
+		EwalletTransactionQueryService,
+		EwalletPurchaseQrService,
 	],
 	exports: [
 		TypeOrmModule,
@@ -34,6 +40,9 @@ import { EwalletFacade } from "@ewallet/ewallet.facade"
 		EwalletTransactionService,
 		EwalletPurchaseService,
 		EwalletFacade,
+		EwalletTopUpService,
+		EwalletTransactionQueryService,
+		EwalletPurchaseQrService,
 	],
 })
 export class EwalletModule {}

@@ -60,6 +60,6 @@ import { PsbSettingService } from "@psb/setting/psb-setting.service"
 		ActiveMemberGuard,
 		PsbJwtAuthGuard,
 	],
-	exports: [PsbAuthService, PsbRegisterService],
+	exports: [TypeOrmModule, PsbAuthService, PsbRegisterService],
 })
 export class PsbModule {}

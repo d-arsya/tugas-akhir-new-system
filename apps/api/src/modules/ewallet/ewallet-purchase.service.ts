@@ -2,7 +2,6 @@ import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
-	UnprocessableEntityException,
 } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { DataSource, Repository } from "typeorm"
@@ -13,8 +12,7 @@ import { EwalletTransactionItem } from "@ewallet/entities/ewallet-transaction-it
 import { EwalletTransaction } from "@ewallet/entities/ewallet-transaction.entity"
 import { Ewallet } from "@ewallet/entities/ewallet.entity"
 import { EwalletService } from "@ewallet/ewallet.service"
-
-const STUDENT_EWALLETABLE_TYPE = "App\\Models\\Student"
+import { EwalletPurchaseQrService } from "./services/ewallet-purchase-qr.service"
 
 @Injectable()
 export class EwalletPurchaseService {
@@ -28,6 +26,7 @@ export class EwalletPurchaseService {
 		@InjectRepository(EwalletTransactionItem)
 		private readonly ewalletTransactionItemRepository: Repository<EwalletTransactionItem>,
 		private readonly ewalletService: EwalletService,
+		private readonly ewalletPurchaseQrService: EwalletPurchaseQrService,
 		private readonly dataSource: DataSource,
 		private readonly redisService: RedisService,
 		private readonly mailerService: MailerService,
@@ -110,106 +109,15 @@ export class EwalletPurchaseService {
 	}
 
 	async getPurchaseQrData(transactionId: number, merchantEwalletId: number, uniqueNumber: string) {
-		const txn = await this.ewalletTransactionRepository.findOneBy({
-			id: transactionId,
-			ewalletId: String(merchantEwalletId),
-		})
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		return {
-			transactionId: txn.id,
-			code: txn.code,
-			amount: Number(txn.amount),
-			status: txn.status,
-			merchantUniqueNumber: uniqueNumber,
-		}
+		return this.ewalletPurchaseQrService.getPurchaseQrData(transactionId, merchantEwalletId, uniqueNumber)
 	}
 
 	async validateBuyerQrScan(transactionId: number, merchantEwalletId: number, scannedQrValue: string) {
-		const txn = await this.ewalletTransactionRepository.findOneBy({
-			id: transactionId,
-			ewalletId: String(merchantEwalletId),
-		})
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		const santriEwallet = await this.ewalletRepository.findOneBy({ uniqueId: scannedQrValue })
-		if (!santriEwallet) {
-			throw new NotFoundException("E-Wallet Santri tidak ditemukan.")
-		}
-
-		if (santriEwallet.ewalletableType !== STUDENT_EWALLETABLE_TYPE) {
-			throw new UnprocessableEntityException("E-Wallet bukan milik Santri.")
-		}
-
-		if (!santriEwallet.isActive) {
-			throw new UnprocessableEntityException("Hubungi Admin untuk mengaktifkan kembali E-Wallet Santri.")
-		}
-
-		let detail = await this.ewalletTransactionDetailRepository.findOneBy({
-			ewalletTransactionId: String(txn.id),
-		})
-
-		if (!detail) {
-			detail = this.ewalletTransactionDetailRepository.create({
-				ewalletTransactionId: String(txn.id),
-				ewalletId: String(santriEwallet.id),
-			})
-		} else {
-			detail.ewalletId = String(santriEwallet.id)
-		}
-
-		await this.ewalletTransactionDetailRepository.save(detail)
-
-		return {
-			transactionId: txn.id,
-			message: "Scan QR berhasil, melanjutkan ke halaman checkout.",
-		}
+		return this.ewalletPurchaseQrService.validateBuyerQrScan(transactionId, merchantEwalletId, scannedQrValue)
 	}
 
 	async getPurchaseCheckoutData(transactionId: number, merchantEwalletId: number) {
-		const txn = await this.ewalletTransactionRepository.findOneBy({
-			id: transactionId,
-			ewalletId: String(merchantEwalletId),
-		})
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		const items = await this.ewalletTransactionItemRepository.findBy({
-			ewalletTransactionId: String(txn.id),
-		})
-
-		const detail = await this.ewalletTransactionDetailRepository.findOneBy({
-			ewalletTransactionId: String(txn.id),
-		})
-
-		let buyerName = "Santri"
-		if (detail?.ewalletId) {
-			const buyerEwallet = await this.ewalletRepository.findOneBy({ id: Number(detail.ewalletId) })
-			if (buyerEwallet) {
-				buyerName = buyerEwallet.ewalletableName ?? buyerEwallet.studentName ?? "Santri"
-			}
-		}
-
-		const totalPrice = items.reduce((sum, item) => sum + Number(item.price ?? 0), 0)
-
-		return {
-			transactionId: txn.id,
-			code: txn.code,
-			status: txn.status,
-			paymentMethod: txn.paymentMethod,
-			buyerName,
-			totalPrice: totalPrice > 0 ? totalPrice : Number(txn.amount),
-			items: items.map((i) => ({
-				id: i.id,
-				description: i.description,
-				price: i.price,
-			})),
-		}
+		return this.ewalletPurchaseQrService.getPurchaseCheckoutData(transactionId, merchantEwalletId)
 	}
 
 	async updatePurchaseItem(
@@ -282,7 +190,6 @@ export class EwalletPurchaseService {
 		const currentAttemptsStr = await this.redisService.get(attemptKey)
 		const currentAttempts = currentAttemptsStr ? Number(currentAttemptsStr) : 0
 
-		// 1. PIN Check
 		if (String(buyerEwallet.pin) !== String(pin)) {
 			const attempts = currentAttempts + 1
 			await this.redisService.set(attemptKey, String(attempts), 3600)
@@ -310,7 +217,6 @@ export class EwalletPurchaseService {
 			}
 		}
 
-		// 2. Balance Check
 		const items = await this.ewalletTransactionItemRepository.findBy({
 			ewalletTransactionId: String(txn.id),
 		})
@@ -327,7 +233,6 @@ export class EwalletPurchaseService {
 			}
 		}
 
-		// 3. Process Payment in DB Transaction
 		const queryRunner = this.dataSource.createQueryRunner()
 		await queryRunner.connect()
 		await queryRunner.startTransaction()
@@ -336,7 +241,6 @@ export class EwalletPurchaseService {
 			txn.status = "valid"
 			await queryRunner.manager.save(txn)
 
-			// Snapshot balances
 			const newMerchantBalance = await this.ewalletService.calculateBalance(merchantEwallet.id)
 			const newBuyerBalance = await this.ewalletService.calculateBalance(buyerEwallet.id)
 
@@ -354,7 +258,6 @@ export class EwalletPurchaseService {
 			await queryRunner.release()
 		}
 
-		// Clear Redis attempt key
 		await this.redisService.del(attemptKey)
 
 		return {

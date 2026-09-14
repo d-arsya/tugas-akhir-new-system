@@ -6,6 +6,7 @@ import { StorageModule } from "@core/storage/storage.module"
 import { EwalletModule } from "@modules/ewallet/ewallet.module"
 import { SantriAuthController } from "@santri/auth/santri-auth.controller"
 import { SantriAuthService } from "@santri/auth/santri-auth.service"
+import { SantriPasswordResetService } from "@santri/auth/services/santri-password-reset.service"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
@@ -57,6 +58,7 @@ import { SettingService } from "@santri/setting/setting.service"
 	],
 	providers: [
 		SantriAuthService,
+		SantriPasswordResetService,
 		SantriEwalletService,
 		SantriEwalletTransactionService,
 		PaymentHistoryService,
@@ -71,6 +73,7 @@ import { SettingService } from "@santri/setting/setting.service"
 	exports: [
 		TypeOrmModule,
 		SantriAuthService,
+		SantriPasswordResetService,
 		SantriEwalletService,
 		SantriEwalletTransactionService,
 		PaymentHistoryService,

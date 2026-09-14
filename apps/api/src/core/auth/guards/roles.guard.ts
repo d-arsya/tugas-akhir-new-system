@@ -17,8 +17,11 @@ export class RolesGuard implements CanActivate {
 
 		const request = context.switchToHttp().getRequest<Request>()
 		const user = request.user as JwtPayload | undefined
-		if (!user) return false
+		if (!user || !user.role) return false
 
-		return requiredRoles.some((role) => user.role === role)
+		const normalize = (r: string) => r.toLowerCase().replace(/[\s\-_]/g, "")
+		const userRoleNorm = normalize(user.role)
+
+		return requiredRoles.some((role) => normalize(role) === userRoleNorm)
 	}
 }

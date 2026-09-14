@@ -22,6 +22,7 @@ import type { SantriUpdateEmailDto } from "@santri/dto/auth/update-email.dto"
 import { StudentPasswordReset } from "@santri/entities/student-password-reset.entity"
 import { Student } from "@santri/entities/student.entity"
 import { TwoFactorStudent } from "@santri/entities/two-factor-student.entity"
+import { SantriPasswordResetService } from "./services/santri-password-reset.service"
 
 export type SantriAuthResult =
 	| { requires2fa: true; studentId: number; email: string | null }
@@ -49,7 +50,8 @@ export class SantriAuthService {
 		private readonly configService: ConfigService<Env, true>,
 		private readonly redisService: RedisService,
 		private readonly mailerService: MailerService,
-	) { }
+		private readonly passwordResetService: SantriPasswordResetService,
+	) {}
 
 	private async generateTokens(student: Student) {
 		const tokenId = crypto.randomUUID()
@@ -71,7 +73,6 @@ export class SantriAuthService {
 			expiresIn: this.configService.get("JWT_REFRESH_EXPIRES", { infer: true }) as any,
 		})
 
-		// TTL for refresh token: 7 days (604800s)
 		await this.redisService.storeRefreshToken(student.id, tokenId, 7 * 24 * 60 * 60)
 
 		return { accessToken, refreshToken }
@@ -97,7 +98,6 @@ export class SantriAuthService {
 			throw new ForbiddenException("Akun santri Anda saat ini sedang dinonaktifkan atau diblokir.")
 		}
 
-		// 2FA Check if enabled
 		if (student.enabled2fa && student.email) {
 			const trustedRecord = await this.twoFactorRepository.findOneBy({
 				studentId: String(student.id),
@@ -161,7 +161,6 @@ export class SantriAuthService {
 			throw new BadRequestException("Kode 2FA salah atau telah kadaluarsa.")
 		}
 
-		// Update IP trust record
 		record.twoFactorCode = null
 		record.twoFactorIp = clientIp
 		await this.twoFactorRepository.save(record)
@@ -206,32 +205,7 @@ export class SantriAuthService {
 	}
 
 	async forgotPassword(dto: SantriForgotPasswordDto): Promise<{ message: string }> {
-		const student = await this.studentRepository.findOneBy({ email: dto.email })
-		if (!student) {
-			// Do not reveal email existence
-			return { message: "Jika email terdaftar, instruksi reset password telah dikirim ke email Anda." }
-		}
-
-		const token = crypto.randomBytes(32).toString("hex")
-
-		// Remove existing reset records for this email
-		await this.passwordResetRepository.delete({ email: dto.email })
-
-		const resetRecord = this.passwordResetRepository.create({
-			email: dto.email,
-			token,
-			createdAt: new Date(),
-		})
-		await this.passwordResetRepository.save(resetRecord)
-
-		const resetUrl = `${this.configService.get("SANTRI_URL", { infer: true })}/reset-password?token=${token}&email=${encodeURIComponent(dto.email)}`
-
-		await this.mailerService.sendForgotPassword(dto.email, {
-			name: student.nis ?? "Santri",
-			resetUrl,
-		})
-
-		return { message: "Jika email terdaftar, instruksi reset password telah dikirim ke email Anda." }
+		return this.passwordResetService.forgotPassword(dto)
 	}
 
 	async refreshToken(user: JwtPayload) {
@@ -244,36 +218,7 @@ export class SantriAuthService {
 	}
 
 	async resetPassword(dto: SantriResetPasswordDto): Promise<{ message: string }> {
-		const resetRecord = await this.passwordResetRepository.findOneBy({
-			email: dto.email,
-			token: dto.token,
-		})
-
-		if (!resetRecord) {
-			throw new BadRequestException("Token reset password tidak valid atau telah digunakan.")
-		}
-
-		// Check 24 hour expiry
-		if (
-			resetRecord.createdAt &&
-			Date.now() - new Date(resetRecord.createdAt).getTime() > 24 * 60 * 60 * 1000
-		) {
-			await this.passwordResetRepository.delete({ email: dto.email, token: dto.token })
-			throw new BadRequestException("Token reset password telah kadaluarsa.")
-		}
-
-		const student = await this.studentRepository.findOneBy({ email: dto.email })
-		if (!student) {
-			throw new BadRequestException("Akun santri tidak ditemukan.")
-		}
-
-		const passwordHash = await bcrypt.hash(dto.password, 10)
-		student.password = passwordHash
-		await this.studentRepository.save(student)
-
-		await this.passwordResetRepository.delete({ email: dto.email })
-
-		return { message: "Password berhasil diperbarui. Silakan login kembali." }
+		return this.passwordResetService.resetPassword(dto)
 	}
 
 	async sendEmailVerification(studentId: number): Promise<{ message: string }> {
@@ -285,7 +230,6 @@ export class SantriAuthService {
 		const token = crypto.randomBytes(32).toString("hex")
 		const key = `santri-email-verify:${student.id}`
 
-		// Store in Redis for 1 hour (3600s)
 		await this.redisService.set(key, token, 3600)
 
 		const verifyUrl = `${this.configService.get("APP_URL", { infer: true })}/santri/auth/email/verify/${student.id}/${token}`

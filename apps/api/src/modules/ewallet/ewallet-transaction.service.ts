@@ -1,284 +1,33 @@
-import {
-	BadRequestException,
-	ForbiddenException,
-	Injectable,
-	NotFoundException,
-} from "@nestjs/common"
-import { InjectRepository } from "@nestjs/typeorm"
-import { Repository } from "typeorm"
-import { StorageService } from "@core/storage/storage.service"
+import { Injectable } from "@nestjs/common"
 import type { TransactionFilterDto } from "@ewallet/dto/transaction-filter.dto"
-import { EwalletTransactionDetail } from "@ewallet/entities/ewallet-transaction-detail.entity"
-import { EwalletTransactionItem } from "@ewallet/entities/ewallet-transaction-item.entity"
-import { EwalletTransaction } from "@ewallet/entities/ewallet-transaction.entity"
-import { Ewallet } from "@ewallet/entities/ewallet.entity"
+import { EwalletTopUpService } from "./services/ewallet-topup.service"
+import { EwalletTransactionQueryService } from "./services/ewallet-transaction-query.service"
 
 @Injectable()
 export class EwalletTransactionService {
 	constructor(
-		@InjectRepository(Ewallet)
-		private readonly ewalletRepository: Repository<Ewallet>,
-		@InjectRepository(EwalletTransaction)
-		private readonly ewalletTransactionRepository: Repository<EwalletTransaction>,
-		@InjectRepository(EwalletTransactionDetail)
-		private readonly ewalletTransactionDetailRepository: Repository<EwalletTransactionDetail>,
-		@InjectRepository(EwalletTransactionItem)
-		private readonly ewalletTransactionItemRepository: Repository<EwalletTransactionItem>,
-		private readonly storageService: StorageService,
+		private readonly queryService: EwalletTransactionQueryService,
+		private readonly topUpService: EwalletTopUpService,
 	) {}
 
-	private mapTypeLabel(type: string | null, name?: string | null): string {
-		if (type === "purchase" || name === "Purchase") return "Jual Beli"
-		if (type === "income") return "Pemasukan"
-		if (type === "expense") return "Pengeluaran"
-		return type ?? "-"
-	}
-
-	private mapStatusLabel(status: string | null): string {
-		switch (status) {
-			case "valid":
-				return "Berhasil"
-			case "process":
-				return "Diproses"
-			case "waiting":
-				return "Menunggu"
-			case "invalid":
-				return "Dibatalkan"
-			default:
-				return status ?? "-"
-		}
-	}
-
 	async getTransactionList(ewalletId: number, filters: TransactionFilterDto) {
-		const ownTxns = await this.ewalletTransactionRepository.findBy({
-			ewalletId: String(ewalletId),
-		})
-
-		const purchaseDetails = await this.ewalletTransactionDetailRepository.findBy({
-			ewalletId: String(ewalletId),
-		})
-
-		const purchaseTxnIds = purchaseDetails
-			.map((d) => (d.ewalletTransactionId ? Number(d.ewalletTransactionId) : null))
-			.filter((id): id is number => id !== null)
-
-		let purchaseTxns: EwalletTransaction[] = []
-		if (purchaseTxnIds.length > 0) {
-			const found = await Promise.all(
-				purchaseTxnIds.map((id) => this.ewalletTransactionRepository.findOneBy({ id })),
-			)
-			purchaseTxns = found.filter((t): t is EwalletTransaction => t !== null)
-		}
-
-		// Combine unique transactions
-		const map = new Map<number, EwalletTransaction>()
-		for (const txn of ownTxns) {
-			map.set(txn.id, txn)
-		}
-		for (const txn of purchaseTxns) {
-			map.set(txn.id, txn)
-		}
-
-		let allTxns = Array.from(map.values())
-
-		// Filter by search query if provided
-		if (filters.search) {
-			const q = filters.search.toLowerCase()
-			allTxns = allTxns.filter(
-				(txn) =>
-					(txn.code && txn.code.toLowerCase().includes(q)) ||
-					(txn.name && txn.name.toLowerCase().includes(q)) ||
-					(txn.paymentMethod && txn.paymentMethod.toLowerCase().includes(q)),
-			)
-		}
-
-		// Filter by status if provided
-		if (filters.status) {
-			allTxns = allTxns.filter((txn) => txn.status === filters.status)
-		}
-
-		// Filter by dateStart
-		if (filters.dateStart) {
-			const start = new Date(filters.dateStart).getTime()
-			allTxns = allTxns.filter((txn) => new Date(txn.createdAt).getTime() >= start)
-		}
-
-		// Filter by dateEnd
-		if (filters.dateEnd) {
-			const end = new Date(filters.dateEnd).getTime() + 24 * 60 * 60 * 1000
-			allTxns = allTxns.filter((txn) => new Date(txn.createdAt).getTime() <= end)
-		}
-
-		// Sort by createdAt DESC
-		allTxns.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-		// Pagination calculation
-		const total = allTxns.length
-		const page = filters.page ?? 1
-		const limit = filters.limit ?? 10
-		const totalPages = Math.ceil(total / limit) || 1
-		const startIndex = (page - 1) * limit
-		const paginatedTxns = allTxns.slice(startIndex, startIndex + limit)
-
-		const items = paginatedTxns.map((txn) => ({
-			id: txn.id,
-			code: txn.code,
-			name: txn.name === "Purchase" ? "Jual Beli" : txn.name,
-			type: txn.type,
-			typeLabel: this.mapTypeLabel(txn.type, txn.name),
-			amount: txn.amount,
-			status: txn.status,
-			statusLabel: this.mapStatusLabel(txn.status),
-			paymentMethod: txn.paymentMethod,
-			paymentDate: txn.paymentDate ? txn.paymentDate.toISOString() : null,
-			createdAt: txn.createdAt.toISOString(),
-		}))
-
-		return {
-			data: items,
-			meta: {
-				page,
-				limit,
-				total,
-				totalPages,
-			},
-		}
+		return this.queryService.getTransactionList(ewalletId, filters)
 	}
 
 	async getTransactionDetail(transactionId: number, ewalletId: number) {
-		const txn = await this.ewalletTransactionRepository.findOneBy({ id: transactionId })
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		// Verify ownership
-		const isOwner = txn.ewalletId === String(ewalletId)
-		const isBuyerDetail = await this.ewalletTransactionDetailRepository.findOneBy({
-			ewalletId: String(ewalletId),
-			ewalletTransactionId: String(txn.id),
-		})
-
-		if (!isOwner && !isBuyerDetail) {
-			throw new ForbiddenException("Anda tidak memiliki akses ke transaksi ini.")
-		}
-
-		let items: EwalletTransactionItem[] = []
-		if (txn.type === "purchase") {
-			items = await this.ewalletTransactionItemRepository.findBy({
-				ewalletTransactionId: String(txn.id),
-			})
-		}
-
-		const attachmentUrl = txn.paymentAttachment
-			? this.storageService.getUrl(txn.paymentAttachment)
-			: null
-
-		return {
-			id: txn.id,
-			code: txn.code,
-			name: txn.name === "Purchase" ? "Jual Beli" : txn.name,
-			type: txn.type,
-			typeLabel: this.mapTypeLabel(txn.type, txn.name),
-			amount: txn.amount,
-			status: txn.status,
-			statusLabel: this.mapStatusLabel(txn.status),
-			paymentMethod: txn.paymentMethod,
-			paymentAccount: txn.paymentAccount,
-			paymentOnBehalfOf: txn.paymentOnBehalfOf,
-			paymentAttachment: attachmentUrl,
-			paymentDate: txn.paymentDate ? txn.paymentDate.toISOString() : null,
-			transferNewsNumber: txn.transferNewsNumber,
-			paymentNote: txn.paymentNote,
-			invalidNote: txn.invalidNote,
-			createdAt: txn.createdAt.toISOString(),
-			items: items.map((item) => ({
-				id: item.id,
-				description: item.description ?? "-",
-				price: item.price ?? 0,
-			})),
-		}
+		return this.queryService.getTransactionDetail(transactionId, ewalletId)
 	}
 
 	async getTopUpBankInfo() {
-		return {
-			bankName: "BSI (Bank Syariah Indonesia)",
-			accountNumber: "7192852646",
-			accountName: "Tabungan Pondok ROJA",
-			minAmount: 1000,
-			note: "Transfer sesuai nominal lalu sertakan bukti transfer saat melakukan konfirmasi.",
-		}
-	}
-
-	private async generateTransactionCode(type: string): Promise<string> {
-		let prefix = "00"
-		if (type === "income") prefix = "01"
-		else if (type === "expense") prefix = "02"
-		else if (type === "purchase") prefix = "03"
-
-		const now = new Date()
-		const year = now.getFullYear()
-		const month = String(now.getMonth() + 1).padStart(2, "0")
-		const day = String(now.getDate()).padStart(2, "0")
-		const dateStr = `${year}${month}${day}`
-
-		let increment = 1
-		let code = ""
-		while (true) {
-			const seq = String(increment).padStart(4, "0")
-			code = `${prefix}${dateStr}${seq}`
-
-			const existing = await this.ewalletTransactionRepository.findOneBy({ code })
-			if (!existing) {
-				break
-			}
-			increment++
-		}
-
-		return code
+		return this.topUpService.getTopUpBankInfo()
 	}
 
 	async createTopUpBankTransfer(ewalletId: number, amount: number) {
-		if (amount < 1000) {
-			throw new BadRequestException("Nominal top-up minimal Rp 1.000")
-		}
-
-		const code = await this.generateTransactionCode("income")
-		const transferNewsNumber = Math.floor(10 + Math.random() * 90)
-
-		const txn = this.ewalletTransactionRepository.create({
-			ewalletId: String(ewalletId),
-			code,
-			name: "Isi saldo",
-			type: "income",
-			amount: String(amount),
-			status: "waiting",
-			paymentMethod: "Bank Transfer (Manual)",
-			paymentAccount: "BSI 7192852646",
-			paymentOnBehalfOf: "Tabungan Pondok ROJA",
-			transferNewsNumber,
-		})
-
-		await this.ewalletTransactionRepository.save(txn)
-
-		return {
-			transactionId: txn.id,
-			code: txn.code,
-			amount,
-			transferNewsNumber,
-			totalAmount: amount + transferNewsNumber,
-			paymentAccount: "BSI 7192852646",
-			paymentOnBehalfOf: "Tabungan Pondok ROJA",
-			message:
-				"Transaksi isi saldo berhasil dibuat. Silakan lakukan transfer bank lalu unggah bukti pembayaran.",
-		}
+		return this.topUpService.createTopUpBankTransfer(ewalletId, amount)
 	}
 
 	async getConfirmForm(transactionId: number, ewalletId: number) {
-		const detail = await this.getTransactionDetail(transactionId, ewalletId)
-		if (detail.status !== "waiting") {
-			throw new BadRequestException("Transaksi ini tidak dalam status menunggu pembayaran.")
-		}
-		return detail
+		return this.queryService.getTransactionDetail(transactionId, ewalletId)
 	}
 
 	async confirmTopUpProof(
@@ -290,166 +39,22 @@ export class EwalletTransactionService {
 			file?: Express.Multer.File | undefined
 		},
 	) {
-		const txn = await this.ewalletTransactionRepository.findOneBy({
-			id: transactionId,
-			ewalletId: String(ewalletId),
-		})
-
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		if (txn.status !== "waiting") {
-			throw new BadRequestException("Transaksi tidak dalam status menunggu pembayaran.")
-		}
-
-		if (!data.file) {
-			throw new BadRequestException("File bukti transfer wajib diunggah.")
-		}
-
-		const uploadedPath = await this.storageService.upload(data.file, "top-up-proofs")
-
-		txn.status = "process"
-		txn.paymentAmount = txn.amount
-		txn.paymentAttachment = uploadedPath
-		txn.paymentDate = data.paymentDate
-		txn.paymentNote = data.paymentNote ?? null
-
-		await this.ewalletTransactionRepository.save(txn)
-
-		return {
-			message:
-				"Bukti pembayaran berhasil diunggah. Transaksi isi saldo Anda sedang diproses oleh admin.",
-		}
+		return this.topUpService.confirmTopUpProof(transactionId, ewalletId, data)
 	}
 
 	async getCashInfo() {
-		return {
-			title: "Isi Saldo Tunai",
-			description:
-				"Silakan kunjungi Kasir / Pengelola E-Wallet Pondok ROJA untuk melakukan pengisian saldo secara tunai.",
-		}
+		return this.topUpService.getCashInfo()
 	}
 
 	async getWithdrawInfo() {
-		return {
-			title: "Tarik Saldo E-Wallet",
-			description:
-				"Penarikan saldo E-Wallet dapat dilakukan secara langsung di Kantor Pengelola E-Wallet Pondok ROJA.",
-		}
+		return this.topUpService.getWithdrawInfo()
 	}
 
 	async getPurchaseHistory(ewalletId: number, filters: TransactionFilterDto) {
-		const details = await this.ewalletTransactionDetailRepository.findBy({
-			ewalletId: String(ewalletId),
-		})
-
-		const txnIds = details
-			.map((d) => (d.ewalletTransactionId ? Number(d.ewalletTransactionId) : null))
-			.filter((id): id is number => id !== null)
-
-		let txns: EwalletTransaction[] = []
-		if (txnIds.length > 0) {
-			const found = await Promise.all(
-				txnIds.map((id) => this.ewalletTransactionRepository.findOneBy({ id })),
-			)
-			txns = found.filter((t): t is EwalletTransaction => t !== null)
-		}
-
-		if (filters.status) {
-			txns = txns.filter((t) => t.status === filters.status)
-		}
-
-		if (filters.dateStart) {
-			const start = new Date(filters.dateStart).getTime()
-			txns = txns.filter((t) => new Date(t.createdAt).getTime() >= start)
-		}
-
-		if (filters.dateEnd) {
-			const end = new Date(filters.dateEnd).getTime() + 24 * 60 * 60 * 1000
-			txns = txns.filter((t) => new Date(t.createdAt).getTime() <= end)
-		}
-
-		txns.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-		const total = txns.length
-		const page = filters.page ?? 1
-		const limit = filters.limit ?? 10
-		const totalPages = Math.ceil(total / limit) || 1
-		const startIndex = (page - 1) * limit
-		const paginated = txns.slice(startIndex, startIndex + limit)
-
-		const items = paginated.map((txn) => ({
-			id: txn.id,
-			code: txn.code,
-			name: txn.name === "Purchase" ? "Jual Beli" : txn.name,
-			type: txn.type,
-			typeLabel: this.mapTypeLabel(txn.type, txn.name),
-			amount: txn.amount,
-			status: txn.status,
-			statusLabel: this.mapStatusLabel(txn.status),
-			paymentMethod: txn.paymentMethod,
-			paymentDate: txn.paymentDate ? txn.paymentDate.toISOString() : null,
-			createdAt: txn.createdAt.toISOString(),
-		}))
-
-		return {
-			data: items,
-			meta: {
-				page,
-				limit,
-				total,
-				totalPages,
-			},
-		}
+		return this.queryService.getPurchaseHistory(ewalletId, filters)
 	}
 
 	async getPurchaseDetail(transactionId: number, ewalletId: number) {
-		const detail = await this.ewalletTransactionDetailRepository.findOneBy({
-			ewalletId: String(ewalletId),
-			ewalletTransactionId: String(transactionId),
-		})
-
-		if (!detail) {
-			throw new NotFoundException("Transaksi pembelian tidak ditemukan.")
-		}
-
-		const txn = await this.ewalletTransactionRepository.findOneBy({ id: transactionId })
-		if (!txn) {
-			throw new NotFoundException("Transaksi tidak ditemukan.")
-		}
-
-		const items = await this.ewalletTransactionItemRepository.findBy({
-			ewalletTransactionId: String(txn.id),
-		})
-
-		const attachmentUrl = txn.paymentAttachment
-			? this.storageService.getUrl(txn.paymentAttachment)
-			: null
-
-		return {
-			id: txn.id,
-			code: txn.code,
-			name: txn.name === "Purchase" ? "Jual Beli" : txn.name,
-			type: txn.type,
-			typeLabel: this.mapTypeLabel(txn.type, txn.name),
-			amount: txn.amount,
-			status: txn.status,
-			statusLabel: this.mapStatusLabel(txn.status),
-			paymentMethod: txn.paymentMethod,
-			paymentAccount: txn.paymentAccount,
-			paymentOnBehalfOf: txn.paymentOnBehalfOf,
-			paymentAttachment: attachmentUrl,
-			paymentDate: txn.paymentDate ? txn.paymentDate.toISOString() : null,
-			transferNewsNumber: txn.transferNewsNumber,
-			paymentNote: txn.paymentNote,
-			invalidNote: txn.invalidNote,
-			createdAt: txn.createdAt.toISOString(),
-			items: items.map((item) => ({
-				id: item.id,
-				description: item.description ?? "-",
-				price: item.price ?? 0,
-			})),
-		}
+		return this.queryService.getPurchaseDetail(transactionId, ewalletId)
 	}
 }
