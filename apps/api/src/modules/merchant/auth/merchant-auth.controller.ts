@@ -27,27 +27,41 @@ import {
 import { MerchantJwtAuthGuard } from "@merchant/guards/merchant-jwt-auth.guard"
 import { MerchantJwtRefreshGuard } from "@merchant/guards/merchant-jwt-refresh.guard"
 import { MerchantAuthResult, MerchantAuthService } from "@merchant/auth/merchant-auth.service"
+import { ConfigService } from "@nestjs/config"
+import { Response } from "express"
 
 @ApiTags("Merchant — Authentication")
 @Controller("merchant/auth")
 export class MerchantAuthController {
-	constructor(private readonly merchantAuthService: MerchantAuthService) {}
+	constructor(private readonly merchantAuthService: MerchantAuthService, private readonly configService: ConfigService) { }
 
-	private setAuthCookies(res: any, accessToken?: string, refreshToken?: string) {
+	private getCookieDomain(): string | undefined {
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+		if (!rawDomain || rawDomain.includes("localhost") || rawDomain.includes("127.0.0.1")) {
+			return undefined
+		}
+		return rawDomain
+	}
+
+	private setAuthCookies(res: Response, accessToken?: string, refreshToken?: string) {
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+
 		if (accessToken) {
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 15 * 60 * 1000, // 15 mins
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 15 * 60 * 1000,
 			})
 		}
 		if (refreshToken) {
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 			})
 		}
 	}
@@ -178,8 +192,9 @@ export class MerchantAuthController {
 		@CurrentUser() user: JwtPayload,
 		@Res({ passthrough: true }) response: any,
 	) {
-		response.clearCookie("access_token")
-		response.clearCookie("refresh_token")
+		const cookieDomain = this.getCookieDomain()
+		response.clearCookie("access_token", cookieDomain ? { domain: cookieDomain } : undefined)
+		response.clearCookie("refresh_token", cookieDomain ? { domain: cookieDomain } : undefined)
 		return this.merchantAuthService.logout(user.sub, user.tokenId)
 	}
 

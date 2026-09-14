@@ -36,12 +36,16 @@ import {
 } from "@psb/dto/register/register-response.dto"
 import { PsbRegisterService } from "@psb/register/psb-register.service"
 import { Throttle } from '@nestjs/throttler';
+import { ConfigService } from "@nestjs/config"
 
 @ApiTags("PSB — Registration Wizard")
 @Controller("psb/register")
 @Throttle({ default: {} })
 export class PsbRegisterController {
-	constructor(private readonly psbRegisterService: PsbRegisterService) { }
+	constructor(
+		private readonly psbRegisterService: PsbRegisterService,
+		private readonly configService: ConfigService
+	) { }
 
 	@Public()
 	@Get("landing")
@@ -208,11 +212,13 @@ export class PsbRegisterController {
 		const res = await this.psbRegisterService.submitAttachment(sessionId, files)
 		if (res.auth && typeof res.auth === "object") {
 			const authResult = res.auth as { accessToken?: string; refreshToken?: string }
+			const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
 			if (authResult.accessToken) {
 				response.cookie("access_token", authResult.accessToken, {
 					httpOnly: true,
 					secure: process.env.NODE_ENV === "production",
-					sameSite: "lax",
+					sameSite: "strict",
+					...(rawDomain ? { domain: rawDomain } : {}),
 					maxAge: 15 * 60 * 1000, // 15 mins
 				})
 			}
@@ -220,7 +226,8 @@ export class PsbRegisterController {
 				response.cookie("refresh_token", authResult.refreshToken, {
 					httpOnly: true,
 					secure: process.env.NODE_ENV === "production",
-					sameSite: "lax",
+					sameSite: "strict",
+					...(rawDomain ? { domain: rawDomain } : {}),
 					maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 				})
 			}

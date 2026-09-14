@@ -30,27 +30,36 @@ import { SantriUpdateEmailDto } from "@santri/dto/auth/update-email.dto"
 import { SantriJwtAuthGuard } from "@santri/guards/santri-jwt-auth.guard"
 import { SantriJwtRefreshGuard } from "@santri/guards/santri-jwt-refresh.guard"
 import { SantriAuthResult, SantriAuthService } from "@santri/auth/santri-auth.service"
+import { ConfigService } from "@nestjs/config"
+import type { Response } from "express"
 
 @ApiTags("Santri — Authentication")
 @Controller("santri/auth")
 export class SantriAuthController {
-	constructor(private readonly santriAuthService: SantriAuthService) {}
+	constructor(
+		private readonly santriAuthService: SantriAuthService,
+		private readonly configService: ConfigService
+	) { }
 
-	private setAuthCookies(res: any, accessToken?: string, refreshToken?: string) {
+	private setAuthCookies(res: Response, accessToken?: string, refreshToken?: string) {
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+
 		if (accessToken) {
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 15 * 60 * 1000, // 15 mins
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 15 * 60 * 1000,
 			})
 		}
 		if (refreshToken) {
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 			})
 		}
 	}
@@ -209,10 +218,11 @@ export class SantriAuthController {
 	})
 	async logout(
 		@CurrentUser() user: JwtPayload,
-		@Res({ passthrough: true }) response: any,
+		@Res({ passthrough: true }) response: Response,
 	) {
-		response.clearCookie("access_token")
-		response.clearCookie("refresh_token")
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+		response.clearCookie("access_token", rawDomain ? { domain: rawDomain } : undefined)
+		response.clearCookie("refresh_token", rawDomain ? { domain: rawDomain } : undefined)
 		return this.santriAuthService.logout(user.sub, user.tokenId)
 	}
 

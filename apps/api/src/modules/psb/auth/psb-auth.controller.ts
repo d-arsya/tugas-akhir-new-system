@@ -14,6 +14,7 @@ import { PsbJwtRefreshGuard } from "@psb/guards/psb-jwt-refresh.guard"
 import { PsbAuthService } from "@psb/auth/psb-auth.service"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import { Throttle } from '@nestjs/throttler';
+import { Response } from "express"
 
 @ApiTags("PSB — Authentication")
 @Controller("psb/auth")
@@ -24,21 +25,25 @@ export class PsbAuthController {
 		private readonly configService: ConfigService,
 	) { }
 
-	private setAuthCookies(res: any, accessToken?: string, refreshToken?: string) {
+	private setAuthCookies(res: Response, accessToken?: string, refreshToken?: string) {
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+
 		if (accessToken) {
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 15 * 60 * 1000, // 15 mins
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 15 * 60 * 1000,
 			})
 		}
 		if (refreshToken) {
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				secure: process.env.NODE_ENV === "production",
-				sameSite: "lax",
-				maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+				secure: process.env["NODE_ENV"] === "production",
+				sameSite: "strict",
+				...(rawDomain ? { domain: rawDomain } : {}),
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 			})
 		}
 	}
@@ -153,8 +158,9 @@ export class PsbAuthController {
 		@CurrentUser() user: JwtPayload,
 		@Res({ passthrough: true }) response: any,
 	): Promise<MessageResponseDto> {
-		response.clearCookie("access_token")
-		response.clearCookie("refresh_token")
+		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+		response.clearCookie("access_token", rawDomain ? { domain: rawDomain } : undefined)
+		response.clearCookie("refresh_token", rawDomain ? { domain: rawDomain } : undefined)
 		return this.psbAuthService.logout(user.sub, user.tokenId)
 	}
 }
