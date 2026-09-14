@@ -5,7 +5,7 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { AuthLogService } from "../services/auth-log.service"
-import type { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
+import { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
 
 import { AuthLogResponseDto } from "../dto/auth-log.dto"
 

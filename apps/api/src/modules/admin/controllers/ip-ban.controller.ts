@@ -5,10 +5,8 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { IpBanService } from "../../../core/ip-ban/ip-ban.service"
-import type { CreateIpBanDto } from "../dto/ip-ban.dto"
-import type { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
-
-import { IpBanResponseDto } from "../dto/ip-ban.dto"
+import { CreateIpBanDto, IpBanResponseDto } from "../dto/ip-ban.dto"
+import { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — IP Ban Management")

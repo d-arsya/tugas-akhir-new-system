@@ -5,9 +5,7 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { SubGradeService } from "../services/sub-grade.service"
-import type { CreateSubGradeDto, UpdateSubGradeDto } from "../dto/academic.dto"
-
-import { SubGradeResponseDto } from "../dto/academic.dto"
+import { CreateSubGradeDto, UpdateSubGradeDto, SubGradeResponseDto } from "../dto/academic.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Academic Structure: Sub-Grade")

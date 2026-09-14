@@ -5,9 +5,9 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { AdminSettingsService } from "../services/admin-settings.service"
-import type { UpdateAnnouncementDto, UpdateSchoolSettingDto } from "../dto/admin-setting.dto"
-
 import {
+	UpdateAnnouncementDto,
+	UpdateSchoolSettingDto,
 	SettingSchoolResponseDto,
 	SettingAnncResponseDto,
 	SettingFormResponseDto,

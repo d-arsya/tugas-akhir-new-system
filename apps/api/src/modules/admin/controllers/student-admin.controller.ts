@@ -20,6 +20,7 @@ import {
 	StudentGradeResponseDto,
 	StudentCapabilityResponseDto,
 } from "../dto/student-admin.dto"
+import { AcademicYearResponseDto, GradeResponseDto } from "../dto/academic.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Student Management")
@@ -32,14 +33,14 @@ export class StudentAdminController {
 
 	@Get("academic-years")
 	@ApiOperation({ summary: "Daftar tahun akademik untuk filter santri" })
-	@ApiResponseWrapped({ status: 200, description: "List tahun akademik", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List tahun akademik", type: AcademicYearResponseDto, isArray: true })
 	async getAcademicYears() {
 		return this.studentAdminService.getAcademicYears()
 	}
 
 	@Get(":academicYearId/grades")
 	@ApiOperation({ summary: "Daftar tingkat/kelas pada tahun akademik" })
-	@ApiResponseWrapped({ status: 200, description: "List tingkat/kelas", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List tingkat/kelas", type: GradeResponseDto, isArray: true })
 	async getGradesForAcademicYear(@Param("academicYearId", ParseIntPipe) academicYearId: number) {
 		return this.studentAdminService.getGradesForAcademicYear(academicYearId)
 	}

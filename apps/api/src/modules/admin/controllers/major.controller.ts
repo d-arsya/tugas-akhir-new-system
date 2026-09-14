@@ -5,9 +5,7 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { MajorService } from "../services/major.service"
-import type { CreateMajorDto, UpdateMajorDto } from "../dto/academic.dto"
-
-import { MajorResponseDto } from "../dto/academic.dto"
+import { CreateMajorDto, UpdateMajorDto, MajorResponseDto } from "../dto/academic.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Academic Structure: Major")

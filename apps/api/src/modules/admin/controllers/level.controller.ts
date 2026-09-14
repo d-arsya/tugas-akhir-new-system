@@ -5,9 +5,14 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { LevelService } from "../services/level.service"
-import type { CreateLevelDto, LinkLevelAcademicYearDto, UpdateLevelDto } from "../dto/academic.dto"
-
-import { LevelResponseDto, LevelListResponseDto, LevelAcademicYearResponseDto } from "../dto/academic.dto"
+import {
+	CreateLevelDto,
+	LinkLevelAcademicYearDto,
+	UpdateLevelDto,
+	LevelResponseDto,
+	LevelListResponseDto,
+	LevelAcademicYearResponseDto,
+} from "../dto/academic.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Academic Structure: Level")

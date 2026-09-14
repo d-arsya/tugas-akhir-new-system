@@ -5,10 +5,8 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { UserManagementService } from "../services/user-management.service"
-import type { CreateUserDto, UpdateUserDto } from "../dto/user-management.dto"
-import type { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
-
-import { UserResponseDto } from "../dto/user-management.dto"
+import { CreateUserDto, UpdateUserDto, UserResponseDto } from "../dto/user-management.dto"
+import { PaginationQueryDto } from "../../../core/dto/pagination-query.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — User Management")

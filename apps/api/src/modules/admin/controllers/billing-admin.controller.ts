@@ -16,6 +16,10 @@ import {
 	CancelTransactionDto,
 	AccountancyResponseDto,
 	CostTermResponseDto,
+	BillingInvoiceResponseDto,
+	BillingTransactionResponseDto,
+	BillingIncomeReportResponseDto,
+	BillingArrearsReportResponseDto,
 } from "../dto/billing-admin.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
@@ -112,21 +116,21 @@ export class BillingAdminController {
 	// Student Invoices & Transactions
 	@Get("students/:studentGradeId/invoices")
 	@ApiOperation({ summary: "Daftar invoice tagihan santri" })
-	@ApiResponseWrapped({ status: 200, description: "List invoice santri", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List invoice santri", type: BillingInvoiceResponseDto, isArray: true })
 	async getStudentInvoices(@Param("studentGradeId", ParseIntPipe) studentGradeId: number) {
 		return this.billingService.getStudentInvoices(studentGradeId)
 	}
 
 	@Get("students/:studentGradeId/transactions")
 	@ApiOperation({ summary: "Daftar transaksi pembayaran santri" })
-	@ApiResponseWrapped({ status: 200, description: "List transaksi santri", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List transaksi santri", type: BillingTransactionResponseDto, isArray: true })
 	async getStudentTransactions(@Param("studentGradeId", ParseIntPipe) studentGradeId: number) {
 		return this.billingService.getStudentTransactions(studentGradeId)
 	}
 
 	@Post("students/:studentGradeId/transactions")
 	@ApiOperation({ summary: "Proses pembayaran tagihan santri" })
-	@ApiResponseWrapped({ status: 201, description: "Pembayaran berhasil dicatat" })
+	@ApiResponseWrapped({ status: 201, description: "Pembayaran berhasil dicatat", type: BillingTransactionResponseDto })
 	async createPayment(
 		@Param("studentGradeId", ParseIntPipe) studentGradeId: number,
 		@Body() dto: CreatePaymentTransactionDto,
@@ -144,14 +148,14 @@ export class BillingAdminController {
 	// Reports
 	@Get("reports/income")
 	@ApiOperation({ summary: "Laporan penerimaan pembayaran" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan penerimaan", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "Detail laporan penerimaan", type: BillingIncomeReportResponseDto, isArray: true })
 	async getReportsIncome() {
 		return this.billingService.getReportsIncome()
 	}
 
 	@Get("reports/arrears")
 	@ApiOperation({ summary: "Laporan tunggakan santri" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan tunggakan", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "Detail laporan tunggakan", type: BillingArrearsReportResponseDto, isArray: true })
 	async getReportsArrears() {
 		return this.billingService.getReportsArrears()
 	}

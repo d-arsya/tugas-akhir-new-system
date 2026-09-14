@@ -51,3 +51,25 @@ export const EwalletResponseSchema = z.object({
 })
 
 export class EwalletResponseDto extends createZodDto(EwalletResponseSchema) {}
+
+export const EwalletWidgetStatsResponseSchema = z.object({
+	totalBalance: z.number(),
+	totalEwallets: z.number(),
+	activeCount: z.number(),
+	blockedCount: z.number(),
+})
+
+export class EwalletWidgetStatsResponseDto extends createZodDto(EwalletWidgetStatsResponseSchema) {}
+
+export const EwalletTransactionResponseSchema = z.object({
+	id: z.number(),
+	ewalletId: z.number(),
+	type: z.string(),
+	amount: z.number(),
+	status: z.string(),
+	note: z.string().nullable().optional(),
+	createdAt: z.string().optional(),
+})
+
+export class EwalletTransactionResponseDto extends createZodDto(EwalletTransactionResponseSchema) {}
+

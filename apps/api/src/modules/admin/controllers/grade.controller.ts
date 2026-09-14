@@ -5,9 +5,13 @@ import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "../../../core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "../../../core/decorators/api-response-wrapped.decorator"
 import { GradeService } from "../services/grade.service"
-import type { CreateGradeDto, UpdateGradeDto } from "../dto/academic.dto"
-
-import { GradeResponseDto, GradeLevelResponseDto, LevelByGradeDto } from "../dto/academic.dto"
+import {
+	CreateGradeDto,
+	UpdateGradeDto,
+	GradeResponseDto,
+	GradeLevelResponseDto,
+	LevelByGradeDto,
+} from "../dto/academic.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Academic Structure: Grade")

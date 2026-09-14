@@ -84,3 +84,48 @@ export const CostTermResponseSchema = z.object({
 })
 
 export class CostTermResponseDto extends createZodDto(CostTermResponseSchema) {}
+
+export const BillingInvoiceResponseSchema = z.object({
+	id: z.number(),
+	studentGradeId: z.number(),
+	accountancyId: z.number(),
+	amount: z.number(),
+	paidAmount: z.number(),
+	remainingAmount: z.number(),
+	status: z.string(),
+	monthOf: z.number().nullable().optional(),
+	dueDate: z.string().nullable().optional(),
+})
+
+export class BillingInvoiceResponseDto extends createZodDto(BillingInvoiceResponseSchema) {}
+
+export const BillingTransactionResponseSchema = z.object({
+	id: z.number(),
+	studentGradeId: z.number(),
+	paidAmount: z.number(),
+	paymentMethod: z.string(),
+	status: z.string(),
+	paidAt: z.string().nullable().optional(),
+	note: z.string().nullable().optional(),
+})
+
+export class BillingTransactionResponseDto extends createZodDto(BillingTransactionResponseSchema) {}
+
+export const BillingIncomeReportResponseSchema = z.object({
+	period: z.string(),
+	totalIncome: z.number(),
+	transactionCount: z.number(),
+})
+
+export class BillingIncomeReportResponseDto extends createZodDto(BillingIncomeReportResponseSchema) {}
+
+export const BillingArrearsReportResponseSchema = z.object({
+	studentGradeId: z.number(),
+	studentName: z.string().optional(),
+	gradeName: z.string().optional(),
+	totalArrears: z.number(),
+	unpaidInvoicesCount: z.number(),
+})
+
+export class BillingArrearsReportResponseDto extends createZodDto(BillingArrearsReportResponseSchema) {}
+

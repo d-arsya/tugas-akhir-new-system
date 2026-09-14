@@ -11,6 +11,7 @@ import {
 	ToggleBlockMerchantDto,
 	MerchantResponseDto,
 } from "../dto/merchant-admin.dto"
+import { EwalletTransactionResponseDto } from "../dto/ewallet-admin.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
 @ApiTags("Admin — Merchant Management")
@@ -30,21 +31,21 @@ export class MerchantAdminController {
 
 	@Get(":id")
 	@ApiOperation({ summary: "Detail data merchant dan e-wallet" })
-	@ApiResponseWrapped({ status: 200, description: "Detail merchant" })
+	@ApiResponseWrapped({ status: 200, description: "Detail merchant", type: MerchantResponseDto })
 	async findOne(@Param("id", ParseIntPipe) id: number) {
 		return this.merchantAdminService.findOne(id)
 	}
 
 	@Get(":id/transactions")
 	@ApiOperation({ summary: "Riwayat transaksi merchant" })
-	@ApiResponseWrapped({ status: 200, description: "List transaksi merchant", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List transaksi merchant", type: EwalletTransactionResponseDto, isArray: true })
 	async getMerchantTransactions(@Param("id", ParseIntPipe) id: number) {
 		return this.merchantAdminService.getMerchantTransactions(id)
 	}
 
 	@Post()
 	@ApiOperation({ summary: "Tambah merchant baru (auto generate user & e-wallet)" })
-	@ApiResponseWrapped({ status: 201, description: "Merchant berhasil dibuat" })
+	@ApiResponseWrapped({ status: 201, description: "Merchant berhasil dibuat", type: MerchantResponseDto })
 	async create(@Body() dto: CreateMerchantDto) {
 		return this.merchantAdminService.create(dto)
 	}

@@ -12,6 +12,8 @@ import {
 	UpdateEwalletSettingDto,
 	UpdateEwalletTxStatusDto,
 	EwalletResponseDto,
+	EwalletWidgetStatsResponseDto,
+	EwalletTransactionResponseDto,
 } from "../dto/ewallet-admin.dto"
 import { AdminMessageResponseDto } from "../dto/admin-response.dto"
 
@@ -32,14 +34,14 @@ export class EwalletAdminController {
 
 	@Get("widget")
 	@ApiOperation({ summary: "Widget statistik total saldo dan status wallet" })
-	@ApiResponseWrapped({ status: 200, description: "Statistik e-wallet" })
+	@ApiResponseWrapped({ status: 200, description: "Statistik e-wallet", type: EwalletWidgetStatsResponseDto })
 	async getWidgetStats() {
 		return this.ewalletAdminService.getWidgetStats()
 	}
 
 	@Get("transactions")
 	@ApiOperation({ summary: "Daftar semua transaksi e-wallet global" })
-	@ApiResponseWrapped({ status: 200, description: "List transaksi e-wallet global", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List transaksi e-wallet global", type: EwalletTransactionResponseDto, isArray: true })
 	async getGlobalTransactions() {
 		return this.ewalletAdminService.getGlobalTransactions()
 	}
@@ -53,21 +55,21 @@ export class EwalletAdminController {
 
 	@Get(":ewalletId/transactions")
 	@ApiOperation({ summary: "Riwayat transaksi e-wallet santri" })
-	@ApiResponseWrapped({ status: 200, description: "List transaksi santri", isArray: true })
+	@ApiResponseWrapped({ status: 200, description: "List transaksi santri", type: EwalletTransactionResponseDto, isArray: true })
 	async getTransactions(@Param("ewalletId", ParseIntPipe) ewalletId: number) {
 		return this.ewalletAdminService.getTransactions(ewalletId)
 	}
 
 	@Post(":ewalletId/top-up")
 	@ApiOperation({ summary: "Top-up saldo e-wallet santri" })
-	@ApiResponseWrapped({ status: 201, description: "Top-up berhasil" })
+	@ApiResponseWrapped({ status: 201, description: "Top-up berhasil", type: EwalletTransactionResponseDto })
 	async topUp(@Param("ewalletId", ParseIntPipe) ewalletId: number, @Body() dto: TopUpEwalletDto) {
 		return this.ewalletAdminService.topUp(ewalletId, dto)
 	}
 
 	@Post(":ewalletId/withdraw")
 	@ApiOperation({ summary: "Tarik saldo e-wallet santri" })
-	@ApiResponseWrapped({ status: 201, description: "Withdraw berhasil" })
+	@ApiResponseWrapped({ status: 201, description: "Withdraw berhasil", type: EwalletTransactionResponseDto })
 	async withdraw(@Param("ewalletId", ParseIntPipe) ewalletId: number, @Body() dto: WithdrawEwalletDto) {
 		return this.ewalletAdminService.withdraw(ewalletId, dto)
 	}
@@ -88,7 +90,7 @@ export class EwalletAdminController {
 
 	@Patch("transactions/:id")
 	@ApiOperation({ summary: "Update status transaksi e-wallet (validasi / tolak)" })
-	@ApiResponseWrapped({ status: 200, description: "Status transaksi diupdate" })
+	@ApiResponseWrapped({ status: 200, description: "Status transaksi diupdate", type: EwalletTransactionResponseDto })
 	async updateTransactionStatus(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateEwalletTxStatusDto) {
 		return this.ewalletAdminService.updateTransactionStatus(id, dto)
 	}
