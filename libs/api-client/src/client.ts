@@ -72,7 +72,7 @@ export const createApiClient = (
 					}
 					if (!refreshEndpoint) {
 						const match = requestUrl.match(/^\/?(psb|admin|merchant|santri)/i)
-						if (match) {
+						if (match && match[1]) {
 							refreshEndpoint = `/${match[1].toLowerCase()}/auth/refresh`
 						}
 					}

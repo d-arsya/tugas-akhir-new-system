@@ -10,33 +10,629 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as AuthAcademicYearsRouteImport } from './routes/_auth.academic-years'
+import { Route as AuthAccountancyRouteImport } from './routes/_auth.accountancy'
+import { Route as AuthAlumniRouteImport } from './routes/_auth.alumni'
+import { Route as AuthAuthLogsRouteImport } from './routes/_auth.auth-logs'
+import { Route as AuthDashboardRouteImport } from './routes/_auth.dashboard'
+import { Route as AuthEwalletConfirmationsRouteImport } from './routes/_auth.ewallet-confirmations'
+import { Route as AuthEwalletTransactionsRouteImport } from './routes/_auth.ewallet-transactions'
+import { Route as AuthEwalletWithdrawalsRouteImport } from './routes/_auth.ewallet-withdrawals'
+import { Route as AuthEwalletsRouteImport } from './routes/_auth.ewallets'
+import { Route as AuthGradesRouteImport } from './routes/_auth.grades'
+import { Route as AuthIpBansRouteImport } from './routes/_auth.ip-bans'
+import { Route as AuthLevelsRouteImport } from './routes/_auth.levels'
+import { Route as AuthMajorsRouteImport } from './routes/_auth.majors'
+import { Route as AuthMerchantsRouteImport } from './routes/_auth.merchants'
+import { Route as AuthMyProfileRouteImport } from './routes/_auth.my-profile'
+import { Route as AuthRegistrantsRouteImport } from './routes/_auth.registrants'
+import { Route as AuthReportsRouteImport } from './routes/_auth.reports'
+import { Route as AuthSettingsRouteImport } from './routes/_auth.settings'
+import { Route as AuthStudentCapabilitiesRouteImport } from './routes/_auth.student-capabilities'
+import { Route as AuthStudentCostsRouteImport } from './routes/_auth.student-costs'
+import { Route as AuthStudentInvoicesRouteImport } from './routes/_auth.student-invoices'
+import { Route as AuthStudentTransactionsRouteImport } from './routes/_auth.student-transactions'
+import { Route as AuthStudentsRouteImport } from './routes/_auth.students'
+import { Route as AuthUsersRouteImport } from './routes/_auth.users'
+import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-password'
+import { Route as GuestLoginRouteImport } from './routes/_guest.login'
+import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
+import { Route as GuestVerify2faRouteImport } from './routes/_guest.verify-2fa'
+import { Route as AuthAcademicYearsCreateRouteImport } from './routes/_auth.academic-years.create'
+import { Route as AuthAlumniIndexRouteImport } from './routes/_auth.alumni.index'
+import { Route as AuthAlumniGraduationYearRouteImport } from './routes/_auth.alumni.$graduationYear'
+import { Route as AuthAlumniDashboardRouteImport } from './routes/_auth.alumni.dashboard'
+import { Route as AuthMerchantsCreateRouteImport } from './routes/_auth.merchants.create'
+import { Route as AuthRegistrantsIndexRouteImport } from './routes/_auth.registrants.index'
+import { Route as AuthRegistrantsIdRouteImport } from './routes/_auth.registrants.$id'
+import { Route as AuthRegistrantsCreateRouteImport } from './routes/_auth.registrants.create'
+import { Route as AuthSettingsAnnouncementsRouteImport } from './routes/_auth.settings.announcements'
+import { Route as AuthSettingsFormRouteImport } from './routes/_auth.settings.form'
+import { Route as AuthSettingsSchoolRouteImport } from './routes/_auth.settings.school'
+import { Route as AuthStudentCapabilitiesIndexRouteImport } from './routes/_auth.student-capabilities.index'
+import { Route as AuthStudentCapabilitiesAcademicYearIdRouteImport } from './routes/_auth.student-capabilities.$academicYearId'
+import { Route as AuthStudentsIndexRouteImport } from './routes/_auth.students.index'
+import { Route as AuthStudentsIdRouteImport } from './routes/_auth.students.$id'
+import { Route as AuthStudentsCreateRouteImport } from './routes/_auth.students.create'
+import { Route as AuthUsersCreateRouteImport } from './routes/_auth.users.create'
+import { Route as AuthRegistrantsAcademicYearIdWorkbenchRouteImport } from './routes/_auth.registrants.$academicYearId.workbench'
+import { Route as AuthStudentsAcademicYearIdGradesIndexRouteImport } from './routes/_auth.students.$academicYearId.grades.index'
+import { Route as AuthStudentsAcademicYearIdGradesGradeIdRouteImport } from './routes/_auth.students.$academicYearId.grades.$gradeId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthAcademicYearsRoute = AuthAcademicYearsRouteImport.update({
+  id: '/academic-years',
+  path: '/academic-years',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAccountancyRoute = AuthAccountancyRouteImport.update({
+  id: '/accountancy',
+  path: '/accountancy',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAlumniRoute = AuthAlumniRouteImport.update({
+  id: '/alumni',
+  path: '/alumni',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthAuthLogsRoute = AuthAuthLogsRouteImport.update({
+  id: '/auth-logs',
+  path: '/auth-logs',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthDashboardRoute = AuthDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthEwalletConfirmationsRoute =
+  AuthEwalletConfirmationsRouteImport.update({
+    id: '/ewallet-confirmations',
+    path: '/ewallet-confirmations',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthEwalletTransactionsRoute = AuthEwalletTransactionsRouteImport.update({
+  id: '/ewallet-transactions',
+  path: '/ewallet-transactions',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthEwalletWithdrawalsRoute = AuthEwalletWithdrawalsRouteImport.update({
+  id: '/ewallet-withdrawals',
+  path: '/ewallet-withdrawals',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthEwalletsRoute = AuthEwalletsRouteImport.update({
+  id: '/ewallets',
+  path: '/ewallets',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthGradesRoute = AuthGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthIpBansRoute = AuthIpBansRouteImport.update({
+  id: '/ip-bans',
+  path: '/ip-bans',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLevelsRoute = AuthLevelsRouteImport.update({
+  id: '/levels',
+  path: '/levels',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthMajorsRoute = AuthMajorsRouteImport.update({
+  id: '/majors',
+  path: '/majors',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthMerchantsRoute = AuthMerchantsRouteImport.update({
+  id: '/merchants',
+  path: '/merchants',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthMyProfileRoute = AuthMyProfileRouteImport.update({
+  id: '/my-profile',
+  path: '/my-profile',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthRegistrantsRoute = AuthRegistrantsRouteImport.update({
+  id: '/registrants',
+  path: '/registrants',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthReportsRoute = AuthReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSettingsRoute = AuthSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthStudentCapabilitiesRoute = AuthStudentCapabilitiesRouteImport.update({
+  id: '/student-capabilities',
+  path: '/student-capabilities',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthStudentCostsRoute = AuthStudentCostsRouteImport.update({
+  id: '/student-costs',
+  path: '/student-costs',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthStudentInvoicesRoute = AuthStudentInvoicesRouteImport.update({
+  id: '/student-invoices',
+  path: '/student-invoices',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthStudentTransactionsRoute = AuthStudentTransactionsRouteImport.update({
+  id: '/student-transactions',
+  path: '/student-transactions',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthStudentsRoute = AuthStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthUsersRoute = AuthUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthRoute,
+} as any)
+const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestLoginRoute = GuestLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestResetPasswordRoute = GuestResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => GuestRoute,
+} as any)
+const GuestVerify2faRoute = GuestVerify2faRouteImport.update({
+  id: '/verify-2fa',
+  path: '/verify-2fa',
+  getParentRoute: () => GuestRoute,
+} as any)
+const AuthAcademicYearsCreateRoute = AuthAcademicYearsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthAcademicYearsRoute,
+} as any)
+const AuthAlumniIndexRoute = AuthAlumniIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthAlumniRoute,
+} as any)
+const AuthAlumniGraduationYearRoute =
+  AuthAlumniGraduationYearRouteImport.update({
+    id: '/$graduationYear',
+    path: '/$graduationYear',
+    getParentRoute: () => AuthAlumniRoute,
+  } as any)
+const AuthAlumniDashboardRoute = AuthAlumniDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthAlumniRoute,
+} as any)
+const AuthMerchantsCreateRoute = AuthMerchantsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthMerchantsRoute,
+} as any)
+const AuthRegistrantsIndexRoute = AuthRegistrantsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRegistrantsRoute,
+} as any)
+const AuthRegistrantsIdRoute = AuthRegistrantsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthRegistrantsRoute,
+} as any)
+const AuthRegistrantsCreateRoute = AuthRegistrantsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthRegistrantsRoute,
+} as any)
+const AuthSettingsAnnouncementsRoute =
+  AuthSettingsAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsFormRoute = AuthSettingsFormRouteImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsSchoolRoute = AuthSettingsSchoolRouteImport.update({
+  id: '/school',
+  path: '/school',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthStudentCapabilitiesIndexRoute =
+  AuthStudentCapabilitiesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthStudentCapabilitiesRoute,
+  } as any)
+const AuthStudentCapabilitiesAcademicYearIdRoute =
+  AuthStudentCapabilitiesAcademicYearIdRouteImport.update({
+    id: '/$academicYearId',
+    path: '/$academicYearId',
+    getParentRoute: () => AuthStudentCapabilitiesRoute,
+  } as any)
+const AuthStudentsIndexRoute = AuthStudentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthStudentsRoute,
+} as any)
+const AuthStudentsIdRoute = AuthStudentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthStudentsRoute,
+} as any)
+const AuthStudentsCreateRoute = AuthStudentsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthStudentsRoute,
+} as any)
+const AuthUsersCreateRoute = AuthUsersCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AuthUsersRoute,
+} as any)
+const AuthRegistrantsAcademicYearIdWorkbenchRoute =
+  AuthRegistrantsAcademicYearIdWorkbenchRouteImport.update({
+    id: '/$academicYearId/workbench',
+    path: '/$academicYearId/workbench',
+    getParentRoute: () => AuthRegistrantsRoute,
+  } as any)
+const AuthStudentsAcademicYearIdGradesIndexRoute =
+  AuthStudentsAcademicYearIdGradesIndexRouteImport.update({
+    id: '/$academicYearId/grades/',
+    path: '/$academicYearId/grades/',
+    getParentRoute: () => AuthStudentsRoute,
+  } as any)
+const AuthStudentsAcademicYearIdGradesGradeIdRoute =
+  AuthStudentsAcademicYearIdGradesGradeIdRouteImport.update({
+    id: '/$academicYearId/grades/$gradeId',
+    path: '/$academicYearId/grades/$gradeId',
+    getParentRoute: () => AuthStudentsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/academic-years': typeof AuthAcademicYearsRouteWithChildren
+  '/accountancy': typeof AuthAccountancyRoute
+  '/alumni': typeof AuthAlumniRouteWithChildren
+  '/auth-logs': typeof AuthAuthLogsRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
+  '/ewallet-transactions': typeof AuthEwalletTransactionsRoute
+  '/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
+  '/ewallets': typeof AuthEwalletsRoute
+  '/grades': typeof AuthGradesRoute
+  '/ip-bans': typeof AuthIpBansRoute
+  '/levels': typeof AuthLevelsRoute
+  '/majors': typeof AuthMajorsRoute
+  '/merchants': typeof AuthMerchantsRouteWithChildren
+  '/my-profile': typeof AuthMyProfileRoute
+  '/registrants': typeof AuthRegistrantsRouteWithChildren
+  '/reports': typeof AuthReportsRoute
+  '/settings': typeof AuthSettingsRouteWithChildren
+  '/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
+  '/student-costs': typeof AuthStudentCostsRoute
+  '/student-invoices': typeof AuthStudentInvoicesRoute
+  '/student-transactions': typeof AuthStudentTransactionsRoute
+  '/students': typeof AuthStudentsRouteWithChildren
+  '/users': typeof AuthUsersRouteWithChildren
+  '/forgot-password': typeof GuestForgotPasswordRoute
+  '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
+  '/verify-2fa': typeof GuestVerify2faRoute
+  '/academic-years/create': typeof AuthAcademicYearsCreateRoute
+  '/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
+  '/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/merchants/create': typeof AuthMerchantsCreateRoute
+  '/registrants/$id': typeof AuthRegistrantsIdRoute
+  '/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/settings/announcements': typeof AuthSettingsAnnouncementsRoute
+  '/settings/form': typeof AuthSettingsFormRoute
+  '/settings/school': typeof AuthSettingsSchoolRoute
+  '/student-capabilities/$academicYearId': typeof AuthStudentCapabilitiesAcademicYearIdRoute
+  '/students/$id': typeof AuthStudentsIdRoute
+  '/students/create': typeof AuthStudentsCreateRoute
+  '/users/create': typeof AuthUsersCreateRoute
+  '/alumni/': typeof AuthAlumniIndexRoute
+  '/registrants/': typeof AuthRegistrantsIndexRoute
+  '/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
+  '/students/': typeof AuthStudentsIndexRoute
+  '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/academic-years': typeof AuthAcademicYearsRouteWithChildren
+  '/accountancy': typeof AuthAccountancyRoute
+  '/auth-logs': typeof AuthAuthLogsRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
+  '/ewallet-transactions': typeof AuthEwalletTransactionsRoute
+  '/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
+  '/ewallets': typeof AuthEwalletsRoute
+  '/grades': typeof AuthGradesRoute
+  '/ip-bans': typeof AuthIpBansRoute
+  '/levels': typeof AuthLevelsRoute
+  '/majors': typeof AuthMajorsRoute
+  '/merchants': typeof AuthMerchantsRouteWithChildren
+  '/my-profile': typeof AuthMyProfileRoute
+  '/reports': typeof AuthReportsRoute
+  '/settings': typeof AuthSettingsRouteWithChildren
+  '/student-costs': typeof AuthStudentCostsRoute
+  '/student-invoices': typeof AuthStudentInvoicesRoute
+  '/student-transactions': typeof AuthStudentTransactionsRoute
+  '/users': typeof AuthUsersRouteWithChildren
+  '/forgot-password': typeof GuestForgotPasswordRoute
+  '/login': typeof GuestLoginRoute
+  '/reset-password': typeof GuestResetPasswordRoute
+  '/verify-2fa': typeof GuestVerify2faRoute
+  '/academic-years/create': typeof AuthAcademicYearsCreateRoute
+  '/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
+  '/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/merchants/create': typeof AuthMerchantsCreateRoute
+  '/registrants/$id': typeof AuthRegistrantsIdRoute
+  '/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/settings/announcements': typeof AuthSettingsAnnouncementsRoute
+  '/settings/form': typeof AuthSettingsFormRoute
+  '/settings/school': typeof AuthSettingsSchoolRoute
+  '/student-capabilities/$academicYearId': typeof AuthStudentCapabilitiesAcademicYearIdRoute
+  '/students/$id': typeof AuthStudentsIdRoute
+  '/students/create': typeof AuthStudentsCreateRoute
+  '/users/create': typeof AuthUsersCreateRoute
+  '/alumni': typeof AuthAlumniIndexRoute
+  '/registrants': typeof AuthRegistrantsIndexRoute
+  '/student-capabilities': typeof AuthStudentCapabilitiesIndexRoute
+  '/students': typeof AuthStudentsIndexRoute
+  '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/students/$academicYearId/grades': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/_guest': typeof GuestRouteWithChildren
+  '/_auth/academic-years': typeof AuthAcademicYearsRouteWithChildren
+  '/_auth/accountancy': typeof AuthAccountancyRoute
+  '/_auth/alumni': typeof AuthAlumniRouteWithChildren
+  '/_auth/auth-logs': typeof AuthAuthLogsRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
+  '/_auth/ewallet-transactions': typeof AuthEwalletTransactionsRoute
+  '/_auth/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
+  '/_auth/ewallets': typeof AuthEwalletsRoute
+  '/_auth/grades': typeof AuthGradesRoute
+  '/_auth/ip-bans': typeof AuthIpBansRoute
+  '/_auth/levels': typeof AuthLevelsRoute
+  '/_auth/majors': typeof AuthMajorsRoute
+  '/_auth/merchants': typeof AuthMerchantsRouteWithChildren
+  '/_auth/my-profile': typeof AuthMyProfileRoute
+  '/_auth/registrants': typeof AuthRegistrantsRouteWithChildren
+  '/_auth/reports': typeof AuthReportsRoute
+  '/_auth/settings': typeof AuthSettingsRouteWithChildren
+  '/_auth/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
+  '/_auth/student-costs': typeof AuthStudentCostsRoute
+  '/_auth/student-invoices': typeof AuthStudentInvoicesRoute
+  '/_auth/student-transactions': typeof AuthStudentTransactionsRoute
+  '/_auth/students': typeof AuthStudentsRouteWithChildren
+  '/_auth/users': typeof AuthUsersRouteWithChildren
+  '/_guest/forgot-password': typeof GuestForgotPasswordRoute
+  '/_guest/login': typeof GuestLoginRoute
+  '/_guest/reset-password': typeof GuestResetPasswordRoute
+  '/_guest/verify-2fa': typeof GuestVerify2faRoute
+  '/_auth/academic-years/create': typeof AuthAcademicYearsCreateRoute
+  '/_auth/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
+  '/_auth/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/_auth/merchants/create': typeof AuthMerchantsCreateRoute
+  '/_auth/registrants/$id': typeof AuthRegistrantsIdRoute
+  '/_auth/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/_auth/settings/announcements': typeof AuthSettingsAnnouncementsRoute
+  '/_auth/settings/form': typeof AuthSettingsFormRoute
+  '/_auth/settings/school': typeof AuthSettingsSchoolRoute
+  '/_auth/student-capabilities/$academicYearId': typeof AuthStudentCapabilitiesAcademicYearIdRoute
+  '/_auth/students/$id': typeof AuthStudentsIdRoute
+  '/_auth/students/create': typeof AuthStudentsCreateRoute
+  '/_auth/users/create': typeof AuthUsersCreateRoute
+  '/_auth/alumni/': typeof AuthAlumniIndexRoute
+  '/_auth/registrants/': typeof AuthRegistrantsIndexRoute
+  '/_auth/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
+  '/_auth/students/': typeof AuthStudentsIndexRoute
+  '/_auth/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/_auth/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/_auth/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/academic-years'
+    | '/accountancy'
+    | '/alumni'
+    | '/auth-logs'
+    | '/dashboard'
+    | '/ewallet-confirmations'
+    | '/ewallet-transactions'
+    | '/ewallet-withdrawals'
+    | '/ewallets'
+    | '/grades'
+    | '/ip-bans'
+    | '/levels'
+    | '/majors'
+    | '/merchants'
+    | '/my-profile'
+    | '/registrants'
+    | '/reports'
+    | '/settings'
+    | '/student-capabilities'
+    | '/student-costs'
+    | '/student-invoices'
+    | '/student-transactions'
+    | '/students'
+    | '/users'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/verify-2fa'
+    | '/academic-years/create'
+    | '/alumni/$graduationYear'
+    | '/alumni/dashboard'
+    | '/merchants/create'
+    | '/registrants/$id'
+    | '/registrants/create'
+    | '/settings/announcements'
+    | '/settings/form'
+    | '/settings/school'
+    | '/student-capabilities/$academicYearId'
+    | '/students/$id'
+    | '/students/create'
+    | '/users/create'
+    | '/alumni/'
+    | '/registrants/'
+    | '/student-capabilities/'
+    | '/students/'
+    | '/registrants/$academicYearId/workbench'
+    | '/students/$academicYearId/grades/$gradeId'
+    | '/students/$academicYearId/grades/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/academic-years'
+    | '/accountancy'
+    | '/auth-logs'
+    | '/dashboard'
+    | '/ewallet-confirmations'
+    | '/ewallet-transactions'
+    | '/ewallet-withdrawals'
+    | '/ewallets'
+    | '/grades'
+    | '/ip-bans'
+    | '/levels'
+    | '/majors'
+    | '/merchants'
+    | '/my-profile'
+    | '/reports'
+    | '/settings'
+    | '/student-costs'
+    | '/student-invoices'
+    | '/student-transactions'
+    | '/users'
+    | '/forgot-password'
+    | '/login'
+    | '/reset-password'
+    | '/verify-2fa'
+    | '/academic-years/create'
+    | '/alumni/$graduationYear'
+    | '/alumni/dashboard'
+    | '/merchants/create'
+    | '/registrants/$id'
+    | '/registrants/create'
+    | '/settings/announcements'
+    | '/settings/form'
+    | '/settings/school'
+    | '/student-capabilities/$academicYearId'
+    | '/students/$id'
+    | '/students/create'
+    | '/users/create'
+    | '/alumni'
+    | '/registrants'
+    | '/student-capabilities'
+    | '/students'
+    | '/registrants/$academicYearId/workbench'
+    | '/students/$academicYearId/grades/$gradeId'
+    | '/students/$academicYearId/grades'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/_guest'
+    | '/_auth/academic-years'
+    | '/_auth/accountancy'
+    | '/_auth/alumni'
+    | '/_auth/auth-logs'
+    | '/_auth/dashboard'
+    | '/_auth/ewallet-confirmations'
+    | '/_auth/ewallet-transactions'
+    | '/_auth/ewallet-withdrawals'
+    | '/_auth/ewallets'
+    | '/_auth/grades'
+    | '/_auth/ip-bans'
+    | '/_auth/levels'
+    | '/_auth/majors'
+    | '/_auth/merchants'
+    | '/_auth/my-profile'
+    | '/_auth/registrants'
+    | '/_auth/reports'
+    | '/_auth/settings'
+    | '/_auth/student-capabilities'
+    | '/_auth/student-costs'
+    | '/_auth/student-invoices'
+    | '/_auth/student-transactions'
+    | '/_auth/students'
+    | '/_auth/users'
+    | '/_guest/forgot-password'
+    | '/_guest/login'
+    | '/_guest/reset-password'
+    | '/_guest/verify-2fa'
+    | '/_auth/academic-years/create'
+    | '/_auth/alumni/$graduationYear'
+    | '/_auth/alumni/dashboard'
+    | '/_auth/merchants/create'
+    | '/_auth/registrants/$id'
+    | '/_auth/registrants/create'
+    | '/_auth/settings/announcements'
+    | '/_auth/settings/form'
+    | '/_auth/settings/school'
+    | '/_auth/student-capabilities/$academicYearId'
+    | '/_auth/students/$id'
+    | '/_auth/students/create'
+    | '/_auth/users/create'
+    | '/_auth/alumni/'
+    | '/_auth/registrants/'
+    | '/_auth/student-capabilities/'
+    | '/_auth/students/'
+    | '/_auth/registrants/$academicYearId/workbench'
+    | '/_auth/students/$academicYearId/grades/$gradeId'
+    | '/_auth/students/$academicYearId/grades/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  GuestRoute: typeof GuestRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +644,560 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/academic-years': {
+      id: '/_auth/academic-years'
+      path: '/academic-years'
+      fullPath: '/academic-years'
+      preLoaderRoute: typeof AuthAcademicYearsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/accountancy': {
+      id: '/_auth/accountancy'
+      path: '/accountancy'
+      fullPath: '/accountancy'
+      preLoaderRoute: typeof AuthAccountancyRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/alumni': {
+      id: '/_auth/alumni'
+      path: '/alumni'
+      fullPath: '/alumni'
+      preLoaderRoute: typeof AuthAlumniRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/auth-logs': {
+      id: '/_auth/auth-logs'
+      path: '/auth-logs'
+      fullPath: '/auth-logs'
+      preLoaderRoute: typeof AuthAuthLogsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/ewallet-confirmations': {
+      id: '/_auth/ewallet-confirmations'
+      path: '/ewallet-confirmations'
+      fullPath: '/ewallet-confirmations'
+      preLoaderRoute: typeof AuthEwalletConfirmationsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/ewallet-transactions': {
+      id: '/_auth/ewallet-transactions'
+      path: '/ewallet-transactions'
+      fullPath: '/ewallet-transactions'
+      preLoaderRoute: typeof AuthEwalletTransactionsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/ewallet-withdrawals': {
+      id: '/_auth/ewallet-withdrawals'
+      path: '/ewallet-withdrawals'
+      fullPath: '/ewallet-withdrawals'
+      preLoaderRoute: typeof AuthEwalletWithdrawalsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/ewallets': {
+      id: '/_auth/ewallets'
+      path: '/ewallets'
+      fullPath: '/ewallets'
+      preLoaderRoute: typeof AuthEwalletsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/grades': {
+      id: '/_auth/grades'
+      path: '/grades'
+      fullPath: '/grades'
+      preLoaderRoute: typeof AuthGradesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/ip-bans': {
+      id: '/_auth/ip-bans'
+      path: '/ip-bans'
+      fullPath: '/ip-bans'
+      preLoaderRoute: typeof AuthIpBansRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/levels': {
+      id: '/_auth/levels'
+      path: '/levels'
+      fullPath: '/levels'
+      preLoaderRoute: typeof AuthLevelsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/majors': {
+      id: '/_auth/majors'
+      path: '/majors'
+      fullPath: '/majors'
+      preLoaderRoute: typeof AuthMajorsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/merchants': {
+      id: '/_auth/merchants'
+      path: '/merchants'
+      fullPath: '/merchants'
+      preLoaderRoute: typeof AuthMerchantsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/my-profile': {
+      id: '/_auth/my-profile'
+      path: '/my-profile'
+      fullPath: '/my-profile'
+      preLoaderRoute: typeof AuthMyProfileRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/registrants': {
+      id: '/_auth/registrants'
+      path: '/registrants'
+      fullPath: '/registrants'
+      preLoaderRoute: typeof AuthRegistrantsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/reports': {
+      id: '/_auth/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthReportsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/settings': {
+      id: '/_auth/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthSettingsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/student-capabilities': {
+      id: '/_auth/student-capabilities'
+      path: '/student-capabilities'
+      fullPath: '/student-capabilities'
+      preLoaderRoute: typeof AuthStudentCapabilitiesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/student-costs': {
+      id: '/_auth/student-costs'
+      path: '/student-costs'
+      fullPath: '/student-costs'
+      preLoaderRoute: typeof AuthStudentCostsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/student-invoices': {
+      id: '/_auth/student-invoices'
+      path: '/student-invoices'
+      fullPath: '/student-invoices'
+      preLoaderRoute: typeof AuthStudentInvoicesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/student-transactions': {
+      id: '/_auth/student-transactions'
+      path: '/student-transactions'
+      fullPath: '/student-transactions'
+      preLoaderRoute: typeof AuthStudentTransactionsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/students': {
+      id: '/_auth/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof AuthStudentsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/users': {
+      id: '/_auth/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthUsersRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_guest/forgot-password': {
+      id: '/_guest/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof GuestForgotPasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/login': {
+      id: '/_guest/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof GuestLoginRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/reset-password': {
+      id: '/_guest/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof GuestResetPasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_guest/verify-2fa': {
+      id: '/_guest/verify-2fa'
+      path: '/verify-2fa'
+      fullPath: '/verify-2fa'
+      preLoaderRoute: typeof GuestVerify2faRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_auth/academic-years/create': {
+      id: '/_auth/academic-years/create'
+      path: '/create'
+      fullPath: '/academic-years/create'
+      preLoaderRoute: typeof AuthAcademicYearsCreateRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/alumni/': {
+      id: '/_auth/alumni/'
+      path: '/'
+      fullPath: '/alumni/'
+      preLoaderRoute: typeof AuthAlumniIndexRouteImport
+      parentRoute: typeof AuthAlumniRoute
+    }
+    '/_auth/alumni/$graduationYear': {
+      id: '/_auth/alumni/$graduationYear'
+      path: '/$graduationYear'
+      fullPath: '/alumni/$graduationYear'
+      preLoaderRoute: typeof AuthAlumniGraduationYearRouteImport
+      parentRoute: typeof AuthAlumniRoute
+    }
+    '/_auth/alumni/dashboard': {
+      id: '/_auth/alumni/dashboard'
+      path: '/dashboard'
+      fullPath: '/alumni/dashboard'
+      preLoaderRoute: typeof AuthAlumniDashboardRouteImport
+      parentRoute: typeof AuthAlumniRoute
+    }
+    '/_auth/merchants/create': {
+      id: '/_auth/merchants/create'
+      path: '/create'
+      fullPath: '/merchants/create'
+      preLoaderRoute: typeof AuthMerchantsCreateRouteImport
+      parentRoute: typeof AuthMerchantsRoute
+    }
+    '/_auth/registrants/': {
+      id: '/_auth/registrants/'
+      path: '/'
+      fullPath: '/registrants/'
+      preLoaderRoute: typeof AuthRegistrantsIndexRouteImport
+      parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/registrants/$id': {
+      id: '/_auth/registrants/$id'
+      path: '/$id'
+      fullPath: '/registrants/$id'
+      preLoaderRoute: typeof AuthRegistrantsIdRouteImport
+      parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/registrants/create': {
+      id: '/_auth/registrants/create'
+      path: '/create'
+      fullPath: '/registrants/create'
+      preLoaderRoute: typeof AuthRegistrantsCreateRouteImport
+      parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/settings/announcements': {
+      id: '/_auth/settings/announcements'
+      path: '/announcements'
+      fullPath: '/settings/announcements'
+      preLoaderRoute: typeof AuthSettingsAnnouncementsRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/form': {
+      id: '/_auth/settings/form'
+      path: '/form'
+      fullPath: '/settings/form'
+      preLoaderRoute: typeof AuthSettingsFormRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/school': {
+      id: '/_auth/settings/school'
+      path: '/school'
+      fullPath: '/settings/school'
+      preLoaderRoute: typeof AuthSettingsSchoolRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/student-capabilities/': {
+      id: '/_auth/student-capabilities/'
+      path: '/'
+      fullPath: '/student-capabilities/'
+      preLoaderRoute: typeof AuthStudentCapabilitiesIndexRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
+    '/_auth/student-capabilities/$academicYearId': {
+      id: '/_auth/student-capabilities/$academicYearId'
+      path: '/$academicYearId'
+      fullPath: '/student-capabilities/$academicYearId'
+      preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearIdRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
+    '/_auth/students/': {
+      id: '/_auth/students/'
+      path: '/'
+      fullPath: '/students/'
+      preLoaderRoute: typeof AuthStudentsIndexRouteImport
+      parentRoute: typeof AuthStudentsRoute
+    }
+    '/_auth/students/$id': {
+      id: '/_auth/students/$id'
+      path: '/$id'
+      fullPath: '/students/$id'
+      preLoaderRoute: typeof AuthStudentsIdRouteImport
+      parentRoute: typeof AuthStudentsRoute
+    }
+    '/_auth/students/create': {
+      id: '/_auth/students/create'
+      path: '/create'
+      fullPath: '/students/create'
+      preLoaderRoute: typeof AuthStudentsCreateRouteImport
+      parentRoute: typeof AuthStudentsRoute
+    }
+    '/_auth/users/create': {
+      id: '/_auth/users/create'
+      path: '/create'
+      fullPath: '/users/create'
+      preLoaderRoute: typeof AuthUsersCreateRouteImport
+      parentRoute: typeof AuthUsersRoute
+    }
+    '/_auth/registrants/$academicYearId/workbench': {
+      id: '/_auth/registrants/$academicYearId/workbench'
+      path: '/$academicYearId/workbench'
+      fullPath: '/registrants/$academicYearId/workbench'
+      preLoaderRoute: typeof AuthRegistrantsAcademicYearIdWorkbenchRouteImport
+      parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/students/$academicYearId/grades/': {
+      id: '/_auth/students/$academicYearId/grades/'
+      path: '/$academicYearId/grades'
+      fullPath: '/students/$academicYearId/grades/'
+      preLoaderRoute: typeof AuthStudentsAcademicYearIdGradesIndexRouteImport
+      parentRoute: typeof AuthStudentsRoute
+    }
+    '/_auth/students/$academicYearId/grades/$gradeId': {
+      id: '/_auth/students/$academicYearId/grades/$gradeId'
+      path: '/$academicYearId/grades/$gradeId'
+      fullPath: '/students/$academicYearId/grades/$gradeId'
+      preLoaderRoute: typeof AuthStudentsAcademicYearIdGradesGradeIdRouteImport
+      parentRoute: typeof AuthStudentsRoute
+    }
   }
 }
 
+interface AuthAcademicYearsRouteChildren {
+  AuthAcademicYearsCreateRoute: typeof AuthAcademicYearsCreateRoute
+}
+
+const AuthAcademicYearsRouteChildren: AuthAcademicYearsRouteChildren = {
+  AuthAcademicYearsCreateRoute: AuthAcademicYearsCreateRoute,
+}
+
+const AuthAcademicYearsRouteWithChildren =
+  AuthAcademicYearsRoute._addFileChildren(AuthAcademicYearsRouteChildren)
+
+interface AuthAlumniRouteChildren {
+  AuthAlumniGraduationYearRoute: typeof AuthAlumniGraduationYearRoute
+  AuthAlumniDashboardRoute: typeof AuthAlumniDashboardRoute
+  AuthAlumniIndexRoute: typeof AuthAlumniIndexRoute
+}
+
+const AuthAlumniRouteChildren: AuthAlumniRouteChildren = {
+  AuthAlumniGraduationYearRoute: AuthAlumniGraduationYearRoute,
+  AuthAlumniDashboardRoute: AuthAlumniDashboardRoute,
+  AuthAlumniIndexRoute: AuthAlumniIndexRoute,
+}
+
+const AuthAlumniRouteWithChildren = AuthAlumniRoute._addFileChildren(
+  AuthAlumniRouteChildren,
+)
+
+interface AuthMerchantsRouteChildren {
+  AuthMerchantsCreateRoute: typeof AuthMerchantsCreateRoute
+}
+
+const AuthMerchantsRouteChildren: AuthMerchantsRouteChildren = {
+  AuthMerchantsCreateRoute: AuthMerchantsCreateRoute,
+}
+
+const AuthMerchantsRouteWithChildren = AuthMerchantsRoute._addFileChildren(
+  AuthMerchantsRouteChildren,
+)
+
+interface AuthRegistrantsRouteChildren {
+  AuthRegistrantsIdRoute: typeof AuthRegistrantsIdRoute
+  AuthRegistrantsCreateRoute: typeof AuthRegistrantsCreateRoute
+  AuthRegistrantsIndexRoute: typeof AuthRegistrantsIndexRoute
+  AuthRegistrantsAcademicYearIdWorkbenchRoute: typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+}
+
+const AuthRegistrantsRouteChildren: AuthRegistrantsRouteChildren = {
+  AuthRegistrantsIdRoute: AuthRegistrantsIdRoute,
+  AuthRegistrantsCreateRoute: AuthRegistrantsCreateRoute,
+  AuthRegistrantsIndexRoute: AuthRegistrantsIndexRoute,
+  AuthRegistrantsAcademicYearIdWorkbenchRoute:
+    AuthRegistrantsAcademicYearIdWorkbenchRoute,
+}
+
+const AuthRegistrantsRouteWithChildren = AuthRegistrantsRoute._addFileChildren(
+  AuthRegistrantsRouteChildren,
+)
+
+interface AuthSettingsRouteChildren {
+  AuthSettingsAnnouncementsRoute: typeof AuthSettingsAnnouncementsRoute
+  AuthSettingsFormRoute: typeof AuthSettingsFormRoute
+  AuthSettingsSchoolRoute: typeof AuthSettingsSchoolRoute
+}
+
+const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
+  AuthSettingsAnnouncementsRoute: AuthSettingsAnnouncementsRoute,
+  AuthSettingsFormRoute: AuthSettingsFormRoute,
+  AuthSettingsSchoolRoute: AuthSettingsSchoolRoute,
+}
+
+const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
+  AuthSettingsRouteChildren,
+)
+
+interface AuthStudentCapabilitiesRouteChildren {
+  AuthStudentCapabilitiesAcademicYearIdRoute: typeof AuthStudentCapabilitiesAcademicYearIdRoute
+  AuthStudentCapabilitiesIndexRoute: typeof AuthStudentCapabilitiesIndexRoute
+}
+
+const AuthStudentCapabilitiesRouteChildren: AuthStudentCapabilitiesRouteChildren =
+  {
+    AuthStudentCapabilitiesAcademicYearIdRoute:
+      AuthStudentCapabilitiesAcademicYearIdRoute,
+    AuthStudentCapabilitiesIndexRoute: AuthStudentCapabilitiesIndexRoute,
+  }
+
+const AuthStudentCapabilitiesRouteWithChildren =
+  AuthStudentCapabilitiesRoute._addFileChildren(
+    AuthStudentCapabilitiesRouteChildren,
+  )
+
+interface AuthStudentsRouteChildren {
+  AuthStudentsIdRoute: typeof AuthStudentsIdRoute
+  AuthStudentsCreateRoute: typeof AuthStudentsCreateRoute
+  AuthStudentsIndexRoute: typeof AuthStudentsIndexRoute
+  AuthStudentsAcademicYearIdGradesGradeIdRoute: typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  AuthStudentsAcademicYearIdGradesIndexRoute: typeof AuthStudentsAcademicYearIdGradesIndexRoute
+}
+
+const AuthStudentsRouteChildren: AuthStudentsRouteChildren = {
+  AuthStudentsIdRoute: AuthStudentsIdRoute,
+  AuthStudentsCreateRoute: AuthStudentsCreateRoute,
+  AuthStudentsIndexRoute: AuthStudentsIndexRoute,
+  AuthStudentsAcademicYearIdGradesGradeIdRoute:
+    AuthStudentsAcademicYearIdGradesGradeIdRoute,
+  AuthStudentsAcademicYearIdGradesIndexRoute:
+    AuthStudentsAcademicYearIdGradesIndexRoute,
+}
+
+const AuthStudentsRouteWithChildren = AuthStudentsRoute._addFileChildren(
+  AuthStudentsRouteChildren,
+)
+
+interface AuthUsersRouteChildren {
+  AuthUsersCreateRoute: typeof AuthUsersCreateRoute
+}
+
+const AuthUsersRouteChildren: AuthUsersRouteChildren = {
+  AuthUsersCreateRoute: AuthUsersCreateRoute,
+}
+
+const AuthUsersRouteWithChildren = AuthUsersRoute._addFileChildren(
+  AuthUsersRouteChildren,
+)
+
+interface AuthRouteChildren {
+  AuthAcademicYearsRoute: typeof AuthAcademicYearsRouteWithChildren
+  AuthAccountancyRoute: typeof AuthAccountancyRoute
+  AuthAlumniRoute: typeof AuthAlumniRouteWithChildren
+  AuthAuthLogsRoute: typeof AuthAuthLogsRoute
+  AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthEwalletConfirmationsRoute: typeof AuthEwalletConfirmationsRoute
+  AuthEwalletTransactionsRoute: typeof AuthEwalletTransactionsRoute
+  AuthEwalletWithdrawalsRoute: typeof AuthEwalletWithdrawalsRoute
+  AuthEwalletsRoute: typeof AuthEwalletsRoute
+  AuthGradesRoute: typeof AuthGradesRoute
+  AuthIpBansRoute: typeof AuthIpBansRoute
+  AuthLevelsRoute: typeof AuthLevelsRoute
+  AuthMajorsRoute: typeof AuthMajorsRoute
+  AuthMerchantsRoute: typeof AuthMerchantsRouteWithChildren
+  AuthMyProfileRoute: typeof AuthMyProfileRoute
+  AuthRegistrantsRoute: typeof AuthRegistrantsRouteWithChildren
+  AuthReportsRoute: typeof AuthReportsRoute
+  AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
+  AuthStudentCapabilitiesRoute: typeof AuthStudentCapabilitiesRouteWithChildren
+  AuthStudentCostsRoute: typeof AuthStudentCostsRoute
+  AuthStudentInvoicesRoute: typeof AuthStudentInvoicesRoute
+  AuthStudentTransactionsRoute: typeof AuthStudentTransactionsRoute
+  AuthStudentsRoute: typeof AuthStudentsRouteWithChildren
+  AuthUsersRoute: typeof AuthUsersRouteWithChildren
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthAcademicYearsRoute: AuthAcademicYearsRouteWithChildren,
+  AuthAccountancyRoute: AuthAccountancyRoute,
+  AuthAlumniRoute: AuthAlumniRouteWithChildren,
+  AuthAuthLogsRoute: AuthAuthLogsRoute,
+  AuthDashboardRoute: AuthDashboardRoute,
+  AuthEwalletConfirmationsRoute: AuthEwalletConfirmationsRoute,
+  AuthEwalletTransactionsRoute: AuthEwalletTransactionsRoute,
+  AuthEwalletWithdrawalsRoute: AuthEwalletWithdrawalsRoute,
+  AuthEwalletsRoute: AuthEwalletsRoute,
+  AuthGradesRoute: AuthGradesRoute,
+  AuthIpBansRoute: AuthIpBansRoute,
+  AuthLevelsRoute: AuthLevelsRoute,
+  AuthMajorsRoute: AuthMajorsRoute,
+  AuthMerchantsRoute: AuthMerchantsRouteWithChildren,
+  AuthMyProfileRoute: AuthMyProfileRoute,
+  AuthRegistrantsRoute: AuthRegistrantsRouteWithChildren,
+  AuthReportsRoute: AuthReportsRoute,
+  AuthSettingsRoute: AuthSettingsRouteWithChildren,
+  AuthStudentCapabilitiesRoute: AuthStudentCapabilitiesRouteWithChildren,
+  AuthStudentCostsRoute: AuthStudentCostsRoute,
+  AuthStudentInvoicesRoute: AuthStudentInvoicesRoute,
+  AuthStudentTransactionsRoute: AuthStudentTransactionsRoute,
+  AuthStudentsRoute: AuthStudentsRouteWithChildren,
+  AuthUsersRoute: AuthUsersRouteWithChildren,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface GuestRouteChildren {
+  GuestForgotPasswordRoute: typeof GuestForgotPasswordRoute
+  GuestLoginRoute: typeof GuestLoginRoute
+  GuestResetPasswordRoute: typeof GuestResetPasswordRoute
+  GuestVerify2faRoute: typeof GuestVerify2faRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestForgotPasswordRoute: GuestForgotPasswordRoute,
+  GuestLoginRoute: GuestLoginRoute,
+  GuestResetPasswordRoute: GuestResetPasswordRoute,
+  GuestVerify2faRoute: GuestVerify2faRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  GuestRoute: GuestRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

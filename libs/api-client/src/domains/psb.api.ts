@@ -180,7 +180,7 @@ const mapPersonalToFrontend = (data: any): WizardPersonalData => ({
 	previousSchoolPostalCode: data.schoolPostalCode?.toString() || "",
 })
 
-const mapIdentityToBackend = (data: WizardIdentityData): any => ({
+const mapIdentityToBackend = (data: WizardIdentityData & Record<string, any>): any => ({
 	nik: data.nik,
 	nisn: data.nisn,
 	kip: data.kip,
@@ -203,7 +203,7 @@ const mapIdentityToBackend = (data: WizardIdentityData): any => ({
 	})),
 })
 
-const mapIdentityToFrontend = (data: any, diseases: any[] = []): WizardIdentityData => ({
+const mapIdentityToFrontend = (data: any, diseases: any[] = []): WizardIdentityData & Record<string, any> => ({
 	nik: data.nik || "",
 	nisn: data.nisn || "",
 	kip: data.kip || "",
@@ -345,7 +345,7 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		const { data } = await client.get<ApiResponse<any>>("/psb/register/wizard-state", {
 			headers: { "x-session-id": sessionId },
 		})
-		if (data && data.success === false) {
+		if (data && (data as any).success === false) {
 			throw new Error(data.message || "Sesi pendaftaran Anda telah berakhir (kadaluarsa). Silakan mulai kembali.")
 		}
 		const state = data.data || {}
@@ -366,7 +366,7 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		const { data: res } = await client.post<ApiResponse<any>>(`/psb/register/${step}`, payload, {
 			headers: { "x-session-id": sessionId },
 		})
-		if (res && res.success === false) {
+		if (res && (res as any).success === false) {
 			throw new Error(res.message || "Sesi pendaftaran Anda telah berakhir (kadaluarsa). Silakan mulai kembali.")
 		}
 		return { success: res.success }

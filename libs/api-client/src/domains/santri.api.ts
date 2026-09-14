@@ -65,6 +65,7 @@ export type SantriCreateEwalletDto = {
 export type SantriEwalletDashboardResponse = {
 	totalBalance: number
 	transactions: EwalletTransaction[]
+	meta?: PaginationMeta
 }
 
 export type SantriValidateCurrentPinDto = {
@@ -123,6 +124,7 @@ export type SantriPaymentSummaryResponse = {
 	totalPaid: number
 	remaining: number
 	invoices: StudentInvoice[]
+	meta?: PaginationMeta
 }
 
 export type SantriChangePasswordDto = {
@@ -280,7 +282,7 @@ export const createSantriApi = (client: AxiosInstance): SantriApi => ({
 		const { data: res } = await client.get<ApiResponse<SantriEwalletDashboardResponse>>("/santri/ewallet", { params })
 		return {
 			...res.data,
-			meta: res.meta || (res.data as any)?.meta,
+			meta: (res as any).meta || (res.data as any)?.meta,
 		}
 	},
 	validateCurrentPin: async (pin: string): Promise<{ message: string }> => {
@@ -342,7 +344,7 @@ export const createSantriApi = (client: AxiosInstance): SantriApi => ({
 		const { data: res } = await client.get<ApiResponse<SantriPaymentSummaryResponse>>("/santri/payment-history", { params })
 		return {
 			...res.data,
-			meta: res.meta || (res.data as any)?.meta,
+			meta: (res as any).meta || (res.data as any)?.meta,
 		}
 	},
 	getInvoiceList: async (studentId: number, params?: { page?: number; limit?: number }): Promise<StudentInvoice[]> => {
@@ -353,7 +355,7 @@ export const createSantriApi = (client: AxiosInstance): SantriApi => ({
 		const { data: res } = await client.get<ApiResponse<SantriInvoiceDetailResponse>>(`/santri/payment-history/invoice/${invoiceId}`, { params })
 		return {
 			...res.data,
-			meta: res.meta || (res.data as any)?.meta,
+			meta: (res as any).meta || (res.data as any)?.meta,
 		}
 	},
 	getSettingPage: async (): Promise<SantriSettingPageResponse> => {

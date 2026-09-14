@@ -6,4 +6,4 @@ export { createSantriApi } from "./domains/santri.api"
 export { createMerchantApi } from "./domains/merchant.api"
 export * from "./domains/merchant.api"
 export { createAdminApi } from "./domains/admin.api"
-
+export * from "./domains/admin.api"

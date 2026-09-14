@@ -185,11 +185,11 @@ export const RojaHeader = ({
 				{isAuthenticated ? (
 					<DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
-							<button className="flex items-center gap-3 cursor-pointer focus:outline-none py-1.5 px-3 rounded-xl hover:bg-black/5 transition-all">
+							<button className="group flex items-center gap-3 cursor-pointer focus:outline-none py-1.5 px-3 rounded-xl hover:bg-black/5 transition-all data-[state=open]:bg-black/5">
 								<div className="flex flex-col text-right">
 									<span
 										className={`text-xs font-semibold max-w-[150px] md:max-w-[200px] truncate transition-colors duration-300 ${
-											isScrolled ?"text-white":"text-slate-700"
+											isScrolled ? "text-white" : "text-slate-700"
 										}`}
 									>
 										{userDisplayName}
@@ -203,7 +203,7 @@ export const RojaHeader = ({
 									</span>
 								</div>
 								<ChevronDown
-									className={`w-4 h-4 transition-colors duration-300 ${
+									className={`w-4 h-4 transition-transform duration-300 group-data-[state=open]:rotate-180 ${
 										isScrolled ? "text-white" : "text-[var(--primary)]"
 									}`}
 								/>
@@ -213,10 +213,10 @@ export const RojaHeader = ({
 						<DropdownMenuContent
 							align="end"
 							sideOffset={14}
-							className="w-64 bg-white/95 backdrop-blur-xl opacity-100 border border-slate-200/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-2 flex flex-col gap-1 z-[99999]"
+							className="w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-2 flex flex-col gap-1 z-[99999] border-0 outline-none"
 						>
 							{/* User Info Header in Dropdown */}
-							<div className="px-3 py-2.5 bg-slate-50/90 rounded-xl mb-1 flex items-center gap-3 border border-slate-100">
+							<div className="px-3 py-2.5 bg-slate-50/90 rounded-xl mb-1 flex items-center gap-3 border-0">
 								<div className="w-8 h-8 rounded-lg bg-[#e4007e]/10 text-[#e4007e] flex items-center justify-center shrink-0">
 									<User className="w-4 h-4" />
 								</div>
@@ -231,7 +231,7 @@ export const RojaHeader = ({
 							</div>
 
 							{activeMenuItems.map((item, idx) => (
-								<DropdownMenuItem key={idx} asChild={!!item.href} onClick={item.onClick} className="rounded-xl px-3 py-2 hover:bg-slate-50 transition-colors cursor-pointer">
+								<DropdownMenuItem key={idx} asChild={!!item.href} onClick={item.onClick} className="rounded-xl px-3 py-2 hover:bg-slate-100 transition-all duration-150 cursor-pointer">
 									{item.href ? (
 										<Link
 											to={item.href as any}
@@ -251,10 +251,10 @@ export const RojaHeader = ({
 
 							{onLogout && (
 								<>
-									<DropdownMenuSeparator className="my-1 border-t border-slate-100"/>
+									<DropdownMenuSeparator className="my-1 border-t border-slate-100" />
 									<DropdownMenuItem
 										onClick={onLogout}
-										className="flex items-center gap-2.5 text-xs text-[#f8374b] hover:bg-rose-50 cursor-pointer font-semibold rounded-xl px-3 py-2 transition-colors border-0 outline-none"
+										className="flex items-center gap-2.5 text-xs text-[#f8374b] hover:bg-rose-50 cursor-pointer font-semibold rounded-xl px-3 py-2 transition-all duration-150 border-0 outline-none"
 									>
 										<LogOut className="w-4 h-4 text-[#f8374b]" />
 										<span>Keluar dari aplikasi</span>

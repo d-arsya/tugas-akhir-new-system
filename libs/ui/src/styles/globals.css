@@ -1309,3 +1309,36 @@ input[type="radio"]:checked::after {
 .animate-shake {
   animation: roja-shake 0.4s ease-in-out;
 }
+
+/* --- Dropdown Animation Keyframes --- */
+@keyframes dropdown-open {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdown-close {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+}
+
+[data-state="open"] > .roja_dropdown_content,
+.data-\[state\=open\]\:animate-in[data-state="open"] {
+  animation: dropdown-open 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+[data-state="closed"] > .roja_dropdown_content,
+.data-\[state\=closed\]\:animate-out[data-state="closed"] {
+  animation: dropdown-close 0.15s cubic-bezier(0.4, 0, 1, 1) forwards;
+}

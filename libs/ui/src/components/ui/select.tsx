@@ -6,8 +6,8 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@roja/utils"
 
-const Select = ({ modal = false, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>) => (
-  <SelectPrimitive.Root modal={modal} {...props} />
+const Select = ({ modal = false, ...props }: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> & { modal?: boolean }) => (
+  <SelectPrimitive.Root modal={modal} {...(props as any)} />
 )
 
 const SelectGroup = SelectPrimitive.Group

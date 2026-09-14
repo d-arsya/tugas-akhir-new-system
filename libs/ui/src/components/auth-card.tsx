@@ -4,13 +4,13 @@ import { Alert, AlertDescription } from "./ui/alert"
 
 export interface AuthCardProps {
 	title: string
-	description?: ReactNode
-	logoSrc?: string
-	errorMsg?: string | null
-	successMsg?: string | null
-	infoMsg?: string | null
-	footer?: ReactNode
-	className?: string
+	description?: ReactNode | undefined
+	logoSrc?: string | undefined
+	errorMsg?: string | null | undefined
+	successMsg?: string | null | undefined
+	infoMsg?: string | null | undefined
+	footer?: ReactNode | undefined
+	className?: string | undefined
 	children: ReactNode
 }
 
