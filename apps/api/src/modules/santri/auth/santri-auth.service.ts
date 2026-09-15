@@ -73,7 +73,7 @@ export class SantriAuthService {
 			expiresIn: this.configService.get("JWT_REFRESH_EXPIRES", { infer: true }) as any,
 		})
 
-		await this.redisService.storeRefreshToken(student.id, tokenId, 7 * 24 * 60 * 60)
+		await this.redisService.storeRefreshToken("santri", student.id, tokenId, 7 * 24 * 60 * 60)
 
 		return { accessToken, refreshToken }
 	}
@@ -300,7 +300,7 @@ export class SantriAuthService {
 
 	async logout(studentId: number, tokenId?: string): Promise<{ message: string }> {
 		if (tokenId) {
-			await this.redisService.revokeRefreshToken(studentId, tokenId)
+			await this.redisService.revokeRefreshToken("santri", studentId, tokenId)
 		}
 		return { message: "Berhasil keluar." }
 	}

@@ -73,7 +73,7 @@ export class MerchantAuthService {
 		})
 
 		// TTL for refresh token: 7 days (604800s)
-		await this.redisService.storeRefreshToken(merchant.id, tokenId, 7 * 24 * 60 * 60)
+		await this.redisService.storeRefreshToken("merchant", merchant.id, tokenId, 7 * 24 * 60 * 60)
 
 		return { accessToken, refreshToken }
 	}
@@ -320,7 +320,7 @@ export class MerchantAuthService {
 
 	async logout(merchantId: number, tokenId?: string): Promise<{ message: string }> {
 		if (tokenId) {
-			await this.redisService.revokeRefreshToken(merchantId, tokenId)
+			await this.redisService.revokeRefreshToken("merchant", merchantId, tokenId)
 		}
 		return { message: "Berhasil keluar." }
 	}

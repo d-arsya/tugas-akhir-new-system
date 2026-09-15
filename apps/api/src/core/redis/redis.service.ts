@@ -27,20 +27,20 @@ export class RedisService {
 		return result === 1
 	}
 
-	// Refresh token helpers
-	refreshTokenKey(userId: number, tokenId: string): string {
-		return `refresh:${userId}:${tokenId}`
+	// Refresh token helpers with domain scoping (admin, santri, psb, merchant)
+	refreshTokenKey(domain: string, userId: number, tokenId: string): string {
+		return `refresh:${domain}:${userId}:${tokenId}`
 	}
 
-	async storeRefreshToken(userId: number, tokenId: string, ttlSeconds: number): Promise<void> {
-		await this.set(this.refreshTokenKey(userId, tokenId), "valid", ttlSeconds)
+	async storeRefreshToken(domain: string, userId: number, tokenId: string, ttlSeconds: number): Promise<void> {
+		await this.set(this.refreshTokenKey(domain, userId, tokenId), "valid", ttlSeconds)
 	}
 
-	async validateRefreshToken(userId: number, tokenId: string): Promise<boolean> {
-		return this.exists(this.refreshTokenKey(userId, tokenId))
+	async validateRefreshToken(domain: string, userId: number, tokenId: string): Promise<boolean> {
+		return this.exists(this.refreshTokenKey(domain, userId, tokenId))
 	}
 
-	async revokeRefreshToken(userId: number, tokenId: string): Promise<void> {
-		await this.del(this.refreshTokenKey(userId, tokenId))
+	async revokeRefreshToken(domain: string, userId: number, tokenId: string): Promise<void> {
+		await this.del(this.refreshTokenKey(domain, userId, tokenId))
 	}
 }

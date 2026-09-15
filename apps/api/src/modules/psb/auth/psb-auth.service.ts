@@ -266,7 +266,7 @@ export class PsbAuthService {
 		})
 
 		// 7 days TTL
-		await this.redisService.storeRefreshToken(registrant.id, tokenId, 7 * 24 * 60 * 60)
+		await this.redisService.storeRefreshToken("psb", registrant.id, tokenId, 7 * 24 * 60 * 60)
 
 		return {
 			requires2fa: false,
@@ -284,7 +284,7 @@ export class PsbAuthService {
 
 	async logout(userId: number, tokenId?: string): Promise<{ message: string }> {
 		if (tokenId) {
-			await this.redisService.revokeRefreshToken(userId, tokenId)
+			await this.redisService.revokeRefreshToken("psb", userId, tokenId)
 		}
 		return { message: "Berhasil logout." }
 	}
@@ -295,7 +295,7 @@ export class PsbAuthService {
 			throw new UnauthorizedException("Akun pendaftaran tidak ditemukan.")
 		}
 		if (user.tokenId) {
-			await this.redisService.revokeRefreshToken(user.sub, user.tokenId)
+			await this.redisService.revokeRefreshToken("psb", user.sub, user.tokenId)
 		}
 		return this.generateTokens(registrant)
 	}

@@ -47,6 +47,7 @@ async function bootstrap(): Promise<void> {
   })
 
   const httpAdapter = app.getHttpAdapter()
+  httpAdapter.getInstance().set("etag", false)
 
   // Redirect root / to /docs
   httpAdapter.get("/", (_req: Request, res: Response) => {

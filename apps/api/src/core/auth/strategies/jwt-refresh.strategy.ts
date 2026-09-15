@@ -28,10 +28,11 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, "jwt-refresh"
 	}
 
 	async validate(payload: JwtPayload): Promise<JwtPayload> {
-		if (!payload.sub || !payload.tokenId) {
+		if (!payload || !payload.sub || !payload.tokenId) {
 			throw new UnauthorizedException("Invalid refresh token")
 		}
-		const isValid = await this.redisService.validateRefreshToken(payload.sub, payload.tokenId)
+		const domain = payload.domain || "auth"
+		const isValid = await this.redisService.validateRefreshToken(domain, payload.sub, payload.tokenId)
 		if (!isValid) {
 			throw new UnauthorizedException("Refresh token revoked or expired")
 		}
