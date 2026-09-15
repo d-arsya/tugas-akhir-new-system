@@ -33,14 +33,12 @@ export class LevelService {
 		const level = new Level()
 		level.name = dto.name
 		level.status = "show"
-		level.desc = dto.desc ?? null
 		return this.levelRepository.save(level)
 	}
 
 	async update(id: number, dto: UpdateLevelDto): Promise<Level> {
 		const level = await this.findOne(id)
 		if (dto.name !== undefined) level.name = dto.name
-		if (dto.desc !== undefined) level.desc = dto.desc
 		return this.levelRepository.save(level)
 	}
 

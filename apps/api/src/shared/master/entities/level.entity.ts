@@ -8,7 +8,4 @@ export class Level extends BaseEntity {
 
 	@Column({ nullable: true, type: "varchar", default: "show" })
 	status: "show" | "hide" | null
-
-	@Column({ nullable: true, type: "text" })
-	desc: string | null
 }
