@@ -23,7 +23,8 @@ const useAuthStore = create<AuthState & AuthActions>()(
 
 			login: (accessToken, refreshToken, user) => {
 				localStorage.setItem("roja-refresh-token", refreshToken)
-				set({ accessToken, user, isAuthenticated: true })
+				const adminUser = { ...user, domain: "admin" }
+				set({ accessToken, user: adminUser, isAuthenticated: true })
 			},
 
 			logout: () => {
