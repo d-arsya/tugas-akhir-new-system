@@ -16,12 +16,9 @@ tmp/
 .gitignore
 
 # Environment Files
-.env
-.env.local
-.env.*.local
-apps/*/.env
-apps/*/.env.local
-apps/*/.env.*.local
+apps/api/.env
+apps/api/.env.*
+.env.example
 
 # IDE & OS Files
 .vscode/
