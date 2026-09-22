@@ -82,7 +82,7 @@ export class PsbAdminService {
 
 		const [items, total] = await qb.getManyAndCount()
 		return {
-			items,
+			data: items,
 			meta: {
 				total,
 				page,
@@ -91,6 +91,7 @@ export class PsbAdminService {
 			},
 		}
 	}
+
 
 	async exportRegistrants(academicYearId: number, status?: string) {
 		const qb = this.registrantRepo.createQueryBuilder("r")

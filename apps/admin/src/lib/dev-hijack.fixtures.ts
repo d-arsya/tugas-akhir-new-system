@@ -22,6 +22,10 @@ import type {
 	StudentCostItem,
 	StudentCapabilityMatrixItem,
 	StudentTransactionItem,
+	DashboardStats,
+	DashboardOptions,
+	DashboardChartItem,
+	DashboardPieItem,
 } from "@roja/types"
 
 export const hijackAuthUser: AuthUser = {
@@ -509,5 +513,34 @@ export const mockStudentTransactions: StudentTransactionItem[] = [
 	},
 ]
 
+// Dashboard — also fed to the static legacy dashboard when comparing screenshots
+export const mockDashboardStats: DashboardStats = { total: 186, approve: 142, reject: 23 }
 
+export const mockDashboardStatsByYear: Record<number, DashboardStats> = {
+	2: { total: 71, approve: 55, reject: 9 },
+	3: { total: 115, approve: 87, reject: 14 },
+}
 
+export const mockDashboardOptions: DashboardOptions = {
+	academicYears: [
+		{ id: 2, year: "2024/2025" },
+		{ id: 3, year: "2025/2026" },
+	],
+	grades: [7, 8, 9, 10, 11, 12].map((label) => ({ label })),
+}
+
+export const mockDashboardChartStudent = (grade: number): DashboardChartItem[] =>
+	["2021/2022", "2022/2023", "2023/2024", "2024/2025", "2025/2026"].map((category, i) => ({
+		category,
+		value: 40 + ((grade * 7 + i * 13) % 35),
+	}))
+
+export const mockDashboardPie: DashboardPieItem[] = [
+	{ grade: "Kelas 7", value: 58 },
+	{ grade: "Kelas 8", value: 52 },
+	{ grade: "Kelas 9", value: 47 },
+	{ grade: "Kelas 10", value: 44 },
+	{ grade: "Kelas 11", value: 39 },
+	{ grade: "Kelas 12", value: 36 },
+	{ grade: "Keluar", value: 6 },
+]

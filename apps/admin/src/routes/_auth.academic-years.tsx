@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { adminApi } from "@/lib/api"
-import { RojaCard, Button, Input, Label, PageLoader } from "@roja/ui"
+import { RojaCard, Button, Input, Label, PageLoader, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@roja/ui"
 import { AdminPageHeader } from "@/components/layout/admin-page-header"
 import type { CreateAcademicYearDto } from "@roja/types"
 import { Calendar, Plus, Star, CheckCircle } from "lucide-react"
@@ -127,10 +127,18 @@ function AcademicYearsPage(): JSX.Element {
 
 							<div className="space-y-1">
 								<Label htmlFor="semester">Semester</Label>
-								<select id="semester" {...form.register("semester")} className="w-full h-10 px-3 rounded-xl bg-slate-50 text-xs text-slate-700">
-									<option value="GANJIL">GANJIL</option>
-									<option value="GENAP">GENAP</option>
-								</select>
+								<Select
+									value={form.watch("semester") || "GANJIL"}
+									onValueChange={(val) => form.setValue("semester", val as any)}
+								>
+									<SelectTrigger className="w-full h-10 bg-slate-50 border-0 text-xs text-slate-700">
+										<SelectValue placeholder="Pilih Semester" />
+									</SelectTrigger>
+									<SelectContent align="start">
+										<SelectItem value="GANJIL">GANJIL</SelectItem>
+										<SelectItem value="GENAP">GENAP</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="grid grid-cols-2 gap-2">

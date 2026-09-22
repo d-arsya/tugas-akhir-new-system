@@ -6,6 +6,6 @@ const BASE_URL = (import.meta.env["VITE_API_URL"] as string) || "http://localhos
 
 setAuthStoreGetter(() => useAuthStore.getState())
 
-export const apiClient = createApiClient(BASE_URL)
+export const apiClient = createApiClient(BASE_URL, { refreshEndpoint: "/admin/auth/refresh" })
 export const sharedApi = createSharedApi(apiClient)
 export const adminApi = hijackAdminApi(createAdminApi(apiClient))

@@ -49,10 +49,11 @@ export class AlumniAdminService {
 
 		const [items, total] = await qb.getManyAndCount()
 		return {
-			items,
+			data: items,
 			meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
 		}
 	}
+
 
 	async exportByGraduationYear(graduationYear: string) {
 		const qb = this.alumniRepo.createQueryBuilder("a")

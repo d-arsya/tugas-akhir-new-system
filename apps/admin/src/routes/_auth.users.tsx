@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { adminApi } from "@/lib/api"
-import { RojaCard, Button, Input, Label, PageLoader } from "@roja/ui"
+import { RojaCard, Button, Input, Label, PageLoader, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@roja/ui"
 import { AdminPageHeader } from "@/components/layout/admin-page-header"
 import type { CreateAdminUserDto, AdminUserItem, AdminRole } from "@roja/types"
 import { UserPlus, Search, Shield, CheckCircle, XCircle, Trash2 } from "lucide-react"
@@ -85,17 +85,21 @@ function UsersManagementPage(): JSX.Element {
 					/>
 				</div>
 
-				<select
-					value={roleFilter}
-					onChange={(e) => setRoleFilter(e.target.value)}
-					className="w-full sm:w-48 h-10 px-3 rounded-xl bg-slate-50 text-slate-700 text-xs font-medium focus:outline-none"
+				<Select
+					value={roleFilter || "ALL"}
+					onValueChange={(val) => setRoleFilter(val === "ALL" ? "" : val)}
 				>
-					<option value="">Semua Peran (Roles)</option>
-					<option value="SUPERADMIN">Superadmin</option>
-					<option value="ADMIN">Admin</option>
-					<option value="BENDAHARA">Bendahara</option>
-					<option value="KASIR_EWALLET">Kasir E-Wallet</option>
-				</select>
+					<SelectTrigger className="w-full sm:w-48 h-10 bg-slate-50 border-0 text-xs text-slate-700">
+						<SelectValue placeholder="Semua Peran (Roles)" />
+					</SelectTrigger>
+					<SelectContent align="end">
+						<SelectItem value="ALL">Semua Peran (Roles)</SelectItem>
+						<SelectItem value="SUPERADMIN">Superadmin</SelectItem>
+						<SelectItem value="ADMIN">Admin</SelectItem>
+						<SelectItem value="BENDAHARA">Bendahara</SelectItem>
+						<SelectItem value="KASIR_EWALLET">Kasir E-Wallet</SelectItem>
+					</SelectContent>
+				</Select>
 			</RojaCard>
 
 			{/* Users Table */}
@@ -174,12 +178,20 @@ function UsersManagementPage(): JSX.Element {
 
 							<div className="space-y-1">
 								<Label htmlFor="role">Peran (Role)</Label>
-								<select id="role" {...createForm.register("role")} className="w-full h-10 px-3 rounded-xl bg-slate-50 text-xs text-slate-700">
-									<option value="SUPERADMIN">Superadmin</option>
-									<option value="ADMIN">Admin</option>
-									<option value="BENDAHARA">Bendahara</option>
-									<option value="KASIR_EWALLET">Kasir E-Wallet</option>
-								</select>
+								<Select
+									value={createForm.watch("role") || "ADMIN"}
+									onValueChange={(val) => createForm.setValue("role", val as AdminRole)}
+								>
+									<SelectTrigger className="w-full h-10 bg-slate-50 border-0 text-xs text-slate-700">
+										<SelectValue placeholder="Pilih Peran..." />
+									</SelectTrigger>
+									<SelectContent align="start">
+										<SelectItem value="SUPERADMIN">Superadmin</SelectItem>
+										<SelectItem value="ADMIN">Admin</SelectItem>
+										<SelectItem value="BENDAHARA">Bendahara</SelectItem>
+										<SelectItem value="KASIR_EWALLET">Kasir E-Wallet</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="space-y-1">

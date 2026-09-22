@@ -19,7 +19,7 @@ export class AcademicYearService {
 		private readonly registrantRepo: Repository<Registrant>,
 		@InjectRepository(StudentGrade)
 		private readonly studentGradeRepo: Repository<StudentGrade>,
-	) {}
+	) { }
 
 	async findAll(query: PaginationQueryDto) {
 		const page = query.page ?? 1
@@ -31,19 +31,22 @@ export class AcademicYearService {
 
 		const [items, total] = await this.academicYearRepository.findAndCount({
 			where,
-			order: { createdAt: "DESC" },
+			order: { activeKbm: "DESC" },
 			take: limit,
 			skip,
 		})
 
 		return {
-			items,
-			total,
-			page,
-			limit,
-			totalPages: Math.ceil(total / limit),
+			data: items,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+			},
 		}
 	}
+
 
 	async findOne(id: number): Promise<AcademicYear> {
 		const academicYear = await this.academicYearRepository.findOneBy({ id })

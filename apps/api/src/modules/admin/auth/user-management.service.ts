@@ -31,13 +31,16 @@ export class UserManagementService {
 		})
 
 		return {
-			items,
-			total,
-			page,
-			limit,
-			totalPages: Math.ceil(total / limit),
+			data: items,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+			},
 		}
 	}
+
 
 	async findOne(id: number): Promise<User> {
 		const user = await this.userRepository.findOneBy({ id })

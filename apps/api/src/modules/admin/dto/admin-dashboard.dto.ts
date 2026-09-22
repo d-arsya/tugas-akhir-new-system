@@ -2,52 +2,44 @@ import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 
 export const DashboardStatsFilterSchema = z.object({
-	academicYearId: z.coerce.number().optional(),
+	// Omitted = all academic years (legacy "Semua Tahun Ajaran")
+	academicYearId: z.coerce.number().int().positive().optional(),
 })
 
 export class DashboardStatsFilterDto extends createZodDto(DashboardStatsFilterSchema) {}
 
 export const DashboardChartFilterSchema = z.object({
-	gradeId: z.coerce.number().optional(),
+	// Grade label (legacy `/dashboard/chart/{grade?}` defaults to 1)
+	grade: z.coerce.number().int().positive().default(1),
 })
 
 export class DashboardChartFilterDto extends createZodDto(DashboardChartFilterSchema) {}
 
 export const DashboardStatsResponseSchema = z.object({
-	psb: z.object({
-		total: z.number(),
-		approve: z.number(),
-		reject: z.number(),
-		wait: z.number(),
-	}),
-	students: z.object({
-		totalActive: z.number(),
-		totalMale: z.number(),
-		totalFemale: z.number(),
-	}),
-	academicYear: z.string().nullable().optional(),
+	total: z.number(),
+	approve: z.number(),
+	reject: z.number(),
 })
 
 export class DashboardStatsResponseDto extends createZodDto(DashboardStatsResponseSchema) {}
+
+export const DashboardOptionsResponseSchema = z.object({
+	academicYears: z.array(z.object({ id: z.number(), year: z.string() })),
+	grades: z.array(z.object({ label: z.number() })),
+})
+
+export class DashboardOptionsResponseDto extends createZodDto(DashboardOptionsResponseSchema) {}
 
 export const DashboardChartItemSchema = z.object({
 	category: z.string(),
 	value: z.number(),
 })
 
-export const DashboardChartResponseSchema = z.object({
-	data: z.array(DashboardChartItemSchema),
-})
-
-export class DashboardChartResponseDto extends createZodDto(DashboardChartResponseSchema) {}
+export class DashboardChartItemDto extends createZodDto(DashboardChartItemSchema) {}
 
 export const DashboardPieItemSchema = z.object({
 	grade: z.string(),
 	value: z.number(),
 })
 
-export const DashboardPieResponseSchema = z.object({
-	data: z.array(DashboardPieItemSchema),
-})
-
-export class DashboardPieResponseDto extends createZodDto(DashboardPieResponseSchema) {}
+export class DashboardPieItemDto extends createZodDto(DashboardPieItemSchema) {}

@@ -48,6 +48,13 @@ import type {
 	BulkGenerateInvoiceDto,
 	AddInvoiceTransactionDto,
 	CreateMerchantDto,
+	ReportArrearItem,
+	ReportArrearsFilterParams,
+	ReportArrearsAgingSummary,
+	DashboardStats,
+	DashboardOptions,
+	DashboardChartItem,
+	DashboardPieItem,
 } from "@roja/types"
 
 export interface AdminLoginDto {
@@ -75,15 +82,6 @@ export interface AdminApi {
 	getMyProfile(): Promise<AdminUserItem>
 	updateMyProfile(data: Partial<AdminUserItem>): Promise<{ message: string }>
 	changePassword(password: string, newPassword: string): Promise<{ message: string }>
-
-	// Dashboard
-	getDashboardStats(): Promise<{
-		totalStudents: number
-		activeAcademicYear: string
-		pendingRegistrants: number
-		totalEwalletBalance: number
-		incomeThisMonth: number
-	}>
 
 	// Users & Security
 	getUsers(params?: { search?: string | undefined; role?: string | undefined; page?: number | undefined; limit?: number | undefined }): Promise<PaginatedResponse<AdminUserItem>>
@@ -183,6 +181,17 @@ export interface AdminApi {
 	getMerchants(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AdminMerchantItem>>
 	createMerchant(data: CreateMerchantDto): Promise<ApiResponse<AdminMerchantItem>>
 	toggleMerchantStatus(id: number, isActive: boolean): Promise<ApiResponse<{ message: string }>>
+
+	// Analytics & Reports
+	getDashboardStats(params?: { academicYearId?: number | undefined }): Promise<DashboardStats>
+	getDashboardOptions(): Promise<DashboardOptions>
+	getDashboardChartStudent(params: { grade: number }): Promise<DashboardChartItem[]>
+	getDashboardPieChart(): Promise<DashboardPieItem[]>
+	getReportsIncome(params?: ReportIncomeFilterParams): Promise<ReportIncomeItem[]>
+	getReportsIncomeRecap(params?: ReportIncomeFilterParams): Promise<ReportIncomeRecapItem[]>
+	getReportsArrears(params?: ReportArrearsFilterParams): Promise<PaginatedResponse<ReportArrearItem>>
+	getReportsArrearsAging(params?: ReportArrearsFilterParams): Promise<ReportArrearsAgingSummary>
+	getAccountancyTree(): Promise<any[]>
 }
 
 const unwrap = <T>(promise: Promise<any>): Promise<T> =>
@@ -205,7 +214,15 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	updateMyProfile: (data) => unwrap(client.patch("/admin/profile", data)),
 	changePassword: (password, newPassword) => unwrap(client.patch("/admin/profile/password", { password, newPassword })),
 
-	getDashboardStats: () => unwrap(client.get("/admin/dashboard")),
+	getDashboardStats: (params) => unwrap(client.get("/admin/dashboard/stats", { params })),
+	getDashboardOptions: () => unwrap(client.get("/admin/dashboard/options")),
+	getDashboardChartStudent: (params) => unwrap(client.get("/admin/dashboard/chart-student", { params })),
+	getDashboardPieChart: () => unwrap(client.get("/admin/dashboard/pie-chart")),
+	getReportsIncome: (params) => unwrap(client.get("/admin/billing/reports/income", { params })),
+	getReportsIncomeRecap: (params) => unwrap(client.get("/admin/billing/reports/income/recap", { params })),
+	getReportsArrears: (params) => unwrap(client.get("/admin/billing/reports/arrears", { params })),
+	getReportsArrearsAging: (params) => unwrap(client.get("/admin/billing/reports/arrears/aging", { params })),
+	getAccountancyTree: () => unwrap(client.get("/admin/billing/accounts")),
 
 	getUsers: (params) => unwrap(client.get("/admin/users", { params })),
 	createUser: (data) => unwrap(client.post("/admin/users", data)),

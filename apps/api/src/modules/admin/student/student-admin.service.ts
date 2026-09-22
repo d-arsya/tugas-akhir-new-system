@@ -68,13 +68,15 @@ export class StudentAdminService {
 
 		qb.orderBy("sg.id", "DESC")
 		qb.skip((page - 1) * limit).take(limit)
-
 		const [items, total] = await qb.getManyAndCount()
+
 		return {
-			items,
+			data: items,
 			meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
 		}
 	}
+
+
 
 	async exportStudents(academicYearId: number, gradeId: number, levelId?: number) {
 		const qb = this.studentGradeRepo.createQueryBuilder("sg")

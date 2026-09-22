@@ -29,11 +29,14 @@ export class AuthLogService {
 		})
 
 		return {
-			items,
-			total,
-			page,
-			limit,
-			totalPages: Math.ceil(total / limit),
+			data: items,
+			meta: {
+				total,
+				page,
+				limit,
+				totalPages: Math.ceil(total / limit),
+			},
 		}
 	}
+
 }

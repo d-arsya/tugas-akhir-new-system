@@ -7,11 +7,6 @@ const AdminFooter = (): JSX.Element => (
 			<div className="w-full px-[15px] text-center lg:w-2/3 lg:text-left">
 				Copyright {new Date().getFullYear()} PONDOK ROJA. All Rights Reserved.
 			</div>
-			<div className="w-full px-[15px] text-center lg:w-1/3 lg:text-right">
-				Version{" "}
-				{/* Legacy links to the changelog page, which the new app does not have yet */}
-				<span className="text-[var(--secondary)]">From Master</span>
-			</div>
 		</div>
 	</footer>
 )

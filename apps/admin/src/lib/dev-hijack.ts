@@ -38,6 +38,11 @@ import {
 	mockStudentCosts,
 	mockStudentCapabilityMatrix,
 	mockStudentTransactions,
+	mockDashboardStats,
+	mockDashboardStatsByYear,
+	mockDashboardOptions,
+	mockDashboardChartStudent,
+	mockDashboardPie,
 } from "./dev-hijack.fixtures"
 
 export { hijackAuthUser }
@@ -154,15 +159,25 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { message: "Kata sandi Anda berhasil diperbarui." }
 		},
 
-		getDashboardStats: async () => {
+		getDashboardStats: async (params) => {
 			await delay(250)
-			return {
-				totalStudents: studentsList.length + 448,
-				activeAcademicYear: "2024/2025 (Genap)",
-				pendingRegistrants: registrantsList.filter((r) => r.status === "PENDING").length + 16,
-				totalEwalletBalance: ewalletsList.reduce((acc, e) => acc + e.balance, 0) + 120000000,
-				incomeThisMonth: 85200000,
-			}
+			const yearId = params?.academicYearId
+			return yearId === undefined ? mockDashboardStats : (mockDashboardStatsByYear[yearId] ?? { total: 0, approve: 0, reject: 0 })
+		},
+
+		getDashboardOptions: async () => {
+			await delay(150)
+			return mockDashboardOptions
+		},
+
+		getDashboardChartStudent: async (params) => {
+			await delay(250)
+			return mockDashboardChartStudent(params.grade)
+		},
+
+		getDashboardPieChart: async () => {
+			await delay(250)
+			return mockDashboardPie
 		},
 
 		getUsers: async (params) => {

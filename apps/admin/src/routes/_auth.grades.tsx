@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { adminApi } from "@/lib/api"
-import { RojaCard, Button, Input, Label, PageLoader } from "@roja/ui"
+import { RojaCard, Button, Input, Label, PageLoader, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@roja/ui"
 import { AdminPageHeader } from "@/components/layout/admin-page-header"
 import type { CreateGradeDto, CreateSubGradeDto } from "@roja/types"
 import { toast } from "sonner"
@@ -177,11 +177,21 @@ function GradesPage(): JSX.Element {
 							</div>
 							<div className="space-y-1">
 								<Label htmlFor="levelId">Jenjang Terkait</Label>
-								<select id="levelId" {...gradeForm.register("levelId", { valueAsNumber: true })} className="w-full h-10 px-3 rounded-xl bg-slate-50 text-xs text-slate-700">
-									{levels.map((lvl) => (
-										<option key={lvl.id} value={lvl.id}>{lvl.name} ({lvl.code})</option>
-									))}
-								</select>
+								<Select
+									value={String(gradeForm.watch("levelId") || levels[0]?.id || 1)}
+									onValueChange={(val) => gradeForm.setValue("levelId", Number(val))}
+								>
+									<SelectTrigger className="w-full h-10 bg-slate-50 border-0 text-xs text-slate-700">
+										<SelectValue placeholder="Pilih Jenjang..." />
+									</SelectTrigger>
+									<SelectContent align="start">
+										{levels.map((lvl) => (
+											<SelectItem key={lvl.id} value={String(lvl.id)}>
+												{lvl.name} ({lvl.code})
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="flex justify-end gap-2 pt-3">

@@ -20,6 +20,8 @@ import {
 	BillingTransactionResponseDto,
 	BillingIncomeReportResponseDto,
 	BillingArrearsReportResponseDto,
+	ReportIncomeFilterDto,
+	ReportArrearsFilterDto,
 } from "@admin/dto/billing-admin.dto"
 import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
 
@@ -147,16 +149,31 @@ export class BillingAdminController {
 
 	// Reports
 	@Get("reports/income")
-	@ApiOperation({ summary: "Laporan penerimaan pembayaran" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan penerimaan", type: BillingIncomeReportResponseDto, isArray: true })
-	async getReportsIncome() {
-		return this.billingService.getReportsIncome()
+	@ApiOperation({ summary: "Laporan rincian penerimaan pembayaran" })
+	@ApiResponseWrapped({ status: 200, description: "Detail laporan penerimaan", isArray: true })
+	async getReportsIncome(@Query() query: ReportIncomeFilterDto) {
+		return this.billingService.getReportsIncome(query)
+	}
+
+	@Get("reports/income/recap")
+	@ApiOperation({ summary: "Rekapitulasi penerimaan pembayaran per jenis biaya" })
+	@ApiResponseWrapped({ status: 200, description: "Rekapitulasi penerimaan per pos biaya", isArray: true })
+	async getReportsIncomeRecap(@Query() query: ReportIncomeFilterDto) {
+		return this.billingService.getReportsIncomeRecap(query)
 	}
 
 	@Get("reports/arrears")
-	@ApiOperation({ summary: "Laporan tunggakan santri" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan tunggakan", type: BillingArrearsReportResponseDto, isArray: true })
-	async getReportsArrears() {
-		return this.billingService.getReportsArrears()
+	@ApiOperation({ summary: "Laporan rincian tunggakan tagihan santri" })
+	@ApiResponseWrapped({ status: 200, description: "Detail laporan tunggakan", isArray: true })
+	async getReportsArrears(@Query() query: ReportArrearsFilterDto) {
+		return this.billingService.getReportsArrears(query)
+	}
+
+	@Get("reports/arrears/aging")
+	@ApiOperation({ summary: "Ringkasan analisis aging tunggakan tagihan santri" })
+	@ApiResponseWrapped({ status: 200, description: "Ringkasan aging bucket tunggakan" })
+	async getReportsArrearsAging(@Query() query: ReportArrearsFilterDto) {
+		return this.billingService.getArrearsAgingSummary(query)
 	}
 }
+

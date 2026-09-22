@@ -1,1 +1,6 @@
 @import "../../../libs/ui/src/styles/globals.css";
+
+/* The legacy admin layout never reserves a scrollbar gutter; the fixed header spans the full width */
+html {
+	scrollbar-gutter: auto;
+}

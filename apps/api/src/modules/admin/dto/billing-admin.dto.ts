@@ -129,3 +129,26 @@ export const BillingArrearsReportResponseSchema = z.object({
 
 export class BillingArrearsReportResponseDto extends createZodDto(BillingArrearsReportResponseSchema) {}
 
+export const ReportIncomeFilterSchema = z.object({
+	dateStart: z.string().optional(),
+	dateEnd: z.string().optional(),
+	academicYearId: z.coerce.number().optional(),
+	grade: z.string().optional(),
+	subGrade: z.string().optional(),
+})
+
+export class ReportIncomeFilterDto extends createZodDto(ReportIncomeFilterSchema) {}
+
+export const ReportArrearsFilterSchema = z.object({
+	dateStart: z.string().optional(),
+	dateEnd: z.string().optional(),
+	academicYearId: z.coerce.number().optional(),
+	grade: z.string().optional(),
+	subGrade: z.string().optional(),
+	accountancyId: z.coerce.number().optional(),
+	page: z.coerce.number().int().optional().default(1),
+	limit: z.coerce.number().int().optional().default(20),
+})
+
+export class ReportArrearsFilterDto extends createZodDto(ReportArrearsFilterSchema) {}
+

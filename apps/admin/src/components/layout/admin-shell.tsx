@@ -6,6 +6,7 @@ import { cn } from "@roja/utils"
 import { roleLabel, type LayoutRole } from "@/lib/admin-roles"
 
 import AdminFooter from "./admin-footer"
+import { AdminLayoutContext } from "./admin-layout-context"
 import AdminHeader from "./admin-header"
 import AdminSidebar from "./admin-sidebar"
 
@@ -35,35 +36,38 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 	}, [mobileOpen])
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-primary)]">
-			<AdminHeader
-				userName={userName}
-				roleLabel={roleLabel(role)}
-				onToggleMobileSidebar={() => setMobileOpen((open) => !open)}
-				onLogout={onLogout}
-			/>
-
-			<div className="md:pt-[60px]">
-				<AdminSidebar
-					role={role}
-					collapsed={collapsed}
-					onToggleCollapse={() => setCollapsed((value) => !value)}
-					mobileOpen={mobileOpen}
-					badges={{}}
+		<AdminLayoutContext.Provider value={{ collapsed }}>
+			<div className="min-h-screen bg-[var(--bg-primary)]">
+				<AdminHeader
+					userName={userName}
+					roleLabel={roleLabel(role)}
+					onToggleMobileSidebar={() => setMobileOpen((open) => !open)}
+					onLogout={onLogout}
 				/>
 
-				{/* Porto's fixed layout renders content-body as a block, so the footer follows the content */}
-				<main
-					className={cn(
-						"block px-[15px] pt-0 pb-[15px] md:p-[30px] md:transition-[margin] md:duration-300",
-						collapsed ? "md:ml-[73px]" : "md:ml-[250px]",
-					)}
-				>
-					<div className="min-w-0">{children}</div>
-					<AdminFooter />
-				</main>
+				{/* Legacy `html.fixed .inner-wrapper`: 60px header + 50px fixed page title */}
+				<div className="md:pt-[110px]">
+					<AdminSidebar
+						role={role}
+						collapsed={collapsed}
+						onToggleCollapse={() => setCollapsed((value) => !value)}
+						mobileOpen={mobileOpen}
+						badges={{}}
+					/>
+
+					{/* Porto's fixed layout renders content-body as a block, so the footer follows the content */}
+					<main
+						className={cn(
+							"block px-[15px] pt-0 pb-[15px] md:p-[30px] md:transition-[margin] md:duration-300",
+							collapsed ? "md:ml-[73px]" : "md:ml-[250px]",
+						)}
+					>
+						<div className="min-w-0">{children}</div>
+						<AdminFooter />
+					</main>
+				</div>
 			</div>
-		</div>
+		</AdminLayoutContext.Provider>
 	)
 }
 

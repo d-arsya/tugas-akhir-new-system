@@ -20,6 +20,7 @@ import {
 } from "@admin/dto/admin-auth.dto"
 import { UserResponseDto } from "@admin/dto/user-management.dto"
 import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminJwtRefreshGuard } from "@admin/guards/admin-jwt-refresh.guard"
 
 @ApiTags("Admin — Authentication")
 @Controller("admin/auth")
@@ -31,12 +32,13 @@ export class AdminAuthController {
 
 	private setAuthCookies(res: Response, accessToken?: string, refreshToken?: string) {
 		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
+		const isProd = process.env["NODE_ENV"] === "production"
 
 		if (accessToken) {
 			res.cookie("access_token", accessToken, {
 				httpOnly: true,
-				secure: process.env["NODE_ENV"] === "production",
-				sameSite: "strict",
+				secure: isProd,
+				sameSite: isProd ? "strict" : "lax",
 				...(rawDomain ? { domain: rawDomain } : {}),
 				maxAge: 15 * 60 * 1000,
 			})
@@ -44,8 +46,8 @@ export class AdminAuthController {
 		if (refreshToken) {
 			res.cookie("refresh_token", refreshToken, {
 				httpOnly: true,
-				secure: process.env["NODE_ENV"] === "production",
-				sameSite: "strict",
+				secure: isProd,
+				sameSite: isProd ? "strict" : "lax",
 				...(rawDomain ? { domain: rawDomain } : {}),
 				maxAge: 7 * 24 * 60 * 60 * 1000,
 			})
@@ -115,6 +117,7 @@ export class AdminAuthController {
 	}
 
 	@Public()
+	@UseGuards(AdminJwtRefreshGuard)
 	@Post("refresh")
 	@ApiOperation({ summary: "Refresh access token admin" })
 	@ApiResponseWrapped({ status: 200, description: "Access token baru berhasil dibuat", type: AdminAuthResultDto })

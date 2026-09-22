@@ -180,13 +180,9 @@ export class AdminAuthService {
 			throw new UnauthorizedException("Akun tidak ditemukan atau telah diblokir.")
 		}
 
-		// Verify & revoke existing refresh token from Redis
+		// Revoke existing refresh token from Redis
 		if (payload.tokenId) {
-			const storedToken = await this.redisService.get(`refresh:admin:${user.id}:${payload.tokenId}`)
-			if (!storedToken) {
-				throw new UnauthorizedException("Refresh token tidak valid atau telah dicabut.")
-			}
-			await this.redisService.del(`refresh:admin:${user.id}:${payload.tokenId}`)
+			await this.redisService.revokeRefreshToken("admin", user.id, payload.tokenId)
 		}
 
 		const tokens = await this.generateTokens(user)
@@ -204,7 +200,7 @@ export class AdminAuthService {
 
 	async logout(userId: number, tokenId?: string, clientIp?: string, userAgent?: string): Promise<{ success: boolean; message: string }> {
 		if (tokenId) {
-			await this.redisService.del(`refresh:admin:${userId}:${tokenId}`)
+			await this.redisService.revokeRefreshToken("admin", userId, tokenId)
 		}
 		const user = await this.userRepository.findOneBy({ id: userId })
 		if (user) {
@@ -267,7 +263,7 @@ export class AdminAuthService {
 		})
 
 		// Store refresh token in Redis (7 days = 604800 seconds)
-		await this.redisService.set(`refresh:admin:${user.id}:${tokenId}`, refreshToken, 604800)
+		await this.redisService.storeRefreshToken("admin", user.id, tokenId, 604800)
 
 		return { accessToken, refreshToken }
 	}

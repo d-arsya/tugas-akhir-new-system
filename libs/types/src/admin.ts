@@ -456,5 +456,64 @@ export interface CreateMerchantDto {
 	phone: string
 }
 
+export interface ReportArrearItem {
+	id: number
+	uniqueId: string
+	studentName: string
+	nis: string
+	feeName: string
+	amount: number
+	dueDate: string
+	agingDays: number
+	agingBucket: "0-30" | "31-60" | "61-90" | "90+"
+	grade: string
+	subGrade: string
+	academicYear?: string
+}
 
+export interface ReportArrearsFilterParams {
+	dateStart?: string
+	dateEnd?: string
+	academicYearId?: number
+	grade?: string
+	subGrade?: string
+	accountancyId?: number
+	page?: number
+	limit?: number
+}
 
+export interface ReportArrearsAgingBucket {
+	label: string
+	count: number
+	totalAmount: number
+	color: string
+}
+
+export interface ReportArrearsAgingSummary {
+	totalAmount: number
+	totalCount: number
+	buckets: Record<"0-30" | "31-60" | "61-90" | "90+", ReportArrearsAgingBucket>
+}
+
+// ── Dashboard (legacy DashboardController port) ──────────────────────────────
+
+export type DashboardStats = {
+	total: number
+	approve: number
+	reject: number
+}
+
+export type DashboardOptions = {
+	academicYears: { id: number; year: string }[]
+	grades: { label: number }[]
+}
+
+export type DashboardChartItem = {
+	category: string
+	value: number
+}
+
+export type DashboardPieItem = {
+	grade: string
+	value: number
+}
