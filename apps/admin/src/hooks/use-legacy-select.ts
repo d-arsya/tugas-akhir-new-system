@@ -17,7 +17,7 @@ export const useLegacySelect = (
 	highlighted: string | null
 	setHighlighted: (value: string) => void
 	select: (value: string) => void
-	onSearchKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
+	onSearchKeyDown: (event: KeyboardEvent<HTMLElement>) => void
 } => {
 	const [open, setOpenState] = useState(false)
 	const [search, setSearchState] = useState("")
@@ -48,7 +48,7 @@ export const useLegacySelect = (
 		if (next !== value) onChange(next)
 	}
 
-	const onSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>): void => {
+	const onSearchKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
 		const index = filtered.findIndex((o) => o.value === highlighted)
 		if (event.key === "ArrowDown" || event.key === "ArrowUp") {
 			event.preventDefault()

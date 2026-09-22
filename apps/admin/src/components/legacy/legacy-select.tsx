@@ -15,6 +15,8 @@ type LegacySelectProps = {
 	variant?: LegacySelectVariant
 	// Legacy options with title="Select" (and similar) render the chosen text in grey
 	mutedText?: boolean
+	// select2 `minimumResultsForSearch: -1` (e.g. the DataTables length menu) hides the search box
+	searchable?: boolean
 	className?: string
 }
 
@@ -35,6 +37,7 @@ const LegacySelect = ({
 	onChange,
 	variant = "default",
 	mutedText = false,
+	searchable = true,
 	className,
 }: LegacySelectProps): JSX.Element => {
 	// Like a native <select> (which select2 wraps): an unknown value shows the first option
@@ -70,15 +73,22 @@ const LegacySelect = ({
 				sideOffset={3}
 				className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-[10px] border-0! bg-[var(--bg-inverse)] p-0 text-[12px] text-[var(--body-txt-inverse)] shadow-[0px_18px_32px_0px_rgba(0,0,0,0.12)] data-[state=closed]:animate-none data-[state=open]:animate-none"
 			>
-				<div className="mb-[-12px] p-[12px]">
-					<input
-						value={state.search}
-						onChange={(event) => state.setSearch(event.target.value)}
-						onKeyDown={state.onSearchKeyDown}
-						className="m-0 min-h-[38.39px] w-full rounded-[6px] border-0 bg-[#f4f7f0] px-[16px] text-[12px] shadow-none outline-none"
-					/>
-				</div>
-				<ul role="listbox" className="m-0 max-h-[200px] list-none overflow-y-auto p-[12px]">
+				{searchable ? (
+					<div className="mb-[-12px] p-[12px]">
+						<input
+							value={state.search}
+							onChange={(event) => state.setSearch(event.target.value)}
+							onKeyDown={state.onSearchKeyDown}
+							className="m-0 min-h-[38.39px] w-full rounded-[6px] border-0 bg-[#f4f7f0] px-[16px] text-[12px] shadow-none outline-none"
+						/>
+					</div>
+				) : null}
+				<ul
+					role="listbox"
+					tabIndex={-1}
+					onKeyDown={searchable ? undefined : state.onSearchKeyDown}
+					className="m-0 max-h-[200px] list-none overflow-y-auto p-[12px] outline-none"
+				>
 					{state.filtered.length === 0 ? (
 						<li className="px-[16px] py-[8px]">No results found</li>
 					) : (

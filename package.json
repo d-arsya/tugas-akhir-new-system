@@ -97,6 +97,7 @@
     "cookie-parser": "^1.4.7",
     "date-fns": "^4.4.0",
     "dayjs": "^1.11.23",
+    "exceljs": "^4.4.0",
     "framer-motion": "^13.1.1",
     "handlebars": "^4.7.9",
     "html5-qrcode": "^2.3.8",

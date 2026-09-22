@@ -44,6 +44,8 @@ async function bootstrap(): Promise<void> {
       process.env["ADMIN_URL"] ?? "http://localhost:4203", // admin dev
     ],
     credentials: true,
+    // Report downloads read the file name from it
+    exposedHeaders: ["Content-Disposition"],
   })
 
   const httpAdapter = app.getHttpAdapter()

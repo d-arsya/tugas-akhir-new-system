@@ -1,4 +1,5 @@
 import type { AdminApi, AdminLoginDto, AdminLoginResponse } from "@roja/api-client"
+import { getRuntimeEnv } from "@roja/utils"
 import type {
 	AdminUserItem,
 	StudentItem,
@@ -44,14 +45,27 @@ import {
 	mockDashboardChartStudent,
 	mockDashboardPie,
 } from "./dev-hijack.fixtures"
+import {
+	mockReportArrears,
+	mockReportIncomeDetail,
+	mockReportIncomeRecap,
+	mockReportOptions,
+} from "./dev-hijack.report-fixtures"
 
 export { hijackAuthUser }
 
 export const IS_DEV_HIJACK =
-	import.meta.env["VITE_DEV_HIJACK"] === "true" ||
-	(import.meta.env.DEV && import.meta.env["VITE_DEV_HIJACK"] !== "false")
+	getRuntimeEnv("VITE_DEV_HIJACK") === "true" ||
+	(import.meta.env.DEV && getRuntimeEnv("VITE_DEV_HIJACK") !== "false")
 
 export const isDevHijackMode = (): boolean => IS_DEV_HIJACK
+
+// Legacy export file names (the real API sends them in Content-Disposition)
+const REPORT_FILE_NAMES = {
+	"income-detail": "Laporan Pembayaran Santri (Rincian).xlsx",
+	"income-recap": "Laporan Pembayaran Santri (Rekapitulasi).xlsx",
+	arrears: "Laporan Tunggakan Pembayaran Santri.xlsx",
+} as const
 
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -178,6 +192,31 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 		getDashboardPieChart: async () => {
 			await delay(250)
 			return mockDashboardPie
+		},
+
+		getReportOptions: async () => {
+			await delay(150)
+			return mockReportOptions
+		},
+
+		getReportIncomeDetail: async (params) => {
+			await delay(300)
+			return mockReportIncomeDetail(params)
+		},
+
+		getReportIncomeRecap: async (params) => {
+			await delay(300)
+			return mockReportIncomeRecap(params)
+		},
+
+		getReportArrears: async (params) => {
+			await delay(300)
+			return mockReportArrears(params)
+		},
+
+		downloadReport: async (kind) => {
+			await delay(400)
+			return { blob: new Blob([`dev mock export: ${kind}`]), fileName: REPORT_FILE_NAMES[kind] }
 		},
 
 		getUsers: async (params) => {

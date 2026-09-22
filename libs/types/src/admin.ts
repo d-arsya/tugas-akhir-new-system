@@ -456,44 +456,78 @@ export interface CreateMerchantDto {
 	phone: string
 }
 
-export interface ReportArrearItem {
-	id: number
-	uniqueId: string
-	studentName: string
-	nis: string
-	feeName: string
+// ── Reports / Laporan (legacy ReportController + ReportArrearController port) ──
+
+export type ReportOptions = {
+	academicYears: string[]
+	grades: number[]
+	subGrades: string[]
+	// Student-cost accountancy names (the legacy "Nama Biaya" filter value is the name)
+	accountancies: string[]
+}
+
+// Legacy query params; dates are bootstrap-datepicker dd/mm/yyyy strings
+export type ReportFilterParams = {
+	from?: string | undefined
+	to?: string | undefined
+	academicYear?: string | undefined
+	grade?: string | undefined
+	subGrade?: string | undefined
+	search?: string | undefined
+}
+
+export type ReportArrearFilterParams = ReportFilterParams & { accountancy?: string | undefined }
+
+export type ReportTableParams = {
+	page: number
+	limit: number
+	sortBy?: string | undefined
+	sortDir?: "asc" | "desc" | undefined
+}
+
+export type ReportIncomeDetailRow = {
+	code: string
+	// Local (Asia/Jakarta) timestamps, yyyy-mm-ddThh:mm:ss
+	paidAt: string | null
+	createdAt: string | null
+	fullname: string | null
+	nis: string | null
 	amount: number
-	dueDate: string
-	agingDays: number
-	agingBucket: "0-30" | "31-60" | "61-90" | "90+"
-	grade: string
-	subGrade: string
-	academicYear?: string
+	description: string
+	grade: number | null
+	subGrade: string | null
 }
 
-export interface ReportArrearsFilterParams {
-	dateStart?: string
-	dateEnd?: string
-	academicYearId?: number
-	grade?: string
-	subGrade?: string
-	accountancyId?: number
-	page?: number
-	limit?: number
+export type ReportPageMeta = { page: number; limit: number; total: number; totalPages: number }
+
+export type ReportIncomeDetailPage = {
+	data: ReportIncomeDetailRow[]
+	meta: ReportPageMeta & { totalIncome: number }
 }
 
-export interface ReportArrearsAgingBucket {
-	label: string
-	count: number
+export type ReportIncomeRecap = {
+	rows: { accName: string; totalAmount: number }[]
 	totalAmount: number
-	color: string
+	totalData: number
 }
 
-export interface ReportArrearsAgingSummary {
-	totalAmount: number
-	totalCount: number
-	buckets: Record<"0-30" | "31-60" | "61-90" | "90+", ReportArrearsAgingBucket>
+export type ReportArrearRow = {
+	id: number
+	nis: string | null
+	fullname: string | null
+	name: string | null
+	amount: number
+	dueDate: string | null
+	grade: string | null
+	subGrade: string | null
 }
+
+export type ReportArrearPage = {
+	data: ReportArrearRow[]
+	meta: ReportPageMeta & { totalArrear: number }
+}
+
+export type ReportExportKind = "income-detail" | "income-recap" | "arrears"
 
 // ── Dashboard (legacy DashboardController port) ──────────────────────────────
 

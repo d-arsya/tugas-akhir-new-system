@@ -51,6 +51,10 @@ import { PsbAdminController } from "@admin/psb/psb-admin.controller"
 import { StudentAdminService } from "@admin/student/student-admin.service"
 import { StudentAdminController } from "@admin/student/student-admin.controller"
 
+import { AdminReportService } from "@admin/report/admin-report.service"
+import { AdminReportExportService } from "@admin/report/admin-report-export.service"
+import { AdminReportController } from "@admin/report/admin-report.controller"
+
 import { BillingAdminService } from "@admin/billing/billing-admin.service"
 import { BillingAdminController } from "@admin/billing/billing-admin.controller"
 
@@ -97,6 +101,7 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 		StudentAdminController,
 		AdminDashboardController,
 		BillingAdminController,
+		AdminReportController,
 		EwalletAdminController,
 		AlumniAdminController,
 		MerchantAdminController,
@@ -115,6 +120,8 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 		StudentAdminService,
 		AdminDashboardService,
 		BillingAdminService,
+		AdminReportService,
+		AdminReportExportService,
 		EwalletAdminService,
 		AlumniAdminService,
 		MerchantAdminService,

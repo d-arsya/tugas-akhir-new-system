@@ -3,6 +3,7 @@ import { useRouterState } from "@tanstack/react-router"
 
 import { cn } from "@roja/utils"
 
+import { LegacyNotifyHost } from "@/components/legacy/legacy-notify"
 import { roleLabel, type LayoutRole } from "@/lib/admin-roles"
 
 import AdminFooter from "./admin-footer"
@@ -36,7 +37,7 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 	}, [mobileOpen])
 
 	return (
-		<AdminLayoutContext.Provider value={{ collapsed }}>
+		<AdminLayoutContext.Provider value={{ collapsed, setCollapsed }}>
 			<div className="min-h-screen bg-[var(--bg-primary)]">
 				<AdminHeader
 					userName={userName}
@@ -55,17 +56,19 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 						badges={{}}
 					/>
 
-					{/* Porto's fixed layout renders content-body as a block, so the footer follows the content */}
+					{/* Porto `html.flexbox.fixed`: content-body fills the viewport below the page title (flex: 2) and
+						`.flex-grow-1` pushes the footer to the bottom on short pages */}
 					<main
 						className={cn(
-							"block px-[15px] pt-0 pb-[15px] md:p-[30px] md:transition-[margin] md:duration-300",
+							"block px-[15px] pt-0 pb-[15px] md:flex md:min-h-[calc(100vh-110px)] md:flex-col md:p-[30px] md:transition-[margin] md:duration-300",
 							collapsed ? "md:ml-[73px]" : "md:ml-[250px]",
 						)}
 					>
-						<div className="min-w-0">{children}</div>
+						<div className="min-w-0 md:grow">{children}</div>
 						<AdminFooter />
 					</main>
 				</div>
+				<LegacyNotifyHost />
 			</div>
 		</AdminLayoutContext.Provider>
 	)

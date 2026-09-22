@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common"
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger"
 import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
@@ -18,10 +18,6 @@ import {
 	CostTermResponseDto,
 	BillingInvoiceResponseDto,
 	BillingTransactionResponseDto,
-	BillingIncomeReportResponseDto,
-	BillingArrearsReportResponseDto,
-	ReportIncomeFilterDto,
-	ReportArrearsFilterDto,
 } from "@admin/dto/billing-admin.dto"
 import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
 
@@ -145,35 +141,6 @@ export class BillingAdminController {
 	@ApiResponseWrapped({ status: 200, description: "Transaksi berhasil dibatalkan", type: AdminMessageResponseDto })
 	async cancelTransaction(@Param("id", ParseIntPipe) id: number, @Body() dto: CancelTransactionDto) {
 		return this.billingService.cancelTransaction(id, dto)
-	}
-
-	// Reports
-	@Get("reports/income")
-	@ApiOperation({ summary: "Laporan rincian penerimaan pembayaran" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan penerimaan", isArray: true })
-	async getReportsIncome(@Query() query: ReportIncomeFilterDto) {
-		return this.billingService.getReportsIncome(query)
-	}
-
-	@Get("reports/income/recap")
-	@ApiOperation({ summary: "Rekapitulasi penerimaan pembayaran per jenis biaya" })
-	@ApiResponseWrapped({ status: 200, description: "Rekapitulasi penerimaan per pos biaya", isArray: true })
-	async getReportsIncomeRecap(@Query() query: ReportIncomeFilterDto) {
-		return this.billingService.getReportsIncomeRecap(query)
-	}
-
-	@Get("reports/arrears")
-	@ApiOperation({ summary: "Laporan rincian tunggakan tagihan santri" })
-	@ApiResponseWrapped({ status: 200, description: "Detail laporan tunggakan", isArray: true })
-	async getReportsArrears(@Query() query: ReportArrearsFilterDto) {
-		return this.billingService.getReportsArrears(query)
-	}
-
-	@Get("reports/arrears/aging")
-	@ApiOperation({ summary: "Ringkasan analisis aging tunggakan tagihan santri" })
-	@ApiResponseWrapped({ status: 200, description: "Ringkasan aging bucket tunggakan" })
-	async getReportsArrearsAging(@Query() query: ReportArrearsFilterDto) {
-		return this.billingService.getArrearsAgingSummary(query)
 	}
 }
 

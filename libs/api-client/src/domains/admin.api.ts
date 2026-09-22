@@ -48,9 +48,14 @@ import type {
 	BulkGenerateInvoiceDto,
 	AddInvoiceTransactionDto,
 	CreateMerchantDto,
-	ReportArrearItem,
-	ReportArrearsFilterParams,
-	ReportArrearsAgingSummary,
+	ReportOptions,
+	ReportFilterParams,
+	ReportArrearFilterParams,
+	ReportTableParams,
+	ReportIncomeDetailPage,
+	ReportIncomeRecap,
+	ReportArrearPage,
+	ReportExportKind,
 	DashboardStats,
 	DashboardOptions,
 	DashboardChartItem,
@@ -187,11 +192,11 @@ export interface AdminApi {
 	getDashboardOptions(): Promise<DashboardOptions>
 	getDashboardChartStudent(params: { grade: number }): Promise<DashboardChartItem[]>
 	getDashboardPieChart(): Promise<DashboardPieItem[]>
-	getReportsIncome(params?: ReportIncomeFilterParams): Promise<ReportIncomeItem[]>
-	getReportsIncomeRecap(params?: ReportIncomeFilterParams): Promise<ReportIncomeRecapItem[]>
-	getReportsArrears(params?: ReportArrearsFilterParams): Promise<PaginatedResponse<ReportArrearItem>>
-	getReportsArrearsAging(params?: ReportArrearsFilterParams): Promise<ReportArrearsAgingSummary>
-	getAccountancyTree(): Promise<any[]>
+	getReportOptions(): Promise<ReportOptions>
+	getReportIncomeDetail(params: ReportFilterParams & ReportTableParams): Promise<ReportIncomeDetailPage>
+	getReportIncomeRecap(params: ReportFilterParams): Promise<ReportIncomeRecap>
+	getReportArrears(params: ReportArrearFilterParams & ReportTableParams): Promise<ReportArrearPage>
+	downloadReport(kind: ReportExportKind, params: ReportArrearFilterParams): Promise<{ blob: Blob; fileName: string | null }>
 }
 
 const unwrap = <T>(promise: Promise<any>): Promise<T> =>
@@ -202,6 +207,24 @@ const unwrap = <T>(promise: Promise<any>): Promise<T> =>
 		}
 		return body
 	})
+
+// Paginated endpoints: keep the envelope's meta next to the rows
+const unwrapPage = <T>(promise: Promise<any>): Promise<T> =>
+	promise.then((r) => ({ data: r.data?.data ?? [], meta: r.data?.meta }) as T)
+
+const REPORT_EXPORT_PATHS: Record<ReportExportKind, string> = {
+	"income-detail": "/admin/reports/income/detail/export",
+	"income-recap": "/admin/reports/income/recap/export",
+	arrears: "/admin/reports/arrears/export",
+}
+
+// RFC 6266: prefer filename* (UTF-8), fall back to the quoted filename
+const fileNameFromDisposition = (header: string | undefined): string | null => {
+	if (!header) return null
+	const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header)?.[1]
+	if (encoded) return decodeURIComponent(encoded)
+	return /filename="([^"]+)"/i.exec(header)?.[1] ?? null
+}
 
 export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
@@ -218,11 +241,15 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	getDashboardOptions: () => unwrap(client.get("/admin/dashboard/options")),
 	getDashboardChartStudent: (params) => unwrap(client.get("/admin/dashboard/chart-student", { params })),
 	getDashboardPieChart: () => unwrap(client.get("/admin/dashboard/pie-chart")),
-	getReportsIncome: (params) => unwrap(client.get("/admin/billing/reports/income", { params })),
-	getReportsIncomeRecap: (params) => unwrap(client.get("/admin/billing/reports/income/recap", { params })),
-	getReportsArrears: (params) => unwrap(client.get("/admin/billing/reports/arrears", { params })),
-	getReportsArrearsAging: (params) => unwrap(client.get("/admin/billing/reports/arrears/aging", { params })),
-	getAccountancyTree: () => unwrap(client.get("/admin/billing/accounts")),
+	getReportOptions: () => unwrap(client.get("/admin/reports/options")),
+	getReportIncomeDetail: (params) => unwrapPage(client.get("/admin/reports/income/detail", { params })),
+	getReportIncomeRecap: (params) => unwrap(client.get("/admin/reports/income/recap", { params })),
+	getReportArrears: (params) => unwrapPage(client.get("/admin/reports/arrears", { params })),
+	downloadReport: (kind, params) =>
+		client.get<Blob>(REPORT_EXPORT_PATHS[kind], { params, responseType: "blob" }).then((r) => ({
+			blob: r.data,
+			fileName: fileNameFromDisposition(r.headers["content-disposition"] as string | undefined),
+		})),
 
 	getUsers: (params) => unwrap(client.get("/admin/users", { params })),
 	createUser: (data) => unwrap(client.post("/admin/users", data)),
