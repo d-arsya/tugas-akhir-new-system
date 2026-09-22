@@ -1,3 +1,4 @@
+import { getRuntimeEnv } from "@roja/utils"
 import type {
 	MerchantApi,
 	MerchantLoginDto,
@@ -21,8 +22,8 @@ import {
 export { hijackAuthUser }
 
 export const IS_DEV_HIJACK =
-	import.meta.env.VITE_DEV_HIJACK === "true" ||
-	(import.meta.env.DEV && import.meta.env.VITE_DEV_HIJACK !== "false")
+	getRuntimeEnv("VITE_DEV_HIJACK") === "true" ||
+	(import.meta.env.DEV && getRuntimeEnv("VITE_DEV_HIJACK") !== "false")
 
 export const isDevHijackMode = (): boolean => IS_DEV_HIJACK
 

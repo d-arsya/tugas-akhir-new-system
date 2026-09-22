@@ -34,8 +34,13 @@ COPY --from=builder /app/dist/apps/santri /usr/share/nginx/html/santri
 COPY --from=builder /app/dist/apps/merchant /usr/share/nginx/html/merchant
 COPY --from=builder /app/dist/apps/admin /usr/share/nginx/html/admin
 
+# Entrypoint script that generates env.js for each app from runtime
+# environment variables before Nginx starts, so env vars can change
+# without rebuilding the image
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Port 8080 for Google Cloud Run
 EXPOSE 8080
 
-# Run Nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

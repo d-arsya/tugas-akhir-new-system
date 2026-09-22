@@ -1,4 +1,5 @@
 import type { PsbApi } from "@roja/api-client"
+import { getRuntimeEnv } from "@roja/utils"
 import {
 	hijackAuthUser,
 	mockDashboardData,
@@ -20,8 +21,8 @@ export {
 }
 
 export const IS_DEV_HIJACK =
-	import.meta.env.VITE_DEV_HIJACK === "true" ||
-	(import.meta.env.DEV && import.meta.env.VITE_DEV_HIJACK !== "false")
+	getRuntimeEnv("VITE_DEV_HIJACK") === "true" ||
+	(import.meta.env.DEV && getRuntimeEnv("VITE_DEV_HIJACK") !== "false")
 
 export const getStoredScenario = (): DashboardScenario => {
 	if (typeof window === "undefined") return "approve"

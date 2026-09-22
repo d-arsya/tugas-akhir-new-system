@@ -1,8 +1,9 @@
 import { createApiClient, createSharedApi, createMerchantApi, setAuthStoreGetter } from "@roja/api-client"
+import { getRuntimeEnv } from "@roja/utils"
 import useAuthStore from "@/stores/auth.store"
 import { hijackMerchantApi } from "./dev-hijack"
 
-const BASE_URL = import.meta.env["VITE_API_URL"] as string
+const BASE_URL = getRuntimeEnv("VITE_API_URL", "http://localhost:3000/api/v1")
 
 setAuthStoreGetter(() => useAuthStore.getState())
 

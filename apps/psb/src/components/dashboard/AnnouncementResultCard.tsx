@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import { Calendar, CheckCircle2, XCircle, AlertTriangle, FileText, Bell, Sparkles, ExternalLink, KeyRound } from "lucide-react"
 import { Badge, Card, CardHeader, CardTitle, CardContent, Button } from "@roja/ui"
+import { getRuntimeEnv } from "@roja/utils"
 
 export interface AnnouncementResultCardProps {
 	status: string
@@ -23,7 +24,7 @@ const formatDate = (dateStr?: string | null): string => {
 }
 
 export const AnnouncementResultCard = ({ status, announcement, nis }: AnnouncementResultCardProps): JSX.Element | null => {
-	const santriUrl = import.meta.env.VITE_SANTRI_URL || "https://santri.pondokroja.com"
+	const santriUrl = getRuntimeEnv("VITE_SANTRI_URL", "https://santri.pondokroja.com")
 
 	if (status === "approve") {
 		return (
