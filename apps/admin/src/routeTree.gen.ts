@@ -48,6 +48,9 @@ import { Route as AuthMerchantsCreateRouteImport } from './routes/_auth.merchant
 import { Route as AuthRegistrantsIndexRouteImport } from './routes/_auth.registrants.index'
 import { Route as AuthRegistrantsIdRouteImport } from './routes/_auth.registrants.$id'
 import { Route as AuthRegistrantsCreateRouteImport } from './routes/_auth.registrants.create'
+import { Route as AuthReportsIndexRouteImport } from './routes/_auth.reports.index'
+import { Route as AuthReportsArrearsRouteImport } from './routes/_auth.reports.arrears'
+import { Route as AuthReportsIncomeRouteImport } from './routes/_auth.reports.income'
 import { Route as AuthSettingsAnnouncementsRouteImport } from './routes/_auth.settings.announcements'
 import { Route as AuthSettingsFormRouteImport } from './routes/_auth.settings.form'
 import { Route as AuthSettingsSchoolRouteImport } from './routes/_auth.settings.school'
@@ -256,6 +259,21 @@ const AuthRegistrantsCreateRoute = AuthRegistrantsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthRegistrantsRoute,
 } as any)
+const AuthReportsIndexRoute = AuthReportsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthReportsRoute,
+} as any)
+const AuthReportsArrearsRoute = AuthReportsArrearsRouteImport.update({
+  id: '/arrears',
+  path: '/arrears',
+  getParentRoute: () => AuthReportsRoute,
+} as any)
+const AuthReportsIncomeRoute = AuthReportsIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AuthReportsRoute,
+} as any)
 const AuthSettingsAnnouncementsRoute =
   AuthSettingsAnnouncementsRouteImport.update({
     id: '/announcements',
@@ -341,7 +359,7 @@ export interface FileRoutesByFullPath {
   '/merchants': typeof AuthMerchantsRouteWithChildren
   '/my-profile': typeof AuthMyProfileRoute
   '/registrants': typeof AuthRegistrantsRouteWithChildren
-  '/reports': typeof AuthReportsRoute
+  '/reports': typeof AuthReportsRouteWithChildren
   '/settings': typeof AuthSettingsRouteWithChildren
   '/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
   '/student-costs': typeof AuthStudentCostsRoute
@@ -359,6 +377,8 @@ export interface FileRoutesByFullPath {
   '/merchants/create': typeof AuthMerchantsCreateRoute
   '/registrants/$id': typeof AuthRegistrantsIdRoute
   '/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/reports/arrears': typeof AuthReportsArrearsRoute
+  '/reports/income': typeof AuthReportsIncomeRoute
   '/settings/announcements': typeof AuthSettingsAnnouncementsRoute
   '/settings/form': typeof AuthSettingsFormRoute
   '/settings/school': typeof AuthSettingsSchoolRoute
@@ -368,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/users/create': typeof AuthUsersCreateRoute
   '/alumni/': typeof AuthAlumniIndexRoute
   '/registrants/': typeof AuthRegistrantsIndexRoute
+  '/reports/': typeof AuthReportsIndexRoute
   '/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
   '/students/': typeof AuthStudentsIndexRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
@@ -390,7 +411,6 @@ export interface FileRoutesByTo {
   '/majors': typeof AuthMajorsRoute
   '/merchants': typeof AuthMerchantsRouteWithChildren
   '/my-profile': typeof AuthMyProfileRoute
-  '/reports': typeof AuthReportsRoute
   '/settings': typeof AuthSettingsRouteWithChildren
   '/student-costs': typeof AuthStudentCostsRoute
   '/student-invoices': typeof AuthStudentInvoicesRoute
@@ -406,6 +426,8 @@ export interface FileRoutesByTo {
   '/merchants/create': typeof AuthMerchantsCreateRoute
   '/registrants/$id': typeof AuthRegistrantsIdRoute
   '/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/reports/arrears': typeof AuthReportsArrearsRoute
+  '/reports/income': typeof AuthReportsIncomeRoute
   '/settings/announcements': typeof AuthSettingsAnnouncementsRoute
   '/settings/form': typeof AuthSettingsFormRoute
   '/settings/school': typeof AuthSettingsSchoolRoute
@@ -415,6 +437,7 @@ export interface FileRoutesByTo {
   '/users/create': typeof AuthUsersCreateRoute
   '/alumni': typeof AuthAlumniIndexRoute
   '/registrants': typeof AuthRegistrantsIndexRoute
+  '/reports': typeof AuthReportsIndexRoute
   '/student-capabilities': typeof AuthStudentCapabilitiesIndexRoute
   '/students': typeof AuthStudentsIndexRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
@@ -442,7 +465,7 @@ export interface FileRoutesById {
   '/_auth/merchants': typeof AuthMerchantsRouteWithChildren
   '/_auth/my-profile': typeof AuthMyProfileRoute
   '/_auth/registrants': typeof AuthRegistrantsRouteWithChildren
-  '/_auth/reports': typeof AuthReportsRoute
+  '/_auth/reports': typeof AuthReportsRouteWithChildren
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/_auth/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
   '/_auth/student-costs': typeof AuthStudentCostsRoute
@@ -460,6 +483,8 @@ export interface FileRoutesById {
   '/_auth/merchants/create': typeof AuthMerchantsCreateRoute
   '/_auth/registrants/$id': typeof AuthRegistrantsIdRoute
   '/_auth/registrants/create': typeof AuthRegistrantsCreateRoute
+  '/_auth/reports/arrears': typeof AuthReportsArrearsRoute
+  '/_auth/reports/income': typeof AuthReportsIncomeRoute
   '/_auth/settings/announcements': typeof AuthSettingsAnnouncementsRoute
   '/_auth/settings/form': typeof AuthSettingsFormRoute
   '/_auth/settings/school': typeof AuthSettingsSchoolRoute
@@ -469,6 +494,7 @@ export interface FileRoutesById {
   '/_auth/users/create': typeof AuthUsersCreateRoute
   '/_auth/alumni/': typeof AuthAlumniIndexRoute
   '/_auth/registrants/': typeof AuthRegistrantsIndexRoute
+  '/_auth/reports/': typeof AuthReportsIndexRoute
   '/_auth/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
   '/_auth/students/': typeof AuthStudentsIndexRoute
   '/_auth/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
@@ -513,6 +539,8 @@ export interface FileRouteTypes {
     | '/merchants/create'
     | '/registrants/$id'
     | '/registrants/create'
+    | '/reports/arrears'
+    | '/reports/income'
     | '/settings/announcements'
     | '/settings/form'
     | '/settings/school'
@@ -522,6 +550,7 @@ export interface FileRouteTypes {
     | '/users/create'
     | '/alumni/'
     | '/registrants/'
+    | '/reports/'
     | '/student-capabilities/'
     | '/students/'
     | '/registrants/$academicYearId/workbench'
@@ -544,7 +573,6 @@ export interface FileRouteTypes {
     | '/majors'
     | '/merchants'
     | '/my-profile'
-    | '/reports'
     | '/settings'
     | '/student-costs'
     | '/student-invoices'
@@ -560,6 +588,8 @@ export interface FileRouteTypes {
     | '/merchants/create'
     | '/registrants/$id'
     | '/registrants/create'
+    | '/reports/arrears'
+    | '/reports/income'
     | '/settings/announcements'
     | '/settings/form'
     | '/settings/school'
@@ -569,6 +599,7 @@ export interface FileRouteTypes {
     | '/users/create'
     | '/alumni'
     | '/registrants'
+    | '/reports'
     | '/student-capabilities'
     | '/students'
     | '/registrants/$academicYearId/workbench'
@@ -613,6 +644,8 @@ export interface FileRouteTypes {
     | '/_auth/merchants/create'
     | '/_auth/registrants/$id'
     | '/_auth/registrants/create'
+    | '/_auth/reports/arrears'
+    | '/_auth/reports/income'
     | '/_auth/settings/announcements'
     | '/_auth/settings/form'
     | '/_auth/settings/school'
@@ -622,6 +655,7 @@ export interface FileRouteTypes {
     | '/_auth/users/create'
     | '/_auth/alumni/'
     | '/_auth/registrants/'
+    | '/_auth/reports/'
     | '/_auth/student-capabilities/'
     | '/_auth/students/'
     | '/_auth/registrants/$academicYearId/workbench'
@@ -910,6 +944,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegistrantsCreateRouteImport
       parentRoute: typeof AuthRegistrantsRoute
     }
+    '/_auth/reports/': {
+      id: '/_auth/reports/'
+      path: '/'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AuthReportsIndexRouteImport
+      parentRoute: typeof AuthReportsRoute
+    }
+    '/_auth/reports/arrears': {
+      id: '/_auth/reports/arrears'
+      path: '/arrears'
+      fullPath: '/reports/arrears'
+      preLoaderRoute: typeof AuthReportsArrearsRouteImport
+      parentRoute: typeof AuthReportsRoute
+    }
+    '/_auth/reports/income': {
+      id: '/_auth/reports/income'
+      path: '/income'
+      fullPath: '/reports/income'
+      preLoaderRoute: typeof AuthReportsIncomeRouteImport
+      parentRoute: typeof AuthReportsRoute
+    }
     '/_auth/settings/announcements': {
       id: '/_auth/settings/announcements'
       path: '/announcements'
@@ -1055,6 +1110,22 @@ const AuthRegistrantsRouteWithChildren = AuthRegistrantsRoute._addFileChildren(
   AuthRegistrantsRouteChildren,
 )
 
+interface AuthReportsRouteChildren {
+  AuthReportsArrearsRoute: typeof AuthReportsArrearsRoute
+  AuthReportsIncomeRoute: typeof AuthReportsIncomeRoute
+  AuthReportsIndexRoute: typeof AuthReportsIndexRoute
+}
+
+const AuthReportsRouteChildren: AuthReportsRouteChildren = {
+  AuthReportsArrearsRoute: AuthReportsArrearsRoute,
+  AuthReportsIncomeRoute: AuthReportsIncomeRoute,
+  AuthReportsIndexRoute: AuthReportsIndexRoute,
+}
+
+const AuthReportsRouteWithChildren = AuthReportsRoute._addFileChildren(
+  AuthReportsRouteChildren,
+)
+
 interface AuthSettingsRouteChildren {
   AuthSettingsAnnouncementsRoute: typeof AuthSettingsAnnouncementsRoute
   AuthSettingsFormRoute: typeof AuthSettingsFormRoute
@@ -1139,7 +1210,7 @@ interface AuthRouteChildren {
   AuthMerchantsRoute: typeof AuthMerchantsRouteWithChildren
   AuthMyProfileRoute: typeof AuthMyProfileRoute
   AuthRegistrantsRoute: typeof AuthRegistrantsRouteWithChildren
-  AuthReportsRoute: typeof AuthReportsRoute
+  AuthReportsRoute: typeof AuthReportsRouteWithChildren
   AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthStudentCapabilitiesRoute: typeof AuthStudentCapabilitiesRouteWithChildren
   AuthStudentCostsRoute: typeof AuthStudentCostsRoute
@@ -1166,7 +1237,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthMerchantsRoute: AuthMerchantsRouteWithChildren,
   AuthMyProfileRoute: AuthMyProfileRoute,
   AuthRegistrantsRoute: AuthRegistrantsRouteWithChildren,
-  AuthReportsRoute: AuthReportsRoute,
+  AuthReportsRoute: AuthReportsRouteWithChildren,
   AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthStudentCapabilitiesRoute: AuthStudentCapabilitiesRouteWithChildren,
   AuthStudentCostsRoute: AuthStudentCostsRoute,

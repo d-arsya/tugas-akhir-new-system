@@ -21,7 +21,7 @@ export const DevHijackPanel = (): JSX.Element | null => {
 
 	const setRole = (role: AdminRole, name: string) => {
 		const user = { ...hijackAuthUser, role, name }
-		auth.login("mock-admin-token", "mock-refresh-token", user)
+		auth.login(user)
 	}
 
 	return (
@@ -34,7 +34,7 @@ export const DevHijackPanel = (): JSX.Element | null => {
 				if (auth.isAuthenticated) {
 					auth.logout()
 				} else {
-					auth.login("mock-admin-token", "mock-refresh-token", hijackAuthUser)
+					auth.login(hijackAuthUser)
 				}
 			}}
 		>

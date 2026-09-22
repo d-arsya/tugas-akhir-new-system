@@ -22,7 +22,7 @@ function Verify2faPage(): JSX.Element {
 			{ code, adminId },
 			{
 				onSuccess: (res) => {
-					if (res.accessToken && res.refreshToken && res.user) {
+					if (res.user) {
 						toast.success("Verifikasi 2FA berhasil!")
 						navigate({ to: "/dashboard" as any })
 					}

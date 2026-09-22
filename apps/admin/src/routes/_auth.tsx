@@ -1,16 +1,27 @@
 import type { JSX } from "react"
 import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import { AdminShell } from "@/components/layout/admin-shell"
+import AdminShell from "@/components/layout/admin-shell"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
-import { adminApi } from "@/lib/api"
+import { adminApi, apiClient } from "@/lib/api"
+import { normalizeRole } from "@/lib/admin-roles"
 
 export const Route = createFileRoute("/_auth")({
-	beforeLoad: () => {
+	beforeLoad: async () => {
 		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (!auth.isAuthenticated) {
-			throw redirect({ to: "/login" as any })
+			try {
+				const res = await apiClient.post("/admin/auth/refresh")
+				const authData = res.data?.data || res.data
+				if (authData?.user) {
+					auth.login(authData.user, undefined, authData.user)
+					return
+				}
+			} catch {
+				// Refresh token missing or expired, proceed to login redirect
+			}
+			throw redirect({ to: "/login" })
 		}
 	},
 	component: AuthLayout,
@@ -19,7 +30,6 @@ export const Route = createFileRoute("/_auth")({
 function AuthLayout(): JSX.Element {
 	const auth = useAuthStore()
 	const navigate = useNavigate()
-	const userRole = auth.user?.role || "SUPERADMIN"
 
 	const handleLogout = async (): Promise<void> => {
 		try {
@@ -28,13 +38,13 @@ function AuthLayout(): JSX.Element {
 			// ignore
 		}
 		auth.logout()
-		navigate({ to: "/login" as any })
+		navigate({ to: "/login" })
 	}
 
 	return (
 		<AdminShell
-			user={auth.user}
-			userRole={userRole}
+			userName={auth.user?.name ?? ""}
+			role={normalizeRole(auth.user?.role)}
 			onLogout={handleLogout}
 		>
 			<Outlet />

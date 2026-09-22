@@ -2,14 +2,25 @@ import type { JSX } from "react"
 import { createFileRoute, redirect, Outlet } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
 import { PageLayout, RojaHeader } from "@roja/ui"
+import { apiClient } from "@/lib/api"
 import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 export const Route = createFileRoute("/_guest")({
-	beforeLoad: () => {
+	beforeLoad: async () => {
 		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (auth.isAuthenticated) {
 			throw redirect({ to: "/dashboard" as any })
+		}
+		try {
+			const res = await apiClient.post("/admin/auth/refresh")
+			const authData = res.data?.data || res.data
+			if (authData?.user) {
+				auth.login(authData.user, undefined, authData.user)
+				throw redirect({ to: "/dashboard" as any })
+			}
+		} catch (err: any) {
+			if (err?.to) throw err // Re-throw TanStack Router redirect
 		}
 	},
 

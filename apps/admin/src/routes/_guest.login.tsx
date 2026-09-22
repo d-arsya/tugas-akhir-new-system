@@ -21,7 +21,7 @@ function LoginPage(): JSX.Element {
 					navigate({ to: "/verify-2fa" as any, search: { adminId: res.adminId, email: res.email || variables.identifier } as any })
 					return
 				}
-				if (res.accessToken && res.refreshToken && res.user) {
+				if (!res.requires2fa && res.user) {
 					toast.success(`Selamat datang kembali, ${res.user.name || "Admin"}!`)
 					navigate({ to: "/dashboard" as any })
 				}

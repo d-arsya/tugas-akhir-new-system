@@ -1,67 +1,70 @@
-import { useState, useEffect, type JSX, type ReactNode } from "react"
-import type { AuthUser } from "@roja/types"
-import { AdminSidebar } from "./admin-sidebar"
-import { AdminHeader } from "./admin-header"
+import { useEffect, useState, type JSX, type ReactNode } from "react"
+import { useRouterState } from "@tanstack/react-router"
 
-export interface AdminShellProps {
-	user: AuthUser | null
-	userRole: string
+import { cn } from "@roja/utils"
+
+import { roleLabel, type LayoutRole } from "@/lib/admin-roles"
+
+import AdminFooter from "./admin-footer"
+import AdminHeader from "./admin-header"
+import AdminSidebar from "./admin-sidebar"
+
+type AdminShellProps = {
+	userName: string
+	role: LayoutRole | null
 	onLogout: () => void
 	children: ReactNode
 }
 
-export function AdminShell({
-	user,
-	userRole,
-	onLogout,
-	children,
-}: AdminShellProps): JSX.Element {
-	const [collapsed, setCollapsed] = useState<boolean>(() => {
-		if (typeof window !== "undefined") {
-			return localStorage.getItem("admin_sidebar_collapsed") === "true"
-		}
-		return false
-	})
-
-	const [mobileOpen, setMobileOpen] = useState<boolean>(false)
+// Port of legacy layouts/app.blade.php with `<html class="fixed sidebar-left-sm">`
+const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JSX.Element => {
+	const pathname = useRouterState({ select: (state) => state.location.pathname })
+	// Legacy keeps the collapsed state per page load only, so it is not persisted
+	const [collapsed, setCollapsed] = useState(false)
+	const [mobileOpen, setMobileOpen] = useState(false)
 
 	useEffect(() => {
-		localStorage.setItem("admin_sidebar_collapsed", String(collapsed))
-	}, [collapsed])
+		setMobileOpen(false)
+	}, [pathname])
 
-	const toggleCollapse = () => {
-		setCollapsed((prev) => !prev)
-	}
+	useEffect(() => {
+		document.body.style.overflow = mobileOpen ? "hidden" : ""
+		return () => {
+			document.body.style.overflow = ""
+		}
+	}, [mobileOpen])
 
 	return (
-		<div className="min-h-screen bg-[var(--bg-primary)] text-slate-800 flex flex-col">
-			{/* Sticky Top Header */}
+		<div className="min-h-screen bg-[var(--bg-primary)]">
 			<AdminHeader
-				user={user}
-				userRole={userRole}
-				onToggleSidebar={toggleCollapse}
-				onOpenMobileSidebar={() => setMobileOpen(true)}
+				userName={userName}
+				roleLabel={roleLabel(role)}
+				onToggleMobileSidebar={() => setMobileOpen((open) => !open)}
 				onLogout={onLogout}
 			/>
 
-			{/* Main Workspace: Left Sidebar + Fluid Bleed Content Area */}
-			<div className="flex-1 flex w-full relative">
-				{/* Left Sidebar */}
+			<div className="md:pt-[60px]">
 				<AdminSidebar
+					role={role}
 					collapsed={collapsed}
-					onToggleCollapse={toggleCollapse}
+					onToggleCollapse={() => setCollapsed((value) => !value)}
 					mobileOpen={mobileOpen}
-					onCloseMobile={() => setMobileOpen(false)}
-					userRole={userRole}
+					badges={{}}
 				/>
 
-				{/* Fluid Bleed Main Content Area */}
-				<main className="flex-1 min-w-0 w-full overflow-x-hidden">
-					<div className="w-full px-4 sm:px-6 lg:px-8 py-6 max-w-full space-y-6">
-						{children}
-					</div>
+				{/* Porto's fixed layout renders content-body as a block, so the footer follows the content */}
+				<main
+					className={cn(
+						"block px-[15px] pt-0 pb-[15px] md:p-[30px] md:transition-[margin] md:duration-300",
+						collapsed ? "md:ml-[73px]" : "md:ml-[250px]",
+					)}
+				>
+					<div className="min-w-0">{children}</div>
+					<AdminFooter />
 				</main>
 			</div>
 		</div>
 	)
 }
+
+export default AdminShell

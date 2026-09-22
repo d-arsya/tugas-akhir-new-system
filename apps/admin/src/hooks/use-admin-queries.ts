@@ -16,8 +16,8 @@ export function useAdminLoginMutation() {
 		mutationFn: (values: LoginSubmitValues) =>
 			adminApi.login({ email: values.identifier, password: values.password }),
 		onSuccess: (res) => {
-			if (res.accessToken && res.refreshToken && res.user) {
-				auth.login(res.accessToken, res.refreshToken, res.user)
+			if (res.user) {
+				auth.login(res.user as any)
 			}
 		},
 	})
@@ -29,8 +29,8 @@ export function useAdminVerify2faMutation() {
 		mutationFn: ({ code, adminId }: { code: string; adminId: number }) =>
 			adminApi.verify2fa(code, adminId),
 		onSuccess: (res) => {
-			if (res.accessToken && res.refreshToken && res.user) {
-				auth.login(res.accessToken, res.refreshToken, res.user)
+			if (res.user) {
+				auth.login(res.user as any)
 			}
 		},
 	})

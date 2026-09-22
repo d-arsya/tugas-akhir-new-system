@@ -1,155 +1,105 @@
-import { useEffect, type JSX } from "react"
+import type { JSX, ReactNode } from "react"
 import { Link } from "@tanstack/react-router"
-import type { AuthUser } from "@roja/types"
-import {
-	Menu,
-	User,
-	Settings,
-	LogOut,
-	ChevronDown,
-	CalendarCheck,
-	Shield,
-} from "lucide-react"
+
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@roja/ui"
 
-export interface AdminHeaderProps {
-	user: AuthUser | null
-	userRole: string
-	onToggleSidebar: () => void
-	onOpenMobileSidebar: () => void
+import { useIsDesktop } from "@/hooks/use-media-query"
+
+import { ArrowDownIcon, BarsIcon, GearIcon, LogoutIcon, UserIcon } from "./sidebar-icons"
+
+type AdminHeaderProps = {
+	userName: string
+	roleLabel: string
+	onToggleMobileSidebar: () => void
 	onLogout: () => void
 }
 
-export function AdminHeader({
-	user,
-	userRole,
-	onToggleSidebar,
-	onOpenMobileSidebar,
-	onLogout,
-}: AdminHeaderProps): JSX.Element {
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			document.documentElement.removeAttribute("data-theme")
-			document.documentElement.classList.remove("dark")
-			localStorage.removeItem("roja_theme")
-		}
-	}, [])
+const LOGO_SRC = "/assets/images/Logo.png"
 
+const MENU_ITEM_CLASS =
+	"relative flex items-center justify-start gap-0 rounded-[6px] bg-transparent px-[16px] py-[10px] text-[12px] leading-[1.3rem] font-normal tracking-[1px] text-white transition-all duration-500 hover:bg-[rgba(17,30,44,0.6)] focus:bg-[rgba(17,30,44,0.6)] focus:text-white [&_svg]:mr-[12px] [&_svg]:size-auto [&_svg]:w-[24px] [&_svg]:min-w-[24px]"
+
+// Legacy Str::words($name, 2, '')
+const firstTwoWords = (name: string): string => name.trim().split(/\s+/).slice(0, 2).join(" ")
+
+const UserboxMenuLink = ({ to, icon, label }: { to: "/settings" | "/my-profile"; icon: ReactNode; label: string }): JSX.Element => (
+	<DropdownMenuItem asChild className={MENU_ITEM_CLASS}>
+		<Link to={to}>
+			{icon}
+			{label}
+		</Link>
+	</DropdownMenuItem>
+)
+
+// Port of legacy header.blade.php (logo + userbox dropdown)
+const AdminHeader = ({ userName, roleLabel, onToggleMobileSidebar, onLogout }: AdminHeaderProps): JSX.Element => {
+	const isDesktop = useIsDesktop()
+
+	// Legacy borders are drawn as padding/inset shadow: globals.css forces border-color on every element
 	return (
-		<header className="sticky top-0 z-30 h-[60px] bg-white text-slate-800 px-4 lg:px-6 flex items-center justify-between shadow-xs transition-colors duration-200">
-			{/* Left Section: Sidebar Toggles & Context Badges */}
-			<div className="flex items-center gap-3">
-				{/* Mobile Hamburger Button */}
+		<header className="static z-[1000] h-auto bg-[#17283C] pt-[3px] md:fixed md:top-0 md:right-0 md:left-0 md:z-[1020] md:h-[60px]">
+			<div className="fixed top-0 right-0 left-0 z-[1003] h-[60px] bg-[#17283C] pt-[3px] pb-[1px] shadow-[inset_0_-1px_0_rgba(17,30,44,0.5)] md:static md:h-auto md:bg-transparent md:p-0 md:shadow-none">
+				<Link
+					to="/"
+					className="relative inline-block px-[25px] leading-[57px] md:float-left md:m-0 md:leading-[1.4rem]"
+				>
+					<img
+						src={LOGO_SRC}
+						alt="Pondok Roja"
+						className="relative -mt-[6px] inline-block h-[42px] w-auto md:mt-[6px]"
+					/>
+				</Link>
 				<button
 					type="button"
-					onClick={onOpenMobileSidebar}
-					className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 lg:hidden cursor-pointer transition-colors"
-					title="Buka Menu"
+					aria-label="Toggle sidebar"
+					onClick={onToggleMobileSidebar}
+					className="absolute top-[16px] right-[15px] flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full bg-[var(--secondary)] text-[12px] font-normal text-white md:hidden"
 				>
-					<Menu className="w-5 h-5" />
+					<BarsIcon />
 				</button>
-
-				{/* Desktop Toggle Button */}
-				<button
-					type="button"
-					onClick={onToggleSidebar}
-					className="hidden lg:flex p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-					title="Toggle Sidebar"
-				>
-					<Menu className="w-5 h-5" />
-				</button>
-
-				{/* Academic Context Badge */}
-				<div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-					<CalendarCheck className="w-3.5 h-3.5" />
-					<span>TA: 2024/2025</span>
-					<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-					<span className="text-[10px] uppercase font-bold tracking-wider">Aktif</span>
-				</div>
 			</div>
 
-			{/* Right Section: Profile Dropdown */}
-			<div className="flex items-center gap-2 sm:gap-3">
-				{/* User Profile Dropdown */}
+			<div className="mt-[60px] h-[60px] w-full bg-[#17283C] md:float-right md:mt-0 md:h-[56px] md:w-auto md:bg-transparent">
 				<DropdownMenu modal={false}>
-					<DropdownMenuTrigger asChild>
-						<button
-							type="button"
-							className="group flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer focus:outline-none data-[state=open]:bg-slate-100"
-						>
-							<div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-[var(--primary)] text-white font-bold text-xs flex items-center justify-center shadow-xs transition-transform duration-200 group-hover:scale-105">
-								{user?.name?.charAt(0)?.toUpperCase() || "A"}
-							</div>
-							<div className="hidden md:flex flex-col text-left">
-								<span className="text-xs font-semibold text-slate-800 truncate max-w-[140px]">
-									{user?.name || "Administrator"}
+					<div className="relative float-left mt-0 mr-[30px] ml-[12px] h-[57px] w-[180px] align-middle md:float-none md:ml-0 md:inline-block">
+						<DropdownMenuTrigger asChild>
+							<button type="button" className="group/trigger relative block w-full cursor-pointer text-left outline-none">
+								<span className="m-0 block w-full pt-[11px] pr-0 pb-[12px] pl-[2px]">
+									<span className="mt-0 mb-[4px] block w-[138px] overflow-hidden text-[0.8rem] leading-[1.1rem] text-ellipsis whitespace-nowrap text-[#EEEEEE]">
+										{firstTwoWords(userName)}
+									</span>
+									<span className="block text-[0.7rem] leading-[0.7rem] text-[#ACACAC]">{roleLabel}</span>
 								</span>
-								<div className="flex items-center gap-1 text-[10px] font-bold text-[var(--primary)] uppercase tracking-wider">
-									<Shield className="w-2.5 h-2.5" />
-									<span>{userRole}</span>
-								</div>
-							</div>
-							<ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden md:block transition-transform duration-300 group-data-[state=open]:rotate-180" />
-						</button>
-					</DropdownMenuTrigger>
+								<span className="absolute top-[calc(50%-12px)] right-0 flex h-[18px] w-[18px] items-center justify-center text-[14px] text-[#FF008D] transition-all duration-500 group-data-[state=open]/trigger:rotate-180">
+									<ArrowDownIcon />
+								</span>
+							</button>
+						</DropdownMenuTrigger>
+					</div>
 
 					<DropdownMenuContent
-						align="end"
-						sideOffset={8}
-						className="w-56 bg-white text-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.12)] p-2 flex flex-col gap-1 z-[99999] border-0 outline-none"
+						align="start"
+						sideOffset={isDesktop ? 7 : 10}
+						className="z-[10016] w-[180px] min-w-0 overflow-hidden rounded-[12px] border-0 bg-[#17283C] px-0 py-[12px] text-white shadow-[0px_3px_16px_0px_rgba(0,0,0,0.08)] data-[state=closed]:animate-none data-[state=open]:animate-none"
 					>
-						<div className="px-3 py-2 bg-slate-50 rounded-xl mb-1 flex items-center gap-2.5">
-							<div className="w-7 h-7 rounded-lg bg-[#e4007e]/10 text-[var(--primary)] flex items-center justify-center shrink-0 font-bold text-xs">
-								{user?.name?.charAt(0)?.toUpperCase() || "A"}
-							</div>
-							<div className="flex flex-col min-w-0">
-								<p className="text-xs font-semibold text-slate-900 truncate">
-									{user?.name || "Administrator"}
-								</p>
-								<p className="text-[10px] text-slate-500 truncate">
-									{user?.email || "admin@pondokroja.com"}
-								</p>
-							</div>
+						<div className="px-[12px]">
+							<UserboxMenuLink to="/settings" icon={<GearIcon />} label="Pengaturan" />
+							<UserboxMenuLink to="/my-profile" icon={<UserIcon />} label="Profil Saya" />
+							<DropdownMenuItem className={MENU_ITEM_CLASS} onSelect={onLogout}>
+								<LogoutIcon />
+								Keluar
+							</DropdownMenuItem>
 						</div>
-
-						<DropdownMenuItem asChild className="rounded-xl px-3 py-2 hover:bg-slate-100 transition-all duration-150 cursor-pointer">
-							<Link
-								to="/my-profile"
-								className="flex items-center gap-2.5 font-medium text-xs text-slate-700 outline-none border-0 w-full"
-							>
-								<User className="w-4 h-4 text-indigo-500" />
-								<span>Profil Saya</span>
-							</Link>
-						</DropdownMenuItem>
-
-						<DropdownMenuItem asChild className="rounded-xl px-3 py-2 hover:bg-slate-100 transition-all duration-150 cursor-pointer">
-							<Link
-								to="/settings"
-								className="flex items-center gap-2.5 font-medium text-xs text-slate-700 outline-none border-0 w-full"
-							>
-								<Settings className="w-4 h-4 text-slate-500" />
-								<span>Pengaturan Sistem</span>
-							</Link>
-						</DropdownMenuItem>
-
-						<DropdownMenuSeparator className="my-1 border-t border-slate-100" />
-
-						<DropdownMenuItem
-							onClick={onLogout}
-							className="flex items-center gap-2.5 text-xs text-red-600 hover:bg-red-50 cursor-pointer font-semibold rounded-xl px-3 py-2 transition-all duration-150 border-0 outline-none"
-						>
-							<LogOut className="w-4 h-4 text-red-600" />
-							<span>Keluar (Logout)</span>
-						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
 		</header>
 	)
 }
+
+export default AdminHeader
