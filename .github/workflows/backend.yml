@@ -1,4 +1,4 @@
-name: Deploy Apps Production
+name: Deploy API apps
 
 on:
   push:
@@ -6,15 +6,15 @@ on:
       - 'apps/api/**'
       - 'libs/types/**'
       - 'libs/utils/**'
-      - 'Dockerfile'
-      - '.github/workflows/deploy.yml'
+      - 'Dockerfile-backend'
+      - '.github/workflows/backend.yml'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Server via SSH
+      - name: Build image on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -24,14 +24,14 @@ jobs:
           script: |
             cd /media/roja-apps/${{ github.event.repository.name }}
             git pull 
-            docker build -t pondokroja/api:latest .
+            docker build -t pondokroja/api:latest -f Dockerfile-backend .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - name: Deploy to Server via SSH
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -47,7 +47,7 @@ jobs:
     needs: build
 
     steps:
-      - name: Deploy to Server via SSH
+      - name: Push image to Docker Hub
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
