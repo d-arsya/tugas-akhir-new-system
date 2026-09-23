@@ -22,8 +22,7 @@ const LoginPage = (): JSX.Element => {
 		try {
 			const res = await psbApi.login({ email: data.identifier, password: data.password })
 			if (res.requires2fa) {
-				localStorage.setItem("roja-2fa-email", res.email)
-				navigate({ to: "/verify-2fa" })
+				navigate({ to: "/verify-2fa", search: { email: res.email } })
 			} else {
 				login(res.user)
 				navigate({ to: "/dashboard" })

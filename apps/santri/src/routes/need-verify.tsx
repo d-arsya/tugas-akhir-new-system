@@ -4,7 +4,6 @@ import { useState } from "react"
 import { santriApi } from "@/lib/api"
 import { z } from "zod"
 import { NeedVerifyCard, PageLayout, RojaHeader } from "@roja/ui"
-import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const searchSchema = z.object({
 	email: z.string().optional(),
@@ -22,10 +21,6 @@ const NeedVerifyPage = (): JSX.Element => {
 		setInfoMsg(null)
 		setErrorMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				setInfoMsg(`Link verifikasi email baru telah berhasil dikirimkan ke ${email || "email Anda"}.`)
-				return
-			}
 			const res = await santriApi.sendEmailVerification()
 			setInfoMsg(res.message || `Link verifikasi email baru telah berhasil dikirimkan ke ${email}.`)
 		} catch (err: unknown) {

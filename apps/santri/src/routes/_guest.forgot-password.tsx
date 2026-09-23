@@ -2,7 +2,6 @@ import { useNavigate, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import { ForgotPasswordCard } from "@roja/ui"
 import { santriApi } from "@/lib/api"
-import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const ForgotPasswordPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -15,16 +14,6 @@ const ForgotPasswordPage = (): JSX.Element => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				await new Promise((res) => setTimeout(res, 500))
-				setSuccessMsg("Instruksi reset password telah dikirim ke email Anda.")
-				setIsSubmitSuccessful(true)
-				setTimeout(() => {
-					navigate({ to: "/login" })
-				}, 3000)
-				return
-			}
-
 			const res = await santriApi.forgotPassword({ email })
 			setSuccessMsg(res.message || "Instruksi reset password telah dikirim ke email Anda.")
 			setIsSubmitSuccessful(true)

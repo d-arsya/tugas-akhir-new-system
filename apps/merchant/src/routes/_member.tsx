@@ -3,7 +3,6 @@ import { createFileRoute, redirect, Outlet, useLocation, useNavigate } from "@ta
 import useAuthStore from "@/stores/auth.store"
 import { PageTitle, PageLayout, RojaHeader } from "@roja/ui"
 import Sidebar from "@/components/layout/Sidebar"
-import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 import { merchantApi } from "@/lib/api"
 
 const getTitleFromPath = (pathname: string): string => {
@@ -52,7 +51,6 @@ const getBreadcrumbsFromPath = (pathname: string): Array<{ label: string; to?: s
 
 export const Route = createFileRoute("/_member")({
 	beforeLoad: () => {
-		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (!auth.isAuthenticated) {
 			throw redirect({ to: "/login" })

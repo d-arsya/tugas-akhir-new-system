@@ -4,19 +4,23 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { psbApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
-import { useNavigate, createFileRoute } from "@tanstack/react-router"
+import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { TwoFactorCard, PageLayout, RojaHeader } from "@roja/ui"
 
+type Verify2faSearch = {
+	email?: string
+}
+
 const Verify2faPage = (): JSX.Element => {
 	const navigate = useNavigate()
+	const search = useSearch({ from: "/verify-2fa" })
+	const email = search.email || ""
 	const login = useAuthStore((s) => s.login)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isResending, setIsResending] = useState<boolean>(false)
 	const [errorMsg, setErrorMsg] = useState<string | null>(null)
 	const [infoMsg, setInfoMsg] = useState<string | null>(null)
-
-	const email = localStorage.getItem("roja-2fa-email") || ""
 
 	const onSubmit = async (code: string): Promise<void> => {
 		if (!email) {
@@ -29,7 +33,6 @@ const Verify2faPage = (): JSX.Element => {
 		try {
 			const res = await psbApi.verify2fa({ email, code })
 			login(res.user)
-			localStorage.removeItem("roja-2fa-email")
 			navigate({ to: "/dashboard" })
 		} catch (err: unknown) {
 			setErrorMsg(err instanceof Error ? err.message : "Kode verifikasi salah")
@@ -76,6 +79,9 @@ const Verify2faPage = (): JSX.Element => {
 }
 
 export const Route = createFileRoute("/verify-2fa")({
+	validateSearch: (search: Record<string, unknown>): Verify2faSearch => ({
+		email: typeof search.email === "string" ? search.email : "",
+	}),
 	component: Verify2faPage,
 })
 

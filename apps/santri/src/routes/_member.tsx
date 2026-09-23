@@ -4,7 +4,6 @@ import useAuthStore from "@/stores/auth.store"
 import { santriApi } from "@/lib/api"
 import { PageLayout, RojaHeader, PageTitle } from "@roja/ui"
 import Sidebar from "@/components/layout/Sidebar"
-import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 const getTitleFromPath = (pathname: string): string => {
 	if (pathname.includes("payment-history")) return "Pembayaran Santri"
@@ -68,7 +67,6 @@ const getBreadcrumbsFromPath = (pathname: string): Array<{ label: string; to?: s
 
 export const Route = createFileRoute("/_member")({
 	beforeLoad: () => {
-		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (!auth.isAuthenticated) {
 			throw redirect({ to: "/login" })

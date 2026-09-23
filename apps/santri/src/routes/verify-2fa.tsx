@@ -4,22 +4,26 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
-import { useNavigate, createFileRoute } from "@tanstack/react-router"
+import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { TwoFactorCard, PageLayout, RojaHeader } from "@roja/ui"
-import { isDevHijackMode, mockSantriAuth } from "@/lib/dev-hijack"
+
+type Verify2faSearch = {
+	email?: string
+	studentId?: number
+}
 
 const Verify2faPage = (): JSX.Element => {
 	const navigate = useNavigate()
+	const search = useSearch({ from: "/verify-2fa" })
+	const email = search.email || ""
+	const studentId = search.studentId || 1
+
 	const login = useAuthStore((s) => s.login)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isResending, setIsResending] = useState<boolean>(false)
 	const [errorMsg, setErrorMsg] = useState<string | null>(null)
 	const [infoMsg, setInfoMsg] = useState<string | null>(null)
-
-	const email = localStorage.getItem("roja-2fa-email") || ""
-	const studentIdStr = localStorage.getItem("roja-2fa-student-id") || "1"
-	const studentId = Number.parseInt(studentIdStr, 10) || 1
 
 	const onSubmit = async (code: string): Promise<void> => {
 		if (!email) {
@@ -30,23 +34,9 @@ const Verify2faPage = (): JSX.Element => {
 		setErrorMsg(null)
 		setInfoMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				await new Promise((res) => setTimeout(res, 500))
-				const mock = mockSantriAuth.verify2fa(code)
-				if (mock.user) {
-					login(mock.user as any)
-					localStorage.removeItem("roja-2fa-email")
-					localStorage.removeItem("roja-2fa-student-id")
-					navigate({ to: "/dashboard" })
-					return
-				}
-			}
-
 			const res = await santriApi.verify2fa({ code }, studentId)
 			if (!res.requires2fa && res.user) {
 				login(res.user as any)
-				localStorage.removeItem("roja-2fa-email")
-				localStorage.removeItem("roja-2fa-student-id")
 				navigate({ to: "/dashboard" })
 			}
 		} catch (err: unknown) {
@@ -62,11 +52,6 @@ const Verify2faPage = (): JSX.Element => {
 		setErrorMsg(null)
 		setInfoMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				setInfoMsg("Kode verifikasi 2FA telah dikirim ulang ke email Anda.")
-				return
-			}
-
 			const res = await santriApi.resend2fa(studentId)
 			setInfoMsg(res.message || "Kode verifikasi 2FA telah dikirim ulang ke email Anda.")
 		} catch (err: unknown) {
@@ -99,6 +84,10 @@ const Verify2faPage = (): JSX.Element => {
 }
 
 export const Route = createFileRoute("/verify-2fa")({
+	validateSearch: (search: Record<string, unknown>): Verify2faSearch => ({
+		email: typeof search.email === "string" ? search.email : "",
+		studentId: typeof search.studentId === "number" ? search.studentId : Number(search.studentId) || 1,
+	}),
 	component: Verify2faPage,
 })
 

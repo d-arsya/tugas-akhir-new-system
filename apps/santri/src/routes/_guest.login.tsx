@@ -5,7 +5,6 @@ import { LoginCard, type LoginSubmitValues } from "@roja/ui"
 import { toast } from "sonner"
 import { santriApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
-import { isDevHijackMode, mockSantriAuth } from "@/lib/dev-hijack"
 
 const LoginPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -17,30 +16,10 @@ const LoginPage = (): JSX.Element => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				await new Promise((res) => setTimeout(res, 500))
-				const mock = mockSantriAuth.login(data.identifier)
-				if (mock.requires2fa && mock.email) {
-					localStorage.setItem("roja-2fa-email", mock.email)
-					localStorage.setItem("roja-2fa-student-id", String(mock.studentId))
-					toast.info("Verifikasi 2FA Diperlukan", { description: "Kode 2FA telah dikirim ke email terdaftar." })
-					navigate({ to: "/verify-2fa" })
-					return
-				}
-				if (mock.user) {
-					login(mock.user as any)
-					toast.success("Login Berhasil", { description: `Selamat datang kembali, ${mock.user.name}!` })
-					navigate({ to: "/dashboard" })
-					return
-				}
-			}
-
 			const res = await santriApi.login({ nis: data.identifier, password: data.password })
 			if (res.requires2fa && res.email) {
-				localStorage.setItem("roja-2fa-email", res.email)
-				localStorage.setItem("roja-2fa-student-id", String(res.studentId))
 				toast.info("Verifikasi 2FA Diperlukan", { description: "Kode 2FA telah dikirim ke email terdaftar." })
-				navigate({ to: "/verify-2fa" })
+				navigate({ to: "/verify-2fa", search: { studentId: res.studentId, email: res.email } })
 			} else if (!res.requires2fa && res.user) {
 				login(res.user as any)
 				toast.success("Login Berhasil", { description: `Selamat datang kembali, ${res.user.name}!` })

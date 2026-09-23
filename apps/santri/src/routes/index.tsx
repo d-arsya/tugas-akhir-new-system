@@ -1,7 +1,6 @@
 import type { JSX } from "react"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 export const Route = createFileRoute("/")({
 	beforeLoad: () => {

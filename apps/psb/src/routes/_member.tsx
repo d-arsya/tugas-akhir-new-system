@@ -3,7 +3,6 @@ import { createFileRoute, redirect, Outlet, useLocation, useNavigate } from "@ta
 import useAuthStore from "@/stores/auth.store"
 import { psbApi } from "@/lib/api"
 import { PageTitle, PageLayout, RojaHeader } from "@roja/ui"
-import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
 
 const getTitleFromPath = (pathname: string): string => {
 	if (pathname.includes("dashboard")) return "Dashboard Pendaftar"
@@ -22,7 +21,6 @@ const getBreadcrumbsFromPath = (pathname: string): Array<{ label: string; to?: s
 
 export const Route = createFileRoute("/_member")({
 	beforeLoad: () => {
-		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (!auth.isAuthenticated) {
 			throw redirect({ to: "/login" })

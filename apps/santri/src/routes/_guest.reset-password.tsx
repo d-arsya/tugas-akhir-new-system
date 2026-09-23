@@ -3,7 +3,6 @@ import { useNavigate, createFileRoute, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { ResetPasswordCard, type ResetPasswordSubmitValues } from "@roja/ui"
 import { santriApi } from "@/lib/api"
-import { isDevHijackMode } from "@/lib/dev-hijack"
 
 type ResetPasswordSearch = {
 	token?: string
@@ -21,15 +20,6 @@ const ResetPasswordPage = (): JSX.Element => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				await new Promise((res) => setTimeout(res, 500))
-				setSuccessMsg("Password Anda berhasil diperbarui.")
-				setTimeout(() => {
-					navigate({ to: "/login" })
-				}, 2000)
-				return
-			}
-
 			const res = await santriApi.resetPassword({
 				email: search.email || "",
 				token: search.token || "",

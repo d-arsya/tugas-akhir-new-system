@@ -6,7 +6,6 @@ import { santriApi } from "@/lib/api"
 import { useNavigate, Link, createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
 import { Button, Input, AuthCard, PageLayout, RojaHeader } from "@roja/ui"
-import { isDevHijackMode } from "@/lib/dev-hijack"
 
 const schema = z.object({
 	email: z.string().email("Format email tidak valid"),
@@ -32,12 +31,6 @@ const CheckEmailPage = (): JSX.Element => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		try {
-			if (isDevHijackMode()) {
-				await new Promise((res) => setTimeout(res, 500))
-				navigate({ to: "/dashboard" })
-				return
-			}
-
 			await santriApi.updateEmail(data)
 			navigate({ to: "/dashboard" })
 		} catch (err: unknown) {
