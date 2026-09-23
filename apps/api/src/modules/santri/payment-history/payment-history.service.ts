@@ -6,6 +6,13 @@ import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-tran
 import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 import { StudentTransaction } from "@santri/entities/student-transaction.entity"
 import { Student } from "@santri/entities/student.entity"
+import {
+	calculatePaid,
+	resolveStatusLabel,
+	selectCountedLinks,
+	toAmount,
+	toId,
+} from "@shared/billing/invoice-calculator"
 
 @Injectable()
 export class PaymentHistoryService {
@@ -21,6 +28,22 @@ export class PaymentHistoryService {
 		@InjectRepository(StudentInvoiceTransaction)
 		private readonly invoiceTransactionRepository: Repository<StudentInvoiceTransaction>,
 	) { }
+
+	/** Ids of the transactions behind these links that are still `valid` — cancelled ones never count. */
+	private async validTransactionIds(links: StudentInvoiceTransaction[]): Promise<Set<number>> {
+		const ids = [
+			...new Set(
+				links
+					.map((link) => toId(link.studentTransactionId))
+					.filter((id): id is number => id !== null),
+			),
+		]
+		if (!ids.length) return new Set<number>()
+		const valid = await this.transactionRepository.find({
+			where: { id: In(ids), status: "valid" },
+		})
+		return new Set(valid.map((transaction) => Number(transaction.id)))
+	}
 
 	async getSummary(studentId: number, page = 1, limit = 10, status?: string, search?: string) {
 		const invoices = await this.invoiceRepository.find({
@@ -50,62 +73,29 @@ export class PaymentHistoryService {
 		}
 
 		const invoiceIds = invoices.map((inv) => Number(inv.id))
-		const invoiceTxns = await this.invoiceTransactionRepository.find({
+		const links = await this.invoiceTransactionRepository.find({
 			where: { studentInvoiceId: In(invoiceIds) },
 		})
-
-		const txnIds = [
-			...new Set(
-				invoiceTxns
-					.map((it) => (it.studentTransactionId !== null && it.studentTransactionId !== undefined ? Number(it.studentTransactionId) : null))
-					.filter((id): id is number => id !== null && !isNaN(id)),
-			),
-		]
-		const validTxns = txnIds.length
-			? await this.transactionRepository.find({
-				where: { id: In(txnIds), status: "valid" },
-			})
-			: []
-		const validTxnMap = new Map(validTxns.map((t) => [Number(t.id), t]))
+		const validIds = await this.validTransactionIds(links)
 
 		let totalBilled = 0
 		let totalPaid = 0
 
 		const formattedInvoices = invoices.map((inv) => {
-			const invAmount = Number(inv.amount || 0)
+			const invAmount = toAmount(inv.amount)
+			const paid = calculatePaid(inv, links, validIds)
+
 			totalBilled += invAmount
-
-			const invTxns = invoiceTxns.filter(
-				(it) =>
-					it.studentInvoiceId !== null &&
-					it.studentTransactionId !== null &&
-					Number(it.studentInvoiceId) === Number(inv.id) &&
-					validTxnMap.has(Number(it.studentTransactionId)),
-			)
-
-			let paid = invTxns.reduce((sum, item) => sum + Number(item.pay ?? item.amount ?? 0), 0)
-			if (inv.status === "paid" && paid < invAmount) {
-				paid = invAmount
-			}
-
 			totalPaid += paid
-			const remaining = Math.max(0, invAmount - paid)
-
-			let statusLabel: "Lunas" | "Cicilan" | "Belum Bayar" = "Belum Bayar"
-			if (inv.status === "paid" || paid >= invAmount) {
-				statusLabel = "Lunas"
-			} else if (paid > 0 || inv.paymentMethod === "installment") {
-				statusLabel = "Cicilan"
-			}
 
 			return {
 				id: inv.id,
 				name: inv.name,
 				amount: invAmount,
 				paidAmount: paid,
-				remainingAmount: remaining,
+				remainingAmount: Math.max(0, invAmount - paid),
 				status: inv.status,
-				statusLabel,
+				statusLabel: resolveStatusLabel(inv, paid),
 				paymentMethod: inv.paymentMethod,
 				dueDate: inv.dueDate,
 				reminder: inv.reminder,
@@ -186,55 +176,36 @@ export class PaymentHistoryService {
 
 		const studentName = activeGrade?.fullname ?? student.nis ?? "Santri"
 
-		const invoiceTxns = await this.invoiceTransactionRepository.find({
+		const links = await this.invoiceTransactionRepository.find({
 			where: { studentInvoiceId: invoiceId },
 		})
+		const validIds = await this.validTransactionIds(links)
 
-		const txnIds = [
-			...new Set(
-				invoiceTxns
-					.map((it) => (it.studentTransactionId !== null && it.studentTransactionId !== undefined ? Number(it.studentTransactionId) : null))
-					.filter((id): id is number => id !== null && !isNaN(id)),
-			),
-		]
-		const validTxns = txnIds.length
+		const orderedValid = validIds.size
 			? await this.transactionRepository.find({
-				where: { id: In(txnIds), status: "valid" },
+				where: { id: In([...validIds]), status: "valid" },
 				order: { paidAt: "DESC" },
 			})
 			: []
+		const validTxnMap = new Map(orderedValid.map((t) => [Number(t.id), t]))
 
-		const validTxnMap = new Map(validTxns.map((t) => [Number(t.id), t]))
+		const allTransactions = selectCountedLinks(invoiceId, links, validIds).map((link) => {
+			const parentTxn = validTxnMap.get(Number(toId(link.studentTransactionId)))!
+			return {
+				id: parentTxn.id,
+				transactionCode: parentTxn.studentTransactionCode,
+				paidAt: parentTxn.paidAt,
+				amount: toAmount(parentTxn.amount),
+				invoicePayAmount: toAmount(link.pay ?? link.amount ?? parentTxn.amount),
+				desc: parentTxn.desc,
+				description: parentTxn.desc,
+				note: parentTxn.note,
+				status: parentTxn.status,
+			}
+		})
 
-		const allTransactions = invoiceTxns
-			.filter(
-				(it) =>
-					it.studentTransactionId !== null &&
-					it.studentTransactionId !== undefined &&
-					validTxnMap.has(Number(it.studentTransactionId)),
-			)
-			.map((it) => {
-				const parentTxn = validTxnMap.get(Number(it.studentTransactionId))!
-				const totalTxnAmount = Number(parentTxn.amount ?? 0)
-				const invoicePayAmount = Number(it.pay ?? it.amount ?? parentTxn.amount ?? 0)
-				return {
-					id: parentTxn.id,
-					transactionCode: parentTxn.studentTransactionCode,
-					paidAt: parentTxn.paidAt,
-					amount: totalTxnAmount,
-					invoicePayAmount,
-					desc: parentTxn.desc,
-					description: parentTxn.desc,
-					note: parentTxn.note,
-					status: parentTxn.status,
-				}
-			})
-
-		const invAmount = Number(invoice.amount || 0)
-		let totalPaid = invoiceTxns.reduce((sum, it) => sum + Number(it.pay ?? it.amount ?? 0), 0)
-		if (invoice.status === "paid" && totalPaid < invAmount) {
-			totalPaid = invAmount
-		}
+		const invAmount = toAmount(invoice.amount)
+		const totalPaid = calculatePaid(invoice, links, validIds)
 
 		const costRemain = Math.max(0, invAmount - totalPaid)
 		const totalTxnsCount = allTransactions.length

@@ -2,30 +2,22 @@ import type { AdminApi, AdminLoginDto, AdminLoginResponse } from "@roja/api-clie
 import { getRuntimeEnv } from "@roja/utils"
 import type {
 	StudentItem,
-	StudentCapabilityItem,
-	StudentInvoiceItem,
 	AlumniItem,
 	AdminRegistrantItem,
 	AdminEwalletItem,
 	BankTransferConfirmationItem,
 	WithdrawalRequestItem,
-	StudentCapabilityMatrixItem,
-	StudentTransactionItem,
 } from "@roja/types"
 import {
 	hijackAuthUser,
 	mockLoginUsers,
 	mockBannedIps,
 	mockStudents,
-	mockCapabilities,
-	mockInvoices,
 	mockAlumni,
 	mockRegistrants,
 	mockEwallets,
 	mockBankConfirmations,
 	mockWithdrawals,
-	mockStudentCapabilityMatrix,
-	mockStudentTransactions,
 	mockDashboardStats,
 	mockDashboardStatsByYear,
 	mockDashboardOptions,
@@ -63,10 +55,6 @@ const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 let bannedIpsList = [...mockBannedIps]
 
 let studentsList: StudentItem[] = [...mockStudents]
-let capabilityMatrixList: StudentCapabilityMatrixItem[] = [...mockStudentCapabilityMatrix]
-let capabilitiesList: StudentCapabilityItem[] = [...mockCapabilities]
-let invoicesList: StudentInvoiceItem[] = [...mockInvoices]
-let transactionsList: StudentTransactionItem[] = [...mockStudentTransactions]
 let alumniList: AlumniItem[] = [...mockAlumni]
 let registrantsList: AdminRegistrantItem[] = [...mockRegistrants]
 let ewalletsList: AdminEwalletItem[] = [...mockEwallets]
@@ -315,88 +303,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 
 
 
-
-		getCapabilities: async () => {
-			await delay(200)
-			return { success: true, data: capabilitiesList, message: "OK" }
-		},
-
-		getStudentCapabilityMatrix: async () => {
-			await delay(200)
-			return { success: true, data: capabilityMatrixList, message: "OK" }
-		},
-
-		updateStudentCapability: async (dto) => {
-			await delay(250)
-			const matrixRow = capabilityMatrixList.find((m) => m.studentId === dto.studentId)
-			if (matrixRow) {
-				const cap = matrixRow.capabilities.find((c) => c.costItemId === dto.costItemId)
-				if (cap) {
-					cap.discountPercent = dto.discountPercent
-					cap.finalAmount = Math.round(cap.nominal * (1 - dto.discountPercent / 100))
-				}
-			}
-			return { success: true, data: { message: "Kesanggupan santri berhasil diperbarui." }, message: "OK" }
-		},
-
-		getInvoices: async (params) => {
-			await delay(200)
-			let filtered = [...invoicesList]
-			if (params?.search) {
-				const q = params.search.toLowerCase()
-				filtered = filtered.filter((i) => i.invoiceNumber.toLowerCase().includes(q) || i.studentName.toLowerCase().includes(q))
-			}
-			if (params?.status) {
-				filtered = filtered.filter((i) => i.status === params.status)
-			}
-			return { success: true, data: { items: filtered, total: filtered.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
-
-		bulkGenerateInvoices: async () => {
-			await delay(400)
-			return { success: true, data: { generatedCount: 28 }, message: "28 Tagihan berhasil dibuat." }
-		},
-
-		addInvoiceTransaction: async (invoiceId, dto) => {
-			await delay(300)
-			const inv = invoicesList.find((i) => i.id === invoiceId)
-			if (inv) {
-				inv.paidAmount = Math.min(inv.amount, inv.paidAmount + dto.amount)
-				inv.status = inv.paidAmount >= inv.amount ? "PAID" : "PARTIAL"
-				if (!inv.transactions) inv.transactions = []
-				inv.transactions.push({
-					id: Date.now(),
-					amount: dto.amount,
-					paymentMethod: dto.paymentMethod,
-					paidAt: new Date().toISOString(),
-					recordedBy: "Super Administrator",
-				})
-				transactionsList.unshift({
-					id: Date.now(),
-					transactionNumber: `TRX-${Date.now().toString().slice(-6)}`,
-					invoiceNumber: inv.invoiceNumber,
-					studentName: inv.studentName,
-					nis: "202407001",
-					gradeName: inv.gradeName,
-					amount: dto.amount,
-					paymentMethod: dto.paymentMethod as any,
-					cashierName: "Koperasi & Kasir Utama",
-					paidAt: new Date().toISOString(),
-					notes: dto.notes || "Pembayaran Tagihan Kasir",
-				})
-			}
-			return { success: true, data: inv!, message: "Pembayaran tagihan berhasil dicatat." }
-		},
-
-		getStudentTransactions: async (params) => {
-			await delay(200)
-			let filtered = [...transactionsList]
-			if (params?.search) {
-				const q = params.search.toLowerCase()
-				filtered = filtered.filter((t) => t.studentName.toLowerCase().includes(q) || t.transactionNumber.toLowerCase().includes(q) || t.invoiceNumber.toLowerCase().includes(q))
-			}
-			return { success: true, data: { items: filtered, total: filtered.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
 
 		getAlumni: async () => {
 			await delay(200)

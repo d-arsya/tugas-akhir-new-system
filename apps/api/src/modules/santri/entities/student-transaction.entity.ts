@@ -6,10 +6,10 @@ export class StudentTransaction extends BaseEntity {
 	@Column({ name: "student_transaction_code", nullable: true, type: "bigint" })
 	studentTransactionCode: string | null
 
-	@Column({ name: "paid_at", nullable: true, type: "timestamp" })
+	@Column({ name: "paid_at", nullable: true, type: "timestamptz" })
 	paidAt: Date | null
 
-	@Column({ name: "amount", nullable: true, type: "int" })
+	@Column({ name: "amount", nullable: true, type: "bigint" })
 	amount: number | null
 
 	@Column({ name: "desc", nullable: true, type: "varchar" })
@@ -18,8 +18,8 @@ export class StudentTransaction extends BaseEntity {
 	@Column({ name: "note", nullable: true, type: "text" })
 	note: string | null
 
-	@Column({ name: "status", nullable: true, type: "varchar", default: "valid" })
-	status: "valid" | "invalid" | null
+	@Column({ name: "status", type: "text", default: "valid" })
+	status: "valid" | "invalid"
 
 	@Column({ name: "cancel_note", nullable: true, type: "text" })
 	cancelNote: string | null

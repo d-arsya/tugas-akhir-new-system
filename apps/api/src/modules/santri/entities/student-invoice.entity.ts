@@ -3,13 +3,13 @@ import { BaseEntity } from "@core/database/base.entity"
 
 @Entity({ name: "tbr_student_invoices" })
 export class StudentInvoice extends BaseEntity {
-	@Column({ name: "student_id", nullable: true, type: "int" })
+	@Column({ name: "student_id", nullable: true, type: "bigint" })
 	studentId: number | null
 
 	@Column({ name: "name", nullable: true, type: "varchar" })
 	name: string | null
 
-	@Column({ name: "amount", nullable: true, type: "int" })
+	@Column({ name: "amount", nullable: true, type: "bigint" })
 	amount: number | null
 
 	@Column({ name: "status", nullable: true, type: "varchar" })

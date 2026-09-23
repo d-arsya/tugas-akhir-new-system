@@ -45,10 +45,13 @@ export class PaymentHistoryController {
 	})
 	async getInvoiceList(
 		@CurrentUser() user: JwtPayload,
-		@Param("studentId", ParseIntPipe) studentId: number,
+		@Param("studentId", ParseIntPipe) _studentId: number,
 		@Query() query: PaginationQueryDto,
 	) {
-		return this.paymentHistoryService.getInvoiceList(studentId, query.page, query.limit)
+		// The path id is ignored on purpose: it used to be passed straight through, so any
+		// authenticated santri could read another's invoices by editing the URL. The sibling
+		// `getInvoiceDetail` already scopes to `user.sub`; this now matches it.
+		return this.paymentHistoryService.getInvoiceList(user.sub, query.page, query.limit)
 	}
 
 	@Get("invoice/:invoiceId")

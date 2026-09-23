@@ -39,6 +39,19 @@ type LegacyDataTableProps<T> = {
 	frozenColumns?: number
 	/** Legacy adds `.tbr_selected` to checked rows on the Biaya Santri account table. */
 	rowClassName?: (row: T, index: number) => string | undefined
+	/**
+	 * DataTables `language.emptyTable` — shown when the table has no rows at all.
+	 * Legacy sets this per page; only Riwayat Transaksi overrides it in this menu.
+	 */
+	emptyText?: string
+	/** DataTables `language.zeroRecords` — shown when a search matched nothing. */
+	zeroRecordsText?: string
+	/**
+	 * Legacy hides the built-in length/search row with a `dom` string like `<"d-none"lf>`
+	 * when the page renders those controls itself in its own filter row
+	 * (student-transaction/index.blade.php:14-67). Set false to suppress it.
+	 */
+	toolbar?: boolean
 }
 
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
@@ -70,6 +83,9 @@ const LegacyDataTable = <T,>({
 	paging = true,
 	frozenColumns = 0,
 	rowClassName,
+	emptyText = "No data available in table",
+	zeroRecordsText = "No matching records found",
+	toolbar = true,
 }: LegacyDataTableProps<T>): JSX.Element => {
 	const [search, setSearch] = useState(state.search)
 	const seeded = useRef(false)
@@ -110,44 +126,46 @@ const LegacyDataTable = <T,>({
 
 	return (
 		<div className="relative">
-			<div className="mx-[-15px] flex flex-wrap">
-				{/*
-				 * The `dom` string keeps both half-width columns either way, but DataTables' own
-				 * `_fnFeatureHtmlLength` returns `null` when `bPaginate` is off, so the length menu
-				 * itself is never built on a non-paging table (Biaya Santri level 3).
-				 */}
-				<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-left">
-					{paging ? (
-						<label className="mb-[8px] inline-block">
-							<LegacySelect
-								value={String(state.length)}
-								options={LENGTH_OPTIONS}
-								searchable={false}
-								onChange={(value) => onStateChange({ ...state, length: Number(value), page: 1 })}
-								className="mr-[10px] inline-flex w-[75px] rounded-[5px]"
+			{toolbar ? (
+				<div className="mx-[-15px] flex flex-wrap">
+					{/*
+					 * The `dom` string keeps both half-width columns either way, but DataTables' own
+					 * `_fnFeatureHtmlLength` returns `null` when `bPaginate` is off, so the length menu
+					 * itself is never built on a non-paging table (Biaya Santri level 3).
+					 */}
+					<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-left">
+						{paging ? (
+							<label className="mb-[8px] inline-block">
+								<LegacySelect
+									value={String(state.length)}
+									options={LENGTH_OPTIONS}
+									searchable={false}
+									onChange={(value) => onStateChange({ ...state, length: Number(value), page: 1 })}
+									className="mr-[10px] inline-flex w-[75px] rounded-[5px]"
+								/>
+							</label>
+						) : null}
+					</div>
+					<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-right">
+						{/*
+						 * `overflow-hidden` is load-bearing. Bootstrap makes the search `input` `display: block`,
+						 * so legacy's label has no in-flow line box and takes its baseline from its bottom margin
+						 * edge — the strut then hangs 7.41px below it, making the toolbar 15.41px taller than the
+						 * label at every width. Tailwind's preflight leaves the input inline-block, so without this
+						 * the port is 7.4px short: below 993px on every table, and at all widths when paging is off.
+						 */}
+						<label className="mb-[8px] inline-block w-full overflow-hidden min-[992px]:w-1/2">
+							<input
+								type="search"
+								value={search}
+								placeholder="Search"
+								onChange={(event) => setSearch(event.target.value)}
+								className="h-[40px] w-full rounded-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] py-[6px] text-[12px] leading-[22.2px] text-[var(--body-txt-inverse)] outline-none placeholder:text-[var(--grey)] focus:border-[var(--secondary)]! [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
 							/>
 						</label>
-					) : null}
+					</div>
 				</div>
-				<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-right">
-					{/*
-					 * `overflow-hidden` is load-bearing. Bootstrap makes the search `input` `display: block`,
-					 * so legacy's label has no in-flow line box and takes its baseline from its bottom margin
-					 * edge — the strut then hangs 7.41px below it, making the toolbar 15.41px taller than the
-					 * label at every width. Tailwind's preflight leaves the input inline-block, so without this
-					 * the port is 7.4px short: below 993px on every table, and at all widths when paging is off.
-					 */}
-					<label className="mb-[8px] inline-block w-full overflow-hidden min-[992px]:w-1/2">
-						<input
-							type="search"
-							value={search}
-							placeholder="Search"
-							onChange={(event) => setSearch(event.target.value)}
-							className="h-[40px] w-full rounded-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] py-[6px] text-[12px] leading-[22.2px] text-[var(--body-txt-inverse)] outline-none placeholder:text-[var(--grey)] focus:border-[var(--secondary)]! [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
-						/>
-					</label>
-				</div>
-			</div>
+			) : null}
 
 			<div className="w-full overflow-x-auto">
 				<table
@@ -180,7 +198,7 @@ const LegacyDataTable = <T,>({
 						{rows.length === 0 ? (
 							<tr>
 								<td colSpan={columns.length} className="py-[50px] text-center leading-[18px] text-[var(--table-txt-inverse)]">
-									{loaded ? "No matching records found" : ""}
+									{loaded ? (state.search.trim() === "" ? emptyText : zeroRecordsText) : ""}
 								</td>
 							</tr>
 						) : (

@@ -57,6 +57,25 @@ export class StorageService {
 		return `${s3Url}/${this.bucket}/${key}`
 	}
 
+	/**
+	 * The stored object's bytes, or `null` when the key holds nothing. Every other S3 fault — an
+	 * unreachable endpoint, bad credentials, a denied bucket — is thrown, so a caller can tell
+	 * "never uploaded" apart from "storage is down" and decide what to do about each.
+	 */
+	async getBuffer(key: string): Promise<Buffer | null> {
+		try {
+			const result = await this.s3Client.send(
+				new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+			)
+			if (!result.Body) return null
+			return Buffer.from(await result.Body.transformToByteArray())
+		} catch (error) {
+			const name = (error as { name?: string }).name
+			if (name === "NoSuchKey" || name === "NotFound") return null
+			throw error
+		}
+	}
+
 	async getUrl(filePath: string): Promise<string> {
 		if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
 			return filePath

@@ -37,36 +37,6 @@ export interface StudentItem {
 	healthNotes?: string
 }
 
-export interface StudentCapabilityItem {
-	id: number
-	code: string
-	name: string
-	amount: number
-	termName: string
-	assignedStudentsCount: number
-}
-
-export interface StudentInvoiceItem {
-	id: number
-	invoiceNumber: string
-	studentId: number
-	studentName: string
-	gradeName: string
-	costTermName: string
-	amount: number
-	paidAmount: number
-	status: "UNPAID" | "PARTIAL" | "PAID" | "CANCELLED"
-	dueDate: string
-	createdAt: string
-	transactions?: Array<{
-		id: number
-		amount: number
-		paymentMethod: string
-		paidAt: string
-		recordedBy: string
-	}>
-}
-
 export interface AlumniItem {
 	id: number
 	studentId: number
@@ -173,40 +143,6 @@ export interface StudentBulkGraduateDto {
 	destination?: string
 }
 
-export interface StudentCapabilityMatrixItem {
-	studentId: number
-	nis: string
-	fullName: string
-	gradeName: string
-	capabilities: Array<{
-		costItemId: number
-		costName: string
-		nominal: number
-		discountPercent: number
-		finalAmount: number
-	}>
-}
-
-export interface UpdateStudentCapabilityDto {
-	studentId: number
-	costItemId: number
-	discountPercent: number
-}
-
-export interface StudentTransactionItem {
-	id: number
-	transactionNumber: string
-	invoiceNumber: string
-	studentName: string
-	nis: string
-	gradeName: string
-	amount: number
-	paymentMethod: "CASH" | "TRANSFER" | "EWALLET"
-	cashierName: string
-	paidAt: string
-	notes?: string
-}
-
 export interface RegistrantDetailItem extends AdminRegistrantItem {
 	nik?: string
 	nisn?: string
@@ -240,19 +176,6 @@ export interface TopupEwalletDto {
 export interface WithdrawEwalletDto {
 	ewalletAccountId: number
 	amount: number
-	notes?: string
-}
-
-export interface BulkGenerateInvoiceDto {
-
-	gradeName: string
-	costTermName: string
-	dueDate: string
-}
-
-export interface AddInvoiceTransactionDto {
-	amount: number
-	paymentMethod: string
 	notes?: string
 }
 

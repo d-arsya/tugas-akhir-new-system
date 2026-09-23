@@ -3,14 +3,13 @@ import type { AxiosInstance } from "axios"
 import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api"
 import { createAdminMasterApi, type AdminMasterApi } from "./admin-master.api"
 import { createAdminMasterFinanceApi, type AdminMasterFinanceApi } from "./admin-master-finance.api"
+import { createAdminPaymentsApi, type AdminPaymentsApi } from "./admin-payments.api"
 import type {
 	ApiResponse,
 	PaginatedResponse,
 	BannedIpItem,
 	CreateBannedIpDto,
 	StudentItem,
-	StudentCapabilityItem,
-	StudentInvoiceItem,
 	AlumniItem,
 	AdminRegistrantItem,
 	AdminEwalletItem,
@@ -23,13 +22,8 @@ import type {
 	StudentBulkChangeMajorDto,
 	StudentBulkStatusDto,
 	StudentBulkGraduateDto,
-	StudentCapabilityMatrixItem,
-	UpdateStudentCapabilityDto,
-	StudentTransactionItem,
 	TopupEwalletDto,
 	WithdrawEwalletDto,
-	BulkGenerateInvoiceDto,
-	AddInvoiceTransactionDto,
 	ReportOptions,
 	ReportFilterParams,
 	ReportArrearFilterParams,
@@ -58,7 +52,7 @@ export interface AdminLoginResponse {
 	user?: any
 }
 
-export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFinanceApi {
+export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFinanceApi, AdminPaymentsApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -85,13 +79,6 @@ export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFi
 	bulkGraduateStudents(data: StudentBulkGraduateDto): Promise<ApiResponse<{ count: number }>>
 
 	// Student Capability & Invoices
-	getCapabilities(): Promise<ApiResponse<StudentCapabilityItem[]>>
-	getStudentCapabilityMatrix(params?: { academicYearId?: number; gradeId?: number }): Promise<ApiResponse<StudentCapabilityMatrixItem[]>>
-	updateStudentCapability(data: UpdateStudentCapabilityDto): Promise<ApiResponse<{ message: string }>>
-	getInvoices(params?: { search?: string; status?: string; grade?: string; page?: number; limit?: number }): Promise<PaginatedResponse<StudentInvoiceItem>>
-	bulkGenerateInvoices(data: BulkGenerateInvoiceDto): Promise<ApiResponse<{ generatedCount: number }>>
-	addInvoiceTransaction(invoiceId: number, data: AddInvoiceTransactionDto): Promise<ApiResponse<StudentInvoiceItem>>
-	getStudentTransactions(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<StudentTransactionItem>>
 	getAlumni(params?: { search?: string; year?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AlumniItem>>
 
 	// Sprint D: Registrant Admin (PSB)
@@ -159,6 +146,7 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminLainnyaApi(client),
 	...createAdminMasterApi(client),
 	...createAdminMasterFinanceApi(client),
+	...createAdminPaymentsApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
@@ -198,13 +186,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	bulkGraduateStudents: (data) => unwrap(client.post("/admin/students/bulk-graduate", data)),
 	
 
-	getCapabilities: () => unwrap(client.get("/admin/capabilities")),
-	getStudentCapabilityMatrix: (params) => unwrap(client.get("/admin/student-capabilities/matrix", { params })),
-	updateStudentCapability: (data) => unwrap(client.post("/admin/student-capabilities/update", data)),
-	getInvoices: (params) => unwrap(client.get("/admin/invoices", { params })),
-	bulkGenerateInvoices: (data) => unwrap(client.post("/admin/invoices/bulk-generate", data)),
-	addInvoiceTransaction: (invoiceId, data) => unwrap(client.post(`/admin/invoices/${invoiceId}/transactions`, data)),
-	getStudentTransactions: (params) => unwrap(client.get("/admin/student-transactions", { params })),
 	getAlumni: (params) => unwrap(client.get("/admin/alumni", { params })),
 
 	getRegistrants: (params) => unwrap(client.get("/admin/registrants", { params })),

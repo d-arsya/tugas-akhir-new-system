@@ -2,15 +2,11 @@ import type {
 	AuthUser,
 	BannedIpItem,
 	StudentItem,
-	StudentCapabilityItem,
-	StudentInvoiceItem,
 	AlumniItem,
 	AdminRegistrantItem,
 	AdminEwalletItem,
 	BankTransferConfirmationItem,
 	WithdrawalRequestItem,
-	StudentCapabilityMatrixItem,
-	StudentTransactionItem,
 	DashboardStats,
 	DashboardOptions,
 	DashboardChartItem,
@@ -83,45 +79,6 @@ export const mockStudents: StudentItem[] = [
 		fatherName: "Ust. M. Yusuf",
 		motherName: "Siti Aminah",
 		guardianName: "Ust. M. Yusuf",
-	},
-]
-
-export const mockCapabilities: StudentCapabilityItem[] = [
-	{ id: 1, code: "SPP-BULANAN", name: "SPP Syahriah Bulanan", amount: 650000, termName: "Bulanan", assignedStudentsCount: 450 },
-	{ id: 2, code: "DU-TAHUNAN", name: "Daftar Ulang Tahunan", amount: 1500000, termName: "Tahunan", assignedStudentsCount: 450 },
-	{ id: 3, code: "EAGLE-SCOUT", name: "Kegiatan Ekstrakurikuler Pramuka", amount: 150000, termName: "Semesteran", assignedStudentsCount: 120 },
-]
-
-export const mockInvoices: StudentInvoiceItem[] = [
-	{
-		id: 1,
-		invoiceNumber: "INV/2026/09/001",
-		studentId: 1,
-		studentName: "Muhammad Farel Rabbani",
-		gradeName: "Kelas 7",
-		costTermName: "SPP September 2026",
-		amount: 650000,
-		paidAmount: 650000,
-		status: "PAID",
-		dueDate: "2026-09-10",
-		createdAt: "2026-09-01T00:00:00Z",
-		transactions: [
-			{ id: 101, amount: 650000, paymentMethod: "TUNAI_KASIR", paidAt: "2026-09-05T09:30:00Z", recordedBy: "Kasir Utama" },
-		],
-	},
-	{
-		id: 2,
-		invoiceNumber: "INV/2026/09/002",
-		studentId: 2,
-		studentName: "Aisyah Nur Syafiqah",
-		gradeName: "Kelas 7",
-		costTermName: "SPP September 2026",
-		amount: 650000,
-		paidAmount: 0,
-		status: "UNPAID",
-		dueDate: "2026-09-10",
-		createdAt: "2026-09-01T00:00:00Z",
-		transactions: [],
 	},
 ]
 
@@ -210,60 +167,6 @@ export const mockWithdrawals: WithdrawalRequestItem[] = [
 		cashierName: "Koperasi & Kasir Utama",
 		status: "PENDING",
 		requestedAt: "2026-09-14T08:00:00Z",
-	},
-]
-
-export const mockStudentCapabilityMatrix: StudentCapabilityMatrixItem[] = [
-	{
-		studentId: 1,
-		nis: "202407001",
-		fullName: "Muhammad Farel Rabbani",
-		gradeName: "Kelas 7",
-		capabilities: [
-			{ costItemId: 1, costName: "SPP Syahriah", nominal: 650000, discountPercent: 0, finalAmount: 650000 },
-			{ costItemId: 2, costName: "Uang Pangkal", nominal: 3500000, discountPercent: 0, finalAmount: 3500000 },
-			{ costItemId: 3, costName: "Seragam & Kitab", nominal: 1200000, discountPercent: 0, finalAmount: 1200000 },
-		],
-	},
-	{
-		studentId: 2,
-		nis: "202407002",
-		fullName: "Aisyah Nur Syafiqah",
-		gradeName: "Kelas 7",
-		capabilities: [
-			{ costItemId: 1, costName: "SPP Syahriah", nominal: 650000, discountPercent: 50, finalAmount: 325000 },
-			{ costItemId: 2, costName: "Uang Pangkal", nominal: 3500000, discountPercent: 20, finalAmount: 2800000 },
-			{ costItemId: 3, costName: "Seragam & Kitab", nominal: 1200000, discountPercent: 0, finalAmount: 1200000 },
-		],
-	},
-]
-
-export const mockStudentTransactions: StudentTransactionItem[] = [
-	{
-		id: 1,
-		transactionNumber: "TRX-202609-0001",
-		invoiceNumber: "INV/2026/09/001",
-		studentName: "Muhammad Farel Rabbani",
-		nis: "202407001",
-		gradeName: "Kelas 7",
-		amount: 650000,
-		paymentMethod: "CASH",
-		cashierName: "Koperasi & Kasir Utama",
-		paidAt: "2026-09-05T09:30:00Z",
-		notes: "Pembayaran SPP September 2026 Tunai",
-	},
-	{
-		id: 2,
-		transactionNumber: "TRX-202609-0002",
-		invoiceNumber: "INV/2026/09/003",
-		studentName: "Muhammad Farel Rabbani",
-		nis: "202407001",
-		gradeName: "Kelas 7",
-		amount: 1200000,
-		paymentMethod: "EWALLET",
-		cashierName: "Koperasi & Kasir Utama",
-		paidAt: "2026-09-07T14:10:00Z",
-		notes: "Pembayaran Seragam & Kitab via E-Wallet",
 	},
 ]
 

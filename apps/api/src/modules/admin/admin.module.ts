@@ -87,6 +87,13 @@ import { AlumniAdminService } from "@admin/alumni/alumni-admin.service"
 import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
 
 
+import { InvoiceAdminController } from "@admin/payments/invoice-admin.controller"
+import { InvoiceAdminService } from "@admin/payments/invoice-admin.service"
+import { PaymentAdminController } from "@admin/payments/payment-admin.controller"
+import { PaymentAdminService } from "@admin/payments/payment-admin.service"
+import { TransactionAdminController } from "@admin/payments/transaction-admin.controller"
+import { TransactionAdminService } from "@admin/payments/transaction-admin.service"
+
 @Module({
 	imports: [
 		TypeOrmModule.forFeature([
@@ -111,6 +118,9 @@ import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
 		EwalletModule,
 	],
 	controllers: [
+		InvoiceAdminController,
+		PaymentAdminController,
+		TransactionAdminController,
 		AdminAuthController,
 		AdminCreatePasswordController,
 		AdminProfileController,
@@ -138,6 +148,9 @@ import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
 		AlumniAdminController,
 	],
 	providers: [
+		InvoiceAdminService,
+		PaymentAdminService,
+		TransactionAdminService,
 		AdminAuthService,
 		AuthLogWriter,
 		AuthLogScheduler,
