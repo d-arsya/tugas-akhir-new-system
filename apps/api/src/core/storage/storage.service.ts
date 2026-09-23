@@ -42,6 +42,21 @@ export class StorageService {
 		return `${s3Url}/${this.bucket}/${key}`
 	}
 
+	/** Same as `upload`, for callers that hold the bytes rather than a multipart file. */
+	async uploadBuffer(buffer: Buffer, key: string, contentType: string): Promise<string> {
+		await this.s3Client.send(
+			new PutObjectCommand({
+				Bucket: this.bucket,
+				Key: key,
+				Body: buffer,
+				ContentType: contentType,
+			}),
+		)
+
+		const s3Url = (this.configService.get("AWS_S3_URL", { infer: true }) ?? "").replace(/\/+$/, "")
+		return `${s3Url}/${this.bucket}/${key}`
+	}
+
 	async getUrl(filePath: string): Promise<string> {
 		if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
 			return filePath

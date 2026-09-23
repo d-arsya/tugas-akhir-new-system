@@ -4,7 +4,7 @@ import { createPortal } from "react-dom"
 // Port of the legacy PNotify notices (`new PNotify({ title, text, type, width: "340px", animate_speed: "fast" })`)
 
 type NoticeType = "error" | "success"
-type Notice = { id: number; title: string; lines: string[]; type: NoticeType }
+type Notice = { id: number; title: string; lines: string[]; type: NoticeType; delay: number }
 
 // PNotify default delay
 const DISMISS_MS = 8000
@@ -15,8 +15,8 @@ let nextId = 1
 const listeners = new Set<() => void>()
 const emit = (): void => listeners.forEach((listener) => listener())
 
-const push = (type: NoticeType, title: string, lines: string[]): void => {
-	notices = [...notices, { id: nextId++, title, lines, type }]
+const push = (type: NoticeType, title: string, lines: string[], delay: number): void => {
+	notices = [...notices, { id: nextId++, title, lines, type, delay }]
 	emit()
 }
 
@@ -25,10 +25,15 @@ const remove = (id: number): void => {
 	emit()
 }
 
+// Some legacy scripts pass their own `delay` (e.g. `setting/update-status.js` uses 2000)
+type NotifyOptions = { delay?: number }
+
 // Legacy texts use `<br />` between lines
 export const legacyNotify = {
-	error: (lines: string | string[], title = "Gagal!"): void => push("error", title, Array.isArray(lines) ? lines : [lines]),
-	success: (lines: string | string[], title = "Berhasil!"): void => push("success", title, Array.isArray(lines) ? lines : [lines]),
+	error: (lines: string | string[], title = "Gagal!", options?: NotifyOptions): void =>
+		push("error", title, Array.isArray(lines) ? lines : [lines], options?.delay ?? DISMISS_MS),
+	success: (lines: string | string[], title = "Berhasil!", options?: NotifyOptions): void =>
+		push("success", title, Array.isArray(lines) ? lines : [lines], options?.delay ?? DISMISS_MS),
 }
 
 const CONTAINER_TYPE: Record<NoticeType, string> = {
@@ -60,7 +65,7 @@ const NoticeCard = ({ notice }: { notice: Notice }): JSX.Element => {
 	// PNotify `mouse_reset`: hovering restarts the countdown
 	useEffect(() => {
 		if (hovered) return undefined
-		timer.current = window.setTimeout(close, DISMISS_MS)
+		timer.current = window.setTimeout(close, notice.delay)
 		return () => window.clearTimeout(timer.current)
 	}, [hovered])
 

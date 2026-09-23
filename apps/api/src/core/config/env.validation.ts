@@ -38,6 +38,18 @@ export const EnvSchema = z.object({
 	MAIL_FROM_ADDRESS: z.string().email().optional(),
 	MAIL_SERVICE: z.string().url().optional(),
 	MAIL_API_KEY: z.string().optional(),
+	// Legacy `config('app.name')`: used for the database backup file name
+	APP_NAME: z.string().default("ROJA"),
+	// Lets a local/test instance run without the cron jobs (auth-log close, database backup)
+	SCHEDULER_ENABLED: z
+		.preprocess((val) => {
+			if (typeof val === "string") {
+				const lower = val.toLowerCase().trim()
+				return lower === "true" || lower === "1"
+			}
+			return val === undefined ? true : Boolean(val)
+		}, z.boolean())
+		.default(true),
 })
 
 export type Env = z.infer<typeof EnvSchema>

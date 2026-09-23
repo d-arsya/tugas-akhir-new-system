@@ -7,14 +7,12 @@ import * as crypto from "crypto"
 import { Repository } from "typeorm"
 import { RedisService } from "@core/redis/redis.service"
 import { MailerService } from "@core/mailer/mailer.service"
+import { AuthLogWriter } from "@admin/auth/auth-log.writer"
 import { User } from "@admin/entities/user.entity"
-import { AuthLog } from "@admin/entities/auth-log.entity"
 import type { Env } from "@core/config/env.validation"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import type {
 	AdminLoginDto,
-	ChangePasswordDto,
-	UpdateProfileDto,
 	AdminForgotPasswordDto,
 	AdminResetPasswordDto,
 	AdminTwoFactorDto,
@@ -40,38 +38,78 @@ export class AdminAuthService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-		@InjectRepository(AuthLog)
-		private readonly authLogRepository: Repository<AuthLog>,
 		private readonly jwtService: JwtService,
 		private readonly configService: ConfigService<Env, true>,
 		private readonly redisService: RedisService,
 		private readonly mailerService: MailerService,
+		private readonly authLogWriter: AuthLogWriter,
 	) {}
 
 	async login(dto: AdminLoginDto, clientIp: string, userAgent?: string): Promise<AdminAuthResult> {
 		const user = await this.userRepository.findOneBy({ email: dto.email })
 		if (!user || !user.password) {
-			await this.recordAuthLog(null, dto.email, clientIp, userAgent, "Failed")
+			// Legacy `LogFailedLogin` stores "-" when the email does not belong to a user
+			await this.authLogWriter.open({
+				userId: null,
+				email: "-",
+				ipAddress: clientIp,
+				userAgent,
+				status: "Failed",
+			})
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
 		const dbHash = user.password.trim().replace(/^\$2y\$/, "$2b$")
 		const isPasswordValid = await bcrypt.compare(dto.password, dbHash)
 		if (!isPasswordValid) {
-			await this.recordAuthLog(user.id, dto.email, clientIp, userAgent, "Failed")
+			await this.authLogWriter.open({
+				userId: user.id,
+				email: user.email,
+				ipAddress: clientIp,
+				userAgent,
+				status: "Failed",
+			})
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
 		if (user.isBlocked) {
-			await this.recordAuthLog(user.id, dto.email, clientIp, userAgent, "Failed")
+			await this.authLogWriter.open({
+				userId: user.id,
+				email: user.email,
+				ipAddress: clientIp,
+				userAgent,
+				status: "Failed",
+			})
 			throw new ForbiddenException("Akun admin Anda saat ini sedang nonaktif atau diblokir.")
 		}
 
+		return this.issueSession(user, clientIp, userAgent, dto.rememberMe)
+	}
+
+	/**
+	 * Creates the tokens and the "Logged In" row for every entry point that starts a session
+	 * (login, 2FA verify, create-password), with the token id kept as the session id.
+	 */
+	async issueSession(
+		user: User,
+		clientIp: string,
+		userAgent?: string,
+		rememberMe?: boolean,
+	): Promise<AdminAuthResult> {
 		const tokens = await this.generateTokens(user)
-		await this.recordAuthLog(user.id, user.email, clientIp, userAgent, "Logged In")
+		await this.authLogWriter.open({
+			userId: user.id,
+			email: user.email,
+			ipAddress: clientIp,
+			userAgent,
+			sessionId: tokens.tokenId,
+			rememberMe,
+			status: "Logged In",
+		})
 
 		return {
-			...tokens,
+			accessToken: tokens.accessToken,
+			refreshToken: tokens.refreshToken,
 			user: {
 				id: user.id,
 				name: user.name,
@@ -95,19 +133,7 @@ export class AdminAuthService {
 			throw new UnauthorizedException("Akun tidak ditemukan atau diblokir.")
 		}
 
-		const tokens = await this.generateTokens(user)
-		await this.recordAuthLog(user.id, user.email, clientIp, userAgent, "Logged In")
-
-		return {
-			...tokens,
-			user: {
-				id: user.id,
-				name: user.name,
-				email: user.email,
-				role: user.role,
-				gender: user.gender,
-			},
-		}
+		return this.issueSession(user, clientIp, userAgent)
 	}
 
 	async resendTwoFactor(adminId: number): Promise<{ message: string }> {
@@ -186,8 +212,12 @@ export class AdminAuthService {
 		}
 
 		const tokens = await this.generateTokens(user)
+		// The open auth-log row is keyed by the token id, so it follows the rotation
+		await this.authLogWriter.rotateSession(payload.tokenId, tokens.tokenId)
+
 		return {
-			...tokens,
+			accessToken: tokens.accessToken,
+			refreshToken: tokens.refreshToken,
 			user: {
 				id: user.id,
 				name: user.name,
@@ -198,51 +228,18 @@ export class AdminAuthService {
 		}
 	}
 
-	async logout(userId: number, tokenId?: string, clientIp?: string, userAgent?: string): Promise<{ success: boolean; message: string }> {
+	async logout(userId: number, tokenId?: string, _clientIp?: string, _userAgent?: string): Promise<{ success: boolean; message: string }> {
 		if (tokenId) {
 			await this.redisService.revokeRefreshToken("admin", userId, tokenId)
 		}
-		const user = await this.userRepository.findOneBy({ id: userId })
-		if (user) {
-			await this.recordAuthLog(user.id, user.email, clientIp ?? "", userAgent, "Logged Out")
-		}
+		// Legacy closes the row of the current session instead of adding a new one
+		await this.authLogWriter.close(tokenId, userId)
 		return { success: true, message: "Berhasil keluar dari sistem admin." }
 	}
 
-	async getProfile(userId: number): Promise<User> {
-		const user = await this.userRepository.findOneBy({ id: userId })
-		if (!user) throw new BadRequestException("User admin tidak ditemukan.")
-		return user
-	}
-
-	async updateProfile(userId: number, dto: UpdateProfileDto): Promise<User> {
-		const user = await this.getProfile(userId)
-		if (dto.email && dto.email !== user.email) {
-			const existing = await this.userRepository.findOneBy({ email: dto.email })
-			if (existing) throw new BadRequestException("Email sudah digunakan oleh pengguna lain.")
-		}
-
-		user.name = dto.name ?? user.name
-		user.email = dto.email ?? user.email
-		if (dto.gender !== undefined) user.gender = dto.gender
-
-		return this.userRepository.save(user)
-	}
-
-	async changePassword(userId: number, dto: ChangePasswordDto): Promise<{ success: boolean; message: string }> {
-		const user = await this.getProfile(userId)
-		const dbHash = user.password?.trim().replace(/^\$2y\$/, "$2b$") ?? ""
-		const isValid = await bcrypt.compare(dto.currentPassword, dbHash)
-		if (!isValid) throw new BadRequestException("Password saat ini salah.")
-
-		user.password = await bcrypt.hash(dto.newPassword, 10)
-		user.weakPassword = dto.newPassword.length < 8
-		await this.userRepository.save(user)
-
-		return { success: true, message: "Password berhasil diperbarui." }
-	}
-
-	private async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+	private async generateTokens(
+		user: User,
+	): Promise<{ accessToken: string; refreshToken: string; tokenId: string }> {
 		const tokenId = crypto.randomUUID()
 		const payload: JwtPayload = {
 			sub: user.id,
@@ -265,24 +262,6 @@ export class AdminAuthService {
 		// Store refresh token in Redis (7 days = 604800 seconds)
 		await this.redisService.storeRefreshToken("admin", user.id, tokenId, 604800)
 
-		return { accessToken, refreshToken }
-	}
-
-	private async recordAuthLog(userId: number | null, email: string | null, ipAddress: string, userAgent?: string, status: "Logged In" | "Failed" | "Logged Out" = "Logged In"): Promise<void> {
-		try {
-			const log = this.authLogRepository.create({
-				userId,
-				email,
-				ipAddress,
-				userAgent: userAgent ?? null,
-				guard: "admin",
-				loginAt: status === "Logged In" ? new Date() : null,
-				logoutAt: status === "Logged Out" ? new Date() : null,
-				loginStatus: status,
-			})
-			await this.authLogRepository.save(log)
-		} catch (err) {
-			console.error("[AuthLog Error]", err)
-		}
+		return { accessToken, refreshToken, tokenId }
 	}
 }

@@ -1,134 +1,42 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useForm } from "react-hook-form"
-import { adminApi } from "@/lib/api"
-import { RojaCard, Button, Input, Label, PageLoader } from "@roja/ui"
-import { AdminPageHeader } from "@/components/layout/admin-page-header"
-import { toast } from "sonner"
-import { UserCheck, KeyRound } from "lucide-react"
 
+import AdminPageTitle from "@/components/layout/admin-page-title"
+import LegacyCard from "@/components/legacy/legacy-card"
+import MyProfileForm from "@/components/settings/my-profile/my-profile-form"
+import { useMyProfile, useRefetchMyProfile } from "@/hooks/use-my-profile"
+import useAuthStore from "@/stores/auth.store"
+
+// WS-B: legacy setting/my-profile.blade.php + password-meter.js
 export const Route = createFileRoute("/_auth/my-profile")({
 	component: MyProfilePage,
 })
 
 function MyProfilePage(): JSX.Element {
-	const queryClient = useQueryClient()
+	const { data: profile } = useMyProfile()
+	const refetch = useRefetchMyProfile()
 
-	const { data: user, isLoading } = useQuery({
-		queryKey: ["admin-my-profile"],
-		queryFn: () => adminApi.getMyProfile(),
-	})
-
-	const profileForm = useForm({
-		values: {
-			name: user?.name || "",
-			email: user?.email || "",
-			phone: user?.phone || "",
-		},
-	})
-
-	const passwordForm = useForm({
-		defaultValues: {
-			currentPassword: "",
-			newPassword: "",
-			confirmPassword: "",
-		},
-	})
-
-	const updateProfileMutation = useMutation({
-		mutationFn: (values: { name: string; email: string; phone: string }) => adminApi.updateMyProfile(values),
-		onSuccess: (res) => {
-			toast.success(res.message || "Profil berhasil diperbarui.")
-			queryClient.invalidateQueries({ queryKey: ["admin-my-profile"] })
-		},
-		onError: (err: any) => toast.error(err.message || "Gagal memperbarui profil."),
-	})
-
-	const changePasswordMutation = useMutation({
-		mutationFn: (values: any) => {
-			if (values.newPassword !== values.confirmPassword) {
-				throw new Error("Konfirmasi kata sandi baru tidak cocok.")
-			}
-			return adminApi.changePassword(values.currentPassword, values.newPassword)
-		},
-		onSuccess: (res) => {
-			toast.success(res.message || "Kata sandi berhasil diperbarui.")
-			passwordForm.reset()
-		},
-		onError: (err: any) => toast.error(err.message || "Gagal memperbarui kata sandi."),
-	})
-
-	if (isLoading) return <PageLoader />
+	// Legacy reloads the page, which redraws the header with the new name
+	const onSaved = (name: string): void => {
+		const { user, login } = useAuthStore.getState()
+		if (user) login({ ...user, name })
+		refetch()
+	}
 
 	return (
-		<div className="space-y-6">
-			<AdminPageHeader
-				title="Profil Saya"
-				subtitle="Pengaturan data akun pribadi dan pembaruan kredensial keamanan login."
-			/>
+		<>
+			<AdminPageTitle title="Profil Saya" breadcrumbs={[{ label: "Lainnya" }, { label: "Pengaturan" }, { label: "Profil Saya" }]} />
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				{/* Profile Info Form */}
-				<RojaCard title="Informasi Identitas" className="space-y-4 border-0 shadow-xs bg-white">
-					<form onSubmit={profileForm.handleSubmit((val) => updateProfileMutation.mutate(val))} className="space-y-4">
-						<div className="space-y-1.5">
-							<Label htmlFor="name">Nama Lengkap</Label>
-							<Input id="name" {...profileForm.register("name", { required: true })} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="space-y-1.5">
-							<Label htmlFor="email">Alamat Email</Label>
-							<Input id="email" type="email" {...profileForm.register("email", { required: true })} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="space-y-1.5">
-							<Label htmlFor="phone">Nomor Telepon / WhatsApp</Label>
-							<Input id="phone" {...profileForm.register("phone")} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="space-y-1.5">
-							<Label>Hak Akses / Peran</Label>
-							<Input value={user?.role || "ADMIN"} disabled className="bg-slate-100 font-semibold text-slate-700 border-0" />
-						</div>
-
-						<div className="pt-2">
-							<Button type="submit" className="bg-[var(--primary)] text-white gap-2 border-0" disabled={updateProfileMutation.isPending}>
-								<UserCheck className="w-4 h-4" />
-								<span>{updateProfileMutation.isPending ? "Menyimpan..." : "Simpan Profil"}</span>
-							</Button>
-						</div>
-					</form>
-				</RojaCard>
-
-				{/* Password Change Form */}
-				<RojaCard title="Ganti Kata Sandi" className="space-y-4 border-0 shadow-xs bg-white">
-					<form onSubmit={passwordForm.handleSubmit((val) => changePasswordMutation.mutate(val))} className="space-y-4">
-						<div className="space-y-1.5">
-							<Label htmlFor="currentPassword">Kata Sandi Saat Ini</Label>
-							<Input id="currentPassword" type="password" {...passwordForm.register("currentPassword", { required: true })} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="space-y-1.5">
-							<Label htmlFor="newPassword">Kata Sandi Baru</Label>
-							<Input id="newPassword" type="password" {...passwordForm.register("newPassword", { required: true, minLength: 6 })} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="space-y-1.5">
-							<Label htmlFor="confirmPassword">Konfirmasi Kata Sandi Baru</Label>
-							<Input id="confirmPassword" type="password" {...passwordForm.register("confirmPassword", { required: true })} className="bg-slate-50 border-0" />
-						</div>
-
-						<div className="pt-2">
-							<Button type="submit" className="bg-slate-800 hover:bg-slate-900 text-white gap-2 border-0" disabled={changePasswordMutation.isPending}>
-								<KeyRound className="w-4 h-4" />
-								<span>{changePasswordMutation.isPending ? "Memproses..." : "Ganti Kata Sandi"}</span>
-							</Button>
-						</div>
-					</form>
-				</RojaCard>
+			{/* `.row.justify-content-center > .col-xl-9.col-lg-10.col-md-12.col-sm-12.col-12` */}
+			<div className="mx-[-15px] flex flex-wrap justify-center">
+				<div className="relative w-full max-w-full flex-[0_0_100%] px-[15px] min-[992px]:max-w-[83.333333%] min-[992px]:flex-[0_0_83.333333%] min-[1200px]:max-w-[75%] min-[1200px]:flex-[0_0_75%]">
+					{/* `.card-body.p-4.px-lg-5` */}
+					<LegacyCard bodyClassName="p-[24px] min-[992px]:px-[48px]">
+						<MyProfileForm profile={profile} onSaved={onSaved} />
+					</LegacyCard>
+				</div>
 			</div>
-		</div>
+		</>
 	)
 }
 

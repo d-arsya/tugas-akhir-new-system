@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX } from "react"
+import { Fragment, useEffect, useRef, useState, type JSX } from "react"
 
 import { cn } from "@roja/utils"
 
@@ -13,6 +13,8 @@ type LegacyDateRangeProps = {
 	from: string
 	to: string
 	onChange: (from: string, to: string) => void
+	// `span.tbr_ig_center` between the two inputs ("Sampai" on the Pengumuman PSB form)
+	middleLabel?: string
 }
 
 const CalendarIcon = (): JSX.Element => (
@@ -34,7 +36,7 @@ const INPUT_CLASS =
 	"relative h-[40px] w-0 min-w-0 flex-1 rounded-none border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] py-[6px] text-center text-[12px] leading-[22.2px] text-[var(--body-txt-inverse)] outline-none focus:z-[3] focus:border-[var(--secondary)]!"
 
 // Port of the legacy `.input-daterange` + bootstrap-datepicker (`format: "dd/mm/yyyy"`, `language: "id"`, no autoclose)
-const LegacyDateRange = ({ from, to, onChange }: LegacyDateRangeProps): JSX.Element => {
+const LegacyDateRange = ({ from, to, onChange, middleLabel }: LegacyDateRangeProps): JSX.Element => {
 	const [open, setOpen] = useState<Side | null>(null)
 	// Text being typed; committed values come from props
 	const [drafts, setDrafts] = useState<[string, string]>([from, to])
@@ -84,21 +86,32 @@ const LegacyDateRange = ({ from, to, onChange }: LegacyDateRangeProps): JSX.Elem
 					<CalendarIcon />
 				</span>
 				{([0, 1] as const).map((side) => (
-					<input
-						key={side}
-						ref={inputs[side]}
-						type="text"
-						autoComplete="off"
-						value={drafts[side]}
-						onFocus={() => setOpen(side)}
-						onClick={() => setOpen(side)}
-						onChange={(event) => onType(side, event.target.value)}
-						onBlur={() => onBlur(side)}
-						onKeyDown={(event) => {
-							if (event.key === "Escape" || event.key === "Tab") setOpen(null)
-						}}
-						className={cn(INPUT_CLASS, side === 1 && "ml-[-1px] rounded-r-[6px]")}
-					/>
+					<Fragment key={side}>
+						{/* `.tbr_ig_center` (form.css 235-244): top and bottom borders only, 16px of padding */}
+						{side === 1 && middleLabel !== undefined ? (
+							<span className="flex items-center border-y-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] text-[var(--grey)]">
+								{middleLabel}
+							</span>
+						) : null}
+						<input
+							ref={inputs[side]}
+							type="text"
+							autoComplete="off"
+							value={drafts[side]}
+							onFocus={() => setOpen(side)}
+							onClick={() => setOpen(side)}
+							onChange={(event) => onType(side, event.target.value)}
+							onBlur={() => onBlur(side)}
+							onKeyDown={(event) => {
+								if (event.key === "Escape" || event.key === "Tab") setOpen(null)
+							}}
+							className={cn(
+								INPUT_CLASS,
+								// `.tbr_last_input` (form.css 379-381); with no middle label the two inputs simply abut
+								side === 1 && (middleLabel === undefined ? "ml-[-1px] rounded-r-[6px]" : "rounded-r-[6px]"),
+							)}
+						/>
+					</Fragment>
 				))}
 			</div>
 			{open !== null ? (

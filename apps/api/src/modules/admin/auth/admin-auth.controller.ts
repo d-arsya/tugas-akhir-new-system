@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Ip, Param, ParseIntPipe, Patch, Post, Res, UseGuards } from "@nestjs/common"
+import { Body, Controller, Headers, Ip, Param, ParseIntPipe, Post, Res, UseGuards } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger"
 import type { Response } from "express"
@@ -8,17 +8,14 @@ import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decora
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import { AdminAuthService, type AdminAuthResult } from "@admin/auth/admin-auth.service"
-import type { User } from "@admin/entities/user.entity"
+import { clearAuthCookies, setAuthCookies } from "@admin/auth/admin-auth-cookies"
 import {
 	AdminLoginDto,
-	ChangePasswordDto,
-	UpdateProfileDto,
 	AdminAuthResultDto,
 	AdminForgotPasswordDto,
 	AdminResetPasswordDto,
 	AdminTwoFactorDto,
 } from "@admin/dto/admin-auth.dto"
-import { UserResponseDto } from "@admin/dto/user-management.dto"
 import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
 import { AdminJwtRefreshGuard } from "@admin/guards/admin-jwt-refresh.guard"
 
@@ -29,30 +26,6 @@ export class AdminAuthController {
 		private readonly adminAuthService: AdminAuthService,
 		private readonly configService: ConfigService,
 	) {}
-
-	private setAuthCookies(res: Response, accessToken?: string, refreshToken?: string) {
-		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
-		const isProd = process.env["NODE_ENV"] === "production"
-
-		if (accessToken) {
-			res.cookie("access_token", accessToken, {
-				httpOnly: true,
-				secure: isProd,
-				sameSite: isProd ? "strict" : "lax",
-				...(rawDomain ? { domain: rawDomain } : {}),
-				maxAge: 15 * 60 * 1000,
-			})
-		}
-		if (refreshToken) {
-			res.cookie("refresh_token", refreshToken, {
-				httpOnly: true,
-				secure: isProd,
-				sameSite: isProd ? "strict" : "lax",
-				...(rawDomain ? { domain: rawDomain } : {}),
-				maxAge: 7 * 24 * 60 * 60 * 1000,
-			})
-		}
-	}
 
 	@Public()
 	@Post("login")
@@ -68,7 +41,7 @@ export class AdminAuthController {
 	): Promise<AdminAuthResult> {
 		const result = await this.adminAuthService.login(dto, ip, userAgent)
 		if (result.accessToken) {
-			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+			setAuthCookies(response, this.configService, result.accessToken, result.refreshToken)
 		}
 		return result
 	}
@@ -86,7 +59,7 @@ export class AdminAuthController {
 	): Promise<AdminAuthResult> {
 		const result = await this.adminAuthService.verifyTwoFactor(dto, ip, userAgent)
 		if (result.accessToken) {
-			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+			setAuthCookies(response, this.configService, result.accessToken, result.refreshToken)
 		}
 		return result
 	}
@@ -127,7 +100,7 @@ export class AdminAuthController {
 	): Promise<AdminAuthResult> {
 		const result = await this.adminAuthService.refreshToken(user)
 		if (result.accessToken) {
-			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+			setAuthCookies(response, this.configService, result.accessToken, result.refreshToken)
 		}
 		return result
 	}
@@ -143,42 +116,7 @@ export class AdminAuthController {
 		@Headers("user-agent") userAgent: string,
 		@Res({ passthrough: true }) response: Response,
 	) {
-		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
-		response.clearCookie("access_token", rawDomain ? { domain: rawDomain } : undefined)
-		response.clearCookie("refresh_token", rawDomain ? { domain: rawDomain } : undefined)
+		clearAuthCookies(response, this.configService)
 		return this.adminAuthService.logout(user.sub, user.tokenId, ip, userAgent)
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth("JWT-Auth")
-	@Get("profile")
-	@ApiOperation({ summary: "Get profil admin yang sedang login" })
-	@ApiResponseWrapped({ status: 200, description: "Detail profil admin", type: UserResponseDto })
-	async getProfile(@CurrentUser() user: JwtPayload): Promise<User> {
-		return this.adminAuthService.getProfile(user.sub)
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth("JWT-Auth")
-	@Patch("profile")
-	@ApiOperation({ summary: "Update profil admin yang sedang login" })
-	@ApiResponseWrapped({ status: 200, description: "Profil berhasil diupdate", type: UserResponseDto })
-	async updateProfile(
-		@CurrentUser() user: JwtPayload,
-		@Body() dto: UpdateProfileDto,
-	): Promise<User> {
-		return this.adminAuthService.updateProfile(user.sub, dto)
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@ApiBearerAuth("JWT-Auth")
-	@Post("change-password")
-	@ApiOperation({ summary: "Ubah password admin yang sedang login" })
-	@ApiResponseWrapped({ status: 200, description: "Password berhasil diubah", type: AdminMessageResponseDto })
-	async changePassword(
-		@CurrentUser() user: JwtPayload,
-		@Body() dto: ChangePasswordDto,
-	) {
-		return this.adminAuthService.changePassword(user.sub, dto)
 	}
 }

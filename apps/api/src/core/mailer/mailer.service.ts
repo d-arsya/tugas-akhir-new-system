@@ -264,4 +264,17 @@ export class MailerService implements OnModuleInit {
 			context: data,
 		})
 	}
+
+	/** Legacy `CreatePasswordNotification`: sent when an admin account is created without a password. */
+	async sendCreatePassword(
+		to: string,
+		data: { name: string; role: string; school: string; createUrl: string },
+	): Promise<void> {
+		await this.sendMail({
+			to,
+			subject: `${data.school} - Anda telah didaftarkan sebagai admin`,
+			template: "create-password",
+			context: { ...data, year: new Date().getFullYear() },
+		})
+	}
 }

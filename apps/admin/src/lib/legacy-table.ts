@@ -13,8 +13,15 @@ export const clientTable = <T>(
 	text: (row: T, key: string) => string,
 	searchKeys: string[],
 ): { rows: T[]; total: number } => {
-	const query = state.search.trim().toLowerCase()
-	const filtered = query ? rows.filter((row) => searchKeys.some((key) => text(row, key).toLowerCase().includes(query))) : rows
+	// DataTables smart search: the term is split on whitespace and every word must show up somewhere in the row
+	const words = state.search.trim().toLowerCase().split(/\s+/).filter((word) => word !== "")
+	const filtered =
+		words.length > 0
+			? rows.filter((row) => {
+					const cells = searchKeys.map((key) => text(row, key).toLowerCase())
+					return words.every((word) => cells.some((cell) => cell.includes(word)))
+				})
+			: rows
 	const sort = state.sort
 	const ordered = sort
 		? [...filtered].sort(

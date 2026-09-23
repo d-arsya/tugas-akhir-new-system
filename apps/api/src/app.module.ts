@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common"
+import { ScheduleModule } from "@nestjs/schedule"
 import { CoreModule } from "@core/core.module"
 import { IpBanMiddleware } from "@core/ip-ban/ip-ban.middleware"
 import { EwalletModule } from "@ewallet/ewallet.module"
@@ -13,6 +14,8 @@ import { LocationModule } from "@shared/location/location.module"
 
 @Module({
 	imports: [
+		// Cron jobs (auth-log close, database backup) — each one checks SCHEDULER_ENABLED before it runs
+		ScheduleModule.forRoot(),
 		CoreModule,
 		LocationModule,
 		SchoolModule,

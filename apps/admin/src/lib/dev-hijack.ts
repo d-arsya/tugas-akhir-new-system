@@ -1,7 +1,6 @@
 import type { AdminApi, AdminLoginDto, AdminLoginResponse } from "@roja/api-client"
 import { getRuntimeEnv } from "@roja/utils"
 import type {
-	AdminUserItem,
 	StudentItem,
 	StudentCapabilityItem,
 	StudentInvoiceItem,
@@ -17,12 +16,8 @@ import type {
 } from "@roja/types"
 import {
 	hijackAuthUser,
-	mockAdminUsers,
-	mockAuthLogs,
+	mockLoginUsers,
 	mockBannedIps,
-	mockSchoolSettings,
-	mockAnnouncements,
-	mockFormConfig,
 	mockAcademicYears,
 	mockLevels,
 	mockMajors,
@@ -51,6 +46,10 @@ import {
 	mockReportIncomeRecap,
 	mockReportOptions,
 } from "./dev-hijack.report-fixtures"
+import { formHijack } from "./dev-hijack.form"
+import { settingsHijack } from "./dev-hijack.settings"
+import { systemHijack } from "./dev-hijack.system"
+import { usersHijack } from "./dev-hijack.users"
 
 export { hijackAuthUser }
 
@@ -69,12 +68,7 @@ const REPORT_FILE_NAMES = {
 
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 
-let usersList: AdminUserItem[] = [...mockAdminUsers]
-let authLogsList = [...mockAuthLogs]
 let bannedIpsList = [...mockBannedIps]
-let announcementsList = [...mockAnnouncements]
-let schoolSettingsState = { ...mockSchoolSettings }
-let formConfigState = { ...mockFormConfig }
 
 let academicYearsList = [...mockAcademicYears]
 let levelsList = [...mockLevels]
@@ -99,12 +93,17 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 	if (!IS_DEV_HIJACK) return realApi
 
 	return {
+		...usersHijack,
+		...settingsHijack,
+		...formHijack,
+		...systemHijack,
+
 		login: async (data: AdminLoginDto): Promise<AdminLoginResponse> => {
 			await delay(300)
 			if (data.email.includes("2fa")) {
 				return { requires2fa: true, adminId: 1, email: data.email }
 			}
-			const matchedUser = usersList.find((u) => u.email === data.email) || mockAdminUsers[0]!
+			const matchedUser = mockLoginUsers.find((u) => u.email === data.email) || mockLoginUsers[0]!
 			return {
 				requires2fa: false,
 				accessToken: "mock-admin-access-token",
@@ -121,7 +120,7 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 
 		verify2fa: async (_code: string, adminId: number): Promise<AdminLoginResponse> => {
 			await delay(300)
-			const matchedUser = usersList.find((u) => u.id === adminId) || mockAdminUsers[0]!
+			const matchedUser = mockLoginUsers.find((u) => u.id === adminId) || mockLoginUsers[0]!
 			return {
 				requires2fa: false,
 				accessToken: "mock-admin-access-token-2fa",
@@ -154,23 +153,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 		logout: async () => {
 			await delay(150)
 			return { message: "Berhasil keluar dari sesi Admin." }
-		},
-
-		getMyProfile: async (): Promise<AdminUserItem> => {
-			await delay(200)
-			return usersList[0] || mockAdminUsers[0]!
-		},
-
-		updateMyProfile: async (data) => {
-			await delay(300)
-			const target = usersList[0] || mockAdminUsers[0]!
-			Object.assign(target, data)
-			return { message: "Profil berhasil diperbarui." }
-		},
-
-		changePassword: async () => {
-			await delay(300)
-			return { message: "Kata sandi Anda berhasil diperbarui." }
 		},
 
 		getDashboardStats: async (params) => {
@@ -219,68 +201,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { blob: new Blob([`dev mock export: ${kind}`]), fileName: REPORT_FILE_NAMES[kind] }
 		},
 
-		getUsers: async (params) => {
-			await delay(200)
-			let filtered = [...usersList]
-			if (params?.search) {
-				const q = params.search.toLowerCase()
-				filtered = filtered.filter((u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
-			}
-			if (params?.role) {
-				filtered = filtered.filter((u) => u.role === params.role)
-			}
-			return {
-				success: true,
-				data: { items: filtered, total: filtered.length, page: params?.page || 1, limit: params?.limit || 10, lastPage: 1 },
-				message: "Users retrieved successfully",
-			}
-		},
-
-		createUser: async (dto) => {
-			await delay(300)
-			const newUser: AdminUserItem = {
-				id: Date.now(),
-				name: dto.name,
-				email: dto.email,
-				role: dto.role,
-				phone: dto.phone || "-",
-				isActive: true,
-				twoFactorEnabled: false,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			}
-			usersList.unshift(newUser)
-			return { success: true, data: newUser, message: "Pengguna baru berhasil ditambahkan." }
-		},
-
-		updateUser: async (id, dto) => {
-			await delay(250)
-			const user = usersList.find((u) => u.id === id)
-			if (user) Object.assign(user, dto, { updatedAt: new Date().toISOString() })
-			return { success: true, data: user!, message: "Data pengguna berhasil diperbarui." }
-		},
-
-		toggleUserStatus: async (id, isActive) => {
-			await delay(200)
-			const user = usersList.find((u) => u.id === id)
-			if (user) user.isActive = isActive
-			return { success: true, data: { message: `Status pengguna berhasil diubah menjadi ${isActive ? "Aktif" : "Non-aktif"}.` }, message: "OK" }
-		},
-
-		getAuthLogs: async (params) => {
-			await delay(200)
-			let filtered = [...authLogsList]
-			if (params?.search) {
-				const q = params.search.toLowerCase()
-				filtered = filtered.filter((l) => l.userName.toLowerCase().includes(q) || l.ipAddress.includes(q))
-			}
-			return {
-				success: true,
-				data: { items: filtered, total: filtered.length, page: 1, limit: 10, lastPage: 1 },
-				message: "Logs retrieved successfully",
-			}
-		},
-
 		getBannedIps: async (params) => {
 			await delay(200)
 			let filtered = [...bannedIpsList]
@@ -313,59 +233,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { success: true, data: { message: "Blokir IP berhasil dihapus." }, message: "OK" }
 		},
 
-		getSchoolSettings: async () => {
-			await delay(200)
-			return { success: true, data: schoolSettingsState, message: "OK" }
-		},
-
-		updateSchoolSettings: async (data) => {
-			await delay(300)
-			schoolSettingsState = { ...data }
-			return { success: true, data: { message: "Profil sekolah berhasil disimpan." }, message: "OK" }
-		},
-
-		getAnnouncements: async () => {
-			await delay(200)
-			return { success: true, data: announcementsList, message: "OK" }
-		},
-
-		createAnnouncement: async (dto) => {
-			await delay(300)
-			const item: any = { id: Date.now(), ...dto, isActive: dto.isActive ?? true, createdAt: new Date().toISOString() }
-			announcementsList.unshift(item)
-			return { success: true, data: item, message: "Pengumuman berhasil dibuat." }
-		},
-
-		updateAnnouncement: async (id, dto) => {
-			await delay(250)
-			const item = announcementsList.find((a) => a.id === id)
-			if (item) Object.assign(item, dto)
-			return { success: true, data: item!, message: "Pengumuman diperbarui." }
-		},
-
-		deleteAnnouncement: async (id) => {
-			await delay(200)
-			announcementsList = announcementsList.filter((a) => a.id !== id)
-			return { success: true, data: { message: "Pengumuman dihapus." }, message: "OK" }
-		},
-
-		getFormConfig: async () => {
-			await delay(200)
-			return { success: true, data: formConfigState, message: "OK" }
-		},
-
-		updateFormConfig: async (data) => {
-			await delay(250)
-			Object.assign(formConfigState, data)
-			return { success: true, data: { message: "Konfigurasi formulir PSB disimpan." }, message: "OK" }
-		},
-
-		toggle2faSystem: async (enabled) => {
-			await delay(200)
-			return { success: true, data: { message: `2FA sistem ${enabled ? "diaktifkan" : "dinonaktifkan"}.` }, message: "OK" }
-		},
-
-		// Academic Structure (Sprint B)
 		getAcademicYears: async () => {
 			await delay(200)
 			return { success: true, data: academicYearsList, message: "OK" }

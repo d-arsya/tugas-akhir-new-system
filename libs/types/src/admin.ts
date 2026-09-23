@@ -1,68 +1,11 @@
 import type { AuthUser } from "./auth"
 
-export type AdminRole = "SUPERADMIN" | "ADMIN" | "BENDAHARA" | "KASIR_EWALLET" | "MERCHANT"
-
-export interface AdminUserItem {
-	id: number
-	name: string
-	email: string
-	role: AdminRole
-	phone?: string
-	isActive: boolean
-	twoFactorEnabled: boolean
-	createdAt: string
-	updatedAt: string
-}
-
-export interface AuthLogItem {
-	id: number
-	userId: number
-	userName: string
-	userEmail: string
-	role: AdminRole
-	ipAddress: string
-	userAgent: string
-	loginAt: string
-	logoutAt?: string | null
-	status: "ACTIVE" | "LOGGED_OUT" | "EXPIRED"
-}
-
 export interface BannedIpItem {
 	id: number
 	ipAddress: string
 	reason: string
 	bannedBy: string
 	createdAt: string
-}
-
-export interface SettingSchoolData {
-	schoolName: string
-	tagline: string
-	address: string
-	phone: string
-	email: string
-	website: string
-	nsm: string
-	npsn: string
-	principalName: string
-	logoUrl?: string
-}
-
-export interface SettingAnnouncementItem {
-	id: number
-	title: string
-	content: string
-	target: "ALL" | "PSB" | "SANTRI" | "MERCHANT"
-	isActive: boolean
-	createdAt: string
-}
-
-export interface SettingFormConfig {
-	isPsbOpen: boolean
-	academicYearId: number
-	registrationFee: number
-	contactPhone: string
-	instructionsNote: string
 }
 
 export interface AcademicYearItem {
@@ -111,32 +54,11 @@ export interface GradeItem {
 }
 
 // Request DTOs
-export interface CreateAdminUserDto {
-	name: string
-	email: string
-	role: AdminRole
-	phone?: string
-}
-
-export interface UpdateAdminUserDto {
-	name?: string
-	email?: string
-	role?: AdminRole
-	phone?: string
-	isActive?: boolean
-}
-
 export interface CreateBannedIpDto {
 	ipAddress: string
 	reason: string
 }
 
-export interface CreateAnnouncementDto {
-	title: string
-	content: string
-	target: "ALL" | "PSB" | "SANTRI" | "MERCHANT"
-	isActive?: boolean
-}
 
 export interface CreateAcademicYearDto {
 	year: string

@@ -57,6 +57,11 @@
   --bg-form: #ffffff;
   --bg-form-border: #eeeeee;
   --bg-form-disabled: #F1F1FB;
+  /* legacy app.css 173-174: summernote frame and toolbar */
+  --bg-editor-toolbar: #ecedf0;
+  --bg-editor-disabled: #ecedf0;
+  /* legacy app.css 2177: Form Data Santri panel rows */
+  --bg-form-builder-panel: #f2f3f8;
   --bg-login: #f7f7f7;
   --bg-login-form: #ffffff;
   --bg-inverse: #ffffff;

@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties, type JSX, type ReactNode } from "react"
+import { useEffect, useRef, useState, type CSSProperties, type JSX, type ReactNode } from "react"
 
 import { cn } from "@roja/utils"
 
@@ -19,6 +19,8 @@ export type LegacyColumn<T> = {
 
 type LegacyDataTableProps<T> = {
 	columns: LegacyColumn<T>[]
+	/** Legacy sets `style="min-width: …"` per table (1100px users, 1650px auth log, 950px reports). */
+	minWidth?: string
 	rows: T[]
 	rowKey: (row: T, index: number) => string | number
 	// recordsFiltered
@@ -28,6 +30,8 @@ type LegacyDataTableProps<T> = {
 	processing: boolean
 	// Before the first response DataTables shows `loadingRecords` (empty in legacy) instead of zeroRecords
 	loaded: boolean
+	// DataTables `order` default (`[[0, "asc"]]`): applied once, while nothing else is sorted
+	initialSort?: { key: string; dir: SortDir }
 }
 
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
@@ -45,11 +49,30 @@ const SpinnerIcon = (): JSX.Element => (
 )
 
 // Port of the legacy server-side DataTables setup (`sDom: '<"row"<"col-lg-6"l><"col-lg-6"f>><"table-responsive"t>pr'`)
-const LegacyDataTable = <T,>({ columns, rows, rowKey, total, state, onStateChange, processing, loaded }: LegacyDataTableProps<T>): JSX.Element => {
+const LegacyDataTable = <T,>({
+	columns,
+	rows,
+	rowKey,
+	total,
+	state,
+	onStateChange,
+	processing,
+	loaded,
+	initialSort,
+	minWidth = "950px",
+}: LegacyDataTableProps<T>): JSX.Element => {
 	const [search, setSearch] = useState(state.search)
+	const seeded = useRef(false)
 
 	// Parent resets (e.g. the sticky toolbar) clear the box too
 	useEffect(() => setSearch(state.search), [state.search])
+
+	// DataTables applies its default `order` on init, before the first draw
+	useEffect(() => {
+		if (seeded.current || initialSort === undefined || state.sort !== null) return
+		seeded.current = true
+		onStateChange({ ...state, sort: initialSort })
+	}, [initialSort, state, onStateChange])
 
 	useEffect(() => {
 		if (search === state.search) return undefined
@@ -94,7 +117,10 @@ const LegacyDataTable = <T,>({ columns, rows, rowKey, total, state, onStateChang
 			</div>
 
 			<div className="w-full overflow-x-auto">
-				<table className="m-0 w-full min-w-[950px] border-collapse text-[12px] leading-[22.4px] text-[#212529]">
+				<table
+					className="m-0 w-full border-collapse text-[12px] leading-[22.4px] text-[#212529]"
+					style={{ minWidth }}
+				>
 					<thead>
 						<tr>
 							{columns.map((column) => {

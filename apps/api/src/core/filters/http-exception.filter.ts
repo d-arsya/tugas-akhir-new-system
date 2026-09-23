@@ -14,6 +14,44 @@ type ErrorResponse = {
 	errors?: Record<string, string[]>
 }
 
+type ZodIssueLike = { path?: unknown; message?: unknown }
+
+const issueField = (path: unknown): string => {
+	if (!Array.isArray(path) || path.length === 0) return "unknown"
+	return path.map((part) => String(part)).join(".")
+}
+
+// Accepts raw zod issues (nestjs-zod `ZodValidationException`) or an already-keyed map
+// (`throwFieldErrors`), and returns the { field: [message] } shape clients render per field.
+const normalizeFieldErrors = (raw: unknown): Record<string, string[]> | undefined => {
+	if (Array.isArray(raw)) {
+		const mapped = raw.reduce<Record<string, string[]>>((acc, item) => {
+			const issue = item as ZodIssueLike
+			if (typeof issue?.message !== "string") return acc
+			const key = issueField(issue.path)
+			acc[key] = [...(acc[key] ?? []), issue.message]
+			return acc
+		}, {})
+		return Object.keys(mapped).length > 0 ? mapped : undefined
+	}
+
+	if (typeof raw === "object" && raw !== null) {
+		const mapped = Object.entries(raw as Record<string, unknown>).reduce<Record<string, string[]>>(
+			(acc, [key, value]) => {
+				const messages = (Array.isArray(value) ? value : [value]).filter(
+					(entry): entry is string => typeof entry === "string",
+				)
+				if (messages.length > 0) acc[key] = messages
+				return acc
+			},
+			{},
+		)
+		return Object.keys(mapped).length > 0 ? mapped : undefined
+	}
+
+	return undefined
+}
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
 	private readonly logger = new Logger(HttpExceptionFilter.name)
@@ -51,6 +89,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 						},
 						{},
 					)
+				}
+
+				// `ZodValidationException` carries the raw zod issues, and `throwFieldErrors` an
+				// already-keyed map. Both surface as { field: [message] } so clients can show them per field.
+				if (resp["errors"] !== undefined) {
+					errors = normalizeFieldErrors(resp["errors"]) ?? errors
 				}
 			}
 		} else if (exception instanceof Error) {

@@ -1,22 +1,16 @@
 import type { AxiosInstance } from "axios"
+
+import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api"
 import type {
 	ApiResponse,
 	PaginatedResponse,
-	AdminUserItem,
-	AuthLogItem,
 	BannedIpItem,
-	SettingSchoolData,
-	SettingAnnouncementItem,
-	SettingFormConfig,
 	AcademicYearItem,
 	LevelItem,
 	MajorItem,
 	GradeItem,
 	SubGradeItem,
-	CreateAdminUserDto,
-	UpdateAdminUserDto,
 	CreateBannedIpDto,
-	CreateAnnouncementDto,
 	CreateAcademicYearDto,
 	CreateLevelDto,
 	CreateMajorDto,
@@ -76,7 +70,7 @@ export interface AdminLoginResponse {
 	user?: any
 }
 
-export interface AdminApi {
+export interface AdminApi extends AdminLainnyaApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -84,30 +78,11 @@ export interface AdminApi {
 	forgotPassword(email: string): Promise<{ message: string }>
 	resetPassword(token: string, password: string): Promise<{ message: string }>
 	logout(): Promise<{ message: string }>
-	getMyProfile(): Promise<AdminUserItem>
-	updateMyProfile(data: Partial<AdminUserItem>): Promise<{ message: string }>
-	changePassword(password: string, newPassword: string): Promise<{ message: string }>
 
-	// Users & Security
-	getUsers(params?: { search?: string | undefined; role?: string | undefined; page?: number | undefined; limit?: number | undefined }): Promise<PaginatedResponse<AdminUserItem>>
-	createUser(data: CreateAdminUserDto): Promise<ApiResponse<AdminUserItem>>
-	updateUser(id: number, data: UpdateAdminUserDto): Promise<ApiResponse<AdminUserItem>>
-	toggleUserStatus(id: number, isActive: boolean): Promise<ApiResponse<{ message: string }>>
-	getAuthLogs(params?: { search?: string | undefined; page?: number | undefined; limit?: number | undefined }): Promise<PaginatedResponse<AuthLogItem>>
+	// IP bans
 	getBannedIps(params?: { search?: string | undefined; page?: number | undefined; limit?: number | undefined }): Promise<PaginatedResponse<BannedIpItem>>
 	createBannedIp(data: CreateBannedIpDto): Promise<ApiResponse<BannedIpItem>>
 	deleteBannedIp(id: number): Promise<ApiResponse<{ message: string }>>
-
-	// System Settings
-	getSchoolSettings(): Promise<ApiResponse<SettingSchoolData>>
-	updateSchoolSettings(data: SettingSchoolData): Promise<ApiResponse<{ message: string }>>
-	getAnnouncements(): Promise<ApiResponse<SettingAnnouncementItem[]>>
-	createAnnouncement(data: CreateAnnouncementDto): Promise<ApiResponse<SettingAnnouncementItem>>
-	updateAnnouncement(id: number, data: Partial<CreateAnnouncementDto>): Promise<ApiResponse<SettingAnnouncementItem>>
-	deleteAnnouncement(id: number): Promise<ApiResponse<{ message: string }>>
-	getFormConfig(): Promise<ApiResponse<SettingFormConfig>>
-	updateFormConfig(data: Partial<SettingFormConfig>): Promise<ApiResponse<{ message: string }>>
-	toggle2faSystem(enabled: boolean): Promise<ApiResponse<{ message: string }>>
 
 	// Academic Structure (Sprint B)
 	getAcademicYears(): Promise<ApiResponse<AcademicYearItem[]>>
@@ -227,15 +202,14 @@ const fileNameFromDisposition = (header: string | undefined): string | null => {
 }
 
 export const createAdminApi = (client: AxiosInstance): AdminApi => ({
+	...createAdminLainnyaApi(client),
+
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
 	resend2fa: (adminId) => unwrap(client.post(`/admin/auth/2fa/resend/${adminId}`)),
 	forgotPassword: (email) => unwrap(client.post("/admin/auth/forgot-password", { email })),
 	resetPassword: (token, password) => unwrap(client.post("/admin/auth/reset-password", { token, password })),
 	logout: () => unwrap(client.post("/admin/auth/logout")),
-	getMyProfile: () => unwrap(client.get("/admin/profile")),
-	updateMyProfile: (data) => unwrap(client.patch("/admin/profile", data)),
-	changePassword: (password, newPassword) => unwrap(client.patch("/admin/profile/password", { password, newPassword })),
 
 	getDashboardStats: (params) => unwrap(client.get("/admin/dashboard/stats", { params })),
 	getDashboardOptions: () => unwrap(client.get("/admin/dashboard/options")),
@@ -251,24 +225,10 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 			fileName: fileNameFromDisposition(r.headers["content-disposition"] as string | undefined),
 		})),
 
-	getUsers: (params) => unwrap(client.get("/admin/users", { params })),
-	createUser: (data) => unwrap(client.post("/admin/users", data)),
-	updateUser: (id, data) => unwrap(client.patch(`/admin/users/${id}`, data)),
-	toggleUserStatus: (id, isActive) => unwrap(client.patch(`/admin/users/${id}/status`, { isActive })),
-	getAuthLogs: (params) => unwrap(client.get("/admin/auth-logs", { params })),
 	getBannedIps: (params) => unwrap(client.get("/admin/ip-bans", { params })),
 	createBannedIp: (data) => unwrap(client.post("/admin/ip-bans", data)),
 	deleteBannedIp: (id) => unwrap(client.delete(`/admin/ip-bans/${id}`)),
 
-	getSchoolSettings: () => unwrap(client.get("/admin/settings/school")),
-	updateSchoolSettings: (data) => unwrap(client.patch("/admin/settings/school", data)),
-	getAnnouncements: () => unwrap(client.get("/admin/settings/announcements")),
-	createAnnouncement: (data) => unwrap(client.post("/admin/settings/announcements", data)),
-	updateAnnouncement: (id, data) => unwrap(client.patch(`/admin/settings/announcements/${id}`, data)),
-	deleteAnnouncement: (id) => unwrap(client.delete(`/admin/settings/announcements/${id}`)),
-	getFormConfig: () => unwrap(client.get("/admin/settings/form")),
-	updateFormConfig: (data) => unwrap(client.patch("/admin/settings/form", data)),
-	toggle2faSystem: (enabled) => unwrap(client.patch("/admin/settings/2fa", { enabled })),
 
 	getAcademicYears: () => unwrap(client.get("/admin/academic-years")),
 	createAcademicYear: (data) => unwrap(client.post("/admin/academic-years", data)),

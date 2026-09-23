@@ -18,21 +18,37 @@ import { Accountancy } from "./entities/accountancy.entity"
 import { StudentCostTerm } from "./entities/student-cost-term.entity"
 import { StudentCost } from "./entities/student-cost.entity"
 import { Alumni } from "./entities/alumni.entity"
+import { Setting } from "./entities/setting.entity"
+import { SettingAnnc } from "../psb/entities/setting-annc.entity"
+import { SettingForm } from "../psb/entities/setting-form.entity"
+import { SettingSchool } from "../../shared/school/entities/setting-school.entity"
 
 // Feature Services & Controllers
 import { AdminAuthService } from "@admin/auth/admin-auth.service"
-import { UserManagementService } from "@admin/auth/user-management.service"
+import { AuthLogWriter } from "@admin/auth/auth-log.writer"
+import { AuthLogScheduler } from "@admin/auth/auth-log.scheduler"
 import { AuthLogService } from "@admin/auth/auth-log.service"
 import { AdminAuthController } from "@admin/auth/admin-auth.controller"
-import { UserManagementController } from "@admin/auth/user-management.controller"
 import { AuthLogController } from "@admin/auth/auth-log.controller"
 import { AdminIpBanController } from "@admin/auth/ip-ban.controller"
+import { AdminCreatePasswordService } from "@admin/auth/admin-create-password.service"
+import { AdminCreatePasswordController } from "@admin/auth/admin-create-password.controller"
+import { AdminProfileService } from "@admin/auth/admin-profile.service"
+import { AdminProfileController } from "@admin/auth/admin-profile.controller"
+import { AdminUserService } from "@admin/user/admin-user.service"
+import { AdminUserController } from "@admin/user/admin-user.controller"
 
 import { AdminDashboardService } from "@admin/dashboard/admin-dashboard.service"
 import { AdminDashboardController } from "@admin/dashboard/admin-dashboard.controller"
 
-import { AdminSettingsService } from "@admin/setting/admin-settings.service"
-import { AdminSettingsController } from "@admin/setting/admin-settings.controller"
+import { AdminSchoolService } from "@admin/setting/admin-school.service"
+import { AdminSchoolController } from "@admin/setting/admin-school.controller"
+import { AdminAnnouncementService } from "@admin/setting/admin-announcement.service"
+import { AdminAnnouncementController } from "@admin/setting/admin-announcement.controller"
+import { AdminSettingFormService } from "@admin/setting/admin-setting-form.service"
+import { AdminSettingFormController } from "@admin/setting/admin-setting-form.controller"
+import { AdminSystemSettingService } from "@admin/setting/admin-system-setting.service"
+import { AdminSystemSettingController } from "@admin/setting/admin-system-setting.controller"
 
 import { AcademicYearService } from "@admin/academic/academic-year.service"
 import { LevelService } from "@admin/academic/level.service"
@@ -76,6 +92,10 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 			StudentCostTerm,
 			StudentCost,
 			Alumni,
+			Setting,
+			SettingAnnc,
+			SettingForm,
+			SettingSchool,
 		]),
 		JwtModule.register({}),
 		IpBanModule,
@@ -88,10 +108,15 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 	],
 	controllers: [
 		AdminAuthController,
-		UserManagementController,
+		AdminCreatePasswordController,
+		AdminProfileController,
+		AdminUserController,
 		AuthLogController,
 		AdminIpBanController,
-		AdminSettingsController,
+		AdminSchoolController,
+		AdminAnnouncementController,
+		AdminSettingFormController,
+		AdminSystemSettingController,
 		AcademicYearController,
 		LevelController,
 		MajorController,
@@ -108,9 +133,16 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 	],
 	providers: [
 		AdminAuthService,
-		UserManagementService,
+		AuthLogWriter,
+		AuthLogScheduler,
+		AdminCreatePasswordService,
+		AdminProfileService,
+		AdminUserService,
 		AuthLogService,
-		AdminSettingsService,
+		AdminSchoolService,
+		AdminAnnouncementService,
+		AdminSettingFormService,
+		AdminSystemSettingService,
 		AcademicYearService,
 		LevelService,
 		MajorService,
@@ -128,7 +160,6 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 	],
 	exports: [
 		AdminAuthService,
-		UserManagementService,
 		AcademicYearService,
 		LevelService,
 		PsbAdminService,

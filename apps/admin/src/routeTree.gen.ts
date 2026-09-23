@@ -36,6 +36,7 @@ import { Route as AuthStudentInvoicesRouteImport } from './routes/_auth.student-
 import { Route as AuthStudentTransactionsRouteImport } from './routes/_auth.student-transactions'
 import { Route as AuthStudentsRouteImport } from './routes/_auth.students'
 import { Route as AuthUsersRouteImport } from './routes/_auth.users'
+import { Route as GuestCreatePasswordRouteImport } from './routes/_guest.create-password'
 import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-password'
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
@@ -51,6 +52,7 @@ import { Route as AuthRegistrantsCreateRouteImport } from './routes/_auth.regist
 import { Route as AuthReportsIndexRouteImport } from './routes/_auth.reports.index'
 import { Route as AuthReportsArrearsRouteImport } from './routes/_auth.reports.arrears'
 import { Route as AuthReportsIncomeRouteImport } from './routes/_auth.reports.income'
+import { Route as AuthSettingsIndexRouteImport } from './routes/_auth.settings.index'
 import { Route as AuthSettingsAnnouncementsRouteImport } from './routes/_auth.settings.announcements'
 import { Route as AuthSettingsFormRouteImport } from './routes/_auth.settings.form'
 import { Route as AuthSettingsSchoolRouteImport } from './routes/_auth.settings.school'
@@ -59,8 +61,10 @@ import { Route as AuthStudentCapabilitiesAcademicYearIdRouteImport } from './rou
 import { Route as AuthStudentsIndexRouteImport } from './routes/_auth.students.index'
 import { Route as AuthStudentsIdRouteImport } from './routes/_auth.students.$id'
 import { Route as AuthStudentsCreateRouteImport } from './routes/_auth.students.create'
+import { Route as AuthUsersIndexRouteImport } from './routes/_auth.users.index'
 import { Route as AuthUsersCreateRouteImport } from './routes/_auth.users.create'
 import { Route as AuthRegistrantsAcademicYearIdWorkbenchRouteImport } from './routes/_auth.registrants.$academicYearId.workbench'
+import { Route as AuthUsersUserIdEditRouteImport } from './routes/_auth.users.$userId.edit'
 import { Route as AuthStudentsAcademicYearIdGradesIndexRouteImport } from './routes/_auth.students.$academicYearId.grades.index'
 import { Route as AuthStudentsAcademicYearIdGradesGradeIdRouteImport } from './routes/_auth.students.$academicYearId.grades.$gradeId'
 
@@ -198,6 +202,11 @@ const AuthUsersRoute = AuthUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthRoute,
 } as any)
+const GuestCreatePasswordRoute = GuestCreatePasswordRouteImport.update({
+  id: '/create-password',
+  path: '/create-password',
+  getParentRoute: () => GuestRoute,
+} as any)
 const GuestForgotPasswordRoute = GuestForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
@@ -274,6 +283,11 @@ const AuthReportsIncomeRoute = AuthReportsIncomeRouteImport.update({
   path: '/income',
   getParentRoute: () => AuthReportsRoute,
 } as any)
+const AuthSettingsIndexRoute = AuthSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsAnnouncementsRoute =
   AuthSettingsAnnouncementsRouteImport.update({
     id: '/announcements',
@@ -317,6 +331,11 @@ const AuthStudentsCreateRoute = AuthStudentsCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthStudentsRoute,
 } as any)
+const AuthUsersIndexRoute = AuthUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthUsersRoute,
+} as any)
 const AuthUsersCreateRoute = AuthUsersCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -328,6 +347,11 @@ const AuthRegistrantsAcademicYearIdWorkbenchRoute =
     path: '/$academicYearId/workbench',
     getParentRoute: () => AuthRegistrantsRoute,
   } as any)
+const AuthUsersUserIdEditRoute = AuthUsersUserIdEditRouteImport.update({
+  id: '/$userId/edit',
+  path: '/$userId/edit',
+  getParentRoute: () => AuthUsersRoute,
+} as any)
 const AuthStudentsAcademicYearIdGradesIndexRoute =
   AuthStudentsAcademicYearIdGradesIndexRouteImport.update({
     id: '/$academicYearId/grades/',
@@ -367,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/student-transactions': typeof AuthStudentTransactionsRoute
   '/students': typeof AuthStudentsRouteWithChildren
   '/users': typeof AuthUsersRouteWithChildren
+  '/create-password': typeof GuestCreatePasswordRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
@@ -389,9 +414,12 @@ export interface FileRoutesByFullPath {
   '/alumni/': typeof AuthAlumniIndexRoute
   '/registrants/': typeof AuthRegistrantsIndexRoute
   '/reports/': typeof AuthReportsIndexRoute
+  '/settings/': typeof AuthSettingsIndexRoute
   '/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
   '/students/': typeof AuthStudentsIndexRoute
+  '/users/': typeof AuthUsersIndexRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
@@ -411,11 +439,10 @@ export interface FileRoutesByTo {
   '/majors': typeof AuthMajorsRoute
   '/merchants': typeof AuthMerchantsRouteWithChildren
   '/my-profile': typeof AuthMyProfileRoute
-  '/settings': typeof AuthSettingsRouteWithChildren
   '/student-costs': typeof AuthStudentCostsRoute
   '/student-invoices': typeof AuthStudentInvoicesRoute
   '/student-transactions': typeof AuthStudentTransactionsRoute
-  '/users': typeof AuthUsersRouteWithChildren
+  '/create-password': typeof GuestCreatePasswordRoute
   '/forgot-password': typeof GuestForgotPasswordRoute
   '/login': typeof GuestLoginRoute
   '/reset-password': typeof GuestResetPasswordRoute
@@ -438,9 +465,12 @@ export interface FileRoutesByTo {
   '/alumni': typeof AuthAlumniIndexRoute
   '/registrants': typeof AuthRegistrantsIndexRoute
   '/reports': typeof AuthReportsIndexRoute
+  '/settings': typeof AuthSettingsIndexRoute
   '/student-capabilities': typeof AuthStudentCapabilitiesIndexRoute
   '/students': typeof AuthStudentsIndexRoute
+  '/users': typeof AuthUsersIndexRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/students/$academicYearId/grades': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
@@ -473,6 +503,7 @@ export interface FileRoutesById {
   '/_auth/student-transactions': typeof AuthStudentTransactionsRoute
   '/_auth/students': typeof AuthStudentsRouteWithChildren
   '/_auth/users': typeof AuthUsersRouteWithChildren
+  '/_guest/create-password': typeof GuestCreatePasswordRoute
   '/_guest/forgot-password': typeof GuestForgotPasswordRoute
   '/_guest/login': typeof GuestLoginRoute
   '/_guest/reset-password': typeof GuestResetPasswordRoute
@@ -495,9 +526,12 @@ export interface FileRoutesById {
   '/_auth/alumni/': typeof AuthAlumniIndexRoute
   '/_auth/registrants/': typeof AuthRegistrantsIndexRoute
   '/_auth/reports/': typeof AuthReportsIndexRoute
+  '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
   '/_auth/students/': typeof AuthStudentsIndexRoute
+  '/_auth/users/': typeof AuthUsersIndexRoute
   '/_auth/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/_auth/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/_auth/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/_auth/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
 }
@@ -529,6 +563,7 @@ export interface FileRouteTypes {
     | '/student-transactions'
     | '/students'
     | '/users'
+    | '/create-password'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -551,9 +586,12 @@ export interface FileRouteTypes {
     | '/alumni/'
     | '/registrants/'
     | '/reports/'
+    | '/settings/'
     | '/student-capabilities/'
     | '/students/'
+    | '/users/'
     | '/registrants/$academicYearId/workbench'
+    | '/users/$userId/edit'
     | '/students/$academicYearId/grades/$gradeId'
     | '/students/$academicYearId/grades/'
   fileRoutesByTo: FileRoutesByTo
@@ -573,11 +611,10 @@ export interface FileRouteTypes {
     | '/majors'
     | '/merchants'
     | '/my-profile'
-    | '/settings'
     | '/student-costs'
     | '/student-invoices'
     | '/student-transactions'
-    | '/users'
+    | '/create-password'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
@@ -600,9 +637,12 @@ export interface FileRouteTypes {
     | '/alumni'
     | '/registrants'
     | '/reports'
+    | '/settings'
     | '/student-capabilities'
     | '/students'
+    | '/users'
     | '/registrants/$academicYearId/workbench'
+    | '/users/$userId/edit'
     | '/students/$academicYearId/grades/$gradeId'
     | '/students/$academicYearId/grades'
   id:
@@ -634,6 +674,7 @@ export interface FileRouteTypes {
     | '/_auth/student-transactions'
     | '/_auth/students'
     | '/_auth/users'
+    | '/_guest/create-password'
     | '/_guest/forgot-password'
     | '/_guest/login'
     | '/_guest/reset-password'
@@ -656,9 +697,12 @@ export interface FileRouteTypes {
     | '/_auth/alumni/'
     | '/_auth/registrants/'
     | '/_auth/reports/'
+    | '/_auth/settings/'
     | '/_auth/student-capabilities/'
     | '/_auth/students/'
+    | '/_auth/users/'
     | '/_auth/registrants/$academicYearId/workbench'
+    | '/_auth/users/$userId/edit'
     | '/_auth/students/$academicYearId/grades/$gradeId'
     | '/_auth/students/$academicYearId/grades/'
   fileRoutesById: FileRoutesById
@@ -860,6 +904,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthUsersRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_guest/create-password': {
+      id: '/_guest/create-password'
+      path: '/create-password'
+      fullPath: '/create-password'
+      preLoaderRoute: typeof GuestCreatePasswordRouteImport
+      parentRoute: typeof GuestRoute
+    }
     '/_guest/forgot-password': {
       id: '/_guest/forgot-password'
       path: '/forgot-password'
@@ -965,6 +1016,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthReportsIncomeRouteImport
       parentRoute: typeof AuthReportsRoute
     }
+    '/_auth/settings/': {
+      id: '/_auth/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthSettingsIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/announcements': {
       id: '/_auth/settings/announcements'
       path: '/announcements'
@@ -1021,6 +1079,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStudentsCreateRouteImport
       parentRoute: typeof AuthStudentsRoute
     }
+    '/_auth/users/': {
+      id: '/_auth/users/'
+      path: '/'
+      fullPath: '/users/'
+      preLoaderRoute: typeof AuthUsersIndexRouteImport
+      parentRoute: typeof AuthUsersRoute
+    }
     '/_auth/users/create': {
       id: '/_auth/users/create'
       path: '/create'
@@ -1034,6 +1099,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/registrants/$academicYearId/workbench'
       preLoaderRoute: typeof AuthRegistrantsAcademicYearIdWorkbenchRouteImport
       parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/users/$userId/edit': {
+      id: '/_auth/users/$userId/edit'
+      path: '/$userId/edit'
+      fullPath: '/users/$userId/edit'
+      preLoaderRoute: typeof AuthUsersUserIdEditRouteImport
+      parentRoute: typeof AuthUsersRoute
     }
     '/_auth/students/$academicYearId/grades/': {
       id: '/_auth/students/$academicYearId/grades/'
@@ -1130,12 +1202,14 @@ interface AuthSettingsRouteChildren {
   AuthSettingsAnnouncementsRoute: typeof AuthSettingsAnnouncementsRoute
   AuthSettingsFormRoute: typeof AuthSettingsFormRoute
   AuthSettingsSchoolRoute: typeof AuthSettingsSchoolRoute
+  AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
 }
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAnnouncementsRoute: AuthSettingsAnnouncementsRoute,
   AuthSettingsFormRoute: AuthSettingsFormRoute,
   AuthSettingsSchoolRoute: AuthSettingsSchoolRoute,
+  AuthSettingsIndexRoute: AuthSettingsIndexRoute,
 }
 
 const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
@@ -1183,10 +1257,14 @@ const AuthStudentsRouteWithChildren = AuthStudentsRoute._addFileChildren(
 
 interface AuthUsersRouteChildren {
   AuthUsersCreateRoute: typeof AuthUsersCreateRoute
+  AuthUsersIndexRoute: typeof AuthUsersIndexRoute
+  AuthUsersUserIdEditRoute: typeof AuthUsersUserIdEditRoute
 }
 
 const AuthUsersRouteChildren: AuthUsersRouteChildren = {
   AuthUsersCreateRoute: AuthUsersCreateRoute,
+  AuthUsersIndexRoute: AuthUsersIndexRoute,
+  AuthUsersUserIdEditRoute: AuthUsersUserIdEditRoute,
 }
 
 const AuthUsersRouteWithChildren = AuthUsersRoute._addFileChildren(
@@ -1250,6 +1328,7 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface GuestRouteChildren {
+  GuestCreatePasswordRoute: typeof GuestCreatePasswordRoute
   GuestForgotPasswordRoute: typeof GuestForgotPasswordRoute
   GuestLoginRoute: typeof GuestLoginRoute
   GuestResetPasswordRoute: typeof GuestResetPasswordRoute
@@ -1257,6 +1336,7 @@ interface GuestRouteChildren {
 }
 
 const GuestRouteChildren: GuestRouteChildren = {
+  GuestCreatePasswordRoute: GuestCreatePasswordRoute,
   GuestForgotPasswordRoute: GuestForgotPasswordRoute,
   GuestLoginRoute: GuestLoginRoute,
   GuestResetPasswordRoute: GuestResetPasswordRoute,

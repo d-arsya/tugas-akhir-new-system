@@ -6,7 +6,7 @@ import type { AdminRole } from "@roja/types"
 
 const quickRoutes: DevHijackRoute[] = [
 	{ label: "Dashboard", path: "/dashboard" },
-	{ label: "Pengguna", path: "/users" },
+	{ label: "Pengelola", path: "/users" },
 	{ label: "Auth Logs", path: "/auth-logs" },
 	{ label: "IP Bans", path: "/ip-bans" },
 	{ label: "Pengaturan", path: "/settings" },
@@ -43,36 +43,36 @@ export const DevHijackPanel = (): JSX.Element | null => {
 				<div className="grid grid-cols-2 gap-1.5">
 					<button
 						type="button"
-						onClick={() => setRole("SUPERADMIN", "Super Administrator")}
+						onClick={() => setRole("Superadmin", "Super Administrator")}
 						className={`px-2 py-1 rounded text-left transition ${
-							auth.user?.role === "SUPERADMIN" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+							auth.user?.role === "Superadmin" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
 						}`}
 					>
 						Superadmin
 					</button>
 					<button
 						type="button"
-						onClick={() => setRole("ADMIN", "Ust. Ahmad Dahlan (Admin)")}
+						onClick={() => setRole("Admin", "Ust. Ahmad Dahlan (Admin)")}
 						className={`px-2 py-1 rounded text-left transition ${
-							auth.user?.role === "ADMIN" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+							auth.user?.role === "Admin" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
 						}`}
 					>
 						Admin
 					</button>
 					<button
 						type="button"
-						onClick={() => setRole("BENDAHARA", "Hj. Siti Rahmah (Bendahara)")}
+						onClick={() => setRole("Bendahara", "Hj. Siti Rahmah (Bendahara)")}
 						className={`px-2 py-1 rounded text-left transition ${
-							auth.user?.role === "BENDAHARA" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+							auth.user?.role === "Bendahara" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
 						}`}
 					>
 						Bendahara
 					</button>
 					<button
 						type="button"
-						onClick={() => setRole("KASIR_EWALLET", "Kasir E-Wallet Utama")}
+						onClick={() => setRole("Kasir E-Wallet", "Kasir E-Wallet Utama")}
 						className={`px-2 py-1 rounded text-left transition ${
-							auth.user?.role === "KASIR_EWALLET" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+							auth.user?.role === "Kasir E-Wallet" ? "bg-pink-600 text-white font-bold" : "bg-slate-800 text-slate-300 hover:bg-slate-700"
 						}`}
 					>
 						Kasir E-Wallet

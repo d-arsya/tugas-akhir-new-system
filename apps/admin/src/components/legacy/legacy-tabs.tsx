@@ -2,7 +2,8 @@ import { useEffect, useState, type JSX, type ReactNode } from "react"
 
 import { cn } from "@roja/utils"
 
-export type LegacyTab<K extends string> = { key: K; label: string; content: ReactNode }
+// Legacy tab links are `div.d-flex.align-items-center > {svg} + span.mx-2.tbr_weight-medium`
+export type LegacyTab<K extends string> = { key: K; label: ReactNode; icon?: ReactNode; content: ReactNode }
 
 type LegacyTabsProps<K extends string> = {
 	tabs: LegacyTab<K>[]
@@ -42,7 +43,9 @@ const LegacyTabs = <K extends string>({ tabs, active, onChange, className }: Leg
 								)}
 							>
 								<div className="flex items-center">
-									<span className="mx-[8px]">{tab.label}</span>
+									{tab.icon}
+									{/* `span.mx-2.tbr_weight-medium` */}
+									<span className="mx-[8px] font-medium">{tab.label}</span>
 								</div>
 							</a>
 						</li>

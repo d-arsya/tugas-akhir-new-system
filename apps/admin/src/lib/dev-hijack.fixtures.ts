@@ -1,11 +1,6 @@
 import type {
 	AuthUser,
-	AdminUserItem,
-	AuthLogItem,
 	BannedIpItem,
-	SettingSchoolData,
-	SettingAnnouncementItem,
-	SettingFormConfig,
 	AcademicYearItem,
 	LevelItem,
 	MajorItem,
@@ -32,82 +27,16 @@ export const hijackAuthUser: AuthUser = {
 	id: 1,
 	email: "superadmin@pondokroja.ac.id",
 	name: "Super Administrator",
-	role: "SUPERADMIN",
+	role: "Superadmin",
 	domain: "admin",
 }
 
-export const mockAdminUsers: AdminUserItem[] = [
-	{
-		id: 1,
-		name: "Super Administrator",
-		email: "superadmin@pondokroja.ac.id",
-		role: "SUPERADMIN",
-		phone: "081234567890",
-		isActive: true,
-		twoFactorEnabled: true,
-		createdAt: "2026-01-01T00:00:00Z",
-		updatedAt: "2026-01-01T00:00:00Z",
-	},
-	{
-		id: 2,
-		name: "Ust. Ahmad Dahlan (Admin Academic)",
-		email: "admin.academic@pondokroja.ac.id",
-		role: "ADMIN",
-		phone: "081298765432",
-		isActive: true,
-		twoFactorEnabled: false,
-		createdAt: "2026-01-10T00:00:00Z",
-		updatedAt: "2026-01-10T00:00:00Z",
-	},
-	{
-		id: 3,
-		name: "Hj. Siti Rahmah (Bendahara)",
-		email: "bendahara@pondokroja.ac.id",
-		role: "BENDAHARA",
-		phone: "081311223344",
-		isActive: true,
-		twoFactorEnabled: true,
-		createdAt: "2026-01-15T00:00:00Z",
-		updatedAt: "2026-01-15T00:00:00Z",
-	},
-	{
-		id: 4,
-		name: "Koperasi & Kasir Utama",
-		email: "kasir@pondokroja.ac.id",
-		role: "KASIR_EWALLET",
-		phone: "081355667788",
-		isActive: true,
-		twoFactorEnabled: false,
-		createdAt: "2026-02-01T00:00:00Z",
-		updatedAt: "2026-02-01T00:00:00Z",
-	},
-]
-
-export const mockAuthLogs: AuthLogItem[] = [
-	{
-		id: 101,
-		userId: 1,
-		userName: "Super Administrator",
-		userEmail: "superadmin@pondokroja.ac.id",
-		role: "SUPERADMIN",
-		ipAddress: "127.0.0.1",
-		userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/128.0",
-		loginAt: "2026-09-14T08:30:00Z",
-		logoutAt: null,
-		status: "ACTIVE",
-	},
-	{
-		id: 100,
-		userId: 3,
-		userName: "Hj. Siti Rahmah (Bendahara)",
-		userEmail: "bendahara@pondokroja.ac.id",
-		role: "BENDAHARA",
-		ipAddress: "192.168.1.45",
-		userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-		loginAt: "2026-09-14T07:15:00Z",
-		logoutAt: "2026-09-14T08:00:00Z",
-		status: "LOGGED_OUT",
-	},
+/** Accounts the mocked login accepts; the Pengelola list has its own fixtures. */
+export const mockLoginUsers = [
+	{ id: 1, name: "Super Administrator", email: "superadmin@pondokroja.ac.id", role: "Superadmin" },
+	{ id: 2, name: "Ust. Ahmad Dahlan", email: "admin@pondokroja.ac.id", role: "Admin" },
+	{ id: 3, name: "Hj. Siti Rahmah", email: "bendahara@pondokroja.ac.id", role: "Bendahara" },
+	{ id: 4, name: "Kasir E-Wallet Utama", email: "kasir@pondokroja.ac.id", role: "Kasir E-Wallet" },
 ]
 
 export const mockBannedIps: BannedIpItem[] = [
@@ -119,45 +48,6 @@ export const mockBannedIps: BannedIpItem[] = [
 		createdAt: "2026-09-01T12:00:00Z",
 	},
 ]
-
-export const mockSchoolSettings: SettingSchoolData = {
-	schoolName: "Pondok Pesantren Roja Islamiyyah",
-	tagline: "Mencetak Generasi Rabbani & Berakhlakul Karimah",
-	address: "Jl. Raya Pesantren No. 99, Kabupaten Bogor, Jawa Barat 16710",
-	phone: "(0251) 8345678",
-	email: "info@pondokroja.ac.id",
-	website: "https://pondokroja.com",
-	nsm: "121232010099",
-	npsn: "69876543",
-	principalName: "KH. Abdullah Syafi'i, M.Ag",
-}
-
-export const mockAnnouncements: SettingAnnouncementItem[] = [
-	{
-		id: 1,
-		title: "Pendaftaran PSB Gelombang II Resmi Dibuka",
-		content: "Calon santri baru dapat mengisi formulir pendaftaran secara online melalui portal PSB.",
-		target: "PSB",
-		isActive: true,
-		createdAt: "2026-09-01T00:00:00Z",
-	},
-	{
-		id: 2,
-		title: "Jadwal Pembayaran SPP Bulanan",
-		content: "Batas akhir pembayaran SPP setiap bulan adalah tanggal 10.",
-		target: "SANTRI",
-		isActive: true,
-		createdAt: "2026-09-05T00:00:00Z",
-	},
-]
-
-export const mockFormConfig: SettingFormConfig = {
-	isPsbOpen: true,
-	academicYearId: 1,
-	registrationFee: 250000,
-	contactPhone: "0812-9988-7766",
-	instructionsNote: "Pastikan mengunggah dokumen KK dan Akta Kelahiran yang jelas dan terbaca.",
-}
 
 export const mockAcademicYears: AcademicYearItem[] = [
 	{

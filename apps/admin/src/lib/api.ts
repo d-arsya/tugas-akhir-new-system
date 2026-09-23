@@ -1,6 +1,7 @@
 import { createApiClient, createSharedApi, createAdminApi, setAuthStoreGetter } from "@roja/api-client"
 import { getRuntimeEnv } from "@roja/utils"
 import { hijackAdminApi } from "./dev-hijack"
+import { hijackSharedApi } from "./dev-hijack.settings"
 import useAuthStore from "@/stores/auth.store"
 
 const BASE_URL = getRuntimeEnv("VITE_API_URL", "http://localhost:3000/api/v1")
@@ -8,5 +9,5 @@ const BASE_URL = getRuntimeEnv("VITE_API_URL", "http://localhost:3000/api/v1")
 setAuthStoreGetter(() => useAuthStore.getState())
 
 export const apiClient = createApiClient(BASE_URL, { refreshEndpoint: "/admin/auth/refresh" })
-export const sharedApi = createSharedApi(apiClient)
+export const sharedApi = hijackSharedApi(createSharedApi(apiClient))
 export const adminApi = hijackAdminApi(createAdminApi(apiClient))

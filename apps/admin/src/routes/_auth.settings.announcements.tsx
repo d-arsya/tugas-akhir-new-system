@@ -1,75 +1,43 @@
-import { type JSX } from "react"
+import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useForm } from "react-hook-form"
-import { RojaCard, Button, Input, Label } from "@roja/ui"
-import { AdminPageHeader } from "@/components/layout/admin-page-header"
-import { toast } from "sonner"
-import { Megaphone, Save } from "lucide-react"
 
+import AdminPageTitle from "@/components/layout/admin-page-title"
+import LegacyCard, { LegacyCardText, LegacyCardTitle } from "@/components/legacy/legacy-card"
+import AnnouncementForm from "@/components/settings/announcement/announcement-form"
+import { useAnnouncementSetting, useRefetchAnnouncementSetting } from "@/hooks/use-announcement-setting"
+import { requireRoles } from "@/lib/route-guards"
+
+// WS-B: legacy setting/annc.blade.php + summernote
 export const Route = createFileRoute("/_auth/settings/announcements")({
-	component: SettingsAnnouncementsPage,
+	beforeLoad: () => requireRoles("superadmin", "admin"),
+	component: SettingAnnouncementPage,
 })
 
-function SettingsAnnouncementsPage(): JSX.Element {
-	const form = useForm({
-		defaultValues: {
-			title: "Pengumuman Hasil Seleksi Gelombang 1 PSB 2026/2027",
-			content:
-				"Selamat kepada calon santri yang dinyatakan lolos seleksi gelombang 1. Silakan lakukan daftar ulang dan verifikasi dokumen sebelum 30 September 2026.",
-			isPublished: true,
-			publishDate: "2026-09-01",
-		},
-	})
-
-	const handleSave = (data: any) => {
-		toast.success("Pengumuman PSB berhasil diperbarui!")
-	}
+function SettingAnnouncementPage(): JSX.Element {
+	const { data: announcement } = useAnnouncementSetting()
+	// Legacy reloads the page 1000 ms after saving; the port refetches the row instead
+	const refetch = useRefetchAnnouncementSetting()
 
 	return (
-		<div className="space-y-6">
-			<AdminPageHeader
-				title="Pengaturan Pengumuman PSB"
-				subtitle="Kelola pengumuman kelulusan dan informasi penting pendaftaran santri baru"
-			/>
+		<>
+			<AdminPageTitle title="Pengumuman PSB" breadcrumbs={[{ label: "Lainnya" }, { label: "Pengaturan" }, { label: "Pengumuman PSB" }]} />
 
-			<RojaCard className="p-6 bg-white shadow-xs border-0 rounded-2xl max-w-2xl space-y-4">
-				<h5 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
-					<Megaphone className="w-4 h-4 text-[var(--primary)]" /> Banner Pengumuman Website PSB
-				</h5>
-
-				<form onSubmit={form.handleSubmit(handleSave)} className="space-y-4 text-xs">
-					<div>
-						<Label>Judul Pengumuman</Label>
-						<Input {...form.register("title")} required className="mt-1 font-bold text-slate-900 text-xs" />
-					</div>
-
-					<div>
-						<Label>Isi Pengumuman / Pesan</Label>
-						<textarea
-							{...form.register("content")}
-							rows={5}
-							required
-							className="w-full mt-1 p-3 bg-slate-50 border-0 rounded-xl text-xs text-slate-800"
-						/>
-					</div>
-
-					<div>
-						<Label>Tanggal Tayang Pengumuman</Label>
-						<Input type="date" {...form.register("publishDate")} required className="mt-1 text-xs" />
-					</div>
-
-					<label className="flex items-center gap-2 pt-2 cursor-pointer">
-						<input type="checkbox" {...form.register("isPublished")} className="rounded text-[var(--primary)]" />
-						<span className="font-semibold text-slate-800">Tampilkan Banner Pengumuman Ini di Halaman Utama PSB</span>
-					</label>
-
-					<div className="flex justify-end pt-4 border-t border-slate-100">
-						<Button type="submit" className="bg-[var(--primary)] text-white gap-2">
-							<Save className="w-4 h-4" /> Simpan Pengumuman
-						</Button>
-					</div>
-				</form>
-			</RojaCard>
-		</div>
+			{/* `.row.justify-content-center > .col-xl-10.col-lg-10.col-md-12.col-sm-12.col-12` */}
+			<div className="mx-[-15px] flex flex-wrap justify-center">
+				<div className="relative w-full max-w-full flex-[0_0_100%] px-[15px] min-[992px]:max-w-[83.333333%] min-[992px]:flex-[0_0_83.333333%]">
+					{/* `.card-body.p-4` */}
+					<LegacyCard bodyClassName="p-[24px]">
+						<LegacyCardTitle>Keterangan</LegacyCardTitle>
+						<LegacyCardText>
+							Berikan informasi dengan singkat dan jelas untuk menginformasikan bahwa pendaftar diterima atau tidak
+							diterima.
+						</LegacyCardText>
+						<AnnouncementForm announcement={announcement} onSaved={refetch} />
+					</LegacyCard>
+				</div>
+			</div>
+		</>
 	)
 }
+
+export default SettingAnnouncementPage

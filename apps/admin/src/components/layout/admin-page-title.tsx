@@ -9,6 +9,8 @@ import type { SidebarRoutePath } from "./sidebar-menu"
 export type AdminBreadcrumb = {
 	label: string
 	to?: SidebarRoutePath
+	/** Legacy `li.tbr_breadcrumbs_parent`: a three-dot crumb whose links appear on hover */
+	dropdown?: AdminBreadcrumb[]
 }
 
 type AdminPageTitleProps = {
@@ -29,6 +31,31 @@ const CRUMB_TEXT_CLASS = "inline-block align-middle text-[12px] leading-[20px] f
 
 const Separator = (): JSX.Element => (
 	<span className="mx-[20px] mt-[2px] inline-block h-[8px] w-[8px] rounded-[8px] bg-[var(--primary)] align-middle" />
+)
+
+const DotsIcon = (): JSX.Element => (
+	<svg xmlns="http://www.w3.org/2000/svg" width="13" height="3" viewBox="0 0 13 3" className="inline-block align-middle" aria-hidden="true">
+		<circle cx="1.5" cy="1.5" r="1.5" fill="#fff" />
+		<circle cx="6.5" cy="1.5" r="1.5" fill="#fff" />
+		<circle cx="11.5" cy="1.5" r="1.5" fill="#fff" />
+	</svg>
+)
+
+// header.css 85-137: hidden with `scale(0,0)`, revealed on hover, with the Polygon.svg arrow on top
+const CrumbDropdown = ({ items }: { items: AdminBreadcrumb[] }): JSX.Element => (
+	<ol className="absolute left-[-90px] z-[1] mt-[-6px] w-[194px] origin-center scale-0 rounded-[10px] bg-[#17283C] px-0 py-[10px] opacity-0 shadow-[0px_3px_16px_0px_rgba(0,0,0,0.08)] transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 before:absolute before:top-[-16px] before:left-[calc(50%-12px)] before:h-[24px] before:w-[24px] before:bg-[url('/assets/svg/etc/Polygon.svg')] before:bg-contain before:bg-center before:bg-no-repeat before:content-['']">
+		{items.map((item, index) => (
+			<li key={`${item.label}-${index}`} className="block">
+				{item.to ? (
+					<Link to={item.to} className={cn(CRUMB_TEXT_CLASS, "block bg-[#17283C] px-[16px] py-[5px] text-center text-white transition-all duration-500 hover:text-[var(--secondary)]")}>
+						{item.label}
+					</Link>
+				) : (
+					<span className={cn(CRUMB_TEXT_CLASS, "block px-[16px] py-[5px] text-center text-white/[0.26]")}>{item.label}</span>
+				)}
+			</li>
+		))}
+	</ol>
 )
 
 // Port of the legacy `<header class="page-header">` (Porto `html.fixed.sidebar-left-sm` + header.css)
@@ -57,8 +84,13 @@ const AdminPageTitle = ({ title, breadcrumbs }: AdminPageTitleProps): JSX.Elemen
 						{breadcrumbs.length > 0 ? <Separator /> : null}
 					</li>
 					{breadcrumbs.map((crumb, index) => (
-						<li key={`${crumb.label}-${index}`} className="relative inline-block font-light text-[#C3C3C3]">
-							{crumb.to ? (
+						<li key={`${crumb.label}-${index}`} className="group relative inline-block font-light text-[#C3C3C3]">
+							{crumb.dropdown ? (
+								<>
+									<DotsIcon />
+									<CrumbDropdown items={crumb.dropdown} />
+								</>
+							) : crumb.to ? (
 								<Link to={crumb.to} className={cn(CRUMB_TEXT_CLASS, "text-white transition-all duration-500 hover:text-[var(--secondary)]")}>
 									{crumb.label}
 								</Link>
