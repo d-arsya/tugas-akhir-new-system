@@ -14,10 +14,10 @@ function RegistrantsIndexLevel1Page(): JSX.Element {
 
 	const { data: ayData, isLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
-	const academicYears = ayData?.data || []
+	const academicYears = ayData ?? []
 
 	if (isLoading) return <PageLoader />
 

@@ -17,12 +17,19 @@ const VARIANT = {
 		"bg-[var(--primary)] text-white shadow-[0px_8px_10px_0px_rgba(228,0,126,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
 	"light-primary":
 		"bg-[rgba(228,0,126,0.16)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white focus:bg-[var(--primary)] focus:text-white",
+	// app.css 666-670 + 771-777
+	"light-danger":
+		"bg-[rgba(248,55,75,0.16)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white focus:bg-[var(--danger)] focus:text-white active:bg-[var(--danger)] active:text-white",
 	secondary:
 		"bg-[var(--secondary)] text-white shadow-[0px_8px_10px_0px_rgba(141,195,30,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
 	success:
 		"bg-[var(--success)] text-white shadow-[0px_8px_10px_0px_rgba(40,175,82,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
 	danger:
 		"bg-[var(--danger)] text-white shadow-[0px_8px_10px_0px_rgba(248,55,75,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
+	warning:
+		"bg-[var(--warning)] text-white shadow-[0px_8px_10px_0px_rgba(255,168,0,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
+	// `.tbr_btn-info` (app.css 819-825): `--info: #6866e9`, `--rgb-info: 104, 102, 233`
+	info: "bg-[var(--info)] text-white shadow-[0px_8px_10px_0px_rgba(104,102,233,0.25)] hover:text-white hover:shadow-none focus:text-white focus:shadow-none",
 	light: "bg-[var(--bg-btn-light-inverse)] text-[var(--grey)] hover:text-[var(--body-txt-inverse)] focus:text-[var(--body-txt-inverse)]",
 } as const
 

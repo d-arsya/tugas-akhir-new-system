@@ -15,10 +15,10 @@ function StudentCapabilitiesIndexLevel1Page(): JSX.Element {
 
 	const { data: ayData, isLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
-	const academicYears = ayData?.data || []
+	const academicYears = ayData ?? []
 
 	if (isLoading) return <PageLoader />
 
@@ -43,12 +43,10 @@ function StudentCapabilitiesIndexLevel1Page(): JSX.Element {
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-100 text-slate-700">
-							{academicYears.map((ay: any, idx: number) => (
+							{academicYears.map((ay, idx) => (
 								<tr key={ay.id} className="hover:bg-slate-50/80 transition-colors">
 									<td className="py-3.5 px-4 font-semibold text-slate-900 text-center">{idx + 1}</td>
-									<td className="py-3.5 px-4 font-bold text-slate-900">
-										{ay.year} - {ay.semester}
-									</td>
+									<td className="py-3.5 px-4 font-bold text-slate-900">{ay.year}</td>
 									<td className="py-3.5 px-4 font-medium">412 Santri</td>
 									<td className="py-3.5 px-4">
 										<span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
@@ -58,12 +56,12 @@ function StudentCapabilitiesIndexLevel1Page(): JSX.Element {
 									<td className="py-3.5 px-4">
 										<span
 											className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-												ay.isActive
+												ay.statusAkademik === "berjalan"
 													? "bg-emerald-100 text-emerald-800 border border-emerald-200"
 													: "bg-slate-100 text-slate-600 border border-slate-200"
 											}`}
 										>
-											{ay.isActive ? "AKTIF" : "ARSIP"}
+											{ay.statusAkademik === "berjalan" ? "AKTIF" : "ARSIP"}
 										</span>
 									</td>
 									<td className="py-3.5 px-4 text-right">

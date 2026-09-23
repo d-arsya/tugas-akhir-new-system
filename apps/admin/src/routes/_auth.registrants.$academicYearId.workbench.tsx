@@ -15,7 +15,7 @@ function RegistrantsWorkbenchLevel2Page(): JSX.Element {
 
 	const { data: ayData, isLoading: ayLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
 	const { data: registrantsData, isLoading: regLoading } = useQuery({
@@ -23,13 +23,15 @@ function RegistrantsWorkbenchLevel2Page(): JSX.Element {
 		queryFn: () => adminApi.getRegistrants({}),
 	})
 
-	const academicYears = ayData?.data || []
+	const academicYears = ayData ?? []
 	const registrants = registrantsData?.data?.items || []
 
-	const currentAy = academicYears.find((a: any) => String(a.id) === String(academicYearId)) || {
+	const matchedAy = academicYears.find((a) => String(a.id) === String(academicYearId))
+	// AcademicYearRow has no semester; the workbench header only renders the year.
+	const currentAy = {
 		id: Number(academicYearId),
-		year: "2026/2027",
-		semester: "Ganjil",
+		year: matchedAy?.year ?? "",
+		semester: "",
 	}
 
 	if (ayLoading || regLoading) return <PageLoader />

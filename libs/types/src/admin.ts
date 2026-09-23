@@ -8,91 +8,12 @@ export interface BannedIpItem {
 	createdAt: string
 }
 
-export interface AcademicYearItem {
-	id: number
-	year: string // e.g. "2024/2025"
-	semester: "GANJIL" | "GENAP"
-	isCurrent: boolean
-	startDate: string
-	endDate: string
-	status: "ACTIVE" | "INACTIVE" | "ARCHIVED"
-	studentCount?: number
-}
-
-export interface LevelItem {
-	id: number
-	code: string // e.g. "TSA", "ALI"
-	name: string // e.g. "Tsanawiyah", "Aliyah"
-	levelNumber: number // e.g. 7, 10
-	description?: string
-	academicYearIds: number[]
-	majorIds: number[]
-}
-
-export interface MajorItem {
-	id: number
-	code: string // e.g. "IPA", "IPS", "AGM"
-	name: string // e.g. "Ilmu Pengetahuan Alam"
-	description?: string
-}
-
-export interface SubGradeItem {
-	id: number
-	gradeId: number
-	name: string // e.g. "A", "B", "1"
-	capacity: number
-	studentCount: number
-}
-
-export interface GradeItem {
-	id: number
-	levelId: number
-	levelName?: string
-	name: string // e.g. "Kelas 7", "Kelas 10"
-	code: string // e.g. "7", "10"
-	subGrades: SubGradeItem[]
-}
-
 // Request DTOs
 export interface CreateBannedIpDto {
 	ipAddress: string
 	reason: string
 }
 
-
-export interface CreateAcademicYearDto {
-	year: string
-	semester: "GANJIL" | "GENAP"
-	startDate: string
-	endDate: string
-	isCurrent?: boolean
-}
-
-export interface CreateLevelDto {
-	code: string
-	name: string
-	levelNumber: number
-	description?: string
-	majorIds?: number[]
-}
-
-export interface CreateMajorDto {
-	code: string
-	name: string
-	description?: string
-}
-
-export interface CreateGradeDto {
-	levelId: number
-	name: string
-	code: string
-}
-
-export interface CreateSubGradeDto {
-	gradeId: number
-	name: string
-	capacity: number
-}
 
 // Sprint C: Student & Financial Billing Types
 export interface StudentItem {
@@ -204,17 +125,6 @@ export interface WithdrawalRequestItem {
 	requestedAt: string
 }
 
-export interface AdminMerchantItem {
-	id: number
-	businessName: string
-	ownerName: string
-	email: string
-	phone: string
-	qrCodePayload: string
-	isActive: boolean
-	createdAt: string
-}
-
 export interface CreateStudentDto {
 	nis: string
 	nisn: string
@@ -261,31 +171,6 @@ export interface StudentBulkGraduateDto {
 	studentIds: number[]
 	graduationYear: string
 	destination?: string
-}
-
-export interface StudentCostItem {
-	id: number
-	name: string
-	code: string
-	category: string
-	amount: number
-	academicYearId: number
-	academicYearName: string
-	gradeId: number
-	gradeName: string
-	billingCycle: "ONCE" | "MONTHLY" | "YEARLY"
-	isActive: boolean
-}
-
-export interface CreateStudentCostDto {
-	name: string
-	code: string
-	category: string
-	amount: number
-	academicYearId: number
-	gradeId: number
-	billingCycle: "ONCE" | "MONTHLY" | "YEARLY"
-	isActive?: boolean
 }
 
 export interface StudentCapabilityMatrixItem {
@@ -369,13 +254,6 @@ export interface AddInvoiceTransactionDto {
 	amount: number
 	paymentMethod: string
 	notes?: string
-}
-
-export interface CreateMerchantDto {
-	businessName: string
-	ownerName: string
-	email: string
-	phone: string
 }
 
 // ── Reports / Laporan (legacy ReportController + ReportArrearController port) ──

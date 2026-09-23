@@ -1,23 +1,31 @@
 import { Column, Entity } from "typeorm"
 import { BaseEntity } from "../../../core/database/base.entity"
 
+/**
+ * Legacy `accountancies` (App\Models\Accountancy) — a self-referencing tree.
+ *
+ * `parent_id` really is a varchar holding a numeric string (legacy quirk, kept).
+ * `name`, `parent_id` and `note` are all varchar(191) in the live schema, which
+ * is why `note` is validated at 191 rather than the 500 the legacy FormRequest
+ * allowed — anything longer was a DB error, surfaced to the user as a 500.
+ */
 @Entity({ name: "tbr_accountancies" })
 export class Accountancy extends BaseEntity {
-	@Column({ name: "name", type: "varchar" })
-	name: string
+	@Column({ name: "name", nullable: true, type: "varchar", length: 191 })
+	name: string | null
 
-	@Column({ name: "is_parent", type: "boolean", default: false })
-	isParent: boolean
+	@Column({ name: "is_parent", nullable: true, type: "boolean" })
+	isParent: boolean | null
 
-	@Column({ name: "parent_id", nullable: true, type: "varchar" })
+	@Column({ name: "parent_id", nullable: true, type: "varchar", length: 191 })
 	parentId: string | null
 
-	@Column({ name: "group", nullable: true, type: "varchar", length: 20 })
+	@Column({ name: "group", nullable: true, type: "text" })
 	group: "income" | "expense" | null
 
-	@Column({ name: "is_student_cost", type: "boolean", default: false })
-	isStudentCost: boolean
+	@Column({ name: "is_student_cost", nullable: true, type: "boolean" })
+	isStudentCost: boolean | null
 
-	@Column({ name: "note", nullable: true, type: "text" })
+	@Column({ name: "note", nullable: true, type: "varchar", length: 191 })
 	note: string | null
 }

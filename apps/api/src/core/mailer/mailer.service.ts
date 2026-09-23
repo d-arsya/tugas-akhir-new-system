@@ -265,6 +265,26 @@ export class MailerService implements OnModuleInit {
 		})
 	}
 
+	/**
+	 * Legacy `MerchantRegisteredNotification`: sent once, when Data Master ▸ Merchant creates a
+	 * merchant. The merchant app signs in with the unique number rather than the email, so both
+	 * the number and the generated password have to travel in the body.
+	 *
+	 * The password is generated with a CSPRNG rather than legacy's `substr(bcrypt($email), -8)`,
+	 * which derived it from the email and so produced the same value for the same address.
+	 */
+	async sendMerchantRegistered(
+		to: string,
+		data: { name: string; uniqueNumber: string; password: string; school: string },
+	): Promise<void> {
+		await this.sendMail({
+			to,
+			subject: `${data.school} - Anda telah didaftarkan sebagai merchant`,
+			template: "merchant-registered",
+			context: { ...data, year: new Date().getFullYear() },
+		})
+	}
+
 	/** Legacy `CreatePasswordNotification`: sent when an admin account is created without a password. */
 	async sendCreatePassword(
 		to: string,

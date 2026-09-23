@@ -19,8 +19,10 @@ import {
 	StudentCapabilityDto,
 	StudentGradeResponseDto,
 	StudentCapabilityResponseDto,
+	AcademicYearResponseDto,
+	GradeResponseDto,
 } from "@admin/dto/student-admin.dto"
-import { AcademicYearResponseDto, GradeResponseDto } from "@admin/dto/academic.dto"
+
 import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
 
 @ApiTags("Admin — Student Management")

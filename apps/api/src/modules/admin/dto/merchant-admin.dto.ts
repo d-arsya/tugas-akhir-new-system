@@ -1,39 +1,90 @@
 import { createZodDto } from "nestjs-zod"
 import { z } from "zod"
 
-export const CreateMerchantSchema = z.object({
-	name: z.string().min(1, "Nama merchant / toko wajib diisi"),
-	email: z.string().email("Email login portal merchant tidak valid"),
-	picName: z.string().min(1, "Nama PIC wajib diisi"),
-	phone: z.string().optional(),
-	address: z.string().optional(),
+// Legacy `StoreMerchantRequest` / `UpdateMerchantRequest`. The two differ only in the unique
+// rule (`unique:merchants` vs `unique:merchants,email,{id}`), which zod cannot express — the
+// service raises it with `throwFieldErrors({ email: ["Email sudah ada sebelumnya."] })`.
+//
+// `attributes()`: name => "nama lengkap", gender => "jenis kelamin", email => "email",
+// merchant_name => "nama merchant", address => "alamat", phone => "nomor telepon",
+// is_blocked => "status akun".
+
+const blank = (input: unknown): boolean => input === undefined || input === null || input === ""
+
+const text = (attr: string, label: string, max = 255) =>
+	z
+		.string({
+			error: (issue) =>
+				blank(issue.input) ? `Kolom ${attr} wajib untuk diisi.` : `${label} harus berupa string.`,
+		})
+		.min(1, `Kolom ${attr} wajib untuk diisi.`)
+		.max(max, `${label} maksimal berisi ${max} karakter.`)
+
+/** Legacy accepts any string; the port narrows it to the two the radios post (plan decision). */
+const gender = z.enum(["male", "female"], {
+	error: (issue) =>
+		blank(issue.input) ? "Kolom jenis kelamin wajib untuk diisi." : "Jenis kelamin yang dipilih tidak valid.",
 })
 
-export class CreateMerchantDto extends createZodDto(CreateMerchantSchema) {}
+const email = z
+	.email({
+		error: (issue) =>
+			blank(issue.input) ? "Kolom email wajib untuk diisi." : "Email harus berupa alamat surel yang valid.",
+	})
+	.max(255, "Email maksimal berisi 255 karakter.")
 
-export const UpdateMerchantSchema = z.object({
-	name: z.string().optional(),
-	email: z.string().email().optional(),
-	picName: z.string().optional(),
-	phone: z.string().optional(),
-	address: z.string().optional(),
+// The legacy radios post "0"/"1"
+const isBlocked = z.preprocess(
+	(input) => {
+		if (input === "1" || input === 1) return true
+		if (input === "0" || input === 0) return false
+		return input
+	},
+	z.boolean({
+		error: (issue) =>
+			blank(issue.input) ? "Kolom status akun wajib untuk diisi." : "Status akun harus bernilai true atau false",
+	}),
+)
+
+export const MerchantWriteSchema = z.object({
+	name: text("nama lengkap", "Nama lengkap"),
+	gender,
+	email,
+	merchantName: text("nama merchant", "Nama merchant"),
+	address: text("alamat", "Alamat"),
+	phone: text("nomor telepon", "Nomor telepon"),
+	isBlocked,
 })
+export class MerchantWriteDto extends createZodDto(MerchantWriteSchema) {}
+export type MerchantWriteInput = z.infer<typeof MerchantWriteSchema>
 
-export class UpdateMerchantDto extends createZodDto(UpdateMerchantSchema.partial()) {}
+// ─── Responses (Swagger) ─────────────────────────────────────────
 
-export const ToggleBlockMerchantSchema = z.object({
-	blocked: z.boolean(),
-})
-
-export class ToggleBlockMerchantDto extends createZodDto(ToggleBlockMerchantSchema) {}
-
-export const MerchantResponseSchema = z.object({
+export const MerchantRowSchema = z.object({
 	id: z.number(),
-	name: z.string(),
-	email: z.string(),
-	uniqueNumber: z.string().nullable().optional(),
-	phone: z.string().nullable().optional(),
-	isBlocked: z.boolean().optional(),
+	uniqueNumber: z.string(),
+	name: z.string().nullable(),
+	merchantName: z.string().nullable(),
+	email: z.string().nullable(),
+	createdAt: z.string(),
+	createdAtTs: z.number(),
+	isBlocked: z.boolean(),
 })
+export class MerchantRowDto extends createZodDto(MerchantRowSchema) {}
 
-export class MerchantResponseDto extends createZodDto(MerchantResponseSchema) {}
+export const MerchantDetailSchema = z.object({
+	id: z.number(),
+	uniqueNumber: z.string(),
+	name: z.string().nullable(),
+	gender: z.enum(["male", "female"]).nullable(),
+	email: z.string().nullable(),
+	merchantName: z.string().nullable(),
+	address: z.string().nullable(),
+	phone: z.string().nullable(),
+	photoUrl: z.string().nullable(),
+	isBlocked: z.boolean(),
+})
+export class MerchantDetailDto extends createZodDto(MerchantDetailSchema) {}
+
+export const MerchantNextNumberSchema = z.object({ uniqueNumber: z.string() })
+export class MerchantNextNumberDto extends createZodDto(MerchantNextNumberSchema) {}

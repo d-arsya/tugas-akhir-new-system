@@ -9,7 +9,8 @@ import LegacySelect from "./legacy-select"
 
 export type LegacyColumn<T> = {
 	key: string
-	header: string
+	/** ReactNode, not string: Biaya Santri puts a check-all box and a tooltip icon in `<th>` */
+	header: ReactNode
 	// Legacy `<th width="…">`
 	width?: string
 	sortable?: boolean
@@ -32,6 +33,12 @@ type LegacyDataTableProps<T> = {
 	loaded: boolean
 	// DataTables `order` default (`[[0, "asc"]]`): applied once, while nothing else is sorted
 	initialSort?: { key: string; dir: SortDir }
+	/** `paging: false` — Biaya Santri's account table renders every row and hides the pager. */
+	paging?: boolean
+	/** `fixedColumns: { left: n }` — the first n columns stay put while the table scrolls. */
+	frozenColumns?: number
+	/** Legacy adds `.tbr_selected` to checked rows on the Biaya Santri account table. */
+	rowClassName?: (row: T, index: number) => string | undefined
 }
 
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
@@ -60,6 +67,9 @@ const LegacyDataTable = <T,>({
 	loaded,
 	initialSort,
 	minWidth = "950px",
+	paging = true,
+	frozenColumns = 0,
+	rowClassName,
 }: LegacyDataTableProps<T>): JSX.Element => {
 	const [search, setSearch] = useState(state.search)
 	const seeded = useRef(false)
@@ -87,24 +97,47 @@ const LegacyDataTable = <T,>({
 	}
 
 	const pages = Math.max(1, Math.ceil(total / state.length))
-	const offset = (state.page - 1) * state.length
+	const offset = paging ? (state.page - 1) * state.length : 0
+
+	// `fixedColumns: { left: n }` — sticky cells need a left offset, so accumulate the widths
+	const frozenLeft = (index: number): string | undefined => {
+		if (index >= frozenColumns) return undefined
+		return columns
+			.slice(0, index)
+			.map((column) => column.width ?? "0px")
+			.reduce((acc, width) => `calc(${acc} + ${width})`, "0px")
+	}
 
 	return (
 		<div className="relative">
 			<div className="mx-[-15px] flex flex-wrap">
+				{/*
+				 * The `dom` string keeps both half-width columns either way, but DataTables' own
+				 * `_fnFeatureHtmlLength` returns `null` when `bPaginate` is off, so the length menu
+				 * itself is never built on a non-paging table (Biaya Santri level 3).
+				 */}
 				<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-left">
-					<label className="mb-[8px] inline-block min-[993px]:pb-[7.4px]">
-						<LegacySelect
-							value={String(state.length)}
-							options={LENGTH_OPTIONS}
-							searchable={false}
-							onChange={(value) => onStateChange({ ...state, length: Number(value), page: 1 })}
-							className="mr-[10px] inline-flex w-[75px] rounded-[5px]"
-						/>
-					</label>
+					{paging ? (
+						<label className="mb-[8px] inline-block">
+							<LegacySelect
+								value={String(state.length)}
+								options={LENGTH_OPTIONS}
+								searchable={false}
+								onChange={(value) => onStateChange({ ...state, length: Number(value), page: 1 })}
+								className="mr-[10px] inline-flex w-[75px] rounded-[5px]"
+							/>
+						</label>
+					) : null}
 				</div>
 				<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-right">
-					<label className="mb-[8px] inline-block w-full min-[992px]:w-1/2">
+					{/*
+					 * `overflow-hidden` is load-bearing. Bootstrap makes the search `input` `display: block`,
+					 * so legacy's label has no in-flow line box and takes its baseline from its bottom margin
+					 * edge — the strut then hangs 7.41px below it, making the toolbar 15.41px taller than the
+					 * label at every width. Tailwind's preflight leaves the input inline-block, so without this
+					 * the port is 7.4px short: below 993px on every table, and at all widths when paging is off.
+					 */}
+					<label className="mb-[8px] inline-block w-full overflow-hidden min-[992px]:w-1/2">
 						<input
 							type="search"
 							value={search}
@@ -123,16 +156,17 @@ const LegacyDataTable = <T,>({
 				>
 					<thead>
 						<tr>
-							{columns.map((column) => {
+							{columns.map((column, index) => {
 								const sorted = state.sort?.key === column.key ? state.sort.dir : null
 								return (
 									<th
 										key={column.key}
-										style={{ width: column.width } as CSSProperties}
+										style={{ width: column.width, left: frozenLeft(index) } as CSSProperties}
 										onClick={column.sortable ? () => toggleSort(column.key) : undefined}
 										aria-sort={sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : undefined}
 										className={cn(
 											"relative border-0 border-b border-[var(--table-inverse)]! py-[12px] pr-[21px] pl-[12px] text-left align-middle font-semibold text-[var(--table-head-txt-inverse)]",
+											index < frozenColumns && "sticky z-[2] bg-[var(--bg-secondary)]",
 											column.sortable && cn("cursor-pointer select-none", SORT_ARROWS, sorted === "asc" && SORTED_ASC, sorted === "desc" && SORTED_DESC),
 										)}
 									>
@@ -151,11 +185,18 @@ const LegacyDataTable = <T,>({
 							</tr>
 						) : (
 							rows.map((row, index) => (
-								<tr key={rowKey(row, index)} className="group hover:bg-[var(--table-inverse)]">
-									{columns.map((column) => (
+								<tr
+									key={rowKey(row, index)}
+									className={cn("group hover:bg-[var(--table-inverse)]", rowClassName?.(row, index))}
+								>
+									{columns.map((column, columnIndex) => (
 										<td
 											key={column.key}
-											className="border-0 border-b border-[var(--table-inverse)]! p-[12px] align-middle leading-[18px] text-[var(--table-txt-inverse)] group-last:border-b-0"
+											style={{ left: frozenLeft(columnIndex) } as CSSProperties}
+											className={cn(
+												"border-0 border-b border-[var(--table-inverse)]! p-[12px] align-middle leading-[18px] text-[var(--table-txt-inverse)] group-last:border-b-0",
+												columnIndex < frozenColumns && "sticky z-[1] bg-[var(--bg-secondary)]",
+											)}
 										>
 											{column.cell(row, offset + index + 1)}
 										</td>
@@ -167,7 +208,9 @@ const LegacyDataTable = <T,>({
 				</table>
 			</div>
 
-			<LegacyPagination page={state.page} pages={pages} onChange={(page) => onStateChange({ ...state, page })} />
+			{paging ? (
+				<LegacyPagination page={state.page} pages={pages} onChange={(page) => onStateChange({ ...state, page })} />
+			) : null}
 
 			{processing ? (
 				<div className="absolute top-[59%] left-1/2 z-[3] mt-[-26px] ml-[-95px] w-[190px] rounded-[100px] bg-[var(--primary)] py-[12px] text-center text-white shadow-[0px_8px_10px_0px_rgba(228,0,126,0.25)]">

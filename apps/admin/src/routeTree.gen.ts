@@ -41,10 +41,14 @@ import { Route as GuestForgotPasswordRouteImport } from './routes/_guest.forgot-
 import { Route as GuestLoginRouteImport } from './routes/_guest.login'
 import { Route as GuestResetPasswordRouteImport } from './routes/_guest.reset-password'
 import { Route as GuestVerify2faRouteImport } from './routes/_guest.verify-2fa'
+import { Route as AuthAcademicYearsIndexRouteImport } from './routes/_auth.academic-years.index'
 import { Route as AuthAcademicYearsCreateRouteImport } from './routes/_auth.academic-years.create'
+import { Route as AuthAccountancyIndexRouteImport } from './routes/_auth.accountancy.index'
 import { Route as AuthAlumniIndexRouteImport } from './routes/_auth.alumni.index'
 import { Route as AuthAlumniGraduationYearRouteImport } from './routes/_auth.alumni.$graduationYear'
 import { Route as AuthAlumniDashboardRouteImport } from './routes/_auth.alumni.dashboard'
+import { Route as AuthLevelsIndexRouteImport } from './routes/_auth.levels.index'
+import { Route as AuthMerchantsIndexRouteImport } from './routes/_auth.merchants.index'
 import { Route as AuthMerchantsCreateRouteImport } from './routes/_auth.merchants.create'
 import { Route as AuthRegistrantsIndexRouteImport } from './routes/_auth.registrants.index'
 import { Route as AuthRegistrantsIdRouteImport } from './routes/_auth.registrants.$id'
@@ -58,15 +62,33 @@ import { Route as AuthSettingsFormRouteImport } from './routes/_auth.settings.fo
 import { Route as AuthSettingsSchoolRouteImport } from './routes/_auth.settings.school'
 import { Route as AuthStudentCapabilitiesIndexRouteImport } from './routes/_auth.student-capabilities.index'
 import { Route as AuthStudentCapabilitiesAcademicYearIdRouteImport } from './routes/_auth.student-capabilities.$academicYearId'
+import { Route as AuthStudentCostsIndexRouteImport } from './routes/_auth.student-costs.index'
 import { Route as AuthStudentsIndexRouteImport } from './routes/_auth.students.index'
 import { Route as AuthStudentsIdRouteImport } from './routes/_auth.students.$id'
 import { Route as AuthStudentsCreateRouteImport } from './routes/_auth.students.create'
 import { Route as AuthUsersIndexRouteImport } from './routes/_auth.users.index'
 import { Route as AuthUsersCreateRouteImport } from './routes/_auth.users.create'
+import { Route as AuthAcademicYearsAcademicYearIdDelegateAlumniRouteImport } from './routes/_auth.academic-years.$academicYearId.delegate-alumni'
+import { Route as AuthAcademicYearsAcademicYearIdDelegateRegistrantRouteImport } from './routes/_auth.academic-years.$academicYearId.delegate-registrant'
+import { Route as AuthAcademicYearsAcademicYearIdDelegateStudentRouteImport } from './routes/_auth.academic-years.$academicYearId.delegate-student'
+import { Route as AuthAcademicYearsAcademicYearIdDeleteRouteImport } from './routes/_auth.academic-years.$academicYearId.delete'
+import { Route as AuthAcademicYearsAcademicYearIdEditRouteImport } from './routes/_auth.academic-years.$academicYearId.edit'
+import { Route as AuthAccountancyAccountancyIdDelegateChildRouteImport } from './routes/_auth.accountancy.$accountancyId.delegate-child'
+import { Route as AuthAccountancyAccountancyIdDeleteRouteImport } from './routes/_auth.accountancy.$accountancyId.delete'
+import { Route as AuthLevelsLevelIdDelegateGradeRouteImport } from './routes/_auth.levels.$levelId.delegate-grade'
+import { Route as AuthLevelsLevelIdDelegateMajorRouteImport } from './routes/_auth.levels.$levelId.delegate-major'
+import { Route as AuthLevelsLevelIdDelegateRegistrantRouteImport } from './routes/_auth.levels.$levelId.delegate-registrant'
+import { Route as AuthLevelsLevelIdDelegateStudentRouteImport } from './routes/_auth.levels.$levelId.delegate-student'
+import { Route as AuthLevelsLevelIdDeleteRouteImport } from './routes/_auth.levels.$levelId.delete'
+import { Route as AuthMerchantsMerchantIdEditRouteImport } from './routes/_auth.merchants.$merchantId.edit'
 import { Route as AuthRegistrantsAcademicYearIdWorkbenchRouteImport } from './routes/_auth.registrants.$academicYearId.workbench'
+import { Route as AuthStudentCostsAcademicYearIdIndexRouteImport } from './routes/_auth.student-costs.$academicYearId.index'
 import { Route as AuthUsersUserIdEditRouteImport } from './routes/_auth.users.$userId.edit'
 import { Route as AuthStudentsAcademicYearIdGradesIndexRouteImport } from './routes/_auth.students.$academicYearId.grades.index'
 import { Route as AuthStudentsAcademicYearIdGradesGradeIdRouteImport } from './routes/_auth.students.$academicYearId.grades.$gradeId'
+import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdIndexRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.index'
+import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.accountancy.$accountancyId.create'
+import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.accountancy.$accountancyId.edit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -227,10 +249,20 @@ const GuestVerify2faRoute = GuestVerify2faRouteImport.update({
   path: '/verify-2fa',
   getParentRoute: () => GuestRoute,
 } as any)
+const AuthAcademicYearsIndexRoute = AuthAcademicYearsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthAcademicYearsRoute,
+} as any)
 const AuthAcademicYearsCreateRoute = AuthAcademicYearsCreateRouteImport.update({
   id: '/create',
   path: '/create',
   getParentRoute: () => AuthAcademicYearsRoute,
+} as any)
+const AuthAccountancyIndexRoute = AuthAccountancyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthAccountancyRoute,
 } as any)
 const AuthAlumniIndexRoute = AuthAlumniIndexRouteImport.update({
   id: '/',
@@ -247,6 +279,16 @@ const AuthAlumniDashboardRoute = AuthAlumniDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthAlumniRoute,
+} as any)
+const AuthLevelsIndexRoute = AuthLevelsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthLevelsRoute,
+} as any)
+const AuthMerchantsIndexRoute = AuthMerchantsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthMerchantsRoute,
 } as any)
 const AuthMerchantsCreateRoute = AuthMerchantsCreateRouteImport.update({
   id: '/create',
@@ -316,6 +358,11 @@ const AuthStudentCapabilitiesAcademicYearIdRoute =
     path: '/$academicYearId',
     getParentRoute: () => AuthStudentCapabilitiesRoute,
   } as any)
+const AuthStudentCostsIndexRoute = AuthStudentCostsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthStudentCostsRoute,
+} as any)
 const AuthStudentsIndexRoute = AuthStudentsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -341,11 +388,94 @@ const AuthUsersCreateRoute = AuthUsersCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthUsersRoute,
 } as any)
+const AuthAcademicYearsAcademicYearIdDelegateAlumniRoute =
+  AuthAcademicYearsAcademicYearIdDelegateAlumniRouteImport.update({
+    id: '/$academicYearId/delegate-alumni',
+    path: '/$academicYearId/delegate-alumni',
+    getParentRoute: () => AuthAcademicYearsRoute,
+  } as any)
+const AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute =
+  AuthAcademicYearsAcademicYearIdDelegateRegistrantRouteImport.update({
+    id: '/$academicYearId/delegate-registrant',
+    path: '/$academicYearId/delegate-registrant',
+    getParentRoute: () => AuthAcademicYearsRoute,
+  } as any)
+const AuthAcademicYearsAcademicYearIdDelegateStudentRoute =
+  AuthAcademicYearsAcademicYearIdDelegateStudentRouteImport.update({
+    id: '/$academicYearId/delegate-student',
+    path: '/$academicYearId/delegate-student',
+    getParentRoute: () => AuthAcademicYearsRoute,
+  } as any)
+const AuthAcademicYearsAcademicYearIdDeleteRoute =
+  AuthAcademicYearsAcademicYearIdDeleteRouteImport.update({
+    id: '/$academicYearId/delete',
+    path: '/$academicYearId/delete',
+    getParentRoute: () => AuthAcademicYearsRoute,
+  } as any)
+const AuthAcademicYearsAcademicYearIdEditRoute =
+  AuthAcademicYearsAcademicYearIdEditRouteImport.update({
+    id: '/$academicYearId/edit',
+    path: '/$academicYearId/edit',
+    getParentRoute: () => AuthAcademicYearsRoute,
+  } as any)
+const AuthAccountancyAccountancyIdDelegateChildRoute =
+  AuthAccountancyAccountancyIdDelegateChildRouteImport.update({
+    id: '/$accountancyId/delegate-child',
+    path: '/$accountancyId/delegate-child',
+    getParentRoute: () => AuthAccountancyRoute,
+  } as any)
+const AuthAccountancyAccountancyIdDeleteRoute =
+  AuthAccountancyAccountancyIdDeleteRouteImport.update({
+    id: '/$accountancyId/delete',
+    path: '/$accountancyId/delete',
+    getParentRoute: () => AuthAccountancyRoute,
+  } as any)
+const AuthLevelsLevelIdDelegateGradeRoute =
+  AuthLevelsLevelIdDelegateGradeRouteImport.update({
+    id: '/$levelId/delegate-grade',
+    path: '/$levelId/delegate-grade',
+    getParentRoute: () => AuthLevelsRoute,
+  } as any)
+const AuthLevelsLevelIdDelegateMajorRoute =
+  AuthLevelsLevelIdDelegateMajorRouteImport.update({
+    id: '/$levelId/delegate-major',
+    path: '/$levelId/delegate-major',
+    getParentRoute: () => AuthLevelsRoute,
+  } as any)
+const AuthLevelsLevelIdDelegateRegistrantRoute =
+  AuthLevelsLevelIdDelegateRegistrantRouteImport.update({
+    id: '/$levelId/delegate-registrant',
+    path: '/$levelId/delegate-registrant',
+    getParentRoute: () => AuthLevelsRoute,
+  } as any)
+const AuthLevelsLevelIdDelegateStudentRoute =
+  AuthLevelsLevelIdDelegateStudentRouteImport.update({
+    id: '/$levelId/delegate-student',
+    path: '/$levelId/delegate-student',
+    getParentRoute: () => AuthLevelsRoute,
+  } as any)
+const AuthLevelsLevelIdDeleteRoute = AuthLevelsLevelIdDeleteRouteImport.update({
+  id: '/$levelId/delete',
+  path: '/$levelId/delete',
+  getParentRoute: () => AuthLevelsRoute,
+} as any)
+const AuthMerchantsMerchantIdEditRoute =
+  AuthMerchantsMerchantIdEditRouteImport.update({
+    id: '/$merchantId/edit',
+    path: '/$merchantId/edit',
+    getParentRoute: () => AuthMerchantsRoute,
+  } as any)
 const AuthRegistrantsAcademicYearIdWorkbenchRoute =
   AuthRegistrantsAcademicYearIdWorkbenchRouteImport.update({
     id: '/$academicYearId/workbench',
     path: '/$academicYearId/workbench',
     getParentRoute: () => AuthRegistrantsRoute,
+  } as any)
+const AuthStudentCostsAcademicYearIdIndexRoute =
+  AuthStudentCostsAcademicYearIdIndexRouteImport.update({
+    id: '/$academicYearId/',
+    path: '/$academicYearId/',
+    getParentRoute: () => AuthStudentCostsRoute,
   } as any)
 const AuthUsersUserIdEditRoute = AuthUsersUserIdEditRouteImport.update({
   id: '/$userId/edit',
@@ -364,11 +494,33 @@ const AuthStudentsAcademicYearIdGradesGradeIdRoute =
     path: '/$academicYearId/grades/$gradeId',
     getParentRoute: () => AuthStudentsRoute,
   } as any)
+const AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute =
+  AuthStudentCostsAcademicYearIdGradesGradeIdIndexRouteImport.update({
+    id: '/$academicYearId/grades/$gradeId/',
+    path: '/$academicYearId/grades/$gradeId/',
+    getParentRoute: () => AuthStudentCostsRoute,
+  } as any)
+const AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute =
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRouteImport.update(
+    {
+      id: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create',
+      path: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create',
+      getParentRoute: () => AuthStudentCostsRoute,
+    } as any,
+  )
+const AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute =
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRouteImport.update(
+    {
+      id: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit',
+      path: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit',
+      getParentRoute: () => AuthStudentCostsRoute,
+    } as any,
+  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/academic-years': typeof AuthAcademicYearsRouteWithChildren
-  '/accountancy': typeof AuthAccountancyRoute
+  '/accountancy': typeof AuthAccountancyRouteWithChildren
   '/alumni': typeof AuthAlumniRouteWithChildren
   '/auth-logs': typeof AuthAuthLogsRoute
   '/dashboard': typeof AuthDashboardRoute
@@ -378,7 +530,7 @@ export interface FileRoutesByFullPath {
   '/ewallets': typeof AuthEwalletsRoute
   '/grades': typeof AuthGradesRoute
   '/ip-bans': typeof AuthIpBansRoute
-  '/levels': typeof AuthLevelsRoute
+  '/levels': typeof AuthLevelsRouteWithChildren
   '/majors': typeof AuthMajorsRoute
   '/merchants': typeof AuthMerchantsRouteWithChildren
   '/my-profile': typeof AuthMyProfileRoute
@@ -386,7 +538,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthReportsRouteWithChildren
   '/settings': typeof AuthSettingsRouteWithChildren
   '/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
-  '/student-costs': typeof AuthStudentCostsRoute
+  '/student-costs': typeof AuthStudentCostsRouteWithChildren
   '/student-invoices': typeof AuthStudentInvoicesRoute
   '/student-transactions': typeof AuthStudentTransactionsRoute
   '/students': typeof AuthStudentsRouteWithChildren
@@ -411,22 +563,42 @@ export interface FileRoutesByFullPath {
   '/students/$id': typeof AuthStudentsIdRoute
   '/students/create': typeof AuthStudentsCreateRoute
   '/users/create': typeof AuthUsersCreateRoute
+  '/academic-years/': typeof AuthAcademicYearsIndexRoute
+  '/accountancy/': typeof AuthAccountancyIndexRoute
   '/alumni/': typeof AuthAlumniIndexRoute
+  '/levels/': typeof AuthLevelsIndexRoute
+  '/merchants/': typeof AuthMerchantsIndexRoute
   '/registrants/': typeof AuthRegistrantsIndexRoute
   '/reports/': typeof AuthReportsIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
   '/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
+  '/student-costs/': typeof AuthStudentCostsIndexRoute
   '/students/': typeof AuthStudentsIndexRoute
   '/users/': typeof AuthUsersIndexRoute
+  '/academic-years/$academicYearId/delegate-alumni': typeof AuthAcademicYearsAcademicYearIdDelegateAlumniRoute
+  '/academic-years/$academicYearId/delegate-registrant': typeof AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute
+  '/academic-years/$academicYearId/delegate-student': typeof AuthAcademicYearsAcademicYearIdDelegateStudentRoute
+  '/academic-years/$academicYearId/delete': typeof AuthAcademicYearsAcademicYearIdDeleteRoute
+  '/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
+  '/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
+  '/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
+  '/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
+  '/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
+  '/levels/$levelId/delegate-student': typeof AuthLevelsLevelIdDelegateStudentRoute
+  '/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
+  '/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
+  '/student-costs/$academicYearId/grades/$gradeId/': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
+  '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/academic-years': typeof AuthAcademicYearsRouteWithChildren
-  '/accountancy': typeof AuthAccountancyRoute
   '/auth-logs': typeof AuthAuthLogsRoute
   '/dashboard': typeof AuthDashboardRoute
   '/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
@@ -435,11 +607,8 @@ export interface FileRoutesByTo {
   '/ewallets': typeof AuthEwalletsRoute
   '/grades': typeof AuthGradesRoute
   '/ip-bans': typeof AuthIpBansRoute
-  '/levels': typeof AuthLevelsRoute
   '/majors': typeof AuthMajorsRoute
-  '/merchants': typeof AuthMerchantsRouteWithChildren
   '/my-profile': typeof AuthMyProfileRoute
-  '/student-costs': typeof AuthStudentCostsRoute
   '/student-invoices': typeof AuthStudentInvoicesRoute
   '/student-transactions': typeof AuthStudentTransactionsRoute
   '/create-password': typeof GuestCreatePasswordRoute
@@ -462,17 +631,39 @@ export interface FileRoutesByTo {
   '/students/$id': typeof AuthStudentsIdRoute
   '/students/create': typeof AuthStudentsCreateRoute
   '/users/create': typeof AuthUsersCreateRoute
+  '/academic-years': typeof AuthAcademicYearsIndexRoute
+  '/accountancy': typeof AuthAccountancyIndexRoute
   '/alumni': typeof AuthAlumniIndexRoute
+  '/levels': typeof AuthLevelsIndexRoute
+  '/merchants': typeof AuthMerchantsIndexRoute
   '/registrants': typeof AuthRegistrantsIndexRoute
   '/reports': typeof AuthReportsIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
   '/student-capabilities': typeof AuthStudentCapabilitiesIndexRoute
+  '/student-costs': typeof AuthStudentCostsIndexRoute
   '/students': typeof AuthStudentsIndexRoute
   '/users': typeof AuthUsersIndexRoute
+  '/academic-years/$academicYearId/delegate-alumni': typeof AuthAcademicYearsAcademicYearIdDelegateAlumniRoute
+  '/academic-years/$academicYearId/delegate-registrant': typeof AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute
+  '/academic-years/$academicYearId/delegate-student': typeof AuthAcademicYearsAcademicYearIdDelegateStudentRoute
+  '/academic-years/$academicYearId/delete': typeof AuthAcademicYearsAcademicYearIdDeleteRoute
+  '/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
+  '/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
+  '/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
+  '/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
+  '/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
+  '/levels/$levelId/delegate-student': typeof AuthLevelsLevelIdDelegateStudentRoute
+  '/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
+  '/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/student-costs/$academicYearId': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/students/$academicYearId/grades': typeof AuthStudentsAcademicYearIdGradesIndexRoute
+  '/student-costs/$academicYearId/grades/$gradeId': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
+  '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -480,7 +671,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_guest': typeof GuestRouteWithChildren
   '/_auth/academic-years': typeof AuthAcademicYearsRouteWithChildren
-  '/_auth/accountancy': typeof AuthAccountancyRoute
+  '/_auth/accountancy': typeof AuthAccountancyRouteWithChildren
   '/_auth/alumni': typeof AuthAlumniRouteWithChildren
   '/_auth/auth-logs': typeof AuthAuthLogsRoute
   '/_auth/dashboard': typeof AuthDashboardRoute
@@ -490,7 +681,7 @@ export interface FileRoutesById {
   '/_auth/ewallets': typeof AuthEwalletsRoute
   '/_auth/grades': typeof AuthGradesRoute
   '/_auth/ip-bans': typeof AuthIpBansRoute
-  '/_auth/levels': typeof AuthLevelsRoute
+  '/_auth/levels': typeof AuthLevelsRouteWithChildren
   '/_auth/majors': typeof AuthMajorsRoute
   '/_auth/merchants': typeof AuthMerchantsRouteWithChildren
   '/_auth/my-profile': typeof AuthMyProfileRoute
@@ -498,7 +689,7 @@ export interface FileRoutesById {
   '/_auth/reports': typeof AuthReportsRouteWithChildren
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/_auth/student-capabilities': typeof AuthStudentCapabilitiesRouteWithChildren
-  '/_auth/student-costs': typeof AuthStudentCostsRoute
+  '/_auth/student-costs': typeof AuthStudentCostsRouteWithChildren
   '/_auth/student-invoices': typeof AuthStudentInvoicesRoute
   '/_auth/student-transactions': typeof AuthStudentTransactionsRoute
   '/_auth/students': typeof AuthStudentsRouteWithChildren
@@ -523,17 +714,39 @@ export interface FileRoutesById {
   '/_auth/students/$id': typeof AuthStudentsIdRoute
   '/_auth/students/create': typeof AuthStudentsCreateRoute
   '/_auth/users/create': typeof AuthUsersCreateRoute
+  '/_auth/academic-years/': typeof AuthAcademicYearsIndexRoute
+  '/_auth/accountancy/': typeof AuthAccountancyIndexRoute
   '/_auth/alumni/': typeof AuthAlumniIndexRoute
+  '/_auth/levels/': typeof AuthLevelsIndexRoute
+  '/_auth/merchants/': typeof AuthMerchantsIndexRoute
   '/_auth/registrants/': typeof AuthRegistrantsIndexRoute
   '/_auth/reports/': typeof AuthReportsIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/student-capabilities/': typeof AuthStudentCapabilitiesIndexRoute
+  '/_auth/student-costs/': typeof AuthStudentCostsIndexRoute
   '/_auth/students/': typeof AuthStudentsIndexRoute
   '/_auth/users/': typeof AuthUsersIndexRoute
+  '/_auth/academic-years/$academicYearId/delegate-alumni': typeof AuthAcademicYearsAcademicYearIdDelegateAlumniRoute
+  '/_auth/academic-years/$academicYearId/delegate-registrant': typeof AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute
+  '/_auth/academic-years/$academicYearId/delegate-student': typeof AuthAcademicYearsAcademicYearIdDelegateStudentRoute
+  '/_auth/academic-years/$academicYearId/delete': typeof AuthAcademicYearsAcademicYearIdDeleteRoute
+  '/_auth/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
+  '/_auth/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
+  '/_auth/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/_auth/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
+  '/_auth/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
+  '/_auth/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
+  '/_auth/levels/$levelId/delegate-student': typeof AuthLevelsLevelIdDelegateStudentRoute
+  '/_auth/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
+  '/_auth/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/_auth/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
   '/_auth/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/_auth/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/_auth/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
   '/_auth/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
+  '/_auth/student-costs/$academicYearId/grades/$gradeId/': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
+  '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -583,22 +796,42 @@ export interface FileRouteTypes {
     | '/students/$id'
     | '/students/create'
     | '/users/create'
+    | '/academic-years/'
+    | '/accountancy/'
     | '/alumni/'
+    | '/levels/'
+    | '/merchants/'
     | '/registrants/'
     | '/reports/'
     | '/settings/'
     | '/student-capabilities/'
+    | '/student-costs/'
     | '/students/'
     | '/users/'
+    | '/academic-years/$academicYearId/delegate-alumni'
+    | '/academic-years/$academicYearId/delegate-registrant'
+    | '/academic-years/$academicYearId/delegate-student'
+    | '/academic-years/$academicYearId/delete'
+    | '/academic-years/$academicYearId/edit'
+    | '/accountancy/$accountancyId/delegate-child'
+    | '/accountancy/$accountancyId/delete'
+    | '/levels/$levelId/delegate-grade'
+    | '/levels/$levelId/delegate-major'
+    | '/levels/$levelId/delegate-registrant'
+    | '/levels/$levelId/delegate-student'
+    | '/levels/$levelId/delete'
+    | '/merchants/$merchantId/edit'
     | '/registrants/$academicYearId/workbench'
     | '/users/$userId/edit'
+    | '/student-costs/$academicYearId/'
     | '/students/$academicYearId/grades/$gradeId'
     | '/students/$academicYearId/grades/'
+    | '/student-costs/$academicYearId/grades/$gradeId/'
+    | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+    | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/academic-years'
-    | '/accountancy'
     | '/auth-logs'
     | '/dashboard'
     | '/ewallet-confirmations'
@@ -607,11 +840,8 @@ export interface FileRouteTypes {
     | '/ewallets'
     | '/grades'
     | '/ip-bans'
-    | '/levels'
     | '/majors'
-    | '/merchants'
     | '/my-profile'
-    | '/student-costs'
     | '/student-invoices'
     | '/student-transactions'
     | '/create-password'
@@ -634,17 +864,39 @@ export interface FileRouteTypes {
     | '/students/$id'
     | '/students/create'
     | '/users/create'
+    | '/academic-years'
+    | '/accountancy'
     | '/alumni'
+    | '/levels'
+    | '/merchants'
     | '/registrants'
     | '/reports'
     | '/settings'
     | '/student-capabilities'
+    | '/student-costs'
     | '/students'
     | '/users'
+    | '/academic-years/$academicYearId/delegate-alumni'
+    | '/academic-years/$academicYearId/delegate-registrant'
+    | '/academic-years/$academicYearId/delegate-student'
+    | '/academic-years/$academicYearId/delete'
+    | '/academic-years/$academicYearId/edit'
+    | '/accountancy/$accountancyId/delegate-child'
+    | '/accountancy/$accountancyId/delete'
+    | '/levels/$levelId/delegate-grade'
+    | '/levels/$levelId/delegate-major'
+    | '/levels/$levelId/delegate-registrant'
+    | '/levels/$levelId/delegate-student'
+    | '/levels/$levelId/delete'
+    | '/merchants/$merchantId/edit'
     | '/registrants/$academicYearId/workbench'
     | '/users/$userId/edit'
+    | '/student-costs/$academicYearId'
     | '/students/$academicYearId/grades/$gradeId'
     | '/students/$academicYearId/grades'
+    | '/student-costs/$academicYearId/grades/$gradeId'
+    | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+    | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   id:
     | '__root__'
     | '/'
@@ -694,17 +946,39 @@ export interface FileRouteTypes {
     | '/_auth/students/$id'
     | '/_auth/students/create'
     | '/_auth/users/create'
+    | '/_auth/academic-years/'
+    | '/_auth/accountancy/'
     | '/_auth/alumni/'
+    | '/_auth/levels/'
+    | '/_auth/merchants/'
     | '/_auth/registrants/'
     | '/_auth/reports/'
     | '/_auth/settings/'
     | '/_auth/student-capabilities/'
+    | '/_auth/student-costs/'
     | '/_auth/students/'
     | '/_auth/users/'
+    | '/_auth/academic-years/$academicYearId/delegate-alumni'
+    | '/_auth/academic-years/$academicYearId/delegate-registrant'
+    | '/_auth/academic-years/$academicYearId/delegate-student'
+    | '/_auth/academic-years/$academicYearId/delete'
+    | '/_auth/academic-years/$academicYearId/edit'
+    | '/_auth/accountancy/$accountancyId/delegate-child'
+    | '/_auth/accountancy/$accountancyId/delete'
+    | '/_auth/levels/$levelId/delegate-grade'
+    | '/_auth/levels/$levelId/delegate-major'
+    | '/_auth/levels/$levelId/delegate-registrant'
+    | '/_auth/levels/$levelId/delegate-student'
+    | '/_auth/levels/$levelId/delete'
+    | '/_auth/merchants/$merchantId/edit'
     | '/_auth/registrants/$academicYearId/workbench'
     | '/_auth/users/$userId/edit'
+    | '/_auth/student-costs/$academicYearId/'
     | '/_auth/students/$academicYearId/grades/$gradeId'
     | '/_auth/students/$academicYearId/grades/'
+    | '/_auth/student-costs/$academicYearId/grades/$gradeId/'
+    | '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+    | '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -939,12 +1213,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestVerify2faRouteImport
       parentRoute: typeof GuestRoute
     }
+    '/_auth/academic-years/': {
+      id: '/_auth/academic-years/'
+      path: '/'
+      fullPath: '/academic-years/'
+      preLoaderRoute: typeof AuthAcademicYearsIndexRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
     '/_auth/academic-years/create': {
       id: '/_auth/academic-years/create'
       path: '/create'
       fullPath: '/academic-years/create'
       preLoaderRoute: typeof AuthAcademicYearsCreateRouteImport
       parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/accountancy/': {
+      id: '/_auth/accountancy/'
+      path: '/'
+      fullPath: '/accountancy/'
+      preLoaderRoute: typeof AuthAccountancyIndexRouteImport
+      parentRoute: typeof AuthAccountancyRoute
     }
     '/_auth/alumni/': {
       id: '/_auth/alumni/'
@@ -966,6 +1254,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/alumni/dashboard'
       preLoaderRoute: typeof AuthAlumniDashboardRouteImport
       parentRoute: typeof AuthAlumniRoute
+    }
+    '/_auth/levels/': {
+      id: '/_auth/levels/'
+      path: '/'
+      fullPath: '/levels/'
+      preLoaderRoute: typeof AuthLevelsIndexRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/merchants/': {
+      id: '/_auth/merchants/'
+      path: '/'
+      fullPath: '/merchants/'
+      preLoaderRoute: typeof AuthMerchantsIndexRouteImport
+      parentRoute: typeof AuthMerchantsRoute
     }
     '/_auth/merchants/create': {
       id: '/_auth/merchants/create'
@@ -1058,6 +1360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearIdRouteImport
       parentRoute: typeof AuthStudentCapabilitiesRoute
     }
+    '/_auth/student-costs/': {
+      id: '/_auth/student-costs/'
+      path: '/'
+      fullPath: '/student-costs/'
+      preLoaderRoute: typeof AuthStudentCostsIndexRouteImport
+      parentRoute: typeof AuthStudentCostsRoute
+    }
     '/_auth/students/': {
       id: '/_auth/students/'
       path: '/'
@@ -1093,12 +1402,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthUsersCreateRouteImport
       parentRoute: typeof AuthUsersRoute
     }
+    '/_auth/academic-years/$academicYearId/delegate-alumni': {
+      id: '/_auth/academic-years/$academicYearId/delegate-alumni'
+      path: '/$academicYearId/delegate-alumni'
+      fullPath: '/academic-years/$academicYearId/delegate-alumni'
+      preLoaderRoute: typeof AuthAcademicYearsAcademicYearIdDelegateAlumniRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/academic-years/$academicYearId/delegate-registrant': {
+      id: '/_auth/academic-years/$academicYearId/delegate-registrant'
+      path: '/$academicYearId/delegate-registrant'
+      fullPath: '/academic-years/$academicYearId/delegate-registrant'
+      preLoaderRoute: typeof AuthAcademicYearsAcademicYearIdDelegateRegistrantRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/academic-years/$academicYearId/delegate-student': {
+      id: '/_auth/academic-years/$academicYearId/delegate-student'
+      path: '/$academicYearId/delegate-student'
+      fullPath: '/academic-years/$academicYearId/delegate-student'
+      preLoaderRoute: typeof AuthAcademicYearsAcademicYearIdDelegateStudentRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/academic-years/$academicYearId/delete': {
+      id: '/_auth/academic-years/$academicYearId/delete'
+      path: '/$academicYearId/delete'
+      fullPath: '/academic-years/$academicYearId/delete'
+      preLoaderRoute: typeof AuthAcademicYearsAcademicYearIdDeleteRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/academic-years/$academicYearId/edit': {
+      id: '/_auth/academic-years/$academicYearId/edit'
+      path: '/$academicYearId/edit'
+      fullPath: '/academic-years/$academicYearId/edit'
+      preLoaderRoute: typeof AuthAcademicYearsAcademicYearIdEditRouteImport
+      parentRoute: typeof AuthAcademicYearsRoute
+    }
+    '/_auth/accountancy/$accountancyId/delegate-child': {
+      id: '/_auth/accountancy/$accountancyId/delegate-child'
+      path: '/$accountancyId/delegate-child'
+      fullPath: '/accountancy/$accountancyId/delegate-child'
+      preLoaderRoute: typeof AuthAccountancyAccountancyIdDelegateChildRouteImport
+      parentRoute: typeof AuthAccountancyRoute
+    }
+    '/_auth/accountancy/$accountancyId/delete': {
+      id: '/_auth/accountancy/$accountancyId/delete'
+      path: '/$accountancyId/delete'
+      fullPath: '/accountancy/$accountancyId/delete'
+      preLoaderRoute: typeof AuthAccountancyAccountancyIdDeleteRouteImport
+      parentRoute: typeof AuthAccountancyRoute
+    }
+    '/_auth/levels/$levelId/delegate-grade': {
+      id: '/_auth/levels/$levelId/delegate-grade'
+      path: '/$levelId/delegate-grade'
+      fullPath: '/levels/$levelId/delegate-grade'
+      preLoaderRoute: typeof AuthLevelsLevelIdDelegateGradeRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/levels/$levelId/delegate-major': {
+      id: '/_auth/levels/$levelId/delegate-major'
+      path: '/$levelId/delegate-major'
+      fullPath: '/levels/$levelId/delegate-major'
+      preLoaderRoute: typeof AuthLevelsLevelIdDelegateMajorRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/levels/$levelId/delegate-registrant': {
+      id: '/_auth/levels/$levelId/delegate-registrant'
+      path: '/$levelId/delegate-registrant'
+      fullPath: '/levels/$levelId/delegate-registrant'
+      preLoaderRoute: typeof AuthLevelsLevelIdDelegateRegistrantRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/levels/$levelId/delegate-student': {
+      id: '/_auth/levels/$levelId/delegate-student'
+      path: '/$levelId/delegate-student'
+      fullPath: '/levels/$levelId/delegate-student'
+      preLoaderRoute: typeof AuthLevelsLevelIdDelegateStudentRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/levels/$levelId/delete': {
+      id: '/_auth/levels/$levelId/delete'
+      path: '/$levelId/delete'
+      fullPath: '/levels/$levelId/delete'
+      preLoaderRoute: typeof AuthLevelsLevelIdDeleteRouteImport
+      parentRoute: typeof AuthLevelsRoute
+    }
+    '/_auth/merchants/$merchantId/edit': {
+      id: '/_auth/merchants/$merchantId/edit'
+      path: '/$merchantId/edit'
+      fullPath: '/merchants/$merchantId/edit'
+      preLoaderRoute: typeof AuthMerchantsMerchantIdEditRouteImport
+      parentRoute: typeof AuthMerchantsRoute
+    }
     '/_auth/registrants/$academicYearId/workbench': {
       id: '/_auth/registrants/$academicYearId/workbench'
       path: '/$academicYearId/workbench'
       fullPath: '/registrants/$academicYearId/workbench'
       preLoaderRoute: typeof AuthRegistrantsAcademicYearIdWorkbenchRouteImport
       parentRoute: typeof AuthRegistrantsRoute
+    }
+    '/_auth/student-costs/$academicYearId/': {
+      id: '/_auth/student-costs/$academicYearId/'
+      path: '/$academicYearId'
+      fullPath: '/student-costs/$academicYearId/'
+      preLoaderRoute: typeof AuthStudentCostsAcademicYearIdIndexRouteImport
+      parentRoute: typeof AuthStudentCostsRoute
     }
     '/_auth/users/$userId/edit': {
       id: '/_auth/users/$userId/edit'
@@ -1121,19 +1528,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStudentsAcademicYearIdGradesGradeIdRouteImport
       parentRoute: typeof AuthStudentsRoute
     }
+    '/_auth/student-costs/$academicYearId/grades/$gradeId/': {
+      id: '/_auth/student-costs/$academicYearId/grades/$gradeId/'
+      path: '/$academicYearId/grades/$gradeId'
+      fullPath: '/student-costs/$academicYearId/grades/$gradeId/'
+      preLoaderRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRouteImport
+      parentRoute: typeof AuthStudentCostsRoute
+    }
+    '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': {
+      id: '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+      path: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+      fullPath: '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
+      preLoaderRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRouteImport
+      parentRoute: typeof AuthStudentCostsRoute
+    }
+    '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': {
+      id: '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
+      path: '/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
+      fullPath: '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
+      preLoaderRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRouteImport
+      parentRoute: typeof AuthStudentCostsRoute
+    }
   }
 }
 
 interface AuthAcademicYearsRouteChildren {
   AuthAcademicYearsCreateRoute: typeof AuthAcademicYearsCreateRoute
+  AuthAcademicYearsIndexRoute: typeof AuthAcademicYearsIndexRoute
+  AuthAcademicYearsAcademicYearIdDelegateAlumniRoute: typeof AuthAcademicYearsAcademicYearIdDelegateAlumniRoute
+  AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute: typeof AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute
+  AuthAcademicYearsAcademicYearIdDelegateStudentRoute: typeof AuthAcademicYearsAcademicYearIdDelegateStudentRoute
+  AuthAcademicYearsAcademicYearIdDeleteRoute: typeof AuthAcademicYearsAcademicYearIdDeleteRoute
+  AuthAcademicYearsAcademicYearIdEditRoute: typeof AuthAcademicYearsAcademicYearIdEditRoute
 }
 
 const AuthAcademicYearsRouteChildren: AuthAcademicYearsRouteChildren = {
   AuthAcademicYearsCreateRoute: AuthAcademicYearsCreateRoute,
+  AuthAcademicYearsIndexRoute: AuthAcademicYearsIndexRoute,
+  AuthAcademicYearsAcademicYearIdDelegateAlumniRoute:
+    AuthAcademicYearsAcademicYearIdDelegateAlumniRoute,
+  AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute:
+    AuthAcademicYearsAcademicYearIdDelegateRegistrantRoute,
+  AuthAcademicYearsAcademicYearIdDelegateStudentRoute:
+    AuthAcademicYearsAcademicYearIdDelegateStudentRoute,
+  AuthAcademicYearsAcademicYearIdDeleteRoute:
+    AuthAcademicYearsAcademicYearIdDeleteRoute,
+  AuthAcademicYearsAcademicYearIdEditRoute:
+    AuthAcademicYearsAcademicYearIdEditRoute,
 }
 
 const AuthAcademicYearsRouteWithChildren =
   AuthAcademicYearsRoute._addFileChildren(AuthAcademicYearsRouteChildren)
+
+interface AuthAccountancyRouteChildren {
+  AuthAccountancyIndexRoute: typeof AuthAccountancyIndexRoute
+  AuthAccountancyAccountancyIdDelegateChildRoute: typeof AuthAccountancyAccountancyIdDelegateChildRoute
+  AuthAccountancyAccountancyIdDeleteRoute: typeof AuthAccountancyAccountancyIdDeleteRoute
+}
+
+const AuthAccountancyRouteChildren: AuthAccountancyRouteChildren = {
+  AuthAccountancyIndexRoute: AuthAccountancyIndexRoute,
+  AuthAccountancyAccountancyIdDelegateChildRoute:
+    AuthAccountancyAccountancyIdDelegateChildRoute,
+  AuthAccountancyAccountancyIdDeleteRoute:
+    AuthAccountancyAccountancyIdDeleteRoute,
+}
+
+const AuthAccountancyRouteWithChildren = AuthAccountancyRoute._addFileChildren(
+  AuthAccountancyRouteChildren,
+)
 
 interface AuthAlumniRouteChildren {
   AuthAlumniGraduationYearRoute: typeof AuthAlumniGraduationYearRoute
@@ -1151,12 +1614,39 @@ const AuthAlumniRouteWithChildren = AuthAlumniRoute._addFileChildren(
   AuthAlumniRouteChildren,
 )
 
+interface AuthLevelsRouteChildren {
+  AuthLevelsIndexRoute: typeof AuthLevelsIndexRoute
+  AuthLevelsLevelIdDelegateGradeRoute: typeof AuthLevelsLevelIdDelegateGradeRoute
+  AuthLevelsLevelIdDelegateMajorRoute: typeof AuthLevelsLevelIdDelegateMajorRoute
+  AuthLevelsLevelIdDelegateRegistrantRoute: typeof AuthLevelsLevelIdDelegateRegistrantRoute
+  AuthLevelsLevelIdDelegateStudentRoute: typeof AuthLevelsLevelIdDelegateStudentRoute
+  AuthLevelsLevelIdDeleteRoute: typeof AuthLevelsLevelIdDeleteRoute
+}
+
+const AuthLevelsRouteChildren: AuthLevelsRouteChildren = {
+  AuthLevelsIndexRoute: AuthLevelsIndexRoute,
+  AuthLevelsLevelIdDelegateGradeRoute: AuthLevelsLevelIdDelegateGradeRoute,
+  AuthLevelsLevelIdDelegateMajorRoute: AuthLevelsLevelIdDelegateMajorRoute,
+  AuthLevelsLevelIdDelegateRegistrantRoute:
+    AuthLevelsLevelIdDelegateRegistrantRoute,
+  AuthLevelsLevelIdDelegateStudentRoute: AuthLevelsLevelIdDelegateStudentRoute,
+  AuthLevelsLevelIdDeleteRoute: AuthLevelsLevelIdDeleteRoute,
+}
+
+const AuthLevelsRouteWithChildren = AuthLevelsRoute._addFileChildren(
+  AuthLevelsRouteChildren,
+)
+
 interface AuthMerchantsRouteChildren {
   AuthMerchantsCreateRoute: typeof AuthMerchantsCreateRoute
+  AuthMerchantsIndexRoute: typeof AuthMerchantsIndexRoute
+  AuthMerchantsMerchantIdEditRoute: typeof AuthMerchantsMerchantIdEditRoute
 }
 
 const AuthMerchantsRouteChildren: AuthMerchantsRouteChildren = {
   AuthMerchantsCreateRoute: AuthMerchantsCreateRoute,
+  AuthMerchantsIndexRoute: AuthMerchantsIndexRoute,
+  AuthMerchantsMerchantIdEditRoute: AuthMerchantsMerchantIdEditRoute,
 }
 
 const AuthMerchantsRouteWithChildren = AuthMerchantsRoute._addFileChildren(
@@ -1233,6 +1723,29 @@ const AuthStudentCapabilitiesRouteWithChildren =
     AuthStudentCapabilitiesRouteChildren,
   )
 
+interface AuthStudentCostsRouteChildren {
+  AuthStudentCostsIndexRoute: typeof AuthStudentCostsIndexRoute
+  AuthStudentCostsAcademicYearIdIndexRoute: typeof AuthStudentCostsAcademicYearIdIndexRoute
+  AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
+}
+
+const AuthStudentCostsRouteChildren: AuthStudentCostsRouteChildren = {
+  AuthStudentCostsIndexRoute: AuthStudentCostsIndexRoute,
+  AuthStudentCostsAcademicYearIdIndexRoute:
+    AuthStudentCostsAcademicYearIdIndexRoute,
+  AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute:
+    AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute,
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute:
+    AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute,
+  AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute:
+    AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute,
+}
+
+const AuthStudentCostsRouteWithChildren =
+  AuthStudentCostsRoute._addFileChildren(AuthStudentCostsRouteChildren)
+
 interface AuthStudentsRouteChildren {
   AuthStudentsIdRoute: typeof AuthStudentsIdRoute
   AuthStudentsCreateRoute: typeof AuthStudentsCreateRoute
@@ -1273,7 +1786,7 @@ const AuthUsersRouteWithChildren = AuthUsersRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthAcademicYearsRoute: typeof AuthAcademicYearsRouteWithChildren
-  AuthAccountancyRoute: typeof AuthAccountancyRoute
+  AuthAccountancyRoute: typeof AuthAccountancyRouteWithChildren
   AuthAlumniRoute: typeof AuthAlumniRouteWithChildren
   AuthAuthLogsRoute: typeof AuthAuthLogsRoute
   AuthDashboardRoute: typeof AuthDashboardRoute
@@ -1283,7 +1796,7 @@ interface AuthRouteChildren {
   AuthEwalletsRoute: typeof AuthEwalletsRoute
   AuthGradesRoute: typeof AuthGradesRoute
   AuthIpBansRoute: typeof AuthIpBansRoute
-  AuthLevelsRoute: typeof AuthLevelsRoute
+  AuthLevelsRoute: typeof AuthLevelsRouteWithChildren
   AuthMajorsRoute: typeof AuthMajorsRoute
   AuthMerchantsRoute: typeof AuthMerchantsRouteWithChildren
   AuthMyProfileRoute: typeof AuthMyProfileRoute
@@ -1291,7 +1804,7 @@ interface AuthRouteChildren {
   AuthReportsRoute: typeof AuthReportsRouteWithChildren
   AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthStudentCapabilitiesRoute: typeof AuthStudentCapabilitiesRouteWithChildren
-  AuthStudentCostsRoute: typeof AuthStudentCostsRoute
+  AuthStudentCostsRoute: typeof AuthStudentCostsRouteWithChildren
   AuthStudentInvoicesRoute: typeof AuthStudentInvoicesRoute
   AuthStudentTransactionsRoute: typeof AuthStudentTransactionsRoute
   AuthStudentsRoute: typeof AuthStudentsRouteWithChildren
@@ -1300,7 +1813,7 @@ interface AuthRouteChildren {
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAcademicYearsRoute: AuthAcademicYearsRouteWithChildren,
-  AuthAccountancyRoute: AuthAccountancyRoute,
+  AuthAccountancyRoute: AuthAccountancyRouteWithChildren,
   AuthAlumniRoute: AuthAlumniRouteWithChildren,
   AuthAuthLogsRoute: AuthAuthLogsRoute,
   AuthDashboardRoute: AuthDashboardRoute,
@@ -1310,7 +1823,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthEwalletsRoute: AuthEwalletsRoute,
   AuthGradesRoute: AuthGradesRoute,
   AuthIpBansRoute: AuthIpBansRoute,
-  AuthLevelsRoute: AuthLevelsRoute,
+  AuthLevelsRoute: AuthLevelsRouteWithChildren,
   AuthMajorsRoute: AuthMajorsRoute,
   AuthMerchantsRoute: AuthMerchantsRouteWithChildren,
   AuthMyProfileRoute: AuthMyProfileRoute,
@@ -1318,7 +1831,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthReportsRoute: AuthReportsRouteWithChildren,
   AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthStudentCapabilitiesRoute: AuthStudentCapabilitiesRouteWithChildren,
-  AuthStudentCostsRoute: AuthStudentCostsRoute,
+  AuthStudentCostsRoute: AuthStudentCostsRouteWithChildren,
   AuthStudentInvoicesRoute: AuthStudentInvoicesRoute,
   AuthStudentTransactionsRoute: AuthStudentTransactionsRoute,
   AuthStudentsRoute: AuthStudentsRouteWithChildren,

@@ -88,8 +88,17 @@ const LegacyModal = ({ open, size = "default", title, icon, footer, children }: 
 				{children}
 			</div>
 			{footer !== undefined ? (
-				<footer className="flex min-h-[68px] shrink-0 items-center justify-end rounded-b-[20px] border-0 bg-[var(--bg-tertiary)] px-[30px]">
-					{footer}
+				// `-mt-[5px]` is porto's `.card-footer { margin-top: -5px }` (theme.css 7571-7575),
+				// which `.tbr_custom_modal .card-footer` re-skins but never resets. Without it every
+				// modal in the app stands 5px taller than legacy.
+				<footer className="-mt-[5px] flex min-h-[68px] shrink-0 items-center justify-end rounded-b-[20px] border-0 bg-[var(--bg-tertiary)] px-[30px]">
+					{/*
+					 * Legacy nests the buttons in `div.text-right` inside the flex footer. That block
+					 * wrapper is load-bearing: inline whitespace between two inline-flex buttons only
+					 * renders in normal flow — a flex container discards whitespace-only text nodes,
+					 * which silently drops the ~3.73px the blade puts between them.
+					 */}
+					<div className="text-right">{footer}</div>
 				</footer>
 			) : null}
 		</section>

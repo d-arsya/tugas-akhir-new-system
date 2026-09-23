@@ -9,8 +9,6 @@ import type {
 	AdminEwalletItem,
 	BankTransferConfirmationItem,
 	WithdrawalRequestItem,
-	AdminMerchantItem,
-	StudentCostItem,
 	StudentCapabilityMatrixItem,
 	StudentTransactionItem,
 } from "@roja/types"
@@ -18,10 +16,6 @@ import {
 	hijackAuthUser,
 	mockLoginUsers,
 	mockBannedIps,
-	mockAcademicYears,
-	mockLevels,
-	mockMajors,
-	mockGrades,
 	mockStudents,
 	mockCapabilities,
 	mockInvoices,
@@ -30,8 +24,6 @@ import {
 	mockEwallets,
 	mockBankConfirmations,
 	mockWithdrawals,
-	mockMerchants,
-	mockStudentCosts,
 	mockStudentCapabilityMatrix,
 	mockStudentTransactions,
 	mockDashboardStats,
@@ -70,13 +62,7 @@ const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 
 let bannedIpsList = [...mockBannedIps]
 
-let academicYearsList = [...mockAcademicYears]
-let levelsList = [...mockLevels]
-let majorsList = [...mockMajors]
-let gradesList = [...mockGrades]
-
 let studentsList: StudentItem[] = [...mockStudents]
-let studentCostsList: StudentCostItem[] = [...mockStudentCosts]
 let capabilityMatrixList: StudentCapabilityMatrixItem[] = [...mockStudentCapabilityMatrix]
 let capabilitiesList: StudentCapabilityItem[] = [...mockCapabilities]
 let invoicesList: StudentInvoiceItem[] = [...mockInvoices]
@@ -86,13 +72,15 @@ let registrantsList: AdminRegistrantItem[] = [...mockRegistrants]
 let ewalletsList: AdminEwalletItem[] = [...mockEwallets]
 let bankConfirmationsList: BankTransferConfirmationItem[] = [...mockBankConfirmations]
 let withdrawalsList: WithdrawalRequestItem[] = [...mockWithdrawals]
-let merchantsList: AdminMerchantItem[] = [...mockMerchants]
 
 
 export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 	if (!IS_DEV_HIJACK) return realApi
 
 	return {
+		// Data Master (Tahun Ajaran, Jenjang, Jurusan, Kelas, Subkelas) has no mocks:
+		// those pages are verified against a real database, so they fall through here.
+		...realApi,
 		...usersHijack,
 		...settingsHijack,
 		...formHijack,
@@ -233,135 +221,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { success: true, data: { message: "Blokir IP berhasil dihapus." }, message: "OK" }
 		},
 
-		getAcademicYears: async () => {
-			await delay(200)
-			return { success: true, data: academicYearsList, message: "OK" }
-		},
-
-		createAcademicYear: async (dto) => {
-			await delay(300)
-			if (dto.isCurrent) {
-				academicYearsList.forEach((y) => (y.isCurrent = false))
-			}
-			const newYear: any = { id: Date.now(), ...dto, isCurrent: dto.isCurrent ?? false, status: "ACTIVE", studentCount: 0 }
-			academicYearsList.unshift(newYear)
-			return { success: true, data: newYear, message: "Tahun akademik berhasil dibuat." }
-		},
-
-		updateAcademicYear: async (id, dto) => {
-			await delay(250)
-			const year = academicYearsList.find((y) => y.id === id)
-			if (year) Object.assign(year, dto)
-			return { success: true, data: year!, message: "Tahun akademik diperbarui." }
-		},
-
-		setActiveAcademicYear: async (id) => {
-			await delay(250)
-			academicYearsList.forEach((y) => (y.isCurrent = y.id === id))
-			return { success: true, data: { message: "Tahun akademik aktif diperbarui." }, message: "OK" }
-		},
-
-		getLevels: async () => {
-			await delay(200)
-			return { success: true, data: levelsList, message: "OK" }
-		},
-
-		createLevel: async (dto) => {
-			await delay(300)
-			const newLevel: any = { id: Date.now(), ...dto, academicYearIds: [1], majorIds: dto.majorIds || [] }
-			levelsList.push(newLevel)
-			return { success: true, data: newLevel, message: "Jenjang pendidikan berhasil ditambahkan." }
-		},
-
-		updateLevel: async (id, dto) => {
-			await delay(250)
-			const level = levelsList.find((l) => l.id === id)
-			if (level) Object.assign(level, dto)
-			return { success: true, data: level!, message: "Jenjang pendidikan diperbarui." }
-		},
-
-		deleteLevel: async (id) => {
-			await delay(200)
-			levelsList = levelsList.filter((l) => l.id !== id)
-			return { success: true, data: { message: "Jenjang pendidikan dihapus." }, message: "OK" }
-		},
-
-		getMajors: async () => {
-			await delay(200)
-			return { success: true, data: majorsList, message: "OK" }
-		},
-
-		createMajor: async (dto) => {
-			await delay(300)
-			const newMajor: any = { id: Date.now(), ...dto }
-			majorsList.push(newMajor)
-			return { success: true, data: newMajor, message: "Jurusan baru berhasil dibuat." }
-		},
-
-		updateMajor: async (id, dto) => {
-			await delay(250)
-			const major = majorsList.find((m) => m.id === id)
-			if (major) Object.assign(major, dto)
-			return { success: true, data: major!, message: "Data jurusan diperbarui." }
-		},
-
-		deleteMajor: async (id) => {
-			await delay(200)
-			majorsList = majorsList.filter((m) => m.id !== id)
-			return { success: true, data: { message: "Jurusan berhasil dihapus." }, message: "OK" }
-		},
-
-		getGrades: async () => {
-			await delay(200)
-			return { success: true, data: gradesList, message: "OK" }
-		},
-
-		createGrade: async (dto) => {
-			await delay(300)
-			const level = levelsList.find((l) => l.id === dto.levelId)
-			const newGrade: any = { id: Date.now(), ...dto, levelName: level?.name || "", subGrades: [] }
-			gradesList.push(newGrade)
-			return { success: true, data: newGrade, message: "Kelas baru berhasil dibuat." }
-		},
-
-		updateGrade: async (id, dto) => {
-			await delay(250)
-			const grade = gradesList.find((g) => g.id === id)
-			if (grade) Object.assign(grade, dto)
-			return { success: true, data: grade!, message: "Data kelas diperbarui." }
-		},
-
-		deleteGrade: async (id) => {
-			await delay(200)
-			gradesList = gradesList.filter((g) => g.id !== id)
-			return { success: true, data: { message: "Kelas berhasil dihapus." }, message: "OK" }
-		},
-
-		createSubGrade: async (dto) => {
-			await delay(300)
-			const grade = gradesList.find((g) => g.id === dto.gradeId)
-			const newSub: any = { id: Date.now(), ...dto, studentCount: 0 }
-			if (grade) grade.subGrades.push(newSub)
-			return { success: true, data: newSub, message: "Sub-kelas berhasil ditambahkan." }
-		},
-
-		updateSubGrade: async (id, dto) => {
-			await delay(250)
-			for (const grade of gradesList) {
-				const sub = grade.subGrades.find((s) => s.id === id)
-				if (sub) Object.assign(sub, dto)
-			}
-			return { success: true, data: {} as any, message: "Sub-kelas diperbarui." }
-		},
-
-		deleteSubGrade: async (id) => {
-			await delay(200)
-			for (const grade of gradesList) {
-				grade.subGrades = grade.subGrades.filter((s) => s.id !== id)
-			}
-			return { success: true, data: { message: "Sub-kelas dihapus." }, message: "OK" }
-		},
-
 		// Sprint C Handlers
 		getStudents: async (params) => {
 			await delay(200)
@@ -396,42 +255,23 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { success: true, data: student!, message: "Data santri berhasil diperbarui." }
 		},
 
+		// The Data Master mocks are gone, so these bulk actions no longer have a
+		// grade/jurusan/tahun-ajaran fixture to resolve target names against.
 		bulkPromoteStudents: async (data) => {
 			await delay(300)
-			const targetGrade = gradesList.find((g) => g.id === data.targetGradeId)
-			const targetSubGrade = targetGrade?.subGrades.find((s) => s.id === data.targetSubGradeId)
-			const targetAy = academicYearsList.find((a) => a.id === data.targetAcademicYearId)
-			studentsList.forEach((s) => {
-				if (data.studentIds.includes(s.id)) {
-					if (targetGrade) s.gradeName = targetGrade.name
-					if (targetSubGrade) s.subGradeName = targetSubGrade.name
-					if (targetAy) s.academicYear = targetAy.year
-				}
-			})
 			return { success: true, data: { count: data.studentIds.length }, message: `${data.studentIds.length} Santri berhasil dinaikkan kelas.` }
 		},
 
 		bulkRetainStudents: async (data) => {
 			await delay(300)
-			const targetAy = academicYearsList.find((a) => a.id === data.targetAcademicYearId)
-			studentsList.forEach((s) => {
-				if (data.studentIds.includes(s.id) && targetAy) {
-					s.academicYear = targetAy.year
-				}
-			})
 			return { success: true, data: { count: data.studentIds.length }, message: `${data.studentIds.length} Santri tercatat tinggal kelas.` }
 		},
 
 		bulkChangeSubGrade: async (data) => {
 			await delay(300)
-			let subName = "Rombel Baru"
-			for (const g of gradesList) {
-				const match = g.subGrades.find((sub) => sub.id === data.targetSubGradeId)
-				if (match) subName = match.name
-			}
 			studentsList.forEach((s) => {
 				if (data.studentIds.includes(s.id)) {
-					s.subGradeName = subName
+					s.subGradeName = "Rombel Baru"
 				}
 			})
 			return { success: true, data: { count: data.studentIds.length }, message: `${data.studentIds.length} Santri dipindahkan subkelas.` }
@@ -439,12 +279,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 
 		bulkChangeMajor: async (data) => {
 			await delay(300)
-			const major = majorsList.find((m) => m.id === data.targetMajorId)
-			studentsList.forEach((s) => {
-				if (data.studentIds.includes(s.id) && major) {
-					s.gradeName = `${s.gradeName.split(" ")[0]} ${major.code}`
-				}
-			})
 			return { success: true, data: { count: data.studentIds.length }, message: `${data.studentIds.length} Santri dipindahkan jurusan.` }
 		},
 
@@ -478,41 +312,9 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 		},
 
 		// Student Costs (Tarif per Akun)
-		getStudentCosts: async (params) => {
-			await delay(200)
-			let filtered = [...studentCostsList]
-			if (params?.academicYearId) filtered = filtered.filter((c) => c.academicYearId === params.academicYearId)
-			if (params?.gradeId) filtered = filtered.filter((c) => c.gradeId === params.gradeId)
-			return { success: true, data: filtered, message: "OK" }
-		},
 
-		createStudentCost: async (dto) => {
-			await delay(300)
-			const ay = academicYearsList.find((a) => a.id === dto.academicYearId)
-			const gr = gradesList.find((g) => g.id === dto.gradeId)
-			const newItem: StudentCostItem = {
-				id: Date.now(),
-				...dto,
-				academicYearName: ay ? `${ay.year} - ${ay.semester}` : "2024/2025",
-				gradeName: gr ? gr.name : "Kelas 7",
-				isActive: dto.isActive ?? true,
-			}
-			studentCostsList.unshift(newItem)
-			return { success: true, data: newItem, message: "Tarif akun biaya berhasil ditambahkan." }
-		},
 
-		updateStudentCost: async (id, dto) => {
-			await delay(250)
-			const item = studentCostsList.find((c) => c.id === id)
-			if (item) Object.assign(item, dto)
-			return { success: true, data: item!, message: "Tarif akun biaya berhasil diperbarui." }
-		},
 
-		deleteStudentCost: async (id) => {
-			await delay(200)
-			studentCostsList = studentCostsList.filter((c) => c.id !== id)
-			return { success: true, data: { message: "Tarif akun biaya berhasil dihapus." }, message: "OK" }
-		},
 
 		getCapabilities: async () => {
 			await delay(200)
@@ -725,30 +527,8 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			return { success: true, data: { message: "Permintaan penarikan ditolak." }, message: "OK" }
 		},
 
-		getMerchants: async () => {
-			await delay(200)
-			return { success: true, data: { items: merchantsList, total: merchantsList.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
 
-		createMerchant: async (dto) => {
-			await delay(300)
-			const newM: any = {
-				id: Date.now(),
-				...dto,
-				qrCodePayload: `ROJA-MERCH-${Date.now()}`,
-				isActive: true,
-				createdAt: new Date().toISOString(),
-			}
-			merchantsList.unshift(newM)
-			return { success: true, data: newM, message: "Akun Merchant berhasil didaftarkan." }
-		},
 
-		toggleMerchantStatus: async (id, isActive) => {
-			await delay(200)
-			const m = merchantsList.find((x) => x.id === id)
-			if (m) m.isActive = isActive
-			return { success: true, data: { message: `Status Merchant ${isActive ? "diaktifkan" : "dinonaktifkan"}.` }, message: "OK" }
-		},
 	}
 }
 

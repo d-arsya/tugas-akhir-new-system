@@ -15,21 +15,27 @@ function StudentGradesLevel2Page(): JSX.Element {
 
 	const { data: ayData, isLoading: ayLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
 	const { data: gradesData, isLoading: gradesLoading } = useQuery({
 		queryKey: ["admin-grades"],
-		queryFn: () => adminApi.getGrades(),
+		queryFn: () => adminApi.getGradeRows(),
 	})
 
-	const academicYears = ayData?.data || []
-	const grades = gradesData?.data || []
+	const academicYears = ayData ?? []
+	const grades = (gradesData ?? []).map((g) => ({
+		id: g.id,
+		name: g.name,
+		levelName: g.levelName ?? "",
+	}))
 
-	const currentAy = academicYears.find((a: any) => String(a.id) === String(academicYearId)) || {
+	const matchedAy = academicYears.find((a) => String(a.id) === String(academicYearId))
+	// AcademicYearRow has no semester; the header only renders the year.
+	const currentAy = {
 		id: Number(academicYearId),
-		year: "2026/2027",
-		semester: "Ganjil",
+		year: matchedAy?.year ?? "",
+		semester: "",
 	}
 
 	if (ayLoading || gradesLoading) return <PageLoader />

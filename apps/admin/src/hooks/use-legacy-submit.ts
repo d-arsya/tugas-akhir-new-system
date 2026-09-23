@@ -15,6 +15,8 @@ type LegacySubmitOptions<TVariables, TData> = {
 	errorTitle?: string
 	// The legacy redirect / `location.reload()` / DataTables reload, 1000 ms after the notice
 	onDone?: (data: TData) => void
+	// Most scripts wait 1000 ms; `grade/delete.js` waits 500, so the Kelas deletes pass 500 here
+	afterMs?: number
 }
 
 export type LegacySubmit<TVariables, TData> = {
@@ -32,6 +34,7 @@ export const useLegacySubmit = <TVariables, TData>({
 	successMessage,
 	errorTitle,
 	onDone,
+	afterMs = AFTER_MS,
 }: LegacySubmitOptions<TVariables, TData>): LegacySubmit<TVariables, TData> => {
 	const timer = useRef<number | undefined>(undefined)
 	const [waiting, setWaiting] = useState(false)
@@ -47,7 +50,7 @@ export const useLegacySubmit = <TVariables, TData>({
 			timer.current = window.setTimeout(() => {
 				setWaiting(false)
 				onDone?.(data)
-			}, AFTER_MS)
+			}, afterMs)
 		},
 		// The legacy handler restores the button and leaves the form untouched on failure
 		onError: (error) => legacyNotify.error(legacyErrors(error), errorTitle),

@@ -50,16 +50,25 @@ import { AdminSettingFormController } from "@admin/setting/admin-setting-form.co
 import { AdminSystemSettingService } from "@admin/setting/admin-system-setting.service"
 import { AdminSystemSettingController } from "@admin/setting/admin-system-setting.controller"
 
-import { AcademicYearService } from "@admin/academic/academic-year.service"
-import { LevelService } from "@admin/academic/level.service"
-import { MajorService } from "@admin/academic/major.service"
-import { GradeService } from "@admin/academic/grade.service"
-import { SubGradeService } from "@admin/academic/sub-grade.service"
-import { AcademicYearController } from "@admin/academic/academic-year.controller"
-import { LevelController } from "@admin/academic/level.controller"
-import { MajorController } from "@admin/academic/major.controller"
-import { GradeController } from "@admin/academic/grade.controller"
-import { SubGradeController } from "@admin/academic/sub-grade.controller"
+import { AcademicYearAdminService } from "@admin/academic/academic-year-admin.service"
+import { AcademicYearAdminController } from "@admin/academic/academic-year-admin.controller"
+import { AcademicYearDeleteService } from "@admin/academic/academic-year-delete.service"
+import { AcademicYearDeleteController } from "@admin/academic/academic-year-delete.controller"
+import { LevelAdminService } from "@admin/academic/level-admin.service"
+import { LevelAdminController } from "@admin/academic/level-admin.controller"
+import { MajorAdminService } from "@admin/academic/major-admin.service"
+import { MajorAdminController } from "@admin/academic/major-admin.controller"
+import { GradeAdminService } from "@admin/academic/grade-admin.service"
+import { GradeAdminController } from "@admin/academic/grade-admin.controller"
+import { SubGradeAdminService } from "@admin/academic/sub-grade-admin.service"
+import { SubGradeAdminController } from "@admin/academic/sub-grade-admin.controller"
+
+import { AccountancyAdminService } from "@admin/billing/accountancy-admin.service"
+import { AccountancyAdminController } from "@admin/billing/accountancy-admin.controller"
+import { StudentCostAdminService } from "@admin/billing/student-cost-admin.service"
+import { StudentCostAdminController } from "@admin/billing/student-cost-admin.controller"
+import { MerchantAdminService } from "@admin/merchant/merchant-admin.service"
+import { MerchantAdminController } from "@admin/merchant/merchant-admin.controller"
 
 import { PsbAdminService } from "@admin/psb/psb-admin.service"
 import { PsbAdminController } from "@admin/psb/psb-admin.controller"
@@ -71,17 +80,12 @@ import { AdminReportService } from "@admin/report/admin-report.service"
 import { AdminReportExportService } from "@admin/report/admin-report-export.service"
 import { AdminReportController } from "@admin/report/admin-report.controller"
 
-import { BillingAdminService } from "@admin/billing/billing-admin.service"
-import { BillingAdminController } from "@admin/billing/billing-admin.controller"
-
 import { EwalletAdminService } from "@admin/ewallet/ewallet-admin.service"
 import { EwalletAdminController } from "@admin/ewallet/ewallet-admin.controller"
 
 import { AlumniAdminService } from "@admin/alumni/alumni-admin.service"
 import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
 
-import { MerchantAdminService } from "@admin/merchant/merchant-admin.service"
-import { MerchantAdminController } from "@admin/merchant/merchant-admin.controller"
 
 @Module({
 	imports: [
@@ -117,19 +121,21 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 		AdminAnnouncementController,
 		AdminSettingFormController,
 		AdminSystemSettingController,
-		AcademicYearController,
-		LevelController,
-		MajorController,
-		GradeController,
-		SubGradeController,
+		AcademicYearAdminController,
+		AcademicYearDeleteController,
+		LevelAdminController,
+		MajorAdminController,
+		GradeAdminController,
+		SubGradeAdminController,
+		AccountancyAdminController,
+		StudentCostAdminController,
+		MerchantAdminController,
 		PsbAdminController,
 		StudentAdminController,
 		AdminDashboardController,
-		BillingAdminController,
 		AdminReportController,
 		EwalletAdminController,
 		AlumniAdminController,
-		MerchantAdminController,
 	],
 	providers: [
 		AdminAuthService,
@@ -143,32 +149,39 @@ import { MerchantAdminController } from "@admin/merchant/merchant-admin.controll
 		AdminAnnouncementService,
 		AdminSettingFormService,
 		AdminSystemSettingService,
-		AcademicYearService,
-		LevelService,
-		MajorService,
-		GradeService,
-		SubGradeService,
+		AcademicYearAdminService,
+		AcademicYearDeleteService,
+		LevelAdminService,
+		MajorAdminService,
+		GradeAdminService,
+		SubGradeAdminService,
+		AccountancyAdminService,
+		StudentCostAdminService,
+		MerchantAdminService,
 		PsbAdminService,
 		StudentAdminService,
 		AdminDashboardService,
-		BillingAdminService,
 		AdminReportService,
 		AdminReportExportService,
 		EwalletAdminService,
 		AlumniAdminService,
-		MerchantAdminService,
 	],
 	exports: [
 		AdminAuthService,
-		AcademicYearService,
-		LevelService,
+		AcademicYearAdminService,
+		AcademicYearDeleteService,
+		LevelAdminService,
+		MajorAdminService,
+		GradeAdminService,
+		SubGradeAdminService,
+		AccountancyAdminService,
+		StudentCostAdminService,
+		MerchantAdminService,
 		PsbAdminService,
 		StudentAdminService,
 		AdminDashboardService,
-		BillingAdminService,
 		EwalletAdminService,
 		AlumniAdminService,
-		MerchantAdminService,
 	],
 })
 export class AdminModule {}

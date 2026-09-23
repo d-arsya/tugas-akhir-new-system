@@ -50,6 +50,18 @@ export const EnvSchema = z.object({
 			return val === undefined ? true : Boolean(val)
 		}, z.boolean())
 		.default(true),
+	// Gates the irreversible Data Master routes (delete + delegate). Off by default so a
+	// dev or verification instance cannot destroy rows by replaying a request; the schema
+	// has no foreign keys, so this flag is the only guard.
+	ALLOW_DESTRUCTIVE: z
+		.preprocess((val) => {
+			if (typeof val === "string") {
+				const lower = val.toLowerCase().trim()
+				return lower === "true" || lower === "1"
+			}
+			return val === undefined ? false : Boolean(val)
+		}, z.boolean())
+		.default(false),
 })
 
 export type Env = z.infer<typeof EnvSchema>

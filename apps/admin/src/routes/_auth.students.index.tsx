@@ -14,10 +14,16 @@ function StudentIndexLevel1Page(): JSX.Element {
 
 	const { data: ayData, isLoading: ayLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
-	const academicYears = ayData?.data || []
+	// AcademicYearRow has no semester; "Berjalan (Aktif)" comes from the akademik status.
+	const academicYears = (ayData ?? []).map((ay) => ({
+		id: ay.id,
+		year: ay.year ?? "",
+		semester: "",
+		isActive: ay.statusAkademik === "berjalan",
+	}))
 
 	if (ayLoading) return <PageLoader />
 

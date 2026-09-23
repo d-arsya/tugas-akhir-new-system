@@ -28,17 +28,17 @@ function StudentRosterLevel3Page(): JSX.Element {
 
 	const { data: ayData, isLoading: ayLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
 	const { data: gradesData, isLoading: gradesLoading } = useQuery({
 		queryKey: ["admin-grades"],
-		queryFn: () => adminApi.getGrades(),
+		queryFn: () => adminApi.getGradeRows(),
 	})
 
 	const { data: majorsData } = useQuery({
 		queryKey: ["admin-majors"],
-		queryFn: () => adminApi.getMajors(),
+		queryFn: () => adminApi.getMajorRows(),
 	})
 
 	const { data: studentsData, isLoading: studentsLoading } = useQuery({
@@ -46,23 +46,27 @@ function StudentRosterLevel3Page(): JSX.Element {
 		queryFn: () => adminApi.getStudents({ search }),
 	})
 
-	const academicYears = ayData?.data || []
-	const grades = gradesData?.data || []
-	const majors = majorsData?.data || []
+	const academicYears = ayData ?? []
+	const grades = gradesData ?? []
+	const majors = (majorsData ?? []).map((m) => ({ id: m.id, name: m.name ?? "" }))
 	const students = studentsData?.data?.items || []
 
-	const subGrades = grades.flatMap((g: any) => g.subGrades || [])
+	// GradeRow carries no sub-grades, so the subkelas filter and picker stay empty.
+	const subGrades: Array<{ id: number; name: string }> = []
 
-	const currentAy = academicYears.find((a: any) => String(a.id) === String(academicYearId)) || {
+	const matchedAy = academicYears.find((a) => String(a.id) === String(academicYearId))
+	// AcademicYearRow has no semester; the roster header only renders the year.
+	const currentAy = {
 		id: Number(academicYearId),
-		year: "2026/2027",
-		semester: "Ganjil",
+		year: matchedAy?.year ?? "",
+		semester: "",
 	}
 
-	const currentGrade = grades.find((g: any) => String(g.id) === String(gradeId)) || {
+	const matchedGrade = grades.find((g) => String(g.id) === String(gradeId))
+	const currentGrade = {
 		id: Number(gradeId),
-		name: `Kelas ${gradeId}`,
-		level: "Tsanawiyah",
+		name: matchedGrade?.name ?? `Kelas ${gradeId}`,
+		level: matchedGrade?.levelName ?? "Tsanawiyah",
 	}
 
 	const handleSelectAll = () => {
@@ -113,7 +117,7 @@ function StudentRosterLevel3Page(): JSX.Element {
 			{/* Floating Bulk Action Bar */}
 			<StudentBulkActions
 				selectedCount={selectedIds.length}
-				isMaxGrade={currentGrade?.name?.includes("12") || currentGrade?.name?.includes("9")}
+				isMaxGrade={currentGrade.name.includes("12") || currentGrade.name.includes("9")}
 				majors={majors}
 				subGrades={subGrades}
 				onPromote={() => setShowPromoteModal(true)}

@@ -1,0 +1,236 @@
+// Raw SQL for Biaya Santri levels 1–4, one statement per legacy query.
+//
+// Legacy walks these lists in PHP: `gradeList()` fires a COUNT per grade, `accountList()` fires
+// one `first()` per accountancy and then one `StudentCost::where(...)` per cell renderer — three
+// times over, since `getMaximumCost`, `getOptionCost` and `actionAccount` each re-query. Each of
+// those becomes a single statement here; the comments name the PHP the expression replaces.
+//
+// **`student_cost_terms.grade` stores the Grade `label`, as text.** `store()`, `accountList()`,
+// `actionAccount()`, `isAccountancyAppliedAll()` and `applied()` all read it that way; only
+// `gradeList()`, the `store()` re-fetch, `edit()` and `update()` read it as the grade **id**.
+// `grades.id == grades.label` for all seven rows today, so both work and no test can tell them
+// apart — every statement below uses the **label**, which is also what the out-of-scope
+// Kesanggupan module reads (plan decision).
+
+/**
+ * `AcademicYearService::getStatusAkademik()`, flattened — the same expression the Tahun Ajaran
+ * list uses, duplicated rather than shared so the two modules stay independent.
+ *
+ * Legacy walks three branches on `now()` (app timezone Asia/Jakarta) against the cost period and
+ * short-circuits to green "Berjalan" inside every one of them when `is_current` is set, so a
+ * period that has already ended is the only case that renders anything else. The `id == 1`
+ * branch is keyed on `year = 'Archive'`; they coincide in this database.
+ */
+const STATUS_AKADEMIK = `CASE
+			WHEN ay.year = 'Archive' THEN 'none'
+			WHEN ay.is_current THEN 'berjalan'
+			WHEN ay.cost_date_end IS NOT NULL
+				AND (now() AT TIME ZONE 'Asia/Jakarta') > ay.cost_date_end::timestamp THEN 'berakhir'
+			ELSE 'empty'
+		END`
+
+/**
+ * Level 1 — `academicYearList()`: `AcademicYear::exceptArchive()->orderBy('year', 'desc')`.
+ *
+ * A plain text sort on `year`; every value is `YYYY/YYYY`, so it is also the numeric order.
+ * `ay.id ASC` is the tie-break legacy leaves to insertion order.
+ */
+export const STUDENT_COST_YEARS_SQL = `SELECT ay.id,
+		ay.year,
+		to_char(ay.cost_date_start, 'YYYY-MM-DD') AS "costDateStart",
+		to_char(ay.cost_date_end, 'YYYY-MM-DD') AS "costDateEnd",
+		${STATUS_AKADEMIK} AS "statusAkademik"
+	FROM tbr_academic_years ay
+	WHERE ay.year IS DISTINCT FROM 'Archive'
+	ORDER BY ay.year DESC, ay.id ASC`
+
+/**
+ * Level 2 — `gradeList()`: `Grade::orderByDesc('label')->get()`, **every** grade, not just the
+ * ones whose level belongs to the academic year, plus the per-grade applied count.
+ *
+ * `applied` is a nullable boolean, so legacy's `'applied' => 1` also excludes the NULL rows a
+ * freshly stored term carries.
+ */
+export const STUDENT_COST_GRADES_SQL = `SELECT g.id AS "gradeId",
+		g.label,
+		(
+			SELECT COUNT(*) FROM tbr_student_cost_terms t
+			 WHERE t.academic_year_id = $1 AND t.grade = g.label::text AND t.applied
+		)::int AS "appliedCount"
+	FROM tbr_grades g
+	ORDER BY g.label DESC, g.id DESC`
+
+/**
+ * `StudentCostService::appliedCostItem()`'s denominator — `Accountancy::where(['is_student_cost'
+ * => 1])->count()`, **9** today. It counts root accounts too, while the level-3 list narrows to
+ * `parent_id IS NOT NULL`; the two happen to agree right now because no root account is flagged.
+ */
+export const STUDENT_COST_ITEM_TOTAL_SQL = `SELECT COUNT(*)::int AS total
+	FROM tbr_accountancies a
+	WHERE a.is_student_cost`
+
+/** The level-2 and level-3 page headers: the year plus its cost period. */
+export const STUDENT_COST_YEAR_SQL = `SELECT ay.id,
+		ay.year,
+		to_char(ay.cost_date_start, 'YYYY-MM-DD') AS "costDateStart",
+		to_char(ay.cost_date_end, 'YYYY-MM-DD') AS "costDateEnd"
+	FROM tbr_academic_years ay
+	WHERE ay.id = $1`
+
+export const STUDENT_COST_GRADE_SQL = `SELECT g.id, g.label
+	FROM tbr_grades g
+	WHERE g.id = $1`
+
+/**
+ * Level 3 — `accountList()`: `Accountancy::whereNotNull('parent_id')->where('is_student_cost', 1)`
+ * joined to this year+grade's term, if any.
+ *
+ * `ORDER BY a.id` is **added**: legacy's `->get()` is unordered, which MySQL happened to return
+ * in primary-key order and Postgres does not have to. The order is user-visible — it is the `$no`
+ * counter and the default sort of the table.
+ *
+ * `parent_id` is a `varchar`, and legacy's Akun create page posts `parent_id=""` for a root
+ * account, so `IS NOT NULL` keeps such a row here while the Akun tree drops it. Kept as legacy;
+ * no row is in that state today.
+ */
+export const STUDENT_COST_ACCOUNTS_SQL = `SELECT a.id AS "accountancyId",
+		a.name,
+		a.note,
+		t.id AS "termId",
+		COALESCE(t.applied, false) AS applied,
+		t.type,
+		t.period,
+		t.time_span AS "timeSpan",
+		t.month_of AS "monthOf",
+		t.day_of AS "dayOf",
+		t.reminder,
+		t.grade
+	FROM tbr_accountancies a
+	LEFT JOIN LATERAL (
+		SELECT st.id, st.applied, st.type, st.period, st.time_span, st.month_of, st.day_of, st.reminder, st.grade
+		  FROM tbr_student_cost_terms st
+		 WHERE st.accountancy_id = a.id AND st.academic_year_id = $1 AND st.grade = $2
+		 ORDER BY st.id
+		 LIMIT 1
+	) t ON TRUE
+	WHERE a.parent_id IS NOT NULL AND a.is_student_cost
+	ORDER BY a.id`
+
+/**
+ * `StudentCost::where('stuco_term_id', $id)->get()` for every visible term at once.
+ *
+ * `ORDER BY c.id` is **added** for the same reason: the amount order is the user-visible option
+ * order, both in the "Option" cell and in the level-4 repeater, and `SELECT *` is unordered in
+ * Postgres. Three terms (221, 222, 223) carry 3, 3 and 4 amounts.
+ */
+export const STUDENT_COST_AMOUNTS_SQL = `SELECT c.stuco_term_id AS "termId", c.amount
+	FROM tbr_student_costs c
+	WHERE c.stuco_term_id = ANY($1::bigint[])
+	ORDER BY c.stuco_term_id, c.id`
+
+/**
+ * `StudentCostService::isAccountancyAppliedAll()` — the header check-all box's initial state.
+ * True only when the year+grade has at least one term and every one of them is applied.
+ */
+export const STUDENT_COST_APPLIED_TOTALS_SQL = `SELECT COUNT(*)::int AS total,
+		COUNT(*) FILTER (WHERE t.applied)::int AS applied
+	FROM tbr_student_cost_terms t
+	WHERE t.academic_year_id = $1 AND t.grade = $2`
+
+/** Level 4 — the `create()` existence probe and the `edit()` lookup, which are the same row. */
+export const STUDENT_COST_TERM_SQL = `SELECT t.id,
+		t.type,
+		t.period,
+		t.time_span AS "timeSpan",
+		t.month_of AS "monthOf",
+		t.day_of AS "dayOf",
+		t.reminder,
+		t.grade
+	FROM tbr_student_cost_terms t
+	WHERE t.academic_year_id = $1 AND t.accountancy_id = $2 AND t.grade = $3
+	ORDER BY t.id
+	LIMIT 1`
+
+export const STUDENT_COST_ACCOUNTANCY_SQL = `SELECT a.id, a.name
+	FROM tbr_accountancies a
+	WHERE a.id = $1`
+
+/**
+ * `edit()`'s `$applies` probe, which disables the Periode radios once a kesanggupan is approved.
+ *
+ * Legacy compares `student_grades.grade` to `$grade->level` — the `level()` **relation**, i.e. a
+ * `Level` model object, since `grades` has `level_id` and no `level` column. The intent is clear
+ * ("does an approved kesanggupan already exist for this year and grade?"), so the port compares
+ * against the grade label, which is what `student_grades.grade` holds (plan decision).
+ *
+ * No `deleted_at` filter: legacy builds this with the query builder, not the `StudentGrade`
+ * model, so its `SoftDeletes` scope never applies.
+ */
+export const STUDENT_COST_PERIOD_LOCK_SQL = `SELECT 1
+	FROM tbr_student_capabilities sc
+	LEFT JOIN tbr_students s ON s.id = sc.student_id
+	LEFT JOIN tbr_student_grades sg ON sg.student_id = s.id
+	WHERE sc.status = 'approve' AND sg.current_academic_year = $1 AND sg.grade = $2
+	LIMIT 1`
+
+// ─── Writes ─────────────────────────────────────────────────────────────────────
+
+/**
+ * `applied()`, scoped.
+ *
+ * Legacy's `StudentCostTerm::whereIn('id', $request->id)` is **not** scoped to the academic year
+ * or grade, so any term id posted from anywhere in the table was flipped to applied; the year and
+ * grade only ever constrained the *clearing* query. Both halves are scoped here (plan decision).
+ *
+ * `applied IS DISTINCT FROM …` reproduces Eloquent's `isDirty()` short-circuit: `$model->update()`
+ * issues no statement when nothing changed, so legacy leaves `updated_at` alone on rows that were
+ * already in the target state.
+ */
+export const STUDENT_COST_APPLY_SQL = `UPDATE tbr_student_cost_terms
+	   SET applied = true, updated_at = now()
+	 WHERE academic_year_id = $1 AND grade = $2 AND id = ANY($3::bigint[])
+	   AND applied IS DISTINCT FROM true`
+
+export const STUDENT_COST_UNAPPLY_SQL = `UPDATE tbr_student_cost_terms
+	   SET applied = false, updated_at = now()
+	 WHERE academic_year_id = $1 AND grade = $2 AND NOT (id = ANY($3::bigint[]))
+	   AND applied IS DISTINCT FROM false`
+
+/**
+ * `$accountancy->academicYears()->attach(...)` — the term row doubles as the accountancy ↔
+ * academic-year pivot.
+ *
+ * `applied` is deliberately left NULL: a new item is not applied until the user uses the bulk
+ * "Terapkan item yang di checklist" button.
+ *
+ * So are the timestamps. `belongsToMany(...)->withPivot(...)` has no `->withTimestamps()`, which
+ * is why `created_at` is NULL on **all 179** existing rows while `updated_at` is set on every one
+ * of them — that column only ever gets written by a later `$model->update()`, which does carry
+ * Eloquent's timestamps. New rows match, as the `level_academic_years` pivot does in phase 1.
+ */
+export const INSERT_STUDENT_COST_TERM_SQL = `INSERT INTO tbr_student_cost_terms
+		(accountancy_id, academic_year_id, type, period, grade, month_of, day_of, time_span, reminder, applied, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, NULL, NULL)
+	RETURNING id`
+
+/**
+ * `$student_cost_term->update([...])`.
+ *
+ * The once branch does not list `month_of` / `day_of`, exactly as legacy's two update blocks do
+ * not — switching monthly → once leaves the stale values in place, and `getDueDate()` keys off
+ * `period`, so they are simply ignored. `grade` and `applied` are never touched by update.
+ */
+export const UPDATE_STUDENT_COST_TERM_ONCE_SQL = `UPDATE tbr_student_cost_terms
+	   SET type = $2, period = $3, time_span = $4, reminder = $5, updated_at = now()
+	 WHERE id = $1`
+
+export const UPDATE_STUDENT_COST_TERM_MONTHLY_SQL = `UPDATE tbr_student_cost_terms
+	   SET type = $2, period = $3, time_span = $4, month_of = $5, day_of = $6, reminder = $7, updated_at = now()
+	 WHERE id = $1`
+
+/** `deleteStudentCosts()` — legacy loops one `DELETE` per row; one statement does the same. */
+export const DELETE_STUDENT_COSTS_SQL = `DELETE FROM tbr_student_costs WHERE stuco_term_id = $1`
+
+export const INSERT_STUDENT_COST_SQL = `INSERT INTO tbr_student_costs
+		(stuco_term_id, amount, created_at, updated_at)
+	VALUES ($1, $2, now(), now())`

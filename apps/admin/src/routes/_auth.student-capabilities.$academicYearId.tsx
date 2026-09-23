@@ -23,7 +23,7 @@ function StudentCapabilityMatrixPage(): JSX.Element {
 
 	const { data: ayData, isLoading: ayLoading } = useQuery({
 		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYears(),
+		queryFn: () => adminApi.getAcademicYearRows(),
 	})
 
 	const { data: matrixData, isLoading: matrixLoading } = useQuery({
@@ -36,15 +36,11 @@ function StudentCapabilityMatrixPage(): JSX.Element {
 		queryFn: () => adminApi.getCapabilities(),
 	})
 
-	const academicYears = ayData?.data || []
+	const academicYears = ayData ?? []
 	const matrix = matrixData?.data || []
 	const summaryItems = capabilitiesSummary?.data || []
 
-	const currentAy = academicYears.find((a: any) => String(a.id) === String(academicYearId)) || {
-		id: Number(academicYearId),
-		year: "2026/2027",
-		semester: "Ganjil",
-	}
+	const currentAy = academicYears.find((a) => String(a.id) === String(academicYearId))
 
 	const updateCapabilityMutation = useMutation({
 		mutationFn: (dto: { studentId: number; costItemId: number; discountPercent: number }) =>
@@ -78,7 +74,7 @@ function StudentCapabilityMatrixPage(): JSX.Element {
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
 				<div>
 					<h2 className="text-xl font-bold text-slate-900 tracking-tight">
-						Matriks Kesanggupan: T.A <span className="text-[var(--primary)]">{currentAy.year}</span> ({currentAy.semester})
+						Matriks Kesanggupan: T.A <span className="text-[var(--primary)]">{currentAy?.year ?? ""}</span>
 					</h2>
 					<p className="text-xs text-slate-500 mt-1">
 						Atur tingkat kesanggupan pembiayaan, diskon beasiswa, dan terbitkan tagihan santri

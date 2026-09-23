@@ -143,3 +143,26 @@ export const StudentCapabilityResponseSchema = z.object({
 })
 
 export class StudentCapabilityResponseDto extends createZodDto(StudentCapabilityResponseSchema) {}
+
+// Swagger shapes for the two filter endpoints on StudentAdminController.
+// Moved here from the deleted dto/academic.dto.ts, which belonged to the old
+// placeholder academic module; these describe student-admin's own responses.
+export const AcademicYearResponseSchema = z.object({
+	id: z.number(),
+	year: z.string(),
+	type: z.string().nullable().optional(),
+	activeKbm: z.string().nullable().optional(),
+	status: z.boolean().optional(),
+	isCurrent: z.boolean().optional(),
+	createdAt: z.string().optional(),
+})
+
+export class AcademicYearResponseDto extends createZodDto(AcademicYearResponseSchema) {}
+
+export const GradeResponseSchema = z.object({
+	id: z.number(),
+	levelId: z.number().nullable().optional(),
+	label: z.number(),
+})
+
+export class GradeResponseDto extends createZodDto(GradeResponseSchema) {}

@@ -1,10 +1,6 @@
 import type {
 	AuthUser,
 	BannedIpItem,
-	AcademicYearItem,
-	LevelItem,
-	MajorItem,
-	GradeItem,
 	StudentItem,
 	StudentCapabilityItem,
 	StudentInvoiceItem,
@@ -13,8 +9,6 @@ import type {
 	AdminEwalletItem,
 	BankTransferConfirmationItem,
 	WithdrawalRequestItem,
-	AdminMerchantItem,
-	StudentCostItem,
 	StudentCapabilityMatrixItem,
 	StudentTransactionItem,
 	DashboardStats,
@@ -46,80 +40,6 @@ export const mockBannedIps: BannedIpItem[] = [
 		reason: "Percobaan brute-force login berulang kali",
 		bannedBy: "Super Administrator",
 		createdAt: "2026-09-01T12:00:00Z",
-	},
-]
-
-export const mockAcademicYears: AcademicYearItem[] = [
-	{
-		id: 1,
-		year: "2024/2025",
-		semester: "GENAP",
-		isCurrent: true,
-		startDate: "2024-07-01",
-		endDate: "2025-06-30",
-		status: "ACTIVE",
-		studentCount: 450,
-	},
-	{
-		id: 2,
-		year: "2025/2026",
-		semester: "GANJIL",
-		isCurrent: false,
-		startDate: "2025-07-01",
-		endDate: "2026-06-30",
-		status: "INACTIVE",
-		studentCount: 0,
-	},
-]
-
-export const mockLevels: LevelItem[] = [
-	{
-		id: 1,
-		code: "TSA",
-		name: "Tsanawiyah (SMP)",
-		levelNumber: 7,
-		description: "Jenjang Pendidikan Menengah Pertama",
-		academicYearIds: [1],
-		majorIds: [],
-	},
-	{
-		id: 2,
-		code: "ALI",
-		name: "Aliyah (SMA)",
-		levelNumber: 10,
-		description: "Jenjang Pendidikan Menengah Atas",
-		academicYearIds: [1],
-		majorIds: [1, 2, 3],
-	},
-]
-
-export const mockMajors: MajorItem[] = [
-	{ id: 1, code: "IPA", name: "Ilmu Pengetahuan Alam", description: "Sains dan Matematika" },
-	{ id: 2, code: "IPS", name: "Ilmu Pengetahuan Sosial", description: "Sosial dan Humaniora" },
-	{ id: 3, code: "AGM", name: "Keagamaan / Al-Quran", description: "Pendalaman Studi Islam & Kitab Kuning" },
-]
-
-export const mockGrades: GradeItem[] = [
-	{
-		id: 1,
-		levelId: 1,
-		levelName: "Tsanawiyah (SMP)",
-		name: "Kelas 7",
-		code: "7",
-		subGrades: [
-			{ id: 101, gradeId: 1, name: "7-A (Putra)", capacity: 30, studentCount: 28 },
-			{ id: 102, gradeId: 1, name: "7-B (Putri)", capacity: 30, studentCount: 30 },
-		],
-	},
-	{
-		id: 2,
-		levelId: 2,
-		levelName: "Aliyah (SMA)",
-		name: "Kelas 10 IPA",
-		code: "10-IPA",
-		subGrades: [
-			{ id: 201, gradeId: 2, name: "10-IPA-1", capacity: 28, studentCount: 26 },
-		],
 	},
 ]
 
@@ -290,62 +210,6 @@ export const mockWithdrawals: WithdrawalRequestItem[] = [
 		cashierName: "Koperasi & Kasir Utama",
 		status: "PENDING",
 		requestedAt: "2026-09-14T08:00:00Z",
-	},
-]
-
-export const mockMerchants: AdminMerchantItem[] = [
-	{
-		id: 1,
-		businessName: "Kantin Kejujuran Putra",
-		ownerName: "H. Ridwan Kamil",
-		email: "kantin.putra@pondokroja.ac.id",
-		phone: "081399887766",
-		qrCodePayload: "ROJA-MERCH-001-KANTIN-PUTRA",
-		isActive: true,
-		createdAt: "2026-01-10T00:00:00Z",
-	},
-]
-
-export const mockStudentCosts: StudentCostItem[] = [
-	{
-		id: 1,
-		name: "SPP Syahriah",
-		code: "SPP-7",
-		category: "SPP",
-		amount: 650000,
-		academicYearId: 1,
-		academicYearName: "2024/2025 - Genap",
-		gradeId: 1,
-		gradeName: "Kelas 7",
-		billingCycle: "MONTHLY",
-		isActive: true,
-	},
-
-	{
-		id: 2,
-		name: "Uang Pangkal / Sarana Gedung",
-		code: "UP-7",
-		category: "Gedung",
-		amount: 3500000,
-		academicYearId: 1,
-		academicYearName: "2024/2025 - Genap",
-		gradeId: 1,
-		gradeName: "Kelas 7",
-		billingCycle: "ONCE",
-		isActive: true,
-	},
-	{
-		id: 3,
-		name: "Paket Seragam & Kitab Kuning",
-		code: "SRG-7",
-		category: "Seragam",
-		amount: 1200000,
-		academicYearId: 1,
-		academicYearName: "2024/2025 - Genap",
-		gradeId: 1,
-		gradeName: "Kelas 7",
-		billingCycle: "YEARLY",
-		isActive: true,
 	},
 ]
 

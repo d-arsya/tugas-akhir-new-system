@@ -1,4 +1,4 @@
-import type { JSX } from "react"
+import type { JSX, ReactNode } from "react"
 import { Link } from "@tanstack/react-router"
 
 import { cn } from "@roja/utils"
@@ -11,6 +11,13 @@ export type AdminBreadcrumb = {
 	to?: SidebarRoutePath
 	/** Legacy `li.tbr_breadcrumbs_parent`: a three-dot crumb whose links appear on hover */
 	dropdown?: AdminBreadcrumb[]
+	/**
+	 * A pre-built crumb body, for the parameterised links the deeper Biaya Santri pages use
+	 * (`studentCost.grade`, `studentCost.accounts`). `to` cannot express those: TanStack types
+	 * `params` per route, which a generic `Record<string, string>` cannot satisfy. Compose the
+	 * `<Link>` yourself and style it with `CRUMB_LINK_CLASS`. Takes precedence over `to`.
+	 */
+	node?: ReactNode
 }
 
 type AdminPageTitleProps = {
@@ -28,6 +35,9 @@ const HomeIcon = (): JSX.Element => (
 )
 
 const CRUMB_TEXT_CLASS = "inline-block align-middle text-[12px] leading-[20px] font-normal"
+
+/** The styling a caller must reuse when it supplies its own <Link> through `node`. */
+export const CRUMB_LINK_CLASS = cn(CRUMB_TEXT_CLASS, "text-white transition-all duration-500 hover:text-[var(--secondary)]")
 
 const Separator = (): JSX.Element => (
 	<span className="mx-[20px] mt-[2px] inline-block h-[8px] w-[8px] rounded-[8px] bg-[var(--primary)] align-middle" />
@@ -85,7 +95,9 @@ const AdminPageTitle = ({ title, breadcrumbs }: AdminPageTitleProps): JSX.Elemen
 					</li>
 					{breadcrumbs.map((crumb, index) => (
 						<li key={`${crumb.label}-${index}`} className="group relative inline-block font-light text-[#C3C3C3]">
-							{crumb.dropdown ? (
+							{crumb.node ? (
+								crumb.node
+							) : crumb.dropdown ? (
 								<>
 									<DotsIcon />
 									<CrumbDropdown items={crumb.dropdown} />

@@ -62,6 +62,8 @@
   --bg-editor-disabled: #ecedf0;
   /* legacy app.css 2177: Form Data Santri panel rows */
   --bg-form-builder-panel: #f2f3f8;
+  /* legacy app.css 167: the radio disc inside `.tbr_radio_block` (Tahun Ajaran jalur PSB) */
+  --bg-form-radio-block: #e8e8e8;
   --bg-login: #f7f7f7;
   --bg-login-form: #ffffff;
   --bg-inverse: #ffffff;

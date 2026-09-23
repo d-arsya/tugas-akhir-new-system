@@ -1,21 +1,13 @@
 import type { AxiosInstance } from "axios"
 
 import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api"
+import { createAdminMasterApi, type AdminMasterApi } from "./admin-master.api"
+import { createAdminMasterFinanceApi, type AdminMasterFinanceApi } from "./admin-master-finance.api"
 import type {
 	ApiResponse,
 	PaginatedResponse,
 	BannedIpItem,
-	AcademicYearItem,
-	LevelItem,
-	MajorItem,
-	GradeItem,
-	SubGradeItem,
 	CreateBannedIpDto,
-	CreateAcademicYearDto,
-	CreateLevelDto,
-	CreateMajorDto,
-	CreateGradeDto,
-	CreateSubGradeDto,
 	StudentItem,
 	StudentCapabilityItem,
 	StudentInvoiceItem,
@@ -24,7 +16,6 @@ import type {
 	AdminEwalletItem,
 	BankTransferConfirmationItem,
 	WithdrawalRequestItem,
-	AdminMerchantItem,
 	CreateStudentDto,
 	StudentBulkPromoteDto,
 	StudentBulkRetainDto,
@@ -32,8 +23,6 @@ import type {
 	StudentBulkChangeMajorDto,
 	StudentBulkStatusDto,
 	StudentBulkGraduateDto,
-	StudentCostItem,
-	CreateStudentCostDto,
 	StudentCapabilityMatrixItem,
 	UpdateStudentCapabilityDto,
 	StudentTransactionItem,
@@ -41,7 +30,6 @@ import type {
 	WithdrawEwalletDto,
 	BulkGenerateInvoiceDto,
 	AddInvoiceTransactionDto,
-	CreateMerchantDto,
 	ReportOptions,
 	ReportFilterParams,
 	ReportArrearFilterParams,
@@ -70,7 +58,7 @@ export interface AdminLoginResponse {
 	user?: any
 }
 
-export interface AdminApi extends AdminLainnyaApi {
+export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFinanceApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -84,31 +72,6 @@ export interface AdminApi extends AdminLainnyaApi {
 	createBannedIp(data: CreateBannedIpDto): Promise<ApiResponse<BannedIpItem>>
 	deleteBannedIp(id: number): Promise<ApiResponse<{ message: string }>>
 
-	// Academic Structure (Sprint B)
-	getAcademicYears(): Promise<ApiResponse<AcademicYearItem[]>>
-	createAcademicYear(data: CreateAcademicYearDto): Promise<ApiResponse<AcademicYearItem>>
-	updateAcademicYear(id: number, data: Partial<CreateAcademicYearDto>): Promise<ApiResponse<AcademicYearItem>>
-	setActiveAcademicYear(id: number): Promise<ApiResponse<{ message: string }>>
-
-	getLevels(): Promise<ApiResponse<LevelItem[]>>
-	createLevel(data: CreateLevelDto): Promise<ApiResponse<LevelItem>>
-	updateLevel(id: number, data: Partial<CreateLevelDto>): Promise<ApiResponse<LevelItem>>
-	deleteLevel(id: number): Promise<ApiResponse<{ message: string }>>
-
-	getMajors(): Promise<ApiResponse<MajorItem[]>>
-	createMajor(data: CreateMajorDto): Promise<ApiResponse<MajorItem>>
-	updateMajor(id: number, data: Partial<CreateMajorDto>): Promise<ApiResponse<MajorItem>>
-	deleteMajor(id: number): Promise<ApiResponse<{ message: string }>>
-
-	getGrades(): Promise<ApiResponse<GradeItem[]>>
-	createGrade(data: CreateGradeDto): Promise<ApiResponse<GradeItem>>
-	updateGrade(id: number, data: Partial<CreateGradeDto>): Promise<ApiResponse<GradeItem>>
-	deleteGrade(id: number): Promise<ApiResponse<{ message: string }>>
-
-	createSubGrade(data: CreateSubGradeDto): Promise<ApiResponse<SubGradeItem>>
-	updateSubGrade(id: number, data: Partial<CreateSubGradeDto>): Promise<ApiResponse<SubGradeItem>>
-	deleteSubGrade(id: number): Promise<ApiResponse<{ message: string }>>
-
 	// Sprint C: Student Management & Financial Billing
 	getStudents(params?: { search?: string; grade?: string; status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<StudentItem>>
 	getStudentById(id: number): Promise<ApiResponse<StudentItem>>
@@ -120,12 +83,6 @@ export interface AdminApi extends AdminLainnyaApi {
 	bulkChangeMajor(data: StudentBulkChangeMajorDto): Promise<ApiResponse<{ count: number }>>
 	bulkChangeStatus(data: StudentBulkStatusDto): Promise<ApiResponse<{ count: number }>>
 	bulkGraduateStudents(data: StudentBulkGraduateDto): Promise<ApiResponse<{ count: number }>>
-	
-	// Student Costs (Tarif per Akun)
-	getStudentCosts(params?: { academicYearId?: number; gradeId?: number }): Promise<ApiResponse<StudentCostItem[]>>
-	createStudentCost(data: CreateStudentCostDto): Promise<ApiResponse<StudentCostItem>>
-	updateStudentCost(id: number, data: Partial<CreateStudentCostDto>): Promise<ApiResponse<StudentCostItem>>
-	deleteStudentCost(id: number): Promise<ApiResponse<{ message: string }>>
 
 	// Student Capability & Invoices
 	getCapabilities(): Promise<ApiResponse<StudentCapabilityItem[]>>
@@ -158,9 +115,6 @@ export interface AdminApi extends AdminLainnyaApi {
 	approveWithdrawal(id: number): Promise<ApiResponse<{ message: string }>>
 	rejectWithdrawal(id: number, reason: string): Promise<ApiResponse<{ message: string }>>
 
-	getMerchants(params?: { search?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AdminMerchantItem>>
-	createMerchant(data: CreateMerchantDto): Promise<ApiResponse<AdminMerchantItem>>
-	toggleMerchantStatus(id: number, isActive: boolean): Promise<ApiResponse<{ message: string }>>
 
 	// Analytics & Reports
 	getDashboardStats(params?: { academicYearId?: number | undefined }): Promise<DashboardStats>
@@ -203,6 +157,8 @@ const fileNameFromDisposition = (header: string | undefined): string | null => {
 
 export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminLainnyaApi(client),
+	...createAdminMasterApi(client),
+	...createAdminMasterFinanceApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
@@ -230,30 +186,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	deleteBannedIp: (id) => unwrap(client.delete(`/admin/ip-bans/${id}`)),
 
 
-	getAcademicYears: () => unwrap(client.get("/admin/academic-years")),
-	createAcademicYear: (data) => unwrap(client.post("/admin/academic-years", data)),
-	updateAcademicYear: (id, data) => unwrap(client.patch(`/admin/academic-years/${id}`, data)),
-	setActiveAcademicYear: (id) => unwrap(client.patch(`/admin/academic-years/${id}/set-active`)),
-
-	getLevels: () => unwrap(client.get("/admin/levels")),
-	createLevel: (data) => unwrap(client.post("/admin/levels", data)),
-	updateLevel: (id, data) => unwrap(client.patch(`/admin/levels/${id}`, data)),
-	deleteLevel: (id) => unwrap(client.delete(`/admin/levels/${id}`)),
-
-	getMajors: () => unwrap(client.get("/admin/majors")),
-	createMajor: (data) => unwrap(client.post("/admin/majors", data)),
-	updateMajor: (id, data) => unwrap(client.patch(`/admin/majors/${id}`, data)),
-	deleteMajor: (id) => unwrap(client.delete(`/admin/majors/${id}`)),
-
-	getGrades: () => unwrap(client.get("/admin/grades")),
-	createGrade: (data) => unwrap(client.post("/admin/grades", data)),
-	updateGrade: (id, data) => unwrap(client.patch(`/admin/grades/${id}`, data)),
-	deleteGrade: (id) => unwrap(client.delete(`/admin/grades/${id}`)),
-
-	createSubGrade: (data) => unwrap(client.post("/admin/sub-grades", data)),
-	updateSubGrade: (id, data) => unwrap(client.patch(`/admin/sub-grades/${id}`, data)),
-	deleteSubGrade: (id) => unwrap(client.delete(`/admin/sub-grades/${id}`)),
-
 	getStudents: (params) => unwrap(client.get("/admin/students", { params })),
 	getStudentById: (id) => unwrap(client.get(`/admin/students/${id}`)),
 	createStudent: (data) => unwrap(client.post("/admin/students", data)),
@@ -265,10 +197,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	bulkChangeStatus: (data) => unwrap(client.post("/admin/students/bulk-change-status", data)),
 	bulkGraduateStudents: (data) => unwrap(client.post("/admin/students/bulk-graduate", data)),
 	
-	getStudentCosts: (params) => unwrap(client.get("/admin/student-costs", { params })),
-	createStudentCost: (data) => unwrap(client.post("/admin/student-costs", data)),
-	updateStudentCost: (id, data) => unwrap(client.patch(`/admin/student-costs/${id}`, data)),
-	deleteStudentCost: (id) => unwrap(client.delete(`/admin/student-costs/${id}`)),
 
 	getCapabilities: () => unwrap(client.get("/admin/capabilities")),
 	getStudentCapabilityMatrix: (params) => unwrap(client.get("/admin/student-capabilities/matrix", { params })),
@@ -298,9 +226,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	approveWithdrawal: (id) => unwrap(client.patch(`/admin/withdrawals/${id}/approve`)),
 	rejectWithdrawal: (id, reason) => unwrap(client.patch(`/admin/withdrawals/${id}/reject`, { reason })),
 
-	getMerchants: (params) => unwrap(client.get("/admin/merchants", { params })),
-	createMerchant: (data) => unwrap(client.post("/admin/merchants", data)),
-	toggleMerchantStatus: (id, isActive) => unwrap(client.patch(`/admin/merchants/${id}/status`, { isActive })),
 })
 
 
