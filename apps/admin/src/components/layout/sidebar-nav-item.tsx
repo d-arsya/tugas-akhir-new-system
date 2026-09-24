@@ -6,7 +6,7 @@ import { cn } from "@roja/utils"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 import { ArrowDownIcon, SIDEBAR_ICONS } from "./sidebar-icons"
-import type { SidebarMenuItem } from "./sidebar-menu"
+import { LEGACY_ADMIN_BASE_URL, type SidebarMenuItem } from "./sidebar-menu"
 
 export type SidebarNavState = {
 	activeChain: string[]
@@ -52,6 +52,8 @@ const SidebarNavItem = ({ item, parentKey, depth, nav }: SidebarNavItemProps): J
 		? cn(TOP_LINK_CLASS, RIPPLE_CLASS, compact ? "px-[13px]" : "px-[20px]")
 		: cn(CHILD_LINK_CLASS, CHILD_DEPTH_CLASS[depth] ?? CHILD_DEPTH_CLASS[2])
 
+	const legacyUrl = `${LEGACY_ADMIN_BASE_URL}${item.legacyPath ? (item.legacyPath.startsWith("/") ? item.legacyPath : `/${item.legacyPath}`) : (item.to || "")}`
+
 	const content = (
 		<>
 			{/* Legacy markup has whitespace between the icon and label; inside a block link it renders as a gap */}
@@ -94,6 +96,15 @@ const SidebarNavItem = ({ item, parentKey, depth, nav }: SidebarNavItemProps): J
 				>
 					{content}
 				</button>
+			) : item.condition === "legacy" ? (
+				<a
+					href={legacyUrl}
+					data-highlight={isActive}
+					className={linkClass}
+					onClick={isTop ? triggerRipple : undefined}
+				>
+					{content}
+				</a>
 			) : item.to ? (
 				<Link
 					to={item.to}

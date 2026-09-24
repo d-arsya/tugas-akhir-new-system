@@ -6,10 +6,17 @@ import type { SidebarIconName } from "./sidebar-icons"
 
 export type SidebarRoutePath = NonNullable<LinkProps["to"]>
 
+export type MenuCondition = "new" | "legacy"
+
+export const LEGACY_ADMIN_BASE_URL: string =
+	(import.meta.env.VITE_LEGACY_ADMIN_URL as string | undefined)?.replace(/\/+$/, "") || "http://localhost:8000"
+
 export type SidebarMenuItem = {
 	key: string
 	label: string
 	to?: SidebarRoutePath
+	legacyPath?: string
+	condition?: MenuCondition
 	icon?: SidebarIconName
 	// Omitted = visible to every role (legacy items without @can)
 	roles?: LayoutRole[]
@@ -25,16 +32,16 @@ const SA: LayoutRole[] = ["superadmin"]
 
 // Mirrors admin.pondokroja.com/resources/views/layouts/sidebar-left.blade.php 1:1
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
-	{ key: "dashboard", label: "Dashboard", to: "/dashboard", icon: "dashboard", roles: SA_ADMIN },
-	{ key: "report", label: "Laporan", to: "/reports", icon: "report", roles: SA_BENDAHARA },
+	{ key: "dashboard", label: "Dashboard", condition: "new", to: "/dashboard", legacyPath: "/dashboard", icon: "dashboard", roles: SA_ADMIN },
+	{ key: "report", label: "Laporan", condition: "new", to: "/reports", legacyPath: "/report", icon: "report", roles: SA_BENDAHARA },
 	{
 		key: "ewallet",
 		label: "Dompet",
 		icon: "ewallet",
 		roles: CASHIER,
 		children: [
-			{ key: "ewallet_account", label: "Akun Dompet", to: "/ewallets", badge: "ewalletProcess" },
-			{ key: "ewallet_history", label: "Riwayat Transaksi", to: "/ewallet-transactions" },
+			{ key: "ewallet_account", label: "Akun Dompet", condition: "legacy", to: "/ewallets", legacyPath: "/e-wallet", badge: "ewalletProcess" },
+			{ key: "ewallet_history", label: "Riwayat Transaksi", condition: "legacy", to: "/ewallet-transactions", legacyPath: "/transaction-history" },
 		],
 	},
 	{
@@ -47,24 +54,24 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				key: "academic_student",
 				label: "Santri",
 				children: [
-					{ key: "academic_student_all", label: "Data Santri", to: "/students" },
-					{ key: "academic_student_add", label: "Tambah", to: "/students/create" },
+					{ key: "academic_student_all", label: "Data Santri", condition: "legacy", to: "/students", legacyPath: "/student" },
+					{ key: "academic_student_add", label: "Tambah", condition: "legacy", to: "/students/create", legacyPath: "/student/create/personal?sidebar=true" },
 				],
 			},
 			{
 				key: "academic_alumni",
 				label: "Alumni",
 				children: [
-					{ key: "academic_alumni_all", label: "Data Alumni", to: "/alumni" },
-					{ key: "academic_alumni_dashboard", label: "Dashboard", to: "/alumni/dashboard" },
+					{ key: "academic_alumni_all", label: "Data Alumni", condition: "legacy", to: "/alumni", legacyPath: "/alumni" },
+					{ key: "academic_alumni_dashboard", label: "Dashboard", condition: "legacy", to: "/alumni/dashboard", legacyPath: "/coming-soon" },
 				],
 			},
 			{
 				key: "academic_registrant",
 				label: "PSB",
 				children: [
-					{ key: "academic_registrant_all", label: "Data PSB", to: "/registrants" },
-					{ key: "academic_registrant_add", label: "Tambah", to: "/registrants/create" },
+					{ key: "academic_registrant_all", label: "Data PSB", condition: "legacy", to: "/registrants", legacyPath: "/registrant" },
+					{ key: "academic_registrant_add", label: "Tambah", condition: "legacy", to: "/registrants/create", legacyPath: "/registrant/create/personal" },
 				],
 			},
 		],
@@ -75,9 +82,9 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 		icon: "finance",
 		roles: SA_BENDAHARA,
 		children: [
-			{ key: "finance_bill", label: "Tagihan", to: "/student-invoices" },
-			{ key: "finance_capability", label: "Kesanggupan", to: "/student-capabilities" },
-			{ key: "finance_history", label: "Riwayat", to: "/student-transactions" },
+			{ key: "finance_bill", label: "Tagihan", condition: "new", to: "/student-invoices", legacyPath: "/student-invoice" },
+			{ key: "finance_capability", label: "Kesanggupan", condition: "new", to: "/student-capabilities", legacyPath: "/student-capability" },
+			{ key: "finance_history", label: "Riwayat", condition: "new", to: "/student-transactions", legacyPath: "/student-transaction" },
 		],
 	},
 	{
@@ -91,8 +98,8 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				label: "Tahun Ajaran",
 				roles: SA_ADMIN,
 				children: [
-					{ key: "master_academic_year_all", label: "Semua", to: "/academic-years" },
-					{ key: "master_academic_year_add", label: "Tambah", to: "/academic-years/create" },
+					{ key: "master_academic_year_all", label: "Semua", condition: "new", to: "/academic-years", legacyPath: "/academic-year" },
+					{ key: "master_academic_year_add", label: "Tambah", condition: "new", to: "/academic-years/create", legacyPath: "/academic-year/create" },
 				],
 			},
 			{
@@ -100,8 +107,8 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				label: "Keuangan",
 				roles: SA_BENDAHARA,
 				children: [
-					{ key: "master_student_cost", label: "Biaya Santri", to: "/student-costs" },
-					{ key: "master_finance_category", label: "Akun", to: "/accountancy" },
+					{ key: "master_student_cost", label: "Biaya Santri", condition: "new", to: "/student-costs", legacyPath: "/student-cost" },
+					{ key: "master_finance_category", label: "Akun", condition: "new", to: "/accountancy", legacyPath: "/accountancy" },
 				],
 			},
 			{
@@ -109,9 +116,9 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				label: "Akademik",
 				roles: SA_ADMIN,
 				children: [
-					{ key: "master_grade", label: "Kelas", to: "/grades" },
-					{ key: "master_major", label: "Jurusan", to: "/majors" },
-					{ key: "master_level", label: "Jenjang", to: "/levels" },
+					{ key: "master_grade", label: "Kelas", condition: "new", to: "/grades", legacyPath: "/grade" },
+					{ key: "master_major", label: "Jurusan", condition: "new", to: "/majors", legacyPath: "/major" },
+					{ key: "master_level", label: "Jenjang", condition: "new", to: "/levels", legacyPath: "/level" },
 				],
 			},
 			{
@@ -119,8 +126,8 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				label: "Merchant",
 				roles: ["superadmin", "admin", "kasir"],
 				children: [
-					{ key: "master_merchant_all", label: "Data Merchant", to: "/merchants" },
-					{ key: "master_merchant_add", label: "Tambah", to: "/merchants/create" },
+					{ key: "master_merchant_all", label: "Data Merchant", condition: "new", to: "/merchants", legacyPath: "/merchant" },
+					{ key: "master_merchant_add", label: "Tambah", condition: "new", to: "/merchants/create", legacyPath: "/merchant/create" },
 				],
 			},
 		],
@@ -135,22 +142,22 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				label: "Pengelola",
 				roles: SA,
 				children: [
-					{ key: "other_user_all", label: "Semua", to: "/users" },
-					{ key: "other_user_add", label: "Tambah", to: "/users/create" },
+					{ key: "other_user_all", label: "Semua", condition: "new", to: "/users", legacyPath: "/user" },
+					{ key: "other_user_add", label: "Tambah", condition: "new", to: "/users/create", legacyPath: "/user/create" },
 				],
 			},
 			{
 				key: "other_setting",
 				label: "Pengaturan",
 				children: [
-					{ key: "other_setting_announcement", label: "Pengumuman PSB", to: "/settings/announcements", roles: SA_ADMIN },
-					{ key: "other_setting_form", label: "Form Data Santri", to: "/settings/form", roles: SA_ADMIN },
-					{ key: "other_setting_school", label: "Profil Pondok", to: "/settings/school", roles: SA_ADMIN },
-					{ key: "other_setting_profile", label: "Profil Saya", to: "/my-profile" },
-					{ key: "other_setting_system", label: "Sistem", to: "/settings", roles: SA },
+					{ key: "other_setting_announcement", label: "Pengumuman PSB", condition: "new", to: "/settings/announcements", legacyPath: "/setting/announcement", roles: SA_ADMIN },
+					{ key: "other_setting_form", label: "Form Data Santri", condition: "new", to: "/settings/form", legacyPath: "/setting/form", roles: SA_ADMIN },
+					{ key: "other_setting_school", label: "Profil Pondok", condition: "new", to: "/settings/school", legacyPath: "/setting/school", roles: SA_ADMIN },
+					{ key: "other_setting_profile", label: "Profil Saya", condition: "new", to: "/my-profile", legacyPath: "/setting/my-profile" },
+					{ key: "other_setting_system", label: "Sistem", condition: "new", to: "/settings", legacyPath: "/setting/setting", roles: SA },
 				],
 			},
-			{ key: "other_auth_log", label: "Authentication Log", to: "/auth-logs", roles: SA },
+			{ key: "other_auth_log", label: "Authentication Log", condition: "new", to: "/auth-logs", legacyPath: "/auth-log", roles: SA },
 		],
 	},
 ]
