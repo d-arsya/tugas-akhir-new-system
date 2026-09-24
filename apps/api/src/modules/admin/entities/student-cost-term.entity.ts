@@ -11,10 +11,10 @@ import { BaseEntity } from "../../../core/database/base.entity"
  */
 @Entity({ name: "tbr_student_cost_terms" })
 export class StudentCostTerm extends BaseEntity {
-	@Column({ name: "accountancy_id", nullable: true, type: "int" })
+	@Column({ name: "accountancy_id", nullable: true, type: "bigint" })
 	accountancyId: number | null
 
-	@Column({ name: "academic_year_id", nullable: true, type: "int" })
+	@Column({ name: "academic_year_id", nullable: true, type: "bigint" })
 	academicYearId: number | null
 
 	@Column({ name: "type", nullable: true, type: "text" })
@@ -23,16 +23,22 @@ export class StudentCostTerm extends BaseEntity {
 	@Column({ name: "period", nullable: true, type: "text" })
 	period: "once" | "monthly" | null
 
-	@Column({ name: "month_of", nullable: true, type: "int" })
+	@Column({ name: "month_of", nullable: true, type: "bigint" })
 	monthOf: number | null
 
-	@Column({ name: "day_of", nullable: true, type: "int" })
+	@Column({ name: "day_of", nullable: true, type: "bigint" })
 	dayOf: number | null
 
-	@Column({ name: "time_span", nullable: true, type: "int" })
+	/**
+	 * Days. For `monthly` this is the billing interval and is always a multiple of 30
+	 * (verified: 90 of 90 live rows); for `once` it is a day offset to the due date and
+	 * is usually **not** a multiple of 30 (61 of 90), so the `/30` decoder must never
+	 * be applied to a `once` row.
+	 */
+	@Column({ name: "time_span", nullable: true, type: "bigint" })
 	timeSpan: number | null
 
-	@Column({ name: "reminder", nullable: true, type: "int" })
+	@Column({ name: "reminder", nullable: true, type: "bigint" })
 	reminder: number | null
 
 	@Column({ name: "grade", nullable: true, type: "varchar" })

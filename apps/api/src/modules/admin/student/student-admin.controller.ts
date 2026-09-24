@@ -16,9 +16,7 @@ import {
 	BulkStudentGraduationDto,
 	BulkStudentDropoutDto,
 	CreateStudentManualDto,
-	StudentCapabilityDto,
 	StudentGradeResponseDto,
-	StudentCapabilityResponseDto,
 	AcademicYearResponseDto,
 	GradeResponseDto,
 } from "@admin/dto/student-admin.dto"
@@ -163,31 +161,4 @@ export class StudentAdminController {
 		return this.studentAdminService.createStudentManual(dto)
 	}
 
-	@Get(":studentGradeId/capability")
-	@ApiOperation({ summary: "Ambil data kesanggupan biaya santri" })
-	@ApiResponseWrapped({ status: 200, description: "Data kesanggupan biaya", type: StudentCapabilityResponseDto })
-	async getCapability(@Param("studentGradeId", ParseIntPipe) studentGradeId: number) {
-		return this.studentAdminService.getCapability(studentGradeId)
-	}
-
-	@Post(":studentGradeId/capability")
-	@ApiOperation({ summary: "Simpan / update kesanggupan biaya santri" })
-	@ApiResponseWrapped({ status: 200, description: "Kesanggupan biaya disimpan", type: StudentCapabilityResponseDto })
-	async updateCapability(
-		@Param("studentGradeId", ParseIntPipe) studentGradeId: number,
-		@Body() dto: StudentCapabilityDto,
-	) {
-		return this.studentAdminService.updateCapability(studentGradeId, dto)
-	}
-
-	@Patch(":studentGradeId/capability/approve")
-	@ApiOperation({ summary: "Setujui kesanggupan biaya santri" })
-	@ApiResponseWrapped({
-		status: 200,
-		description: "Kesanggupan biaya disetujui",
-		type: StudentCapabilityResponseDto,
-	})
-	async approveCapability(@Param("studentGradeId", ParseIntPipe) studentGradeId: number) {
-		return this.studentAdminService.approveCapability(studentGradeId)
-	}
 }

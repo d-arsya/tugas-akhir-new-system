@@ -39,6 +39,12 @@ const CRUMB_TEXT_CLASS = "inline-block align-middle text-[12px] leading-[20px] f
 /** The styling a caller must reuse when it supplies its own <Link> through `node`. */
 export const CRUMB_LINK_CLASS = cn(CRUMB_TEXT_CLASS, "text-white transition-all duration-500 hover:text-[var(--secondary)]")
 
+/** Same, for a `node` placed inside a three-dot dropdown, whose items are full-width blocks. */
+export const CRUMB_DROPDOWN_LINK_CLASS = cn(
+	CRUMB_TEXT_CLASS,
+	"block bg-[#17283C] px-[16px] py-[5px] text-center text-white transition-all duration-500 hover:text-[var(--secondary)]",
+)
+
 const Separator = (): JSX.Element => (
 	<span className="mx-[20px] mt-[2px] inline-block h-[8px] w-[8px] rounded-[8px] bg-[var(--primary)] align-middle" />
 )
@@ -56,8 +62,10 @@ const CrumbDropdown = ({ items }: { items: AdminBreadcrumb[] }): JSX.Element => 
 	<ol className="absolute left-[-90px] z-[1] mt-[-6px] w-[194px] origin-center scale-0 rounded-[10px] bg-[#17283C] px-0 py-[10px] opacity-0 shadow-[0px_3px_16px_0px_rgba(0,0,0,0.08)] transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 before:absolute before:top-[-16px] before:left-[calc(50%-12px)] before:h-[24px] before:w-[24px] before:bg-[url('/assets/svg/etc/Polygon.svg')] before:bg-contain before:bg-center before:bg-no-repeat before:content-['']">
 		{items.map((item, index) => (
 			<li key={`${item.label}-${index}`} className="block">
-				{item.to ? (
-					<Link to={item.to} className={cn(CRUMB_TEXT_CLASS, "block bg-[#17283C] px-[16px] py-[5px] text-center text-white transition-all duration-500 hover:text-[var(--secondary)]")}>
+				{item.node ? (
+					item.node
+				) : item.to ? (
+					<Link to={item.to} className={CRUMB_DROPDOWN_LINK_CLASS}>
 						{item.label}
 					</Link>
 				) : (

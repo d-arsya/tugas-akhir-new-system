@@ -97,18 +97,6 @@ export const CreateStudentManualSchema = z.object({
 
 export class CreateStudentManualDto extends createZodDto(CreateStudentManualSchema) {}
 
-export const StudentCapabilityItemSchema = z.object({
-	accountancyId: z.number(),
-	amount: z.number(),
-})
-
-export const StudentCapabilitySchema = z.object({
-	capabilities: z.array(StudentCapabilityItemSchema),
-	note: z.string().optional(),
-})
-
-export class StudentCapabilityDto extends createZodDto(StudentCapabilitySchema) {}
-
 export const StudentGradeResponseSchema = z.object({
 	id: z.number(),
 	studentId: z.number(),
@@ -125,24 +113,6 @@ export const StudentGradeResponseSchema = z.object({
 })
 
 export class StudentGradeResponseDto extends createZodDto(StudentGradeResponseSchema) {}
-
-export const StudentCapabilityResponseSchema = z.object({
-	id: z.number(),
-	studentId: z.number(),
-	studentGradeId: z.number(),
-	status: z.string(),
-	note: z.string().nullable().optional(),
-	approveDate: z.string().nullable().optional(),
-	items: z.array(
-		z.object({
-			id: z.number(),
-			accountancyId: z.number(),
-			amount: z.number(),
-		}),
-	).optional(),
-})
-
-export class StudentCapabilityResponseDto extends createZodDto(StudentCapabilityResponseSchema) {}
 
 // Swagger shapes for the two filter endpoints on StudentAdminController.
 // Moved here from the deleted dto/academic.dto.ts, which belonged to the old

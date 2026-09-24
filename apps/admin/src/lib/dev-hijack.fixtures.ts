@@ -39,7 +39,7 @@ export const mockBannedIps: BannedIpItem[] = [
 	},
 ]
 
-// Sprint C Fixtures: Students, Capabilities, Invoices, Alumni
+// Sprint C Fixtures: Students, Alumni
 export const mockStudents: StudentItem[] = [
 	{
 		id: 1,

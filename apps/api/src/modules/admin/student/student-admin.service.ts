@@ -3,8 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { Student } from "../../santri/entities/student.entity"
 import { StudentGrade } from "../../santri/entities/student-grade.entity"
-import { StudentCapability } from "../../santri/entities/student-capability.entity"
-import { StudentCostCapability } from "../../santri/entities/student-cost-capability.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import {
@@ -18,7 +16,6 @@ import {
 	BulkStudentGraduationDto,
 	BulkStudentDropoutDto,
 	CreateStudentManualDto,
-	StudentCapabilityDto,
 } from "@admin/dto/student-admin.dto"
 
 @Injectable()
@@ -28,10 +25,6 @@ export class StudentAdminService {
 		private readonly studentRepo: Repository<Student>,
 		@InjectRepository(StudentGrade)
 		private readonly studentGradeRepo: Repository<StudentGrade>,
-		@InjectRepository(StudentCapability)
-		private readonly capabilityRepo: Repository<StudentCapability>,
-		@InjectRepository(StudentCostCapability)
-		private readonly costCapabilityRepo: Repository<StudentCostCapability>,
 		@InjectRepository(AcademicYear)
 		private readonly academicYearRepo: Repository<AcademicYear>,
 		@InjectRepository(Grade)
@@ -233,56 +226,4 @@ export class StudentAdminService {
 		return this.studentGradeRepo.save(newGrade)
 	}
 
-	async getCapability(studentGradeId: number) {
-		const sg = await this.findStudentGradeById(studentGradeId)
-		const cap = await this.capabilityRepo.findOne({
-			where: { studentGradeId },
-		})
-		if (!cap) return { capability: null, items: [] }
-
-		const items = await this.costCapabilityRepo.find({
-			where: { studentCapId: cap.id },
-		})
-		return { capability: cap, items }
-	}
-
-	async updateCapability(studentGradeId: number, dto: StudentCapabilityDto) {
-		const sg = await this.findStudentGradeById(studentGradeId)
-		let cap = await this.capabilityRepo.findOne({ where: { studentGradeId } })
-
-		if (!cap) {
-			cap = this.capabilityRepo.create({
-				studentId: sg.studentId || 0,
-				studentGradeId,
-				status: "changed",
-				note: dto.note ?? null,
-			})
-			cap = await this.capabilityRepo.save(cap)
-		} else {
-			if (dto.note) cap.note = dto.note
-			await this.capabilityRepo.save(cap)
-		}
-
-		await this.costCapabilityRepo.delete({ studentCapId: cap.id })
-		const items = []
-		for (const item of dto.capabilities) {
-			const costCap = this.costCapabilityRepo.create({
-				studentCapId: cap.id,
-				accountancyId: item.accountancyId,
-				amount: item.amount,
-			})
-			items.push(await this.costCapabilityRepo.save(costCap))
-		}
-
-		return { capability: cap, items }
-	}
-
-	async approveCapability(studentGradeId: number) {
-		const cap = await this.capabilityRepo.findOne({ where: { studentGradeId } })
-		if (!cap) throw new NotFoundException(`Capability for student grade #${studentGradeId} not found`)
-
-		cap.status = "approve"
-		cap.approveDate = new Date()
-		return this.capabilityRepo.save(cap)
-	}
 }

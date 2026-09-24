@@ -1,5 +1,6 @@
 import type { AxiosInstance } from "axios"
 
+import { createAdminCapabilitiesApi, type AdminCapabilitiesApi } from "./admin-capabilities.api"
 import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api"
 import { createAdminMasterApi, type AdminMasterApi } from "./admin-master.api"
 import { createAdminMasterFinanceApi, type AdminMasterFinanceApi } from "./admin-master-finance.api"
@@ -52,7 +53,12 @@ export interface AdminLoginResponse {
 	user?: any
 }
 
-export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFinanceApi, AdminPaymentsApi {
+export interface AdminApi
+	extends AdminLainnyaApi,
+		AdminMasterApi,
+		AdminMasterFinanceApi,
+		AdminPaymentsApi,
+		AdminCapabilitiesApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -78,7 +84,7 @@ export interface AdminApi extends AdminLainnyaApi, AdminMasterApi, AdminMasterFi
 	bulkChangeStatus(data: StudentBulkStatusDto): Promise<ApiResponse<{ count: number }>>
 	bulkGraduateStudents(data: StudentBulkGraduateDto): Promise<ApiResponse<{ count: number }>>
 
-	// Student Capability & Invoices
+	// Alumni
 	getAlumni(params?: { search?: string; year?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AlumniItem>>
 
 	// Sprint D: Registrant Admin (PSB)
@@ -147,6 +153,7 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminMasterApi(client),
 	...createAdminMasterFinanceApi(client),
 	...createAdminPaymentsApi(client),
+	...createAdminCapabilitiesApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),

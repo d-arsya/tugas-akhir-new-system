@@ -89,10 +89,42 @@ import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
 
 import { InvoiceAdminController } from "@admin/payments/invoice-admin.controller"
 import { InvoiceAdminService } from "@admin/payments/invoice-admin.service"
+import { InvoiceDueDateScheduler } from "@admin/payments/invoice-duedate.scheduler"
 import { PaymentAdminController } from "@admin/payments/payment-admin.controller"
 import { PaymentAdminService } from "@admin/payments/payment-admin.service"
 import { TransactionAdminController } from "@admin/payments/transaction-admin.controller"
 import { TransactionAdminService } from "@admin/payments/transaction-admin.service"
+import { CapabilityAdminController } from "@admin/capabilities/capability-admin.controller"
+import { CapabilityAdminService } from "@admin/capabilities/capability-admin.service"
+import { CapabilitySingleController } from "@admin/capabilities/capability-single.controller"
+import { MassCapabilityController } from "@admin/capabilities/mass-controller"
+import { MassCapabilityService } from "@admin/capabilities/mass-service"
+import {
+	CAPABILITY_DOCUMENT_QUEUE,
+	CapabilityPublishService,
+	type CapabilityDocumentQueue,
+} from "@admin/capabilities/publish-service"
+import { generateCapabilityPdfInBackground } from "@admin/capabilities/capability-pdf-store"
+import { StorageService } from "@core/storage/storage.service"
+import { DataSource } from "typeorm"
+
+/**
+ * The Kesanggupan agreement PDF, rendered and uploaded after a publish has committed.
+ *
+ * Both writers inject this `@Optional()`, so leaving it unregistered silently produces no
+ * document — hence the explicit registration here rather than a provider tucked inside the
+ * capabilities folder. The helper it wraps returns `void` and cannot reject: an S3 outage must
+ * never roll back an agreed capability, exactly as the phase 1 receipt does at
+ * `payment-admin.service.ts:154-160`.
+ */
+const capabilityDocumentQueue = {
+	provide: CAPABILITY_DOCUMENT_QUEUE,
+	inject: [StorageService, DataSource],
+	useFactory: (storageService: StorageService, dataSource: DataSource): CapabilityDocumentQueue => ({
+		generateInBackground: (capabilityId: number, studentGradeId: number): void =>
+			generateCapabilityPdfInBackground(storageService, dataSource, capabilityId, studentGradeId),
+	}),
+}
 
 @Module({
 	imports: [
@@ -121,6 +153,9 @@ import { TransactionAdminService } from "@admin/payments/transaction-admin.servi
 		InvoiceAdminController,
 		PaymentAdminController,
 		TransactionAdminController,
+		CapabilityAdminController,
+		CapabilitySingleController,
+		MassCapabilityController,
 		AdminAuthController,
 		AdminCreatePasswordController,
 		AdminProfileController,
@@ -154,6 +189,11 @@ import { TransactionAdminService } from "@admin/payments/transaction-admin.servi
 		AdminAuthService,
 		AuthLogWriter,
 		AuthLogScheduler,
+		InvoiceDueDateScheduler,
+		CapabilityAdminService,
+		CapabilityPublishService,
+		MassCapabilityService,
+		capabilityDocumentQueue,
 		AdminCreatePasswordService,
 		AdminProfileService,
 		AdminUserService,

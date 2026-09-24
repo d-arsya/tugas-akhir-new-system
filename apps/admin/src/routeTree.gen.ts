@@ -84,15 +84,21 @@ import { Route as AuthLevelsLevelIdDelegateStudentRouteImport } from './routes/_
 import { Route as AuthLevelsLevelIdDeleteRouteImport } from './routes/_auth.levels.$levelId.delete'
 import { Route as AuthMerchantsMerchantIdEditRouteImport } from './routes/_auth.merchants.$merchantId.edit'
 import { Route as AuthRegistrantsAcademicYearIdWorkbenchRouteImport } from './routes/_auth.registrants.$academicYearId.workbench'
+import { Route as AuthStudentCapabilitiesStudentsStudentGradeIdRouteImport } from './routes/_auth.student-capabilities.students.$studentGradeId'
 import { Route as AuthStudentCostsAcademicYearIdIndexRouteImport } from './routes/_auth.student-costs.$academicYearId.index'
 import { Route as AuthStudentInvoicesStudentGradeIdIndexRouteImport } from './routes/_auth.student-invoices.$studentGradeId.index'
 import { Route as AuthStudentInvoicesStudentGradeIdCreateTransactionRouteImport } from './routes/_auth.student-invoices.$studentGradeId.create-transaction'
 import { Route as AuthStudentInvoicesBillsInvoiceIdRouteImport } from './routes/_auth.student-invoices.bills.$invoiceId'
 import { Route as AuthStudentInvoicesTransactionsTransactionIdRouteImport } from './routes/_auth.student-invoices.transactions.$transactionId'
 import { Route as AuthUsersUserIdEditRouteImport } from './routes/_auth.users.$userId.edit'
+import { Route as AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRouteImport } from './routes/_auth.student-capabilities.$capabilityId.students.$studentGradeId'
+import { Route as AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRouteImport } from './routes/_auth.student-capabilities.academic-years.$academicYearId.index'
 import { Route as AuthStudentsAcademicYearIdGradesIndexRouteImport } from './routes/_auth.students.$academicYearId.grades.index'
 import { Route as AuthStudentsAcademicYearIdGradesGradeIdRouteImport } from './routes/_auth.students.$academicYearId.grades.$gradeId'
 import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdIndexRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.index'
+import { Route as AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRouteImport } from './routes/_auth.student-capabilities.academic-years.$academicYearId.grades.$gradeId.index'
+import { Route as AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRouteImport } from './routes/_auth.student-capabilities.academic-years.$academicYearId.grades.$gradeId.mass-create'
+import { Route as AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRouteImport } from './routes/_auth.student-capabilities.academic-years.$academicYearId.grades.$gradeId.mass-edit'
 import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.accountancy.$accountancyId.create'
 import { Route as AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRouteImport } from './routes/_auth.student-costs.$academicYearId.grades.$gradeId.accountancy.$accountancyId.edit'
 
@@ -489,6 +495,12 @@ const AuthRegistrantsAcademicYearIdWorkbenchRoute =
     path: '/$academicYearId/workbench',
     getParentRoute: () => AuthRegistrantsRoute,
   } as any)
+const AuthStudentCapabilitiesStudentsStudentGradeIdRoute =
+  AuthStudentCapabilitiesStudentsStudentGradeIdRouteImport.update({
+    id: '/students/$studentGradeId',
+    path: '/students/$studentGradeId',
+    getParentRoute: () => AuthStudentCapabilitiesRoute,
+  } as any)
 const AuthStudentCostsAcademicYearIdIndexRoute =
   AuthStudentCostsAcademicYearIdIndexRouteImport.update({
     id: '/$academicYearId/',
@@ -524,6 +536,18 @@ const AuthUsersUserIdEditRoute = AuthUsersUserIdEditRouteImport.update({
   path: '/$userId/edit',
   getParentRoute: () => AuthUsersRoute,
 } as any)
+const AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute =
+  AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRouteImport.update({
+    id: '/$capabilityId/students/$studentGradeId',
+    path: '/$capabilityId/students/$studentGradeId',
+    getParentRoute: () => AuthStudentCapabilitiesRoute,
+  } as any)
+const AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute =
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRouteImport.update({
+    id: '/academic-years/$academicYearId/',
+    path: '/academic-years/$academicYearId/',
+    getParentRoute: () => AuthStudentCapabilitiesRoute,
+  } as any)
 const AuthStudentsAcademicYearIdGradesIndexRoute =
   AuthStudentsAcademicYearIdGradesIndexRouteImport.update({
     id: '/$academicYearId/grades/',
@@ -542,6 +566,30 @@ const AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute =
     path: '/$academicYearId/grades/$gradeId/',
     getParentRoute: () => AuthStudentCostsRoute,
   } as any)
+const AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute =
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRouteImport.update(
+    {
+      id: '/academic-years/$academicYearId/grades/$gradeId/',
+      path: '/academic-years/$academicYearId/grades/$gradeId/',
+      getParentRoute: () => AuthStudentCapabilitiesRoute,
+    } as any,
+  )
+const AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute =
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRouteImport.update(
+    {
+      id: '/academic-years/$academicYearId/grades/$gradeId/mass-create',
+      path: '/academic-years/$academicYearId/grades/$gradeId/mass-create',
+      getParentRoute: () => AuthStudentCapabilitiesRoute,
+    } as any,
+  )
+const AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute =
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRouteImport.update(
+    {
+      id: '/academic-years/$academicYearId/grades/$gradeId/mass-edit',
+      path: '/academic-years/$academicYearId/grades/$gradeId/mass-edit',
+      getParentRoute: () => AuthStudentCapabilitiesRoute,
+    } as any,
+  )
 const AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute =
   AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRouteImport.update(
     {
@@ -633,15 +681,21 @@ export interface FileRoutesByFullPath {
   '/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
   '/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/student-capabilities/students/$studentGradeId': typeof AuthStudentCapabilitiesStudentsStudentGradeIdRoute
   '/student-invoices/$studentGradeId/create-transaction': typeof AuthStudentInvoicesStudentGradeIdCreateTransactionRoute
   '/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/student-invoices/$studentGradeId/': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
+  '/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/student-capabilities/academic-years/$academicYearId/': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute
   '/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
   '/student-costs/$academicYearId/grades/$gradeId/': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute
   '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
   '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
@@ -705,15 +759,21 @@ export interface FileRoutesByTo {
   '/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
   '/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/student-capabilities/students/$studentGradeId': typeof AuthStudentCapabilitiesStudentsStudentGradeIdRoute
   '/student-invoices/$studentGradeId/create-transaction': typeof AuthStudentInvoicesStudentGradeIdCreateTransactionRoute
   '/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/student-costs/$academicYearId': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/student-invoices/$studentGradeId': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
+  '/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
   '/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/student-capabilities/academic-years/$academicYearId': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute
   '/students/$academicYearId/grades': typeof AuthStudentsAcademicYearIdGradesIndexRoute
   '/student-costs/$academicYearId/grades/$gradeId': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute
+  '/student-capabilities/academic-years/$academicYearId/grades/$gradeId': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute
   '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
   '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
@@ -794,15 +854,21 @@ export interface FileRoutesById {
   '/_auth/levels/$levelId/delete': typeof AuthLevelsLevelIdDeleteRoute
   '/_auth/merchants/$merchantId/edit': typeof AuthMerchantsMerchantIdEditRoute
   '/_auth/registrants/$academicYearId/workbench': typeof AuthRegistrantsAcademicYearIdWorkbenchRoute
+  '/_auth/student-capabilities/students/$studentGradeId': typeof AuthStudentCapabilitiesStudentsStudentGradeIdRoute
   '/_auth/student-invoices/$studentGradeId/create-transaction': typeof AuthStudentInvoicesStudentGradeIdCreateTransactionRoute
   '/_auth/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/_auth/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/_auth/users/$userId/edit': typeof AuthUsersUserIdEditRoute
   '/_auth/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/_auth/student-invoices/$studentGradeId/': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
+  '/_auth/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
   '/_auth/students/$academicYearId/grades/$gradeId': typeof AuthStudentsAcademicYearIdGradesGradeIdRoute
+  '/_auth/student-capabilities/academic-years/$academicYearId/': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute
   '/_auth/students/$academicYearId/grades/': typeof AuthStudentsAcademicYearIdGradesIndexRoute
   '/_auth/student-costs/$academicYearId/grades/$gradeId/': typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRoute
+  '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute
+  '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute
+  '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/': typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute
   '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdCreateRoute
   '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit': typeof AuthStudentCostsAcademicYearIdGradesGradeIdAccountancyAccountancyIdEditRoute
 }
@@ -882,15 +948,21 @@ export interface FileRouteTypes {
     | '/levels/$levelId/delete'
     | '/merchants/$merchantId/edit'
     | '/registrants/$academicYearId/workbench'
+    | '/student-capabilities/students/$studentGradeId'
     | '/student-invoices/$studentGradeId/create-transaction'
     | '/student-invoices/bills/$invoiceId'
     | '/student-invoices/transactions/$transactionId'
     | '/users/$userId/edit'
     | '/student-costs/$academicYearId/'
     | '/student-invoices/$studentGradeId/'
+    | '/student-capabilities/$capabilityId/students/$studentGradeId'
     | '/students/$academicYearId/grades/$gradeId'
+    | '/student-capabilities/academic-years/$academicYearId/'
     | '/students/$academicYearId/grades/'
     | '/student-costs/$academicYearId/grades/$gradeId/'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/'
     | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
     | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -954,15 +1026,21 @@ export interface FileRouteTypes {
     | '/levels/$levelId/delete'
     | '/merchants/$merchantId/edit'
     | '/registrants/$academicYearId/workbench'
+    | '/student-capabilities/students/$studentGradeId'
     | '/student-invoices/$studentGradeId/create-transaction'
     | '/student-invoices/bills/$invoiceId'
     | '/student-invoices/transactions/$transactionId'
     | '/users/$userId/edit'
     | '/student-costs/$academicYearId'
     | '/student-invoices/$studentGradeId'
+    | '/student-capabilities/$capabilityId/students/$studentGradeId'
     | '/students/$academicYearId/grades/$gradeId'
+    | '/student-capabilities/academic-years/$academicYearId'
     | '/students/$academicYearId/grades'
     | '/student-costs/$academicYearId/grades/$gradeId'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+    | '/student-capabilities/academic-years/$academicYearId/grades/$gradeId'
     | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
     | '/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   id:
@@ -1042,15 +1120,21 @@ export interface FileRouteTypes {
     | '/_auth/levels/$levelId/delete'
     | '/_auth/merchants/$merchantId/edit'
     | '/_auth/registrants/$academicYearId/workbench'
+    | '/_auth/student-capabilities/students/$studentGradeId'
     | '/_auth/student-invoices/$studentGradeId/create-transaction'
     | '/_auth/student-invoices/bills/$invoiceId'
     | '/_auth/student-invoices/transactions/$transactionId'
     | '/_auth/users/$userId/edit'
     | '/_auth/student-costs/$academicYearId/'
     | '/_auth/student-invoices/$studentGradeId/'
+    | '/_auth/student-capabilities/$capabilityId/students/$studentGradeId'
     | '/_auth/students/$academicYearId/grades/$gradeId'
+    | '/_auth/student-capabilities/academic-years/$academicYearId/'
     | '/_auth/students/$academicYearId/grades/'
     | '/_auth/student-costs/$academicYearId/grades/$gradeId/'
+    | '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create'
+    | '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+    | '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/'
     | '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
     | '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/edit'
   fileRoutesById: FileRoutesById
@@ -1588,6 +1672,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegistrantsAcademicYearIdWorkbenchRouteImport
       parentRoute: typeof AuthRegistrantsRoute
     }
+    '/_auth/student-capabilities/students/$studentGradeId': {
+      id: '/_auth/student-capabilities/students/$studentGradeId'
+      path: '/students/$studentGradeId'
+      fullPath: '/student-capabilities/students/$studentGradeId'
+      preLoaderRoute: typeof AuthStudentCapabilitiesStudentsStudentGradeIdRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
     '/_auth/student-costs/$academicYearId/': {
       id: '/_auth/student-costs/$academicYearId/'
       path: '/$academicYearId'
@@ -1630,6 +1721,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthUsersUserIdEditRouteImport
       parentRoute: typeof AuthUsersRoute
     }
+    '/_auth/student-capabilities/$capabilityId/students/$studentGradeId': {
+      id: '/_auth/student-capabilities/$capabilityId/students/$studentGradeId'
+      path: '/$capabilityId/students/$studentGradeId'
+      fullPath: '/student-capabilities/$capabilityId/students/$studentGradeId'
+      preLoaderRoute: typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
+    '/_auth/student-capabilities/academic-years/$academicYearId/': {
+      id: '/_auth/student-capabilities/academic-years/$academicYearId/'
+      path: '/academic-years/$academicYearId'
+      fullPath: '/student-capabilities/academic-years/$academicYearId/'
+      preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
     '/_auth/students/$academicYearId/grades/': {
       id: '/_auth/students/$academicYearId/grades/'
       path: '/$academicYearId/grades'
@@ -1650,6 +1755,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/student-costs/$academicYearId/grades/$gradeId/'
       preLoaderRoute: typeof AuthStudentCostsAcademicYearIdGradesGradeIdIndexRouteImport
       parentRoute: typeof AuthStudentCostsRoute
+    }
+    '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/': {
+      id: '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/'
+      path: '/academic-years/$academicYearId/grades/$gradeId'
+      fullPath: '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/'
+      preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
+    '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create': {
+      id: '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create'
+      path: '/academic-years/$academicYearId/grades/$gradeId/mass-create'
+      fullPath: '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-create'
+      preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
+    }
+    '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit': {
+      id: '/_auth/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+      path: '/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+      fullPath: '/student-capabilities/academic-years/$academicYearId/grades/$gradeId/mass-edit'
+      preLoaderRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRouteImport
+      parentRoute: typeof AuthStudentCapabilitiesRoute
     }
     '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create': {
       id: '/_auth/student-costs/$academicYearId/grades/$gradeId/accountancy/$accountancyId/create'
@@ -1824,11 +1950,29 @@ const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
 
 interface AuthStudentCapabilitiesRouteChildren {
   AuthStudentCapabilitiesIndexRoute: typeof AuthStudentCapabilitiesIndexRoute
+  AuthStudentCapabilitiesStudentsStudentGradeIdRoute: typeof AuthStudentCapabilitiesStudentsStudentGradeIdRoute
+  AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute: typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute
+  AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute: typeof AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute
 }
 
 const AuthStudentCapabilitiesRouteChildren: AuthStudentCapabilitiesRouteChildren =
   {
     AuthStudentCapabilitiesIndexRoute: AuthStudentCapabilitiesIndexRoute,
+    AuthStudentCapabilitiesStudentsStudentGradeIdRoute:
+      AuthStudentCapabilitiesStudentsStudentGradeIdRoute,
+    AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute:
+      AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute,
+    AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute:
+      AuthStudentCapabilitiesAcademicYearsAcademicYearIdIndexRoute,
+    AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute:
+      AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassCreateRoute,
+    AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute:
+      AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdMassEditRoute,
+    AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute:
+      AuthStudentCapabilitiesAcademicYearsAcademicYearIdGradesGradeIdIndexRoute,
   }
 
 const AuthStudentCapabilitiesRouteWithChildren =
