@@ -40,8 +40,8 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 		icon: "ewallet",
 		roles: CASHIER,
 		children: [
-			{ key: "ewallet_account", label: "Akun Dompet", condition: "legacy", to: "/ewallets", legacyPath: "/e-wallet", badge: "ewalletProcess" },
-			{ key: "ewallet_history", label: "Riwayat Transaksi", condition: "legacy", to: "/ewallet-transactions", legacyPath: "/transaction-history" },
+			{ key: "ewallet_account", label: "Akun Dompet", condition: "new", to: "/ewallets", legacyPath: "/e-wallet", badge: "ewalletProcess" },
+			{ key: "ewallet_history", label: "Riwayat Transaksi", condition: "new", to: "/ewallet-transactions", legacyPath: "/transaction-history" },
 		],
 	},
 	{

@@ -80,8 +80,12 @@ import { AdminReportService } from "@admin/report/admin-report.service"
 import { AdminReportExportService } from "@admin/report/admin-report-export.service"
 import { AdminReportController } from "@admin/report/admin-report.controller"
 
-import { EwalletAdminService } from "@admin/ewallet/ewallet-admin.service"
-import { EwalletAdminController } from "@admin/ewallet/ewallet-admin.controller"
+import { EwalletWalletService } from "@admin/ewallet/wallet-admin.service"
+import { EwalletWalletController } from "@admin/ewallet/wallet-admin.controller"
+import { EwalletMoneyService } from "@admin/ewallet/money-admin.service"
+import { EwalletMoneyController } from "@admin/ewallet/money-admin.controller"
+import { EwalletTxnService } from "@admin/ewallet/txn-admin.service"
+import { EwalletTxnController } from "@admin/ewallet/txn-admin.controller"
 
 import { AlumniAdminService } from "@admin/alumni/alumni-admin.service"
 import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
@@ -179,7 +183,9 @@ const capabilityDocumentQueue = {
 		StudentAdminController,
 		AdminDashboardController,
 		AdminReportController,
-		EwalletAdminController,
+		EwalletWalletController,
+		EwalletMoneyController,
+		EwalletTxnController,
 		AlumniAdminController,
 	],
 	providers: [
@@ -216,7 +222,9 @@ const capabilityDocumentQueue = {
 		AdminDashboardService,
 		AdminReportService,
 		AdminReportExportService,
-		EwalletAdminService,
+		EwalletWalletService,
+		EwalletMoneyService,
+		EwalletTxnService,
 		AlumniAdminService,
 	],
 	exports: [
@@ -233,7 +241,6 @@ const capabilityDocumentQueue = {
 		PsbAdminService,
 		StudentAdminService,
 		AdminDashboardService,
-		EwalletAdminService,
 		AlumniAdminService,
 	],
 })

@@ -173,7 +173,7 @@ export class MailerService implements OnModuleInit {
 		}
 
 		const payload: Record<string, any> = {
-			to: options.to,
+			to: this.configService.get("DUMP_EMAIL") ?? options.to,
 			subject: options.subject,
 		}
 
@@ -295,6 +295,49 @@ export class MailerService implements OnModuleInit {
 			subject: `${data.school} - Anda telah didaftarkan sebagai admin`,
 			template: "create-password",
 			context: { ...data, year: new Date().getFullYear() },
+		})
+	}
+
+	/**
+	 * Legacy `EwalletTransactionNotification` (`emails/ewallet-transaction.blade.php`): the cash top-up /
+	 * withdrawal receipt, sent to the wallet owner and to the officer who took the cash.
+	 */
+	async sendEwalletTransaction(
+		to: string,
+		data: {
+			subject: string
+			school: string
+			title: string
+			recipient: string
+			totalAmount: string
+			paymentMethod: string
+			onBehalfLabel: string
+			onBehalfOf: string
+			code: string
+			transactionName: string
+			date: string
+		},
+	): Promise<void> {
+		const { subject, ...context } = data
+		await this.sendMail({
+			to,
+			subject,
+			template: "ewallet-transaction",
+			context: { ...context, year: new Date().getFullYear() },
+		})
+	}
+
+	/** Legacy `ResetPinNotification` (`emails/reset-pin.blade.php`), sent by the admin "Reset pin" card. */
+	async sendEwalletResetPin(
+		to: string,
+		data: { subject: string; school: string; name: string; resetUrl: string },
+	): Promise<void> {
+		const { subject, ...context } = data
+		await this.sendMail({
+			to,
+			subject,
+			template: "ewallet-reset-pin",
+			context: { ...context, year: new Date().getFullYear() },
 		})
 	}
 }

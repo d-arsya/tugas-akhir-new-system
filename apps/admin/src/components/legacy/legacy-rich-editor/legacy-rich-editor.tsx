@@ -4,23 +4,29 @@ import { cn } from "@roja/utils"
 
 import LegacyEditorHelpDialog from "./legacy-editor-help-dialog"
 import LegacyEditorLinkDialog, { type EditorLink } from "./legacy-editor-link-dialog"
-import LegacyEditorToolbar, { type EditorMenu } from "./legacy-editor-toolbar"
+import LegacyEditorToolbar, { type EditorMenu, type EditorToolbarVariant } from "./legacy-editor-toolbar"
 
 // Summernote's `dom.emptyPara`; `setting/annc-ajax.js` treats it as an empty field
 const EMPTY = "<p><br></p>"
-const STATE_COMMANDS = ["bold", "underline", "insertUnorderedList", "insertOrderedList", "justifyLeft", "justifyCenter", "justifyRight", "justifyFull"]
+const STATE_COMMANDS = ["bold", "italic", "underline", "insertUnorderedList", "insertOrderedList", "justifyLeft", "justifyCenter", "justifyRight", "justifyFull"]
 
 const escapeHtml = (value: string): string =>
 	value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
 
-type LegacyRichEditorProps = { value: string; onChange: (html: string) => void; height?: number }
+type LegacyRichEditorProps = {
+	value: string
+	onChange: (html: string) => void
+	height?: number
+	/** `compact` is the ewallet status-note toolbar; the default is the PSB/announcement one. */
+	toolbar?: EditorToolbarVariant
+}
 
 /**
  * Port of the legacy summernote editor (`default-summernote.js`, `height: 130`, `lang: "id-ID"`).
  * A `contentEditable` driven by `document.execCommand`, so the stored HTML stays byte-for-byte
  * what the browser produced — the PSB portal renders it with `{!! … !!}`.
  */
-const LegacyRichEditor = ({ value, onChange, height = 130 }: LegacyRichEditorProps): JSX.Element => {
+const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: LegacyRichEditorProps): JSX.Element => {
 	const frame = useRef<HTMLDivElement>(null)
 	const editable = useRef<HTMLDivElement>(null)
 	const emitted = useRef<string | null>(null)
@@ -176,6 +182,7 @@ const LegacyRichEditor = ({ value, onChange, height = 130 }: LegacyRichEditorPro
 			)}
 		>
 			<LegacyEditorToolbar
+				variant={toolbar}
 				state={state}
 				menu={menu}
 				codeview={code !== null}

@@ -39,6 +39,7 @@ export const EnvSchema = z.object({
 	MAIL_SERVICE: z.string().url().optional(),
 	MAIL_API_KEY: z.string().optional(),
 	// Legacy `config('app.name')`: used for the database backup file name
+	DUMP_EMAIL: z.string().email().optional(),
 	APP_NAME: z.string().default("ROJA"),
 	// Lets a local/test instance run without the cron jobs (auth-log close, database backup)
 	SCHEDULER_ENABLED: z

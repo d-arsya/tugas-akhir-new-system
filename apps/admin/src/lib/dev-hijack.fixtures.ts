@@ -4,9 +4,6 @@ import type {
 	StudentItem,
 	AlumniItem,
 	AdminRegistrantItem,
-	AdminEwalletItem,
-	BankTransferConfirmationItem,
-	WithdrawalRequestItem,
 	DashboardStats,
 	DashboardOptions,
 	DashboardChartItem,
@@ -119,54 +116,6 @@ export const mockRegistrants: AdminRegistrantItem[] = [
 		phone: "081900112244",
 		status: "ACCEPTED",
 		registeredAt: "2026-09-03T11:15:00Z",
-	},
-]
-
-// Sprint E Fixtures: E-Wallets, Confirmations, Withdrawals, Merchants
-export const mockEwallets: AdminEwalletItem[] = [
-	{
-		id: 1,
-		accountNumber: "EW-202407001",
-		ownerName: "Muhammad Farel Rabbani (Santri)",
-		ownerType: "SANTRI",
-		balance: 450000,
-		status: "ACTIVE",
-		lastTransactionAt: "2026-09-12T14:20:00Z",
-	},
-	{
-		id: 2,
-		accountNumber: "EW-MERCH-001",
-		ownerName: "Kantin Kejujuran Putra (Merchant)",
-		ownerType: "MERCHANT",
-		balance: 2850000,
-		status: "ACTIVE",
-		lastTransactionAt: "2026-09-14T09:00:00Z",
-	},
-]
-
-export const mockBankConfirmations: BankTransferConfirmationItem[] = [
-	{
-		id: 1,
-		ewalletAccountId: 1,
-		ownerName: "Muhammad Farel Rabbani",
-		bankName: "Bank Syariah Indonesia (BSI)",
-		accountHolder: "Ahmad Fauzi",
-		amount: 500000,
-		proofImageUrl: "https://placehold.co/600x400/emerald/white?text=Bukti+Transfer+BSI",
-		requestedAt: "2026-09-13T16:00:00Z",
-		status: "PENDING",
-	},
-]
-
-export const mockWithdrawals: WithdrawalRequestItem[] = [
-	{
-		id: 1,
-		ewalletAccountId: 2,
-		ownerName: "Kantin Kejujuran Putra",
-		amount: 1000000,
-		cashierName: "Koperasi & Kasir Utama",
-		status: "PENDING",
-		requestedAt: "2026-09-14T08:00:00Z",
 	},
 ]
 

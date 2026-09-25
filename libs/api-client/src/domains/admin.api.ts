@@ -1,6 +1,7 @@
 import type { AxiosInstance } from "axios"
 
 import { createAdminCapabilitiesApi, type AdminCapabilitiesApi } from "./admin-capabilities.api"
+import { createAdminEwalletApi, type AdminEwalletApi } from "./admin-ewallet.api"
 import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api"
 import { createAdminMasterApi, type AdminMasterApi } from "./admin-master.api"
 import { createAdminMasterFinanceApi, type AdminMasterFinanceApi } from "./admin-master-finance.api"
@@ -13,9 +14,6 @@ import type {
 	StudentItem,
 	AlumniItem,
 	AdminRegistrantItem,
-	AdminEwalletItem,
-	BankTransferConfirmationItem,
-	WithdrawalRequestItem,
 	CreateStudentDto,
 	StudentBulkPromoteDto,
 	StudentBulkRetainDto,
@@ -23,8 +21,6 @@ import type {
 	StudentBulkChangeMajorDto,
 	StudentBulkStatusDto,
 	StudentBulkGraduateDto,
-	TopupEwalletDto,
-	WithdrawEwalletDto,
 	ReportOptions,
 	ReportFilterParams,
 	ReportArrearFilterParams,
@@ -58,7 +54,8 @@ export interface AdminApi
 		AdminMasterApi,
 		AdminMasterFinanceApi,
 		AdminPaymentsApi,
-		AdminCapabilitiesApi {
+		AdminCapabilitiesApi,
+		AdminEwalletApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -93,21 +90,6 @@ export interface AdminApi
 	acceptRegistrant(id: number): Promise<ApiResponse<{ message: string }>>
 	rejectRegistrant(id: number, reason: string): Promise<ApiResponse<{ message: string }>>
 	markRegistrantInvalid(id: number, note: string): Promise<ApiResponse<{ message: string }>>
-
-	// Sprint E: E-Wallet, Cashier & Merchant Operations
-	getEwallets(params?: { search?: string; type?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AdminEwalletItem>>
-	topUpEwalletCash(id: number, amount: number): Promise<ApiResponse<{ message: string }>>
-	withdrawEwalletCash(data: WithdrawEwalletDto): Promise<ApiResponse<{ message: string }>>
-	resetEwalletPin(id: number): Promise<ApiResponse<{ message: string }>>
-	
-	getBankTransferConfirmations(params?: { status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<BankTransferConfirmationItem>>
-	approveBankTransfer(id: number): Promise<ApiResponse<{ message: string }>>
-	rejectBankTransfer(id: number, reason: string): Promise<ApiResponse<{ message: string }>>
-	
-	getWithdrawalRequests(params?: { status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<WithdrawalRequestItem>>
-	approveWithdrawal(id: number): Promise<ApiResponse<{ message: string }>>
-	rejectWithdrawal(id: number, reason: string): Promise<ApiResponse<{ message: string }>>
-
 
 	// Analytics & Reports
 	getDashboardStats(params?: { academicYearId?: number | undefined }): Promise<DashboardStats>
@@ -154,6 +136,7 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminMasterFinanceApi(client),
 	...createAdminPaymentsApi(client),
 	...createAdminCapabilitiesApi(client),
+	...createAdminEwalletApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
@@ -200,19 +183,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	acceptRegistrant: (id) => unwrap(client.patch(`/admin/registrants/${id}/accept`)),
 	rejectRegistrant: (id, reason) => unwrap(client.patch(`/admin/registrants/${id}/reject`, { reason })),
 	markRegistrantInvalid: (id, note) => unwrap(client.patch(`/admin/registrants/${id}/invalid`, { note })),
-
-	getEwallets: (params) => unwrap(client.get("/admin/ewallets", { params })),
-	topUpEwalletCash: (id, amount) => unwrap(client.post(`/admin/ewallets/${id}/top-up-cash`, { amount })),
-	withdrawEwalletCash: (data) => unwrap(client.post("/admin/ewallets/withdraw-cash", data)),
-	resetEwalletPin: (id) => unwrap(client.post(`/admin/ewallets/${id}/reset-pin`)),
-
-	getBankTransferConfirmations: (params) => unwrap(client.get("/admin/bank-confirmations", { params })),
-	approveBankTransfer: (id) => unwrap(client.patch(`/admin/bank-confirmations/${id}/approve`)),
-	rejectBankTransfer: (id, reason) => unwrap(client.patch(`/admin/bank-confirmations/${id}/reject`, { reason })),
-
-	getWithdrawalRequests: (params) => unwrap(client.get("/admin/withdrawals", { params })),
-	approveWithdrawal: (id) => unwrap(client.patch(`/admin/withdrawals/${id}/approve`)),
-	rejectWithdrawal: (id, reason) => unwrap(client.patch(`/admin/withdrawals/${id}/reject`, { reason })),
 
 })
 

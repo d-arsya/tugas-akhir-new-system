@@ -27,6 +27,36 @@ export class RedisService {
 		return result === 1
 	}
 
+	// Counters (rate limits, strike counters) — used by the admin Dompet module.
+
+	/**
+	 * Adds one to the counter and answers the new value. The key is created with `windowSeconds`
+	 * to live when it does not exist (`SET … EX NX`, then `INCR`, in one MULTI), so the window is
+	 * fixed from the first hit and a crash between the two commands cannot leave a key without a TTL.
+	 */
+	async incrWithWindow(key: string, windowSeconds: number): Promise<number> {
+		const results = await this.redis.multi().set(key, 0, "EX", windowSeconds, "NX").incr(key).exec()
+		const incr = results?.[1]
+		if (!incr || incr[0]) throw incr?.[0] ?? new Error("Redis INCR failed")
+		return Number(incr[1])
+	}
+
+	/** Deletes the key and says whether it was there — exactly one concurrent caller gets `true`. */
+	async delIfPresent(key: string): Promise<boolean> {
+		return (await this.redis.del(key)) === 1
+	}
+
+	/** Restarts the key's time-to-live. */
+	async expire(key: string, ttlSeconds: number): Promise<void> {
+		await this.redis.expire(key, ttlSeconds)
+	}
+
+	/** Seconds left on the key; 0 when it is missing or has no expiry. */
+	async ttlSeconds(key: string): Promise<number> {
+		const ttl = await this.redis.ttl(key)
+		return ttl > 0 ? ttl : 0
+	}
+
 	// Refresh token helpers with domain scoping (admin, santri, psb, merchant)
 	refreshTokenKey(domain: string, userId: number, tokenId: string): string {
 		return `refresh:${domain}:${userId}:${tokenId}`

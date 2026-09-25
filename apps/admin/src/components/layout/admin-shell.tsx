@@ -4,6 +4,7 @@ import { useRouterState } from "@tanstack/react-router"
 import { cn } from "@roja/utils"
 
 import { LegacyNotifyHost } from "@/components/legacy/legacy-notify"
+import { useEwalletBadge } from "@/hooks/use-ewallets"
 import { roleLabel, type LayoutRole } from "@/lib/admin-roles"
 
 import AdminFooter from "./admin-footer"
@@ -24,6 +25,9 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 	// Legacy keeps the collapsed state per page load only, so it is not persisted
 	const [collapsed, setCollapsed] = useState(false)
 	const [mobileOpen, setMobileOpen] = useState(false)
+	// Legacy `ViewServiceProvider` counts `process` transactions on every page, but the menu (and so the
+	// badge) exists only under `@can('do-as-cashier')` — the API answers 403 to anyone else, so only ask them
+	const { data: ewalletBadge } = useEwalletBadge(role === "superadmin" || role === "kasir")
 
 	useEffect(() => {
 		setMobileOpen(false)
@@ -53,7 +57,7 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 						collapsed={collapsed}
 						onToggleCollapse={() => setCollapsed((value) => !value)}
 						mobileOpen={mobileOpen}
-						badges={{}}
+						badges={{ ewalletProcess: ewalletBadge?.count ?? 0 }}
 					/>
 
 					{/* Porto `html.flexbox.fixed`: content-body fills the viewport below the page title (flex: 2) and

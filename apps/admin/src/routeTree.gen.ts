@@ -17,9 +17,7 @@ import { Route as AuthAccountancyRouteImport } from './routes/_auth.accountancy'
 import { Route as AuthAlumniRouteImport } from './routes/_auth.alumni'
 import { Route as AuthAuthLogsRouteImport } from './routes/_auth.auth-logs'
 import { Route as AuthDashboardRouteImport } from './routes/_auth.dashboard'
-import { Route as AuthEwalletConfirmationsRouteImport } from './routes/_auth.ewallet-confirmations'
 import { Route as AuthEwalletTransactionsRouteImport } from './routes/_auth.ewallet-transactions'
-import { Route as AuthEwalletWithdrawalsRouteImport } from './routes/_auth.ewallet-withdrawals'
 import { Route as AuthEwalletsRouteImport } from './routes/_auth.ewallets'
 import { Route as AuthGradesRouteImport } from './routes/_auth.grades'
 import { Route as AuthIpBansRouteImport } from './routes/_auth.ip-bans'
@@ -47,6 +45,10 @@ import { Route as AuthAccountancyIndexRouteImport } from './routes/_auth.account
 import { Route as AuthAlumniIndexRouteImport } from './routes/_auth.alumni.index'
 import { Route as AuthAlumniGraduationYearRouteImport } from './routes/_auth.alumni.$graduationYear'
 import { Route as AuthAlumniDashboardRouteImport } from './routes/_auth.alumni.dashboard'
+import { Route as AuthEwalletTransactionsIndexRouteImport } from './routes/_auth.ewallet-transactions.index'
+import { Route as AuthEwalletTransactionsTransactionIdRouteImport } from './routes/_auth.ewallet-transactions.$transactionId'
+import { Route as AuthEwalletsIndexRouteImport } from './routes/_auth.ewallets.index'
+import { Route as AuthEwalletsQrAllRouteImport } from './routes/_auth.ewallets.qr-all'
 import { Route as AuthLevelsIndexRouteImport } from './routes/_auth.levels.index'
 import { Route as AuthMerchantsIndexRouteImport } from './routes/_auth.merchants.index'
 import { Route as AuthMerchantsCreateRouteImport } from './routes/_auth.merchants.create'
@@ -77,6 +79,12 @@ import { Route as AuthAcademicYearsAcademicYearIdDeleteRouteImport } from './rou
 import { Route as AuthAcademicYearsAcademicYearIdEditRouteImport } from './routes/_auth.academic-years.$academicYearId.edit'
 import { Route as AuthAccountancyAccountancyIdDelegateChildRouteImport } from './routes/_auth.accountancy.$accountancyId.delegate-child'
 import { Route as AuthAccountancyAccountancyIdDeleteRouteImport } from './routes/_auth.accountancy.$accountancyId.delete'
+import { Route as AuthEwalletsEwalletIdIndexRouteImport } from './routes/_auth.ewallets.$ewalletId.index'
+import { Route as AuthEwalletsEwalletIdBlockedRouteImport } from './routes/_auth.ewallets.$ewalletId.blocked'
+import { Route as AuthEwalletsEwalletIdQrRouteImport } from './routes/_auth.ewallets.$ewalletId.qr'
+import { Route as AuthEwalletsEwalletIdSettingRouteImport } from './routes/_auth.ewallets.$ewalletId.setting'
+import { Route as AuthEwalletsEwalletIdWithdrawPinRouteImport } from './routes/_auth.ewallets.$ewalletId.withdraw-pin'
+import { Route as AuthEwalletsTransactionsTransactionIdRouteImport } from './routes/_auth.ewallets.transactions.$transactionId'
 import { Route as AuthLevelsLevelIdDelegateGradeRouteImport } from './routes/_auth.levels.$levelId.delegate-grade'
 import { Route as AuthLevelsLevelIdDelegateMajorRouteImport } from './routes/_auth.levels.$levelId.delegate-major'
 import { Route as AuthLevelsLevelIdDelegateRegistrantRouteImport } from './routes/_auth.levels.$levelId.delegate-registrant'
@@ -140,20 +148,9 @@ const AuthDashboardRoute = AuthDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthEwalletConfirmationsRoute =
-  AuthEwalletConfirmationsRouteImport.update({
-    id: '/ewallet-confirmations',
-    path: '/ewallet-confirmations',
-    getParentRoute: () => AuthRoute,
-  } as any)
 const AuthEwalletTransactionsRoute = AuthEwalletTransactionsRouteImport.update({
   id: '/ewallet-transactions',
   path: '/ewallet-transactions',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthEwalletWithdrawalsRoute = AuthEwalletWithdrawalsRouteImport.update({
-  id: '/ewallet-withdrawals',
-  path: '/ewallet-withdrawals',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthEwalletsRoute = AuthEwalletsRouteImport.update({
@@ -291,6 +288,28 @@ const AuthAlumniDashboardRoute = AuthAlumniDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthAlumniRoute,
+} as any)
+const AuthEwalletTransactionsIndexRoute =
+  AuthEwalletTransactionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthEwalletTransactionsRoute,
+  } as any)
+const AuthEwalletTransactionsTransactionIdRoute =
+  AuthEwalletTransactionsTransactionIdRouteImport.update({
+    id: '/$transactionId',
+    path: '/$transactionId',
+    getParentRoute: () => AuthEwalletTransactionsRoute,
+  } as any)
+const AuthEwalletsIndexRoute = AuthEwalletsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthEwalletsRoute,
+} as any)
+const AuthEwalletsQrAllRoute = AuthEwalletsQrAllRouteImport.update({
+  id: '/qr-all',
+  path: '/qr-all',
+  getParentRoute: () => AuthEwalletsRoute,
 } as any)
 const AuthLevelsIndexRoute = AuthLevelsIndexRouteImport.update({
   id: '/',
@@ -454,6 +473,41 @@ const AuthAccountancyAccountancyIdDeleteRoute =
     path: '/$accountancyId/delete',
     getParentRoute: () => AuthAccountancyRoute,
   } as any)
+const AuthEwalletsEwalletIdIndexRoute =
+  AuthEwalletsEwalletIdIndexRouteImport.update({
+    id: '/$ewalletId/',
+    path: '/$ewalletId/',
+    getParentRoute: () => AuthEwalletsRoute,
+  } as any)
+const AuthEwalletsEwalletIdBlockedRoute =
+  AuthEwalletsEwalletIdBlockedRouteImport.update({
+    id: '/$ewalletId/blocked',
+    path: '/$ewalletId/blocked',
+    getParentRoute: () => AuthEwalletsRoute,
+  } as any)
+const AuthEwalletsEwalletIdQrRoute = AuthEwalletsEwalletIdQrRouteImport.update({
+  id: '/$ewalletId/qr',
+  path: '/$ewalletId/qr',
+  getParentRoute: () => AuthEwalletsRoute,
+} as any)
+const AuthEwalletsEwalletIdSettingRoute =
+  AuthEwalletsEwalletIdSettingRouteImport.update({
+    id: '/$ewalletId/setting',
+    path: '/$ewalletId/setting',
+    getParentRoute: () => AuthEwalletsRoute,
+  } as any)
+const AuthEwalletsEwalletIdWithdrawPinRoute =
+  AuthEwalletsEwalletIdWithdrawPinRouteImport.update({
+    id: '/$ewalletId/withdraw-pin',
+    path: '/$ewalletId/withdraw-pin',
+    getParentRoute: () => AuthEwalletsRoute,
+  } as any)
+const AuthEwalletsTransactionsTransactionIdRoute =
+  AuthEwalletsTransactionsTransactionIdRouteImport.update({
+    id: '/transactions/$transactionId',
+    path: '/transactions/$transactionId',
+    getParentRoute: () => AuthEwalletsRoute,
+  } as any)
 const AuthLevelsLevelIdDelegateGradeRoute =
   AuthLevelsLevelIdDelegateGradeRouteImport.update({
     id: '/$levelId/delegate-grade',
@@ -614,10 +668,8 @@ export interface FileRoutesByFullPath {
   '/alumni': typeof AuthAlumniRouteWithChildren
   '/auth-logs': typeof AuthAuthLogsRoute
   '/dashboard': typeof AuthDashboardRoute
-  '/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
-  '/ewallet-transactions': typeof AuthEwalletTransactionsRoute
-  '/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
-  '/ewallets': typeof AuthEwalletsRoute
+  '/ewallet-transactions': typeof AuthEwalletTransactionsRouteWithChildren
+  '/ewallets': typeof AuthEwalletsRouteWithChildren
   '/grades': typeof AuthGradesRoute
   '/ip-bans': typeof AuthIpBansRoute
   '/levels': typeof AuthLevelsRouteWithChildren
@@ -641,6 +693,8 @@ export interface FileRoutesByFullPath {
   '/academic-years/create': typeof AuthAcademicYearsCreateRoute
   '/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
   '/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/ewallet-transactions/$transactionId': typeof AuthEwalletTransactionsTransactionIdRoute
+  '/ewallets/qr-all': typeof AuthEwalletsQrAllRoute
   '/merchants/create': typeof AuthMerchantsCreateRoute
   '/registrants/$id': typeof AuthRegistrantsIdRoute
   '/registrants/create': typeof AuthRegistrantsCreateRoute
@@ -656,6 +710,8 @@ export interface FileRoutesByFullPath {
   '/academic-years/': typeof AuthAcademicYearsIndexRoute
   '/accountancy/': typeof AuthAccountancyIndexRoute
   '/alumni/': typeof AuthAlumniIndexRoute
+  '/ewallet-transactions/': typeof AuthEwalletTransactionsIndexRoute
+  '/ewallets/': typeof AuthEwalletsIndexRoute
   '/levels/': typeof AuthLevelsIndexRoute
   '/merchants/': typeof AuthMerchantsIndexRoute
   '/registrants/': typeof AuthRegistrantsIndexRoute
@@ -674,6 +730,11 @@ export interface FileRoutesByFullPath {
   '/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
   '/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
   '/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/ewallets/$ewalletId/blocked': typeof AuthEwalletsEwalletIdBlockedRoute
+  '/ewallets/$ewalletId/qr': typeof AuthEwalletsEwalletIdQrRoute
+  '/ewallets/$ewalletId/setting': typeof AuthEwalletsEwalletIdSettingRoute
+  '/ewallets/$ewalletId/withdraw-pin': typeof AuthEwalletsEwalletIdWithdrawPinRoute
+  '/ewallets/transactions/$transactionId': typeof AuthEwalletsTransactionsTransactionIdRoute
   '/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
   '/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
   '/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
@@ -686,6 +747,7 @@ export interface FileRoutesByFullPath {
   '/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/ewallets/$ewalletId/': typeof AuthEwalletsEwalletIdIndexRoute
   '/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/student-invoices/$studentGradeId/': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
   '/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
@@ -703,10 +765,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth-logs': typeof AuthAuthLogsRoute
   '/dashboard': typeof AuthDashboardRoute
-  '/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
-  '/ewallet-transactions': typeof AuthEwalletTransactionsRoute
-  '/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
-  '/ewallets': typeof AuthEwalletsRoute
   '/grades': typeof AuthGradesRoute
   '/ip-bans': typeof AuthIpBansRoute
   '/majors': typeof AuthMajorsRoute
@@ -719,6 +777,8 @@ export interface FileRoutesByTo {
   '/academic-years/create': typeof AuthAcademicYearsCreateRoute
   '/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
   '/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/ewallet-transactions/$transactionId': typeof AuthEwalletTransactionsTransactionIdRoute
+  '/ewallets/qr-all': typeof AuthEwalletsQrAllRoute
   '/merchants/create': typeof AuthMerchantsCreateRoute
   '/registrants/$id': typeof AuthRegistrantsIdRoute
   '/registrants/create': typeof AuthRegistrantsCreateRoute
@@ -734,6 +794,8 @@ export interface FileRoutesByTo {
   '/academic-years': typeof AuthAcademicYearsIndexRoute
   '/accountancy': typeof AuthAccountancyIndexRoute
   '/alumni': typeof AuthAlumniIndexRoute
+  '/ewallet-transactions': typeof AuthEwalletTransactionsIndexRoute
+  '/ewallets': typeof AuthEwalletsIndexRoute
   '/levels': typeof AuthLevelsIndexRoute
   '/merchants': typeof AuthMerchantsIndexRoute
   '/registrants': typeof AuthRegistrantsIndexRoute
@@ -752,6 +814,11 @@ export interface FileRoutesByTo {
   '/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
   '/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
   '/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/ewallets/$ewalletId/blocked': typeof AuthEwalletsEwalletIdBlockedRoute
+  '/ewallets/$ewalletId/qr': typeof AuthEwalletsEwalletIdQrRoute
+  '/ewallets/$ewalletId/setting': typeof AuthEwalletsEwalletIdSettingRoute
+  '/ewallets/$ewalletId/withdraw-pin': typeof AuthEwalletsEwalletIdWithdrawPinRoute
+  '/ewallets/transactions/$transactionId': typeof AuthEwalletsTransactionsTransactionIdRoute
   '/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
   '/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
   '/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
@@ -764,6 +831,7 @@ export interface FileRoutesByTo {
   '/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/ewallets/$ewalletId': typeof AuthEwalletsEwalletIdIndexRoute
   '/student-costs/$academicYearId': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/student-invoices/$studentGradeId': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
   '/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
@@ -787,10 +855,8 @@ export interface FileRoutesById {
   '/_auth/alumni': typeof AuthAlumniRouteWithChildren
   '/_auth/auth-logs': typeof AuthAuthLogsRoute
   '/_auth/dashboard': typeof AuthDashboardRoute
-  '/_auth/ewallet-confirmations': typeof AuthEwalletConfirmationsRoute
-  '/_auth/ewallet-transactions': typeof AuthEwalletTransactionsRoute
-  '/_auth/ewallet-withdrawals': typeof AuthEwalletWithdrawalsRoute
-  '/_auth/ewallets': typeof AuthEwalletsRoute
+  '/_auth/ewallet-transactions': typeof AuthEwalletTransactionsRouteWithChildren
+  '/_auth/ewallets': typeof AuthEwalletsRouteWithChildren
   '/_auth/grades': typeof AuthGradesRoute
   '/_auth/ip-bans': typeof AuthIpBansRoute
   '/_auth/levels': typeof AuthLevelsRouteWithChildren
@@ -814,6 +880,8 @@ export interface FileRoutesById {
   '/_auth/academic-years/create': typeof AuthAcademicYearsCreateRoute
   '/_auth/alumni/$graduationYear': typeof AuthAlumniGraduationYearRoute
   '/_auth/alumni/dashboard': typeof AuthAlumniDashboardRoute
+  '/_auth/ewallet-transactions/$transactionId': typeof AuthEwalletTransactionsTransactionIdRoute
+  '/_auth/ewallets/qr-all': typeof AuthEwalletsQrAllRoute
   '/_auth/merchants/create': typeof AuthMerchantsCreateRoute
   '/_auth/registrants/$id': typeof AuthRegistrantsIdRoute
   '/_auth/registrants/create': typeof AuthRegistrantsCreateRoute
@@ -829,6 +897,8 @@ export interface FileRoutesById {
   '/_auth/academic-years/': typeof AuthAcademicYearsIndexRoute
   '/_auth/accountancy/': typeof AuthAccountancyIndexRoute
   '/_auth/alumni/': typeof AuthAlumniIndexRoute
+  '/_auth/ewallet-transactions/': typeof AuthEwalletTransactionsIndexRoute
+  '/_auth/ewallets/': typeof AuthEwalletsIndexRoute
   '/_auth/levels/': typeof AuthLevelsIndexRoute
   '/_auth/merchants/': typeof AuthMerchantsIndexRoute
   '/_auth/registrants/': typeof AuthRegistrantsIndexRoute
@@ -847,6 +917,11 @@ export interface FileRoutesById {
   '/_auth/academic-years/$academicYearId/edit': typeof AuthAcademicYearsAcademicYearIdEditRoute
   '/_auth/accountancy/$accountancyId/delegate-child': typeof AuthAccountancyAccountancyIdDelegateChildRoute
   '/_auth/accountancy/$accountancyId/delete': typeof AuthAccountancyAccountancyIdDeleteRoute
+  '/_auth/ewallets/$ewalletId/blocked': typeof AuthEwalletsEwalletIdBlockedRoute
+  '/_auth/ewallets/$ewalletId/qr': typeof AuthEwalletsEwalletIdQrRoute
+  '/_auth/ewallets/$ewalletId/setting': typeof AuthEwalletsEwalletIdSettingRoute
+  '/_auth/ewallets/$ewalletId/withdraw-pin': typeof AuthEwalletsEwalletIdWithdrawPinRoute
+  '/_auth/ewallets/transactions/$transactionId': typeof AuthEwalletsTransactionsTransactionIdRoute
   '/_auth/levels/$levelId/delegate-grade': typeof AuthLevelsLevelIdDelegateGradeRoute
   '/_auth/levels/$levelId/delegate-major': typeof AuthLevelsLevelIdDelegateMajorRoute
   '/_auth/levels/$levelId/delegate-registrant': typeof AuthLevelsLevelIdDelegateRegistrantRoute
@@ -859,6 +934,7 @@ export interface FileRoutesById {
   '/_auth/student-invoices/bills/$invoiceId': typeof AuthStudentInvoicesBillsInvoiceIdRoute
   '/_auth/student-invoices/transactions/$transactionId': typeof AuthStudentInvoicesTransactionsTransactionIdRoute
   '/_auth/users/$userId/edit': typeof AuthUsersUserIdEditRoute
+  '/_auth/ewallets/$ewalletId/': typeof AuthEwalletsEwalletIdIndexRoute
   '/_auth/student-costs/$academicYearId/': typeof AuthStudentCostsAcademicYearIdIndexRoute
   '/_auth/student-invoices/$studentGradeId/': typeof AuthStudentInvoicesStudentGradeIdIndexRoute
   '/_auth/student-capabilities/$capabilityId/students/$studentGradeId': typeof AuthStudentCapabilitiesCapabilityIdStudentsStudentGradeIdRoute
@@ -881,9 +957,7 @@ export interface FileRouteTypes {
     | '/alumni'
     | '/auth-logs'
     | '/dashboard'
-    | '/ewallet-confirmations'
     | '/ewallet-transactions'
-    | '/ewallet-withdrawals'
     | '/ewallets'
     | '/grades'
     | '/ip-bans'
@@ -908,6 +982,8 @@ export interface FileRouteTypes {
     | '/academic-years/create'
     | '/alumni/$graduationYear'
     | '/alumni/dashboard'
+    | '/ewallet-transactions/$transactionId'
+    | '/ewallets/qr-all'
     | '/merchants/create'
     | '/registrants/$id'
     | '/registrants/create'
@@ -923,6 +999,8 @@ export interface FileRouteTypes {
     | '/academic-years/'
     | '/accountancy/'
     | '/alumni/'
+    | '/ewallet-transactions/'
+    | '/ewallets/'
     | '/levels/'
     | '/merchants/'
     | '/registrants/'
@@ -941,6 +1019,11 @@ export interface FileRouteTypes {
     | '/academic-years/$academicYearId/edit'
     | '/accountancy/$accountancyId/delegate-child'
     | '/accountancy/$accountancyId/delete'
+    | '/ewallets/$ewalletId/blocked'
+    | '/ewallets/$ewalletId/qr'
+    | '/ewallets/$ewalletId/setting'
+    | '/ewallets/$ewalletId/withdraw-pin'
+    | '/ewallets/transactions/$transactionId'
     | '/levels/$levelId/delegate-grade'
     | '/levels/$levelId/delegate-major'
     | '/levels/$levelId/delegate-registrant'
@@ -953,6 +1036,7 @@ export interface FileRouteTypes {
     | '/student-invoices/bills/$invoiceId'
     | '/student-invoices/transactions/$transactionId'
     | '/users/$userId/edit'
+    | '/ewallets/$ewalletId/'
     | '/student-costs/$academicYearId/'
     | '/student-invoices/$studentGradeId/'
     | '/student-capabilities/$capabilityId/students/$studentGradeId'
@@ -970,10 +1054,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth-logs'
     | '/dashboard'
-    | '/ewallet-confirmations'
-    | '/ewallet-transactions'
-    | '/ewallet-withdrawals'
-    | '/ewallets'
     | '/grades'
     | '/ip-bans'
     | '/majors'
@@ -986,6 +1066,8 @@ export interface FileRouteTypes {
     | '/academic-years/create'
     | '/alumni/$graduationYear'
     | '/alumni/dashboard'
+    | '/ewallet-transactions/$transactionId'
+    | '/ewallets/qr-all'
     | '/merchants/create'
     | '/registrants/$id'
     | '/registrants/create'
@@ -1001,6 +1083,8 @@ export interface FileRouteTypes {
     | '/academic-years'
     | '/accountancy'
     | '/alumni'
+    | '/ewallet-transactions'
+    | '/ewallets'
     | '/levels'
     | '/merchants'
     | '/registrants'
@@ -1019,6 +1103,11 @@ export interface FileRouteTypes {
     | '/academic-years/$academicYearId/edit'
     | '/accountancy/$accountancyId/delegate-child'
     | '/accountancy/$accountancyId/delete'
+    | '/ewallets/$ewalletId/blocked'
+    | '/ewallets/$ewalletId/qr'
+    | '/ewallets/$ewalletId/setting'
+    | '/ewallets/$ewalletId/withdraw-pin'
+    | '/ewallets/transactions/$transactionId'
     | '/levels/$levelId/delegate-grade'
     | '/levels/$levelId/delegate-major'
     | '/levels/$levelId/delegate-registrant'
@@ -1031,6 +1120,7 @@ export interface FileRouteTypes {
     | '/student-invoices/bills/$invoiceId'
     | '/student-invoices/transactions/$transactionId'
     | '/users/$userId/edit'
+    | '/ewallets/$ewalletId'
     | '/student-costs/$academicYearId'
     | '/student-invoices/$studentGradeId'
     | '/student-capabilities/$capabilityId/students/$studentGradeId'
@@ -1053,9 +1143,7 @@ export interface FileRouteTypes {
     | '/_auth/alumni'
     | '/_auth/auth-logs'
     | '/_auth/dashboard'
-    | '/_auth/ewallet-confirmations'
     | '/_auth/ewallet-transactions'
-    | '/_auth/ewallet-withdrawals'
     | '/_auth/ewallets'
     | '/_auth/grades'
     | '/_auth/ip-bans'
@@ -1080,6 +1168,8 @@ export interface FileRouteTypes {
     | '/_auth/academic-years/create'
     | '/_auth/alumni/$graduationYear'
     | '/_auth/alumni/dashboard'
+    | '/_auth/ewallet-transactions/$transactionId'
+    | '/_auth/ewallets/qr-all'
     | '/_auth/merchants/create'
     | '/_auth/registrants/$id'
     | '/_auth/registrants/create'
@@ -1095,6 +1185,8 @@ export interface FileRouteTypes {
     | '/_auth/academic-years/'
     | '/_auth/accountancy/'
     | '/_auth/alumni/'
+    | '/_auth/ewallet-transactions/'
+    | '/_auth/ewallets/'
     | '/_auth/levels/'
     | '/_auth/merchants/'
     | '/_auth/registrants/'
@@ -1113,6 +1205,11 @@ export interface FileRouteTypes {
     | '/_auth/academic-years/$academicYearId/edit'
     | '/_auth/accountancy/$accountancyId/delegate-child'
     | '/_auth/accountancy/$accountancyId/delete'
+    | '/_auth/ewallets/$ewalletId/blocked'
+    | '/_auth/ewallets/$ewalletId/qr'
+    | '/_auth/ewallets/$ewalletId/setting'
+    | '/_auth/ewallets/$ewalletId/withdraw-pin'
+    | '/_auth/ewallets/transactions/$transactionId'
     | '/_auth/levels/$levelId/delegate-grade'
     | '/_auth/levels/$levelId/delegate-major'
     | '/_auth/levels/$levelId/delegate-registrant'
@@ -1125,6 +1222,7 @@ export interface FileRouteTypes {
     | '/_auth/student-invoices/bills/$invoiceId'
     | '/_auth/student-invoices/transactions/$transactionId'
     | '/_auth/users/$userId/edit'
+    | '/_auth/ewallets/$ewalletId/'
     | '/_auth/student-costs/$academicYearId/'
     | '/_auth/student-invoices/$studentGradeId/'
     | '/_auth/student-capabilities/$capabilityId/students/$studentGradeId'
@@ -1203,25 +1301,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthDashboardRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/ewallet-confirmations': {
-      id: '/_auth/ewallet-confirmations'
-      path: '/ewallet-confirmations'
-      fullPath: '/ewallet-confirmations'
-      preLoaderRoute: typeof AuthEwalletConfirmationsRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/ewallet-transactions': {
       id: '/_auth/ewallet-transactions'
       path: '/ewallet-transactions'
       fullPath: '/ewallet-transactions'
       preLoaderRoute: typeof AuthEwalletTransactionsRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/ewallet-withdrawals': {
-      id: '/_auth/ewallet-withdrawals'
-      path: '/ewallet-withdrawals'
-      fullPath: '/ewallet-withdrawals'
-      preLoaderRoute: typeof AuthEwalletWithdrawalsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/ewallets': {
@@ -1412,6 +1496,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/alumni/dashboard'
       preLoaderRoute: typeof AuthAlumniDashboardRouteImport
       parentRoute: typeof AuthAlumniRoute
+    }
+    '/_auth/ewallet-transactions/': {
+      id: '/_auth/ewallet-transactions/'
+      path: '/'
+      fullPath: '/ewallet-transactions/'
+      preLoaderRoute: typeof AuthEwalletTransactionsIndexRouteImport
+      parentRoute: typeof AuthEwalletTransactionsRoute
+    }
+    '/_auth/ewallet-transactions/$transactionId': {
+      id: '/_auth/ewallet-transactions/$transactionId'
+      path: '/$transactionId'
+      fullPath: '/ewallet-transactions/$transactionId'
+      preLoaderRoute: typeof AuthEwalletTransactionsTransactionIdRouteImport
+      parentRoute: typeof AuthEwalletTransactionsRoute
+    }
+    '/_auth/ewallets/': {
+      id: '/_auth/ewallets/'
+      path: '/'
+      fullPath: '/ewallets/'
+      preLoaderRoute: typeof AuthEwalletsIndexRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/qr-all': {
+      id: '/_auth/ewallets/qr-all'
+      path: '/qr-all'
+      fullPath: '/ewallets/qr-all'
+      preLoaderRoute: typeof AuthEwalletsQrAllRouteImport
+      parentRoute: typeof AuthEwalletsRoute
     }
     '/_auth/levels/': {
       id: '/_auth/levels/'
@@ -1622,6 +1734,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/accountancy/$accountancyId/delete'
       preLoaderRoute: typeof AuthAccountancyAccountancyIdDeleteRouteImport
       parentRoute: typeof AuthAccountancyRoute
+    }
+    '/_auth/ewallets/$ewalletId/': {
+      id: '/_auth/ewallets/$ewalletId/'
+      path: '/$ewalletId'
+      fullPath: '/ewallets/$ewalletId/'
+      preLoaderRoute: typeof AuthEwalletsEwalletIdIndexRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/$ewalletId/blocked': {
+      id: '/_auth/ewallets/$ewalletId/blocked'
+      path: '/$ewalletId/blocked'
+      fullPath: '/ewallets/$ewalletId/blocked'
+      preLoaderRoute: typeof AuthEwalletsEwalletIdBlockedRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/$ewalletId/qr': {
+      id: '/_auth/ewallets/$ewalletId/qr'
+      path: '/$ewalletId/qr'
+      fullPath: '/ewallets/$ewalletId/qr'
+      preLoaderRoute: typeof AuthEwalletsEwalletIdQrRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/$ewalletId/setting': {
+      id: '/_auth/ewallets/$ewalletId/setting'
+      path: '/$ewalletId/setting'
+      fullPath: '/ewallets/$ewalletId/setting'
+      preLoaderRoute: typeof AuthEwalletsEwalletIdSettingRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/$ewalletId/withdraw-pin': {
+      id: '/_auth/ewallets/$ewalletId/withdraw-pin'
+      path: '/$ewalletId/withdraw-pin'
+      fullPath: '/ewallets/$ewalletId/withdraw-pin'
+      preLoaderRoute: typeof AuthEwalletsEwalletIdWithdrawPinRouteImport
+      parentRoute: typeof AuthEwalletsRoute
+    }
+    '/_auth/ewallets/transactions/$transactionId': {
+      id: '/_auth/ewallets/transactions/$transactionId'
+      path: '/transactions/$transactionId'
+      fullPath: '/ewallets/transactions/$transactionId'
+      preLoaderRoute: typeof AuthEwalletsTransactionsTransactionIdRouteImport
+      parentRoute: typeof AuthEwalletsRoute
     }
     '/_auth/levels/$levelId/delegate-grade': {
       id: '/_auth/levels/$levelId/delegate-grade'
@@ -1856,6 +2010,50 @@ const AuthAlumniRouteWithChildren = AuthAlumniRoute._addFileChildren(
   AuthAlumniRouteChildren,
 )
 
+interface AuthEwalletTransactionsRouteChildren {
+  AuthEwalletTransactionsTransactionIdRoute: typeof AuthEwalletTransactionsTransactionIdRoute
+  AuthEwalletTransactionsIndexRoute: typeof AuthEwalletTransactionsIndexRoute
+}
+
+const AuthEwalletTransactionsRouteChildren: AuthEwalletTransactionsRouteChildren =
+  {
+    AuthEwalletTransactionsTransactionIdRoute:
+      AuthEwalletTransactionsTransactionIdRoute,
+    AuthEwalletTransactionsIndexRoute: AuthEwalletTransactionsIndexRoute,
+  }
+
+const AuthEwalletTransactionsRouteWithChildren =
+  AuthEwalletTransactionsRoute._addFileChildren(
+    AuthEwalletTransactionsRouteChildren,
+  )
+
+interface AuthEwalletsRouteChildren {
+  AuthEwalletsQrAllRoute: typeof AuthEwalletsQrAllRoute
+  AuthEwalletsIndexRoute: typeof AuthEwalletsIndexRoute
+  AuthEwalletsEwalletIdBlockedRoute: typeof AuthEwalletsEwalletIdBlockedRoute
+  AuthEwalletsEwalletIdQrRoute: typeof AuthEwalletsEwalletIdQrRoute
+  AuthEwalletsEwalletIdSettingRoute: typeof AuthEwalletsEwalletIdSettingRoute
+  AuthEwalletsEwalletIdWithdrawPinRoute: typeof AuthEwalletsEwalletIdWithdrawPinRoute
+  AuthEwalletsTransactionsTransactionIdRoute: typeof AuthEwalletsTransactionsTransactionIdRoute
+  AuthEwalletsEwalletIdIndexRoute: typeof AuthEwalletsEwalletIdIndexRoute
+}
+
+const AuthEwalletsRouteChildren: AuthEwalletsRouteChildren = {
+  AuthEwalletsQrAllRoute: AuthEwalletsQrAllRoute,
+  AuthEwalletsIndexRoute: AuthEwalletsIndexRoute,
+  AuthEwalletsEwalletIdBlockedRoute: AuthEwalletsEwalletIdBlockedRoute,
+  AuthEwalletsEwalletIdQrRoute: AuthEwalletsEwalletIdQrRoute,
+  AuthEwalletsEwalletIdSettingRoute: AuthEwalletsEwalletIdSettingRoute,
+  AuthEwalletsEwalletIdWithdrawPinRoute: AuthEwalletsEwalletIdWithdrawPinRoute,
+  AuthEwalletsTransactionsTransactionIdRoute:
+    AuthEwalletsTransactionsTransactionIdRoute,
+  AuthEwalletsEwalletIdIndexRoute: AuthEwalletsEwalletIdIndexRoute,
+}
+
+const AuthEwalletsRouteWithChildren = AuthEwalletsRoute._addFileChildren(
+  AuthEwalletsRouteChildren,
+)
+
 interface AuthLevelsRouteChildren {
   AuthLevelsIndexRoute: typeof AuthLevelsIndexRoute
   AuthLevelsLevelIdDelegateGradeRoute: typeof AuthLevelsLevelIdDelegateGradeRoute
@@ -2087,10 +2285,8 @@ interface AuthRouteChildren {
   AuthAlumniRoute: typeof AuthAlumniRouteWithChildren
   AuthAuthLogsRoute: typeof AuthAuthLogsRoute
   AuthDashboardRoute: typeof AuthDashboardRoute
-  AuthEwalletConfirmationsRoute: typeof AuthEwalletConfirmationsRoute
-  AuthEwalletTransactionsRoute: typeof AuthEwalletTransactionsRoute
-  AuthEwalletWithdrawalsRoute: typeof AuthEwalletWithdrawalsRoute
-  AuthEwalletsRoute: typeof AuthEwalletsRoute
+  AuthEwalletTransactionsRoute: typeof AuthEwalletTransactionsRouteWithChildren
+  AuthEwalletsRoute: typeof AuthEwalletsRouteWithChildren
   AuthGradesRoute: typeof AuthGradesRoute
   AuthIpBansRoute: typeof AuthIpBansRoute
   AuthLevelsRoute: typeof AuthLevelsRouteWithChildren
@@ -2114,10 +2310,8 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthAlumniRoute: AuthAlumniRouteWithChildren,
   AuthAuthLogsRoute: AuthAuthLogsRoute,
   AuthDashboardRoute: AuthDashboardRoute,
-  AuthEwalletConfirmationsRoute: AuthEwalletConfirmationsRoute,
-  AuthEwalletTransactionsRoute: AuthEwalletTransactionsRoute,
-  AuthEwalletWithdrawalsRoute: AuthEwalletWithdrawalsRoute,
-  AuthEwalletsRoute: AuthEwalletsRoute,
+  AuthEwalletTransactionsRoute: AuthEwalletTransactionsRouteWithChildren,
+  AuthEwalletsRoute: AuthEwalletsRouteWithChildren,
   AuthGradesRoute: AuthGradesRoute,
   AuthIpBansRoute: AuthIpBansRoute,
   AuthLevelsRoute: AuthLevelsRouteWithChildren,

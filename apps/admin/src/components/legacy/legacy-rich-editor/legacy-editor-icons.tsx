@@ -12,6 +12,7 @@ ensureLegacyStyle(
 const GLYPH = {
 	align: "",
 	alignCenter: "",
+	italic: "",
 	indent: "",
 	alignJustify: "",
 	alignLeft: "",

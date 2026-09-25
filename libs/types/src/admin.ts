@@ -62,39 +62,6 @@ export interface AdminRegistrantItem {
 	registeredAt: string
 }
 
-// Sprint E: E-Wallet & Cashier Workbench Types
-export interface AdminEwalletItem {
-	id: number
-	accountNumber: string
-	ownerName: string
-	ownerType: "SANTRI" | "MERCHANT"
-	balance: number
-	status: "ACTIVE" | "BLOCKED" | "INACTIVE"
-	lastTransactionAt?: string
-}
-
-export interface BankTransferConfirmationItem {
-	id: number
-	ewalletAccountId: number
-	ownerName: string
-	bankName: string
-	accountHolder: string
-	amount: number
-	proofImageUrl: string
-	requestedAt: string
-	status: "PENDING" | "APPROVED" | "REJECTED"
-}
-
-export interface WithdrawalRequestItem {
-	id: number
-	ewalletAccountId: number
-	ownerName: string
-	amount: number
-	cashierName?: string
-	status: "PENDING" | "APPROVED" | "REJECTED"
-	requestedAt: string
-}
-
 export interface CreateStudentDto {
 	nis: string
 	nisn: string
@@ -165,18 +132,6 @@ export interface RegistrantDetailItem extends AdminRegistrantItem {
 		fileUrl: string
 		isVerified: boolean
 	}>
-}
-
-export interface TopupEwalletDto {
-	ewalletAccountId: number
-	amount: number
-	notes?: string
-}
-
-export interface WithdrawEwalletDto {
-	ewalletAccountId: number
-	amount: number
-	notes?: string
 }
 
 // ── Reports / Laporan (legacy ReportController + ReportArrearController port) ──

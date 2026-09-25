@@ -4,9 +4,6 @@ import type {
 	StudentItem,
 	AlumniItem,
 	AdminRegistrantItem,
-	AdminEwalletItem,
-	BankTransferConfirmationItem,
-	WithdrawalRequestItem,
 } from "@roja/types"
 import {
 	hijackAuthUser,
@@ -15,9 +12,6 @@ import {
 	mockStudents,
 	mockAlumni,
 	mockRegistrants,
-	mockEwallets,
-	mockBankConfirmations,
-	mockWithdrawals,
 	mockDashboardStats,
 	mockDashboardStatsByYear,
 	mockDashboardOptions,
@@ -57,9 +51,6 @@ let bannedIpsList = [...mockBannedIps]
 let studentsList: StudentItem[] = [...mockStudents]
 let alumniList: AlumniItem[] = [...mockAlumni]
 let registrantsList: AdminRegistrantItem[] = [...mockRegistrants]
-let ewalletsList: AdminEwalletItem[] = [...mockEwallets]
-let bankConfirmationsList: BankTransferConfirmationItem[] = [...mockBankConfirmations]
-let withdrawalsList: WithdrawalRequestItem[] = [...mockWithdrawals]
 
 
 export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
@@ -352,89 +343,6 @@ export const hijackAdminApi = (realApi: AdminApi): AdminApi => {
 			if (reg) reg.status = "INVALID"
 			return { success: true, data: { message: "Berkas pendaftar ditandai tidak valid." }, message: "OK" }
 		},
-
-		// Sprint E Handlers
-		getEwallets: async () => {
-			await delay(200)
-			return { success: true, data: { items: ewalletsList, total: ewalletsList.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
-
-		topUpEwalletCash: async (id, amount) => {
-			await delay(300)
-			const ew = ewalletsList.find((e) => e.id === id)
-			if (ew) {
-				ew.balance += amount
-				ew.lastTransactionAt = new Date().toISOString()
-			}
-			return { success: true, data: { message: "Top-up tunai berhasil diproses." }, message: "OK" }
-		},
-
-		withdrawEwalletCash: async (dto) => {
-			await delay(300)
-			const ew = ewalletsList.find((e) => e.id === dto.ewalletAccountId)
-			if (ew) {
-				if (ew.balance < dto.amount) {
-					throw new Error("Saldo e-wallet tidak mencukupi untuk penarikan tunai.")
-				}
-				ew.balance -= dto.amount
-				ew.lastTransactionAt = new Date().toISOString()
-			}
-			return { success: true, data: { message: "Penarikan tunai berhasil diproses." }, message: "OK" }
-		},
-
-		resetEwalletPin: async () => {
-			await delay(250)
-			return { success: true, data: { message: "PIN e-wallet berhasil direset ke 123456." }, message: "OK" }
-		},
-
-		getBankTransferConfirmations: async () => {
-			await delay(200)
-			return { success: true, data: { items: bankConfirmationsList, total: bankConfirmationsList.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
-
-		approveBankTransfer: async (id) => {
-			await delay(300)
-			const tf = bankConfirmationsList.find((b) => b.id === id)
-			if (tf) {
-				tf.status = "APPROVED"
-				const ew = ewalletsList.find((e) => e.id === tf.ewalletAccountId)
-				if (ew) ew.balance += tf.amount
-			}
-			return { success: true, data: { message: "Konfirmasi transfer bank disetujui." }, message: "OK" }
-		},
-
-		rejectBankTransfer: async (id) => {
-			await delay(250)
-			const tf = bankConfirmationsList.find((b) => b.id === id)
-			if (tf) tf.status = "REJECTED"
-			return { success: true, data: { message: "Konfirmasi transfer bank ditolak." }, message: "OK" }
-		},
-
-		getWithdrawalRequests: async () => {
-			await delay(200)
-			return { success: true, data: { items: withdrawalsList, total: withdrawalsList.length, page: 1, limit: 10, lastPage: 1 }, message: "OK" }
-		},
-
-		approveWithdrawal: async (id) => {
-			await delay(300)
-			const wd = withdrawalsList.find((w) => w.id === id)
-			if (wd) {
-				wd.status = "APPROVED"
-				const ew = ewalletsList.find((e) => e.id === wd.ewalletAccountId)
-				if (ew) ew.balance = Math.max(0, ew.balance - wd.amount)
-			}
-			return { success: true, data: { message: "Penarikan saldo e-wallet disetujui." }, message: "OK" }
-		},
-
-		rejectWithdrawal: async (id) => {
-			await delay(250)
-			const wd = withdrawalsList.find((w) => w.id === id)
-			if (wd) wd.status = "REJECTED"
-			return { success: true, data: { message: "Permintaan penarikan ditolak." }, message: "OK" }
-		},
-
-
-
 	}
 }
 

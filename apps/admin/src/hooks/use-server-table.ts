@@ -37,6 +37,8 @@ export type UseServerTableOptions<TRow, TExtra> = {
 	/** Legacy DataTables waits before firing a search; 0 disables. */
 	searchDelayMs?: number
 	enabled?: boolean
+	/** Overrides the app-wide 5 minutes. Legacy's server-side tables hit the server on every page load. */
+	staleTime?: number
 }
 
 export const useServerTable = <TRow, TExtra extends object>({
@@ -46,6 +48,7 @@ export const useServerTable = <TRow, TExtra extends object>({
 	initialState,
 	searchDelayMs = 400,
 	enabled = true,
+	staleTime,
 }: UseServerTableOptions<TRow, TExtra>): UseServerTableResult<TRow> => {
 	const [state, setState] = useState<TableState>(initialState ?? INITIAL_TABLE_STATE)
 	const [debouncedSearch, setDebouncedSearch] = useState(state.search)
@@ -74,6 +77,7 @@ export const useServerTable = <TRow, TExtra extends object>({
 		queryFn: () => fetcher(query),
 		placeholderData: keepPreviousData,
 		enabled,
+		...(staleTime === undefined ? {} : { staleTime }),
 	})
 
 	return {
