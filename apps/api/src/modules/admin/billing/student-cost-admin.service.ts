@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
-import { DataSource, type QueryRunner } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository, type QueryRunner } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import {
@@ -29,6 +30,7 @@ import type {
 	StudentCostAppliedInput,
 	StudentCostTermWriteInput as Write,
 } from "@admin/billing/dto/student-cost-admin.dto"
+import { Grade } from "@shared/master/entities/grade.entity"
 
 export type {
 	StudentCostAccountPage,
@@ -55,7 +57,10 @@ const WRITE_SUCCESS = "Data berhasil diupdate."
  */
 @Injectable()
 export class StudentCostAdminService {
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+	) {}
 
 	/** Level 1 — `academicYearList()`: `exceptArchive()`, `ORDER BY year DESC`. */
 	async findYears(): Promise<StudentCostYearRow[]> {
@@ -266,9 +271,9 @@ export class StudentCostAdminService {
 	}
 
 	private async requireGrade(id: number): Promise<GradeContext> {
-		type Row = { id: string; label: string | null }
-		const row = await this.requireOne<Row>(sql.STUDENT_COST_GRADE_SQL, id, "Kelas tidak ditemukan.")
-		return { id: Number(row.id), label: toNumber(row.label) }
+		const grade = await this.grades.findOne({ select: { id: true, label: true }, where: { id } })
+		if (!grade) throw new NotFoundException("Kelas tidak ditemukan.")
+		return { id: Number(grade.id), label: grade.label === null ? null : Number(grade.label) }
 	}
 
 	private async requireAccountancy(id: number): Promise<{ id: number; name: string | null }> {

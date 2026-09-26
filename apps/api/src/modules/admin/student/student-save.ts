@@ -9,6 +9,7 @@ import { replaceDiseaseHistories } from "../../../shared/society/disease-history
 import { storeSocietyUpload } from "../../../shared/society/files"
 import { generateMasterId } from "../../../shared/society/master-id"
 import type { SocietyRuleInput, SocietyValidated } from "../../../shared/society/society-rules"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 import { fail, UPDATE_FAILED } from "./student-grade-ops"
 
@@ -113,8 +114,8 @@ export const createStudent = async (
 	const columns = validated.columns
 	const academicYearId = Number(columns["academic_year_id"])
 
-	const years = (await manager.query(`SELECT year FROM tbr_academic_years WHERE id = $1`, [academicYearId])) as Array<{ year: string | null }>
-	if (years.length === 0) return fail(CREATE_FAILED)
+	const academicYear = await manager.findOne(AcademicYear, { select: { year: true }, where: { id: academicYearId } })
+	if (!academicYear) return fail(CREATE_FAILED)
 
 	const nis = typeof columns["nis"] === "string" && columns["nis"] !== "" ? columns["nis"] : await generateMasterId(manager, academicYearId)
 	const studentId = await insertRow(manager, "tbr_students", {
@@ -134,7 +135,7 @@ export const createStudent = async (
 		grade_note: columns["source"] ?? null,
 		registered_by_admin: true,
 		...Object.fromEntries(ATTACHMENTS.map((column) => [column, uploads[column] ?? null])),
-		current_academic_year: years[0]?.year ?? null,
+		current_academic_year: academicYear.year,
 		student_id: studentId,
 	})
 

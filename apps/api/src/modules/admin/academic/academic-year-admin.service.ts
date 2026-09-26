@@ -1,25 +1,21 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
-import { DataSource, type QueryRunner } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Not, Repository, type EntityManager } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { fromDmy, indoDateShort, toDmyDash, toDmySlash } from "@admin/common/date-format"
 import {
 	ACADEMIC_YEAR_DETAIL_SQL,
-	ACADEMIC_YEAR_EXISTS_SQL,
-	ACADEMIC_YEAR_LEVELS_SQL,
 	ACADEMIC_YEAR_LIST_SQL,
 	ACADEMIC_YEAR_QUOTA_ROWS_SQL,
-	DEMOTE_CURRENT_YEARS_SQL,
-	FIND_QUOTA_PIVOT_SQL,
-	INSERT_ACADEMIC_YEAR_SQL,
-	INSERT_QUOTA_PIVOT_SQL,
-	UPDATE_ACADEMIC_YEAR_SQL,
-	UPDATE_QUOTA_PIVOT_SQL,
 } from "@admin/academic/academic-year-sql"
 import type {
 	AcademicYearCreateInput,
 	AcademicYearUpdateInput,
 } from "@admin/academic/dto/academic-year-admin.dto"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
+import { Level } from "@shared/master/entities/level.entity"
 
 /** Where a row's destroy icon points — legacy picks this per row, server-side, at list-render time. */
 export type AcademicYearDeleteTarget =
@@ -114,7 +110,11 @@ const quotaValue = (quota: string): number => {
  */
 @Injectable()
 export class AcademicYearAdminService {
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
+		@InjectRepository(Level) private readonly levels: Repository<Level>,
+	) {}
 
 	/** Legacy `@list`. Sorted by the first digit run in `year`, descending; "Archive" sorts last. */
 	async findAll(): Promise<AcademicYearRow[]> {
@@ -139,14 +139,16 @@ export class AcademicYearAdminService {
 
 	/** Legacy `@levelList` — the create page's quota table: every shown level, no year context. */
 	async findQuotaRows(): Promise<AcademicYearQuotaRow[]> {
-		const rows = await this.dataSource.query<{ levelId: string; levelName: string | null }[]>(
-			ACADEMIC_YEAR_LEVELS_SQL,
-		)
+		const levels = await this.levels.find({
+			select: { id: true, name: true },
+			where: { status: "show" },
+			order: { createdAt: "DESC", id: "DESC" },
+		})
 
 		// Legacy emits `["", 0, 0, ""]` for Kuota/PSB/TMQ/Sisa — nothing is known before the year exists
-		return rows.map((row) => ({
-			levelId: Number(row.levelId),
-			levelName: row.levelName,
+		return levels.map((level) => ({
+			levelId: Number(level.id),
+			levelName: level.name,
 			quota: null,
 			psb: 0,
 			tmq: 0,
@@ -193,30 +195,23 @@ export class AcademicYearAdminService {
 		// `"{$request->start_year}/" . ($request->start_year + 1)` — PHP's numeric string addition
 		const year = `${dto.startYear}/${Number(dto.startYear) + 1}`
 
-		const clash = await this.dataSource.query<unknown[]>(ACADEMIC_YEAR_EXISTS_SQL, [year])
 		// `AcademicYearExistRule` — ":Attribute sudah ada sebelumnya." with attribute "tahun ajaran"
-		if (clash.length > 0) throwFieldErrors({ startYear: ["Tahun ajaran sudah ada sebelumnya."] })
+		if (await this.academicYears.existsBy({ year })) {
+			throwFieldErrors({ startYear: ["Tahun ajaran sudah ada sebelumnya."] })
+		}
 
-		await this.inTransaction(async (runner) => {
+		await this.dataSource.transaction(async (manager) => {
 			// B-11: legacy demotes only the first current year; the port demotes every other one
-			if (dto.isCurrent) await runner.query(DEMOTE_CURRENT_YEARS_SQL, [0])
+			if (dto.isCurrent) await this.demoteCurrentYears(manager, 0)
 
-			const inserted: { id: string }[] = await runner.query(INSERT_ACADEMIC_YEAR_SQL, [
-				year,
-				fromDmy(dto.activeKbm),
-				dto.note ?? null,
-				dto.serialNumber,
-				dto.type ?? null,
-				dto.status,
-				dto.isCurrent,
-				fromDmy(dto.costDateStart),
-				fromDmy(dto.costDateEnd),
-			])
-			const id = Number(inserted[0]?.id)
+			const saved = await manager.save(
+				manager.create(AcademicYear, { year, ...this.yearColumns(dto) }),
+			)
+			const id = Number(saved.id)
 
 			// `foreach (Arr::wrap($request->quota) as $key => $quota) $ay->levels()->attach(...)`
 			for (const quota of dto.quotas) {
-				await runner.query(INSERT_QUOTA_PIVOT_SQL, [quota.levelId, id, quotaValue(quota.quota)])
+				await this.attachQuota(manager, id, quota.levelId, quotaValue(quota.quota))
 			}
 		})
 
@@ -226,58 +221,53 @@ export class AcademicYearAdminService {
 	async update(id: number, dto: AcademicYearUpdateInput): Promise<{ message: string }> {
 		await this.requireYear(id)
 
-		await this.inTransaction(async (runner) => {
+		await this.dataSource.transaction(async (manager) => {
 			// Legacy: `where('is_current',1)->where('id','!=',$ay->id)->first()` — B-11 again
-			if (dto.isCurrent) await runner.query(DEMOTE_CURRENT_YEARS_SQL, [id])
+			if (dto.isCurrent) await this.demoteCurrentYears(manager, id)
 
 			// `year` is absent from the payload: the edit form disables both year inputs, so the
 			// `sometimes` rule skips `start_year` and the column is immutable through this route
-			await runner.query(UPDATE_ACADEMIC_YEAR_SQL, [
-				id,
-				fromDmy(dto.activeKbm),
-				dto.note ?? null,
-				dto.serialNumber,
-				dto.type ?? null,
-				dto.status,
-				dto.isCurrent,
-				fromDmy(dto.costDateStart),
-				fromDmy(dto.costDateEnd),
-			])
+			await manager.update(AcademicYear, { id }, this.yearColumns(dto))
 
 			// B-12: upsert instead of `levels()->sync()`, so a hidden level keeps its quota row
 			for (const quota of dto.quotas) {
 				const value = quotaValue(quota.quota)
-				const existing: unknown[] = await runner.query(FIND_QUOTA_PIVOT_SQL, [id, quota.levelId])
-				if (existing.length > 0) await runner.query(UPDATE_QUOTA_PIVOT_SQL, [id, quota.levelId, value])
-				else await runner.query(INSERT_QUOTA_PIVOT_SQL, [quota.levelId, id, value])
+				const where = { academicYearId: id, levelId: quota.levelId }
+				if (await manager.existsBy(LevelAcademicYear, where)) {
+					await manager.update(LevelAcademicYear, where, { quota: value })
+				} else {
+					await this.attachQuota(manager, id, quota.levelId, value)
+				}
 			}
 		})
 
 		return { message: UPDATE_SUCCESS }
 	}
 
-	/** Route-model binding: legacy 404s before the handler runs. */
-	private async requireYear(id: number): Promise<void> {
-		const rows = await this.dataSource.query<unknown[]>(
-			"SELECT 1 FROM tbr_academic_years WHERE id = $1 LIMIT 1",
-			[id],
-		)
-		if (rows.length === 0) throw new NotFoundException("Tahun ajaran tidak ditemukan.")
+	private yearColumns(dto: AcademicYearUpdateInput) {
+		return {
+			activeKbm: fromDmy(dto.activeKbm),
+			note: dto.note ?? null,
+			serialNumber: dto.serialNumber,
+			type: dto.type ?? null,
+			status: dto.status,
+			isCurrent: dto.isCurrent,
+			costDateStart: fromDmy(dto.costDateStart),
+			costDateEnd: fromDmy(dto.costDateEnd),
+		}
 	}
 
-	/** Legacy runs store/update outside any transaction (B-8/B-9); the port wraps each one. */
-	private async inTransaction(work: (runner: QueryRunner) => Promise<void>): Promise<void> {
-		const runner = this.dataSource.createQueryRunner()
-		await runner.connect()
-		await runner.startTransaction()
-		try {
-			await work(runner)
-			await runner.commitTransaction()
-		} catch (error) {
-			await runner.rollbackTransaction()
-			throw error
-		} finally {
-			await runner.release()
-		}
+	private async demoteCurrentYears(manager: EntityManager, keepId: number): Promise<void> {
+		await manager.update(AcademicYear, { isCurrent: true, id: Not(keepId) }, { isCurrent: false })
+	}
+
+	/** Legacy `attach()` without `withTimestamps()`: pivot rows keep null timestamps. */
+	private async attachQuota(manager: EntityManager, academicYearId: number, levelId: number, quota: number): Promise<void> {
+		await manager.insert(LevelAcademicYear, { academicYearId, levelId, quota })
+	}
+
+	/** Route-model binding: legacy 404s before the handler runs. */
+	private async requireYear(id: number): Promise<void> {
+		if (!(await this.academicYears.existsBy({ id }))) throw new NotFoundException("Tahun ajaran tidak ditemukan.")
 	}
 }

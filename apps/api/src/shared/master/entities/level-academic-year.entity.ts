@@ -1,8 +1,10 @@
-import { Column, Entity } from "typeorm"
-import { BaseEntity } from "../../../core/database/base.entity"
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
 
 @Entity({ name: "tbr_level_academic_years" })
-export class LevelAcademicYear extends BaseEntity {
+export class LevelAcademicYear {
+	@PrimaryGeneratedColumn()
+	id: number
+
 	@Column({ name: "level_id", nullable: true, type: "int" })
 	levelId: number | null
 

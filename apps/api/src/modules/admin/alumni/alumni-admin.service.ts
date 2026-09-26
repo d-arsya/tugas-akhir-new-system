@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
 // Nest DI reads constructor parameter types at runtime (emitDecoratorMetadata), so this stays a value import
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { DataSource } from "typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import type { AdminAlumniDetail, AdminAlumniList, AdminAlumniRow, AdminAlumniValues, AdminAlumniYearRow } from "@roja/types"
 
@@ -9,6 +10,7 @@ import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
 import { MONTHS_ID } from "@admin/common/date-format"
+import { SettingForm } from "@shared/school/entities/setting-form.entity"
 
 import { ALUMNI_EXPORT_FILE, buildAlumniWorkbook } from "./alumni-export"
 import * as sql from "./alumni-sql"
@@ -56,17 +58,18 @@ const toRow = (row: Row): AdminAlumniRow => ({
 
 @Injectable()
 export class AlumniAdminService {
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(SettingForm) private readonly settingForms: Repository<SettingForm>,
+	) {}
 
 	/** `getInputLabel` / `getInputStatus` of setting 1 (the name column). */
 	private async nameSetting(): Promise<{ label: string; visible: boolean }> {
-		const rows = (await this.dataSource.query(`SELECT status, custom_name, "default" FROM tbr_setting_forms WHERE id = 1`)) as Array<{
-			status: boolean | null
-			custom_name: string | null
-			default: string | null
-		}>
-		const row = rows[0]
-		return { label: row?.custom_name ?? row?.default ?? "", visible: row?.status === true }
+		const setting = await this.settingForms.findOne({
+			select: { status: true, customName: true, default: true },
+			where: { id: 1 },
+		})
+		return { label: setting?.customName ?? setting?.default ?? "", visible: setting?.status === true }
 	}
 
 	private async list(query: string, params: unknown[]): Promise<AdminAlumniList> {

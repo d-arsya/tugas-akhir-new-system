@@ -51,15 +51,6 @@ export const CAPABILITY_YEARS_SQL = `SELECT ay.id,
 	WHERE ay.year IS DISTINCT FROM 'Archive'
 	ORDER BY ay.year DESC, ay.id ASC`
 
-/** The level-2/3 page headers and every `getAcademicYearId()` guard. */
-export const CAPABILITY_YEAR_SQL = `SELECT ay.id, ay.year
-	FROM tbr_academic_years ay
-	WHERE ay.id = $1`
-
-export const CAPABILITY_GRADE_SQL = `SELECT g.id, g.label
-	FROM tbr_grades g
-	WHERE g.id = $1`
-
 // ─── Level 2: grades of one year (`@gradeList`) ──────────────────────────────
 
 /**

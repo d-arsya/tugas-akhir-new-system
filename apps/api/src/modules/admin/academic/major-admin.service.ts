@@ -1,9 +1,11 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
 import { indoDateTimeDot } from "@admin/common/date-format"
 import type { MajorWriteInput } from "@admin/academic/dto/major-admin.dto"
+import { Major } from "@shared/master/entities/major.entity"
 
 export type MajorRow = {
 	id: number
@@ -34,13 +36,6 @@ type MajorListSqlRow = {
 	createdAtTs: string | null
 }
 
-type MajorDetailSqlRow = {
-	id: string
-	name: string | null
-	levelId: string | null
-	desc: string | null
-}
-
 // `Major::latest()->get()` joined to the level. `hasOne(Level::class, 'id', 'level_id')->withDefault()`
 // answers a blank model for an orphaned `level_id`, so a LEFT JOIN reproduces it exactly: the cell
 // renders empty rather than throwing. `id DESC` only breaks ties `created_at` leaves undefined.
@@ -54,10 +49,6 @@ const MAJOR_LIST_SQL = `SELECT m.id,
 	FROM tbr_majors m
 	LEFT JOIN tbr_levels l ON l.id = m.level_id
 	ORDER BY m.created_at DESC, m.id DESC`
-
-const MAJOR_DETAIL_SQL = `SELECT m.id, m.name, m.level_id AS "levelId", m."desc" AS "desc"
-	FROM tbr_majors m
-	WHERE m.id = $1`
 
 // `MajorController` hard-codes these two literals instead of reading `admin.create-success` /
 // `admin.create-failed`; the text happens to match. Kept verbatim.
@@ -81,7 +72,10 @@ const DELETE_FAILED = "Data gagal dihapus dari basis data"
 export class MajorAdminService {
 	private readonly logger = new Logger(MajorAdminService.name)
 
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Major) private readonly majors: Repository<Major>,
+	) {}
 
 	/** `Major::latest()->get()` with the level joined; LEFT JOIN so an orphan renders blank. */
 	async findAll(): Promise<MajorRow[]> {
@@ -100,8 +94,10 @@ export class MajorAdminService {
 
 	/** `MajorController@edit` — the payload the magnific-popup edit modal is built from. */
 	async findOne(id: number): Promise<MajorDetail> {
-		const rows = await this.dataSource.query<MajorDetailSqlRow[]>(MAJOR_DETAIL_SQL, [id])
-		const major = rows[0]
+		const major = await this.majors.findOne({
+			select: { id: true, name: true, levelId: true, desc: true },
+			where: { id },
+		})
 		if (!major) throw new NotFoundException("Jurusan tidak ditemukan.")
 
 		return {
@@ -115,11 +111,7 @@ export class MajorAdminService {
 	/** `Major::create(['level_id' => $request->level, 'name' => …, 'desc' => …])`. */
 	async create(dto: MajorWriteInput): Promise<{ message: string }> {
 		try {
-			await this.dataSource.query(
-				`INSERT INTO tbr_majors (level_id, name, "desc", created_at, updated_at)
-				VALUES ($1, $2, $3, now(), now())`,
-				[dto.levelId, dto.name, dto.desc ?? null],
-			)
+			await this.majors.save(this.majors.create({ levelId: dto.levelId, name: dto.name, desc: dto.desc ?? null }))
 		} catch (error: unknown) {
 			this.logger.error("[Jurusan] gagal menyimpan jurusan", error)
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -133,10 +125,7 @@ export class MajorAdminService {
 		await this.findOne(id)
 
 		try {
-			await this.dataSource.query(
-				`UPDATE tbr_majors SET level_id = $2, name = $3, "desc" = $4, updated_at = now() WHERE id = $1`,
-				[id, dto.levelId, dto.name, dto.desc ?? null],
-			)
+			await this.majors.update({ id }, { levelId: dto.levelId, name: dto.name, desc: dto.desc ?? null })
 		} catch (error: unknown) {
 			this.logger.error("[Jurusan] gagal mengupdate jurusan", error)
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -150,7 +139,7 @@ export class MajorAdminService {
 		await this.findOne(id)
 
 		try {
-			await this.dataSource.query(`DELETE FROM tbr_majors WHERE id = $1`, [id])
+			await this.majors.delete({ id })
 		} catch (error: unknown) {
 			this.logger.error("[Jurusan] gagal menghapus jurusan", error)
 			throw new InternalServerErrorException(DELETE_FAILED)

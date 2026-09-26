@@ -1,10 +1,12 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Not, Repository } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
 import { indoDateTimeDot } from "@admin/common/date-format"
 import type { GradeWriteInput } from "@admin/academic/dto/grade-admin.dto"
+import { Grade } from "@shared/master/entities/grade.entity"
 
 export type GradeRow = {
 	id: number
@@ -33,12 +35,6 @@ type GradeListSqlRow = {
 	createdAtTs: string | null
 }
 
-type GradeDetailSqlRow = {
-	id: string
-	levelId: string | null
-	label: string | null
-}
-
 // `Grade::orderBy('label', 'desc')->get()`, with the level LEFT JOINed instead of legacy's
 // per-row `Level::find($grade->level_id)->name` (bug B-6: no null guard, so one orphaned
 // grade made the whole endpoint 500). `id DESC` only breaks ties `label` leaves undefined.
@@ -51,8 +47,6 @@ const GRADE_LIST_SQL = `SELECT g.id,
 	FROM tbr_grades g
 	LEFT JOIN tbr_levels l ON l.id = g.level_id
 	ORDER BY g.label DESC, g.id DESC`
-
-const GRADE_DETAIL_SQL = `SELECT g.id, g.level_id AS "levelId", g.label FROM tbr_grades g WHERE g.id = $1`
 
 // `Lang::get('admin.*')` — resources/lang/id/admin.php, verbatim.
 const CREATE_SUCCESS = "Data berhasil disimpan ke dalam basis data."
@@ -83,7 +77,10 @@ const LABEL_TAKEN = "Kelas sudah ada sebelumnya"
 export class GradeAdminService {
 	private readonly logger = new Logger(GradeAdminService.name)
 
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+	) {}
 
 	/** `Grade::orderBy('label', 'desc')->get()`. */
 	async findAll(): Promise<GradeRow[]> {
@@ -103,8 +100,7 @@ export class GradeAdminService {
 
 	/** `GradeController@edit` — the payload the edit modal is built from. */
 	async findOne(id: number): Promise<GradeDetail> {
-		const rows = await this.dataSource.query<GradeDetailSqlRow[]>(GRADE_DETAIL_SQL, [id])
-		const grade = rows[0]
+		const grade = await this.grades.findOne({ select: { id: true, levelId: true, label: true }, where: { id } })
 		if (!grade) throw new NotFoundException("Kelas tidak ditemukan.")
 
 		return {
@@ -119,10 +115,7 @@ export class GradeAdminService {
 		await this.assertLabelFree(dto.label, null)
 
 		try {
-			await this.dataSource.query(
-				`INSERT INTO tbr_grades (level_id, label, created_at, updated_at) VALUES ($1, $2, now(), now())`,
-				[dto.levelId, dto.label],
-			)
+			await this.grades.save(this.grades.create({ levelId: dto.levelId, label: dto.label }))
 		} catch (error: unknown) {
 			this.logger.error("[Kelas] gagal menyimpan kelas", error)
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -137,10 +130,7 @@ export class GradeAdminService {
 		await this.assertLabelFree(dto.label, id)
 
 		try {
-			await this.dataSource.query(
-				`UPDATE tbr_grades SET level_id = $2, label = $3, updated_at = now() WHERE id = $1`,
-				[id, dto.levelId, dto.label],
-			)
+			await this.grades.update({ id }, { levelId: dto.levelId, label: dto.label })
 		} catch (error: unknown) {
 			this.logger.error("[Kelas] gagal mengupdate kelas", error)
 			throw new InternalServerErrorException(UPDATE_FAILED)
@@ -157,7 +147,7 @@ export class GradeAdminService {
 		await this.findOne(id)
 
 		try {
-			await this.dataSource.query(`DELETE FROM tbr_grades WHERE id = $1`, [id])
+			await this.grades.delete({ id })
 		} catch (error: unknown) {
 			this.logger.error("[Kelas] gagal menghapus kelas", error)
 			throw new InternalServerErrorException(DELETE_FAILED)
@@ -172,10 +162,7 @@ export class GradeAdminService {
 	 * validation would have produced.
 	 */
 	private async assertLabelFree(label: number, ignoreId: number | null): Promise<void> {
-		const rows = await this.dataSource.query<{ id: string }[]>(
-			`SELECT g.id FROM tbr_grades g WHERE g.label = $1 AND ($2::bigint IS NULL OR g.id <> $2) LIMIT 1`,
-			[label, ignoreId],
-		)
-		if (rows.length > 0) throwFieldErrors({ label: [LABEL_TAKEN] })
+		const taken = await this.grades.existsBy(ignoreId === null ? { label } : { label, id: Not(ignoreId) })
+		if (taken) throwFieldErrors({ label: [LABEL_TAKEN] })
 	}
 }

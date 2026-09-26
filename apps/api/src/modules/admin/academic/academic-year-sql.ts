@@ -90,15 +90,6 @@ export const ACADEMIC_YEAR_DETAIL_SQL = `SELECT ay.id,
 	WHERE ay.id = $1`
 
 /**
- * `Level::where('status','show')->latest()->get()` — the level order both quota tables use.
- * `latest()` is `created_at DESC` alone; `id DESC` is added so ties are deterministic.
- */
-export const ACADEMIC_YEAR_LEVELS_SQL = `SELECT l.id AS "levelId", l.name AS "levelName"
-	FROM tbr_levels l
-	WHERE l.status = 'show'
-	ORDER BY l.created_at DESC, l.id DESC`
-
-/**
  * `AcademicYearController@editLevelList`, de-N+1'd.
  *
  * * **Kuota** — `optional(optional($level->academicYears->firstWhere('id', $ay->id))->pivot)->quota ?? 0`.
@@ -139,58 +130,3 @@ export const ACADEMIC_YEAR_QUOTA_ROWS_SQL = `SELECT l.id AS "levelId",
 	) pivot ON TRUE
 	WHERE l.status = 'show'
 	ORDER BY l.created_at DESC, l.id DESC`
-
-/** `AcademicYearExistRule` — `AcademicYear::where('year', $value.'/'.(intval($value)+1))->exists()`. */
-export const ACADEMIC_YEAR_EXISTS_SQL = `SELECT 1 FROM tbr_academic_years WHERE year = $1 LIMIT 1`
-
-/**
- * B-11: legacy demotes only the **first** row it finds with `is_current = 1` (`->first()`),
- * leaving any others current. There is no unique constraint, so that state is reachable.
- * The port demotes every other one.
- */
-export const DEMOTE_CURRENT_YEARS_SQL = `UPDATE tbr_academic_years
-	   SET is_current = false, updated_at = now()
-	 WHERE is_current = true AND id <> $1`
-
-/**
- * `AcademicYear::create(...)` followed by the second `update()` that writes the cost dates.
- * Legacy splits them only because the model's accessors would reformat the values on the way
- * in; one INSERT stores exactly the same row.
- */
-export const INSERT_ACADEMIC_YEAR_SQL = `INSERT INTO tbr_academic_years
-		(year, active_kbm, note, serial_number, type, status, is_current, cost_date_start, cost_date_end, created_at, updated_at)
-	VALUES ($1, $2::date, $3, $4, $5, $6, $7, $8::date, $9::date, now(), now())
-	RETURNING id`
-
-export const UPDATE_ACADEMIC_YEAR_SQL = `UPDATE tbr_academic_years
-	   SET active_kbm = $2::date,
-	       note = $3,
-	       serial_number = $4,
-	       type = $5,
-	       status = $6,
-	       is_current = $7,
-	       cost_date_start = $8::date,
-	       cost_date_end = $9::date,
-	       updated_at = now()
-	 WHERE id = $1`
-
-/**
- * Legacy `attach()` on a `belongsToMany` **without** `->withTimestamps()`, which is why every
- * pivot row in this database has null `created_at` / `updated_at`.
- */
-export const INSERT_QUOTA_PIVOT_SQL = `INSERT INTO tbr_level_academic_years (level_id, academic_year_id, quota)
-	VALUES ($1, $2, $3)`
-
-/**
- * B-12: legacy `update()` runs `levels()->sync($payload)`, which **detaches** every level
- * missing from it — and the form only renders `status='show'` levels, so saving any year
- * silently deleted the quota rows of hidden levels (live today for Levels 4 and 6 on the
- * Archive year). The port upserts the submitted pivots and leaves the rest alone.
- */
-export const FIND_QUOTA_PIVOT_SQL = `SELECT id FROM tbr_level_academic_years
-	 WHERE academic_year_id = $1 AND level_id = $2
-	 LIMIT 1`
-
-export const UPDATE_QUOTA_PIVOT_SQL = `UPDATE tbr_level_academic_years
-	   SET quota = $3
-	 WHERE academic_year_id = $1 AND level_id = $2`

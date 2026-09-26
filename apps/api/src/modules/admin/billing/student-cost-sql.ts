@@ -77,10 +77,6 @@ export const STUDENT_COST_YEAR_SQL = `SELECT ay.id,
 	FROM tbr_academic_years ay
 	WHERE ay.id = $1`
 
-export const STUDENT_COST_GRADE_SQL = `SELECT g.id, g.label
-	FROM tbr_grades g
-	WHERE g.id = $1`
-
 /**
  * Level 3 — `accountList()`: `Accountancy::whereNotNull('parent_id')->where('is_student_cost', 1)`
  * joined to this year+grade's term, if any.

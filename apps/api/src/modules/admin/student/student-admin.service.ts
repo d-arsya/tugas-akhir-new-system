@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
 // Nest injects by the constructor parameter types at runtime (decorator metadata), so these stay value imports
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { DataSource, type EntityManager } from "typeorm"
+import { DataSource, Repository, type EntityManager } from "typeorm"
 
 import type {
 	AdminStudentAcademicYear,
@@ -23,6 +24,11 @@ import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
 import { validateSocietyInput, type SocietyRuleInput } from "../../../shared/society/society-rules"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
+import { Level } from "@shared/master/entities/level.entity"
+import { Major } from "@shared/master/entities/major.entity"
+import { SubGrade } from "@shared/master/entities/sub-grade.entity"
 
 import * as bulk from "./student-bulk"
 import { destroyByGrade, destroyGradeRow } from "./student-delete"
@@ -41,13 +47,24 @@ export class StudentAdminService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly storageService: StorageService,
+		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
+		@InjectRepository(Level) private readonly levels: Repository<Level>,
+		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+		@InjectRepository(SubGrade) private readonly subGrades: Repository<SubGrade>,
+		@InjectRepository(Major) private readonly majors: Repository<Major>,
 	) {}
 
 	private async yearOrFail(academicYearId: number): Promise<AdminStudentAcademicYear> {
-		const rows = (await this.dataSource.query(sql.YEAR_SQL, [academicYearId])) as Array<{ id: string; year: string | null }>
-		const row = rows[0]
-		if (!row) throw new NotFoundException("Tahun ajaran tidak ditemukan")
-		return { id: Number(row.id), year: row.year }
+		const year = await this.academicYears.findOne({ select: { id: true, year: true }, where: { id: academicYearId } })
+		if (!year) throw new NotFoundException("Tahun ajaran tidak ditemukan")
+		return { id: Number(year.id), year: year.year }
+	}
+
+	/** `Level::find($level_id)->majors`; a null level has none. */
+	private async majorNamesOf(levelId: number | null): Promise<string[]> {
+		if (levelId === null) return []
+		const majors = await this.majors.find({ select: { name: true }, where: { levelId }, order: { id: "ASC" } })
+		return majors.map((major) => major.name ?? "")
 	}
 
 	private write<T>(work: (manager: EntityManager) => Promise<T>): Promise<T> {
@@ -76,19 +93,19 @@ export class StudentAdminService {
 		const [exists, maxGrade, level, majors, subGrades] = await Promise.all([
 			this.dataSource.query(sql.ROSTER_EXISTS_SQL, [academicYear.year, grade, levelId]) as Promise<Array<{ exists: boolean }>>,
 			this.dataSource.query(sql.MAX_GRADE_SQL) as Promise<Array<{ maxGrade: number }>>,
-			this.dataSource.query(sql.LEVEL_NAME_SQL, [levelId]) as Promise<Array<{ name: string | null }>>,
-			this.dataSource.query(sql.MAJORS_OF_LEVEL_SQL, [levelId]) as Promise<Array<{ name: string | null }>>,
-			this.dataSource.query(sql.SUB_GRADES_SQL) as Promise<Array<{ label: string | null }>>,
+			this.levels.findOne({ select: { name: true }, where: { id: levelId } }),
+			this.majorNamesOf(levelId),
+			this.subGrades.find({ select: { label: true }, order: { id: "ASC" } }),
 		])
 		return {
 			academicYear,
 			grade,
 			levelId,
-			levelName: level[0]?.name ?? null,
+			levelName: level?.name ?? null,
 			exists: exists[0]?.exists === true,
 			maxGrade: maxGrade[0]?.maxGrade ?? 0,
-			majors: majors.map((row) => row.name ?? ""),
-			subGrades: subGrades.map((row) => row.label ?? ""),
+			majors,
+			subGrades: subGrades.map((subGrade) => subGrade.label ?? ""),
 		}
 	}
 
@@ -99,19 +116,20 @@ export class StudentAdminService {
 	}
 
 	async findOptions(): Promise<AdminStudentOptions> {
+		const latestFirst = { createdAt: { direction: "DESC", nulls: "LAST" }, id: "DESC" } as const
 		const [years, levels, grades, subGrades, majors] = await Promise.all([
-			this.dataSource.query(sql.OPTION_YEARS_SQL) as Promise<Array<{ id: string; year: string | null }>>,
-			this.dataSource.query(sql.OPTION_LEVELS_SQL) as Promise<Array<{ id: string; name: string | null }>>,
-			this.dataSource.query(sql.OPTION_GRADES_SQL) as Promise<Array<{ id: string; label: string | null; levelId: string | null }>>,
-			this.dataSource.query(sql.OPTION_SUB_GRADES_SQL) as Promise<Array<{ label: string | null }>>,
-			this.dataSource.query(sql.OPTION_MAJORS_SQL) as Promise<Array<{ name: string | null; levelId: string | null }>>,
+			this.academicYears.find({ select: { id: true, year: true }, order: { id: "ASC" } }),
+			this.levels.find({ select: { id: true, name: true }, order: latestFirst }),
+			this.grades.find({ select: { id: true, label: true, levelId: true }, order: { label: "ASC", id: "ASC" } }),
+			this.subGrades.find({ select: { label: true }, order: latestFirst }),
+			this.majors.find({ select: { name: true, levelId: true }, order: { id: "ASC" } }),
 		])
 		return {
-			academicYears: years.map((row) => ({ id: Number(row.id), year: row.year })),
-			levels: levels.map((row) => ({ id: Number(row.id), name: row.name })),
-			grades: grades.map((row) => ({ id: Number(row.id), label: toNumber(row.label), levelId: toNumber(row.levelId) })),
-			subGrades: subGrades.map((row) => row.label ?? ""),
-			majors: majors.map((row) => ({ name: row.name, levelId: toNumber(row.levelId) })),
+			academicYears: years.map((year) => ({ id: Number(year.id), year: year.year })),
+			levels: levels.map((level) => ({ id: Number(level.id), name: level.name })),
+			grades: grades.map((grade) => ({ id: Number(grade.id), label: toNumber(grade.label), levelId: toNumber(grade.levelId) })),
+			subGrades: subGrades.map((subGrade) => subGrade.label ?? ""),
+			majors: majors.map((major) => ({ name: major.name, levelId: toNumber(major.levelId) })),
 		}
 	}
 
@@ -148,7 +166,7 @@ export class StudentAdminService {
 		const [maxGrade, majors] = await Promise.all([
 			this.dataSource.query(sql.MAX_GRADE_SQL) as Promise<Array<{ maxGrade: number }>>,
 			// `optional(Level::find($level_id))->majors ?? collect([new Major()])`
-			this.dataSource.query(sql.MAJORS_OF_LEVEL_SQL, [row.levelId]) as Promise<Array<{ name: string | null }>>,
+			this.majorNamesOf(toNumber(row.levelId)),
 		])
 		return {
 			id: Number(row.id),
@@ -171,7 +189,7 @@ export class StudentAdminService {
 			photoUrl: societyFileUrl(row.attachPhoto),
 			createdAtDisplay: indoDateTime(row.createdDay, row.createdMonth, row.createdYear, row.createdTime),
 			maxGrade: maxGrade[0]?.maxGrade ?? 0,
-			majors: majors.map((major) => major.name ?? ""),
+			majors,
 			record,
 		}
 	}

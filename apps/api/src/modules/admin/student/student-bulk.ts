@@ -1,6 +1,7 @@
 import type { EntityManager } from "typeorm"
 
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
+import { Grade } from "@shared/master/entities/grade.entity"
 
 import { createAlumni } from "./student-alumni"
 import {
@@ -42,11 +43,11 @@ async function* eachRow(manager: EntityManager, ids: number[], failure: string):
 
 /** `Grade::orderBy('label')` — the first label above the row's (or its own at the top). */
 const nextGradeOf = async (manager: EntityManager, grade: string | null): Promise<{ grade: string | null; levelId: string | null }> => {
-	const labels = (await manager.query(`SELECT label FROM tbr_grades ORDER BY label ASC`)) as Array<{ label: string | null }>
+	const grades = await manager.find(Grade, { select: { label: true }, order: { label: "ASC" } })
 	let next = grade
-	for (const { label } of labels) {
+	for (const { label } of grades) {
 		if (label !== null && grade !== null && Number(label) > Number(grade)) {
-			next = label
+			next = String(label)
 			break
 		}
 	}

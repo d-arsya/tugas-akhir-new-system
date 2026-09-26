@@ -5,6 +5,7 @@ import { syncStudentWalletActive } from "../../../shared/ewallet/student-wallet"
 import { deleteDiseaseHistories } from "../../../shared/society/disease-history"
 
 import { TIMEZONE } from "@admin/common/sql"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 // Row-level operations the Santri writes share, each a port of a legacy model method or controller
 // helper. All take the request transaction's manager (approved fix: one transaction per request).
@@ -68,9 +69,7 @@ export const previousAcademicYear = (year: string | null): string => {
 
 /** `StudentService::hasNextAcademicYear()` */
 export const hasNextAcademicYear = async (manager: EntityManager, year: string | null, failure: string): Promise<boolean> => {
-	const next = nextAcademicYear(year, failure)
-	const rows = (await manager.query(`SELECT 1 FROM tbr_academic_years WHERE year = $1 LIMIT 1`, [next])) as unknown[]
-	return rows.length > 0
+	return manager.existsBy(AcademicYear, { year: nextAcademicYear(year, failure) })
 }
 
 let replicaColumns: string[] | null = null

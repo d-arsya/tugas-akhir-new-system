@@ -10,6 +10,8 @@ import { DataSource, type EntityManager } from "typeorm"
 
 import type { AcademicYearDeleteTarget } from "@admin/academic/academic-year-admin.service"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
 
 export type AcademicYearDeleteStep = {
 	id: number
@@ -75,9 +77,6 @@ const YEAR_SQL = `SELECT y.id, y.year,
 	FROM tbr_academic_years y
 	WHERE y.id = $1`
 
-/** Kept from legacy, but keyed on the name rather than `id = 1`; in this database they coincide. */
-const ARCHIVE_SQL = `SELECT y.id FROM tbr_academic_years y WHERE y.year = 'Archive' ORDER BY y.id LIMIT 1`
-
 const MOVE_REGISTRANTS_SQL = `UPDATE tbr_registrants SET academic_year_id = $2, updated_at = now()
 	WHERE academic_year_id = $1`
 const MOVE_STUDENTS_SQL = `UPDATE tbr_students SET academic_year_id = $2, updated_at = now()
@@ -95,9 +94,7 @@ const MOVE_ALUMNI_SQL = `UPDATE tbr_alumnis SET academic_year_id = $2, updated_a
 
 // `AcademicYear::delete()` is overridden: detach the level pivots, hard-delete the registrants,
 // then delete the row. `Registrant` has no `deleted_at` column, so that really is a hard delete.
-const DETACH_QUOTA_SQL = `DELETE FROM tbr_level_academic_years WHERE academic_year_id = $1`
 const DELETE_REGISTRANTS_SQL = `DELETE FROM tbr_registrants WHERE academic_year_id = $1`
-const DELETE_YEAR_SQL = `DELETE FROM tbr_academic_years WHERE id = $1`
 
 const deleteTargetOf = (row: YearSqlRow): AcademicYearDeleteTarget => {
 	if (Number(row.registrantCount) > 0) return "delegate-registrant"
@@ -218,15 +215,19 @@ export class AcademicYearDeleteService {
 	}
 
 	private async deleteYear(manager: EntityManager, id: number): Promise<void> {
-		await manager.query(DETACH_QUOTA_SQL, [id])
+		await manager.delete(LevelAcademicYear, { academicYearId: id })
 		await manager.query(DELETE_REGISTRANTS_SQL, [id])
-		await manager.query(DELETE_YEAR_SQL, [id])
+		await manager.delete(AcademicYear, { id })
 	}
 
 	private async requireArchive(manager: EntityManager): Promise<number> {
-		const [row] = await manager.query<{ id: string }[]>(ARCHIVE_SQL)
-		if (!row) throw new Error("Tahun ajaran 'Archive' tidak ada — tujuan delegasi tidak diketahui.")
-		return Number(row.id)
+		const archive = await manager.findOne(AcademicYear, {
+			select: { id: true },
+			where: { year: "Archive" },
+			order: { id: "ASC" },
+		})
+		if (!archive) throw new Error("Tahun ajaran 'Archive' tidak ada — tujuan delegasi tidak diketahui.")
+		return Number(archive.id)
 	}
 
 	private async requireYear(id: number): Promise<YearSqlRow> {

@@ -49,12 +49,6 @@ export type YearPageRow = {
 	reject_count: string
 }
 
-/** `Level::where('status', 'show')->get()` */
-export const SHOWN_LEVELS_SQL = `SELECT id, name FROM tbr_levels WHERE status = 'show' ORDER BY id`
-
-/** `Level::latest()->get()` — the edit widget's select */
-export const LATEST_LEVELS_SQL = `SELECT id, name FROM tbr_levels ORDER BY created_at DESC NULLS LAST, id DESC`
-
 const LIST_COLUMNS = `
 	r.id, r.registrant_id, r.fullname, r.nis, r.school_name, l.name AS level_name,
 	${DMY_HI("r.created_at")} AS created_at, ${EPOCH_SECONDS("r.created_at")} AS created_ts,

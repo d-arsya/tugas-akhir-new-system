@@ -1,29 +1,24 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
-import { DataSource, type EntityManager } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Not, Repository, type EntityManager } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { indoDateTimeDot } from "@admin/common/date-format"
 import {
-	DELETE_LEVEL_SQL,
-	DETACH_LEVEL_QUOTA_SQL,
 	LEVEL_BY_ID_SQL,
 	LEVEL_CREATE_QUOTA_SQL,
-	LEVEL_EXISTS_SQL,
-	LEVEL_INSERT_SQL,
 	LEVEL_LIST_SQL,
-	LEVEL_OPTIONS_EXCEPT_SQL,
-	LEVEL_OPTIONS_SQL,
-	LEVEL_UPDATE_SQL,
-	MOVE_GRADES_SQL,
-	MOVE_MAJORS_SQL,
 	MOVE_REGISTRANTS_SQL,
 	MOVE_STUDENT_GRADES_SQL,
 	UPDATE_QUOTA_SQL,
-	type LevelOptionSqlRow,
 	type LevelSqlRow,
 } from "@admin/academic/level-sql"
 import type { LevelDelegateInput, LevelWriteInput } from "@admin/academic/dto/level-admin.dto"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { Grade } from "@shared/master/entities/grade.entity"
+import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
+import { Level } from "@shared/master/entities/level.entity"
+import { Major } from "@shared/master/entities/major.entity"
 
 export type LevelDeleteTarget =
 	| "delete"
@@ -83,7 +78,9 @@ const delegateSuccess = (society: string): string => `Data ${society} berhasil d
 const LEVELS_PATH = "/levels"
 const stepPath = (id: number, step: LevelDeleteTarget): string => `/levels/${id}/${step}`
 
-const toOption = (row: LevelOptionSqlRow): LevelOption => ({ id: Number(row.id), name: row.name })
+const toOption = (level: Pick<Level, "id" | "name">): LevelOption => ({ id: Number(level.id), name: level.name })
+
+type Move = (manager: EntityManager) => Promise<unknown>
 
 /**
  * `LevelService::delegateAction` — the priority ladder that picks where a row's destroy icon
@@ -114,7 +111,10 @@ const deleteTargetOf = (row: LevelSqlRow): LevelDeleteTarget => {
 export class LevelAdminService {
 	private readonly logger = new Logger(LevelAdminService.name)
 
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Level) private readonly levels: Repository<Level>,
+	) {}
 
 	async findAll(): Promise<LevelRow[]> {
 		const rows = await this.dataSource.query<LevelSqlRow[]>(LEVEL_LIST_SQL)
@@ -130,11 +130,12 @@ export class LevelAdminService {
 
 	/** Destination picker for the delegate pages and the Jurusan/Kelas selects. */
 	async findOptions(exclude?: number): Promise<LevelOption[]> {
-		const rows =
-			exclude === undefined || Number.isNaN(exclude)
-				? await this.dataSource.query<LevelOptionSqlRow[]>(LEVEL_OPTIONS_SQL)
-				: await this.dataSource.query<LevelOptionSqlRow[]>(LEVEL_OPTIONS_EXCEPT_SQL, [exclude])
-		return rows.map(toOption)
+		const levels = await this.levels.find({
+			select: { id: true, name: true },
+			where: exclude === undefined || Number.isNaN(exclude) ? {} : { id: Not(exclude) },
+			order: { id: "ASC" },
+		})
+		return levels.map(toOption)
 	}
 
 	async findOne(id: number): Promise<LevelDetail> {
@@ -145,8 +146,8 @@ export class LevelAdminService {
 	async create(dto: LevelWriteInput): Promise<{ message: string }> {
 		try {
 			await this.dataSource.transaction(async (manager) => {
-				const inserted = await manager.query<{ id: string }[]>(LEVEL_INSERT_SQL, [dto.name, dto.status])
-				const id = Number(inserted[0]?.id)
+				const saved = await manager.save(manager.create(Level, { name: dto.name, status: dto.status }))
+				const id = Number(saved.id)
 				// `createQuota()`: one pivot row per academic year, quota at the column default of 0
 				await manager.query(LEVEL_CREATE_QUOTA_SQL, [id])
 			})
@@ -161,7 +162,7 @@ export class LevelAdminService {
 	async update(id: number, dto: LevelWriteInput): Promise<{ message: string }> {
 		await this.requireLevel(id)
 		try {
-			await this.dataSource.query(LEVEL_UPDATE_SQL, [id, dto.name, dto.status])
+			await this.levels.update({ id }, { name: dto.name, status: dto.status })
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -187,10 +188,7 @@ export class LevelAdminService {
 	async remove(id: number): Promise<AdminRedirectResult> {
 		await this.requireLevel(id)
 		try {
-			await this.dataSource.transaction(async (manager) => {
-				await manager.query(DETACH_LEVEL_QUOTA_SQL, [id])
-				await manager.query(DELETE_LEVEL_SQL, [id])
-			})
+			await this.dataSource.transaction((manager) => this.detachAndDelete(manager, id))
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
 			throw new InternalServerErrorException(DELETE_FAILED)
@@ -199,20 +197,20 @@ export class LevelAdminService {
 	}
 
 	async delegateMajor(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, MOVE_MAJORS_SQL, "jurusan")
+		return this.delegate(id, dto, (manager) => manager.update(Major, { levelId: id }, { levelId: dto.levelId }), "jurusan")
 	}
 
 	async delegateGrade(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, MOVE_GRADES_SQL, "kelas")
+		return this.delegate(id, dto, (manager) => manager.update(Grade, { levelId: id }, { levelId: dto.levelId }), "kelas")
 	}
 
 	async delegateRegistrant(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, MOVE_REGISTRANTS_SQL, "PSB")
+		return this.delegate(id, dto, (manager) => manager.query(MOVE_REGISTRANTS_SQL, [id, dto.levelId]), "PSB")
 	}
 
 	/** Terminal step — legacy's `:society` is lowercase "santri" here, capital "Santri" on Tahun Ajaran. */
 	async delegateStudent(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, MOVE_STUDENT_GRADES_SQL, "santri")
+		return this.delegate(id, dto, (manager) => manager.query(MOVE_STUDENT_GRADES_SQL, [id, dto.levelId]), "santri")
 	}
 
 	/**
@@ -226,22 +224,19 @@ export class LevelAdminService {
 	private async delegate(
 		id: number,
 		dto: LevelDelegateInput,
-		moveSql: string,
+		move: Move,
 		society: string,
 	): Promise<AdminRedirectResult> {
 		await this.requireLevel(id)
 		// Legacy validated `required` only, so a stale or hand-written id reached `Level::find()`
 		// as null and 500-ed *after* the rows had moved to a level that does not exist. With no
 		// foreign keys, that orphaning is silent — so the destination is checked up front.
-		const destination =
-			dto.levelId === id
-				? []
-				: await this.dataSource.query<{ id: string }[]>(LEVEL_EXISTS_SQL, [dto.levelId])
-		if (destination.length === 0) throwFieldErrors({ levelId: ["Kolom jenjang wajib untuk dipilih."] })
+		const destinationExists = dto.levelId !== id && (await this.levels.existsBy({ id: dto.levelId }))
+		if (!destinationExists) throwFieldErrors({ levelId: ["Kolom jenjang wajib untuk dipilih."] })
 
 		try {
 			return await this.dataSource.transaction(async (manager) => {
-				await manager.query(moveSql, [id, dto.levelId])
+				await move(manager)
 
 				const [row] = await manager.query<LevelSqlRow[]>(LEVEL_BY_ID_SQL, [id])
 				const target = row ? deleteTargetOf(row) : "delete"
@@ -261,8 +256,13 @@ export class LevelAdminService {
 	/** The terminal branch every delegate handler shares: `updateQuota` → `detach` → `delete`. */
 	private async finish(manager: EntityManager, id: number, destinationId: number): Promise<void> {
 		await manager.query(UPDATE_QUOTA_SQL, [id, destinationId])
-		await manager.query(DETACH_LEVEL_QUOTA_SQL, [id])
-		await manager.query(DELETE_LEVEL_SQL, [id])
+		await this.detachAndDelete(manager, id)
+	}
+
+	/** `$level->academicYears()->detach()` then `$level->delete()`. */
+	private async detachAndDelete(manager: EntityManager, id: number): Promise<void> {
+		await manager.delete(LevelAcademicYear, { levelId: id })
+		await manager.delete(Level, { id })
 	}
 
 	private async requireLevel(id: number): Promise<LevelSqlRow> {

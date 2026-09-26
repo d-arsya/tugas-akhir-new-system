@@ -23,8 +23,6 @@ export type LevelSqlRow = {
 	studentGradeCount: string
 }
 
-export type LevelOptionSqlRow = { id: string; name: string | null }
-
 /** The four counts `LevelService::delegateAction` tests, in the order it tests them. */
 const CHILD_COUNTS = `(SELECT count(*) FROM tbr_majors m WHERE m.level_id = l.id) AS "majorCount",
 		(SELECT count(*) FROM tbr_grades g WHERE g.level_id = l.id) AS "gradeCount",
@@ -53,23 +51,6 @@ export const LEVEL_BY_ID_SQL = `SELECT l.id, l.name, l.status,
 	WHERE l.id = $1`
 
 /**
- * Legacy `Level::whereNotIn('id', [$level->id])->get()` — no ORDER BY, so the rows came
- * back in physical order. Ordering by id reproduces that on today's data and makes the
- * picker deterministic after a level is rewritten.
- */
-export const LEVEL_OPTIONS_SQL = `SELECT l.id, l.name FROM tbr_levels l ORDER BY l.id`
-export const LEVEL_OPTIONS_EXCEPT_SQL = `SELECT l.id, l.name FROM tbr_levels l WHERE l.id <> $1 ORDER BY l.id`
-
-/** Does the delegation destination still exist? The schema has no foreign key to answer it. */
-export const LEVEL_EXISTS_SQL = `SELECT l.id FROM tbr_levels l WHERE l.id = $1`
-
-export const LEVEL_INSERT_SQL = `INSERT INTO tbr_levels (name, status, created_at, updated_at)
-	VALUES ($1, $2, now(), now())
-	RETURNING id`
-
-export const LEVEL_UPDATE_SQL = `UPDATE tbr_levels SET name = $2, status = $3, updated_at = now() WHERE id = $1`
-
-/**
  * Legacy `createQuota()`: `$level->academicYears()->attach(AcademicYear::pluck('id'))`.
  * One pivot row per academic year, `quota` left at the column default of 0. `attach()`
  * writes no timestamps, so neither do we.
@@ -80,8 +61,6 @@ export const LEVEL_CREATE_QUOTA_SQL = `INSERT INTO tbr_level_academic_years (lev
 // ─── The delegation moves ────────────────────────────────────────
 // $1 = the level being deleted, $2 = the destination chosen in the picker.
 
-export const MOVE_MAJORS_SQL = `UPDATE tbr_majors SET level_id = $2, updated_at = now() WHERE level_id = $1`
-export const MOVE_GRADES_SQL = `UPDATE tbr_grades SET level_id = $2, updated_at = now() WHERE level_id = $1`
 export const MOVE_REGISTRANTS_SQL = `UPDATE tbr_registrants SET level_id = $2, updated_at = now() WHERE level_id = $1`
 
 /**
@@ -112,8 +91,3 @@ export const UPDATE_QUOTA_SQL = `UPDATE tbr_level_academic_years d
 	SET quota = COALESCE(d.quota, 0) + COALESCE(s.quota, 0), updated_at = now()
 	FROM tbr_level_academic_years s
 	WHERE d.level_id = $2 AND s.level_id = $1 AND s.academic_year_id = d.academic_year_id`
-
-/** `$level->academicYears()->detach()`. */
-export const DETACH_LEVEL_QUOTA_SQL = `DELETE FROM tbr_level_academic_years WHERE level_id = $1`
-
-export const DELETE_LEVEL_SQL = `DELETE FROM tbr_levels WHERE id = $1`

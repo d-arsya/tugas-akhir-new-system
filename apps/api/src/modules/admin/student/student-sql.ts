@@ -36,8 +36,6 @@ export const YEAR_LIST_SQL = `SELECT ay.id, ay.year,
 	FROM tbr_academic_years ay
 	ORDER BY COALESCE(substring(ay.year from '[0-9]+')::bigint, 0) DESC, ay.id ASC`
 
-export const YEAR_SQL = `SELECT ay.id, ay.year FROM tbr_academic_years ay WHERE ay.id = $1`
-
 /**
  * `gradeList:111-152`: the distinct (grade, level_id) pairs of the year, grade descending, with the four
  * counts legacy takes off the year's rows. `->with('level')` + `withDefault()` → a missing level has no name.
@@ -61,12 +59,6 @@ export const ROSTER_EXISTS_SQL = `SELECT EXISTS (SELECT 1 FROM tbr_student_grade
 
 /** `Grade::all()->pluck('label')` → `max()` (empty → 0) */
 export const MAX_GRADE_SQL = `SELECT COALESCE(MAX(label), 0)::int AS "maxGrade" FROM tbr_grades`
-
-export const LEVEL_NAME_SQL = `SELECT name FROM tbr_levels WHERE id = $1`
-
-export const MAJORS_OF_LEVEL_SQL = `SELECT name FROM tbr_majors WHERE level_id = $1 ORDER BY id`
-
-export const SUB_GRADES_SQL = `SELECT label FROM tbr_sub_grades ORDER BY id`
 
 /**
  * `studentList:317-354`: `->latest()->get()` (created_at desc; `id` breaks ties). The photo, the date and
@@ -96,14 +88,6 @@ export const DETAIL_SQL = `SELECT sg.id, sg.student_id AS "studentId", s.nis, s.
 	LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
 	LEFT JOIN tbr_levels l ON l.id = sg.level_id
 	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
-
-// ─── Select lists ────────────────────────────────────────────────────────────
-
-export const OPTION_YEARS_SQL = `SELECT id, year FROM tbr_academic_years ORDER BY id`
-export const OPTION_LEVELS_SQL = `SELECT id, name FROM tbr_levels ORDER BY created_at DESC NULLS LAST, id DESC`
-export const OPTION_GRADES_SQL = `SELECT id, label, level_id AS "levelId" FROM tbr_grades ORDER BY label ASC, id ASC`
-export const OPTION_SUB_GRADES_SQL = `SELECT label FROM tbr_sub_grades ORDER BY created_at DESC NULLS LAST, id DESC`
-export const OPTION_MAJORS_SQL = `SELECT name, level_id AS "levelId" FROM tbr_majors ORDER BY id`
 
 // ─── Export (`StudentExport::view`) ──────────────────────────────────────────
 

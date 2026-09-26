@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 import type {
 	CapabilityAcademicYearRow,
 	CapabilityGradeRow,
@@ -45,6 +46,8 @@ import {
 } from "@admin/capabilities/capability-pdf-store"
 import { renderCapabilityPrint } from "@admin/capabilities/capability-print"
 import * as sql from "@admin/capabilities/capability-sql"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
 
 /** What levels 4 and 5 both need before they can answer: the card plus the two resolved ids. */
 type StudentContext = { student: InvoiceStudentCard; academicYearId: number; gradeId: number; grade: string }
@@ -65,6 +68,8 @@ export class CapabilityAdminService {
 		private readonly dataSource: DataSource,
 		private readonly configService: ConfigService<Env, true>,
 		private readonly storageService: StorageService,
+		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
+		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
 	) {
 		this.pdfStore = new CapabilityPdfStore(storageService)
 	}
@@ -261,21 +266,17 @@ export class CapabilityAdminService {
 		return row
 	}
 
-	private async findYear(academicYearId: number): Promise<{ id: string; year: string | null }> {
-		const [row] = await this.dataSource.query<{ id: string; year: string | null }[]>(sql.CAPABILITY_YEAR_SQL, [
-			academicYearId,
-		])
-		if (!row) throw new NotFoundException(YEAR_NOT_FOUND)
-		return row
+	private async findYear(academicYearId: number): Promise<Pick<AcademicYear, "id" | "year">> {
+		const year = await this.academicYears.findOne({ select: { id: true, year: true }, where: { id: academicYearId } })
+		if (!year) throw new NotFoundException(YEAR_NOT_FOUND)
+		return year
 	}
 
 	/** Every route here takes the grade **id**; two legacy URLs pass the label and get away with it. */
-	private async findGrade(gradeId: number): Promise<{ id: string; label: string | null }> {
-		const [row] = await this.dataSource.query<{ id: string; label: string | null }[]>(sql.CAPABILITY_GRADE_SQL, [
-			gradeId,
-		])
-		if (!row) throw new NotFoundException(GRADE_NOT_FOUND)
-		return row
+	private async findGrade(gradeId: number): Promise<Pick<Grade, "id" | "label">> {
+		const grade = await this.grades.findOne({ select: { id: true, label: true }, where: { id: gradeId } })
+		if (!grade) throw new NotFoundException(GRADE_NOT_FOUND)
+		return grade
 	}
 
 	/** PHP `storage_url()`: an absolute URL passes through, anything else is an S3 key. */

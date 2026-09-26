@@ -1,5 +1,6 @@
 import type { EntityManager } from "typeorm"
 
+import { Grade } from "@shared/master/entities/grade.entity"
 import {
 	DELETE_FAILED,
 	DELETE_SUCCESS,
@@ -47,11 +48,11 @@ const reopen = async (manager: EntityManager, row: KbmRow): Promise<void> => {
  */
 export const updateKbmNote = async (manager: EntityManager, nis: string | null, grade: string | null): Promise<void> => {
 	// `Grade::orderBy('label', 'desc')`: the first label below `$grade`, else `$grade` itself
-	const labels = (await manager.query(`SELECT label FROM tbr_grades ORDER BY label DESC`)) as Array<{ label: string | null }>
+	const grades = await manager.find(Grade, { select: { label: true }, order: { label: "DESC" } })
 	let prevGrade = grade
-	for (const { label } of labels) {
+	for (const { label } of grades) {
 		if (label !== null && prevGrade !== null && Number(label) < Number(prevGrade)) {
-			prevGrade = label
+			prevGrade = String(label)
 			break
 		}
 	}

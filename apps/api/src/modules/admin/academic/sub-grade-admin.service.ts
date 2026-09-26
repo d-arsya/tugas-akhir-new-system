@@ -1,9 +1,11 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
 import { indoDateTimeDot } from "@admin/common/date-format"
 import type { SubGradeWriteInput } from "@admin/academic/dto/sub-grade-admin.dto"
+import { SubGrade } from "@shared/master/entities/sub-grade.entity"
 
 export type SubGradeRow = {
 	id: number
@@ -33,8 +35,6 @@ const SUB_GRADE_LIST_SQL = `SELECT s.id,
 	FROM tbr_sub_grades s
 	ORDER BY s.created_at DESC, s.id DESC`
 
-const SUB_GRADE_DETAIL_SQL = `SELECT s.id, s.label FROM tbr_sub_grades s WHERE s.id = $1`
-
 // `Lang::get('admin.*')` — resources/lang/id/admin.php, verbatim.
 const CREATE_SUCCESS = "Data berhasil disimpan ke dalam basis data."
 const CREATE_FAILED = "Terjadi kesalahan. Data gagal disimpan ke dalam basis data."
@@ -59,7 +59,10 @@ const DELETE_FAILED = "Data gagal dihapus dari basis data."
 export class SubGradeAdminService {
 	private readonly logger = new Logger(SubGradeAdminService.name)
 
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(SubGrade) private readonly subGrades: Repository<SubGrade>,
+	) {}
 
 	/** `SubGrade::latest()->get()`. */
 	async findAll(): Promise<SubGradeRow[]> {
@@ -75,8 +78,7 @@ export class SubGradeAdminService {
 
 	/** `SubGradeController@edit` — the payload the edit modal is built from. */
 	async findOne(id: number): Promise<SubGradeDetail> {
-		const rows = await this.dataSource.query<SubGradeSqlRow[]>(SUB_GRADE_DETAIL_SQL, [id])
-		const subGrade = rows[0]
+		const subGrade = await this.subGrades.findOne({ select: { id: true, label: true }, where: { id } })
 		if (!subGrade) throw new NotFoundException("Subkelas tidak ditemukan.")
 
 		return { id: Number(subGrade.id), label: subGrade.label }
@@ -85,10 +87,7 @@ export class SubGradeAdminService {
 	/** `SubGrade::create($request->only('label'))`. */
 	async create(dto: SubGradeWriteInput): Promise<{ message: string }> {
 		try {
-			await this.dataSource.query(
-				`INSERT INTO tbr_sub_grades (label, created_at, updated_at) VALUES ($1, now(), now())`,
-				[dto.label],
-			)
+			await this.subGrades.save(this.subGrades.create({ label: dto.label }))
 		} catch (error: unknown) {
 			this.logger.error("[Subkelas] gagal menyimpan subkelas", error)
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -102,10 +101,7 @@ export class SubGradeAdminService {
 		await this.findOne(id)
 
 		try {
-			await this.dataSource.query(`UPDATE tbr_sub_grades SET label = $2, updated_at = now() WHERE id = $1`, [
-				id,
-				dto.label,
-			])
+			await this.subGrades.update({ id }, { label: dto.label })
 		} catch (error: unknown) {
 			this.logger.error("[Subkelas] gagal mengupdate subkelas", error)
 			throw new InternalServerErrorException(UPDATE_FAILED)
@@ -122,7 +118,7 @@ export class SubGradeAdminService {
 		await this.findOne(id)
 
 		try {
-			await this.dataSource.query(`DELETE FROM tbr_sub_grades WHERE id = $1`, [id])
+			await this.subGrades.delete({ id })
 		} catch (error: unknown) {
 			this.logger.error("[Subkelas] gagal menghapus subkelas", error)
 			throw new InternalServerErrorException(DELETE_FAILED)

@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import type {
 	AdminMessageResult,
@@ -17,14 +18,13 @@ import { deleteDiseaseHistories } from "../../../shared/society/disease-history"
 import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
+import { Level } from "@shared/master/entities/level.entity"
 
 import { buildRegistrantWorkbook, registrantExportFileName } from "./registrant-export"
 import { createdAtLabel, toRegistrantRow, toYearRows } from "./registrant-format"
 import {
 	DETAIL_SQL,
-	LATEST_LEVELS_SQL,
 	LIST_SQL,
-	SHOWN_LEVELS_SQL,
 	YEAR_LIST_SQL,
 	YEAR_PAGE_SQL,
 	exportSql,
@@ -40,14 +40,34 @@ import {
 const DELETE_SUCCESS = "Data berhasil dihapus dari basis data."
 const DELETE_FAILED = "Data gagal dihapus dari basis data."
 
-const options = (rows: Array<{ id: string; name: string | null }>): AdminRegistrantOption[] =>
-	rows.map((row) => ({ id: Number(row.id), name: row.name ?? "" }))
+const options = (levels: Array<Pick<Level, "id" | "name">>): AdminRegistrantOption[] =>
+	levels.map((level) => ({ id: Number(level.id), name: level.name ?? "" }))
 
 @Injectable()
 export class RegistrantAdminService {
 	private readonly logger = new Logger(RegistrantAdminService.name)
 
-	constructor(@Inject(DataSource) private readonly dataSource: DataSource) {}
+	constructor(
+		@Inject(DataSource) private readonly dataSource: DataSource,
+		@InjectRepository(Level) private readonly levels: Repository<Level>,
+	) {}
+
+	/** `Level::where('status', 'show')->get()` */
+	private async shownLevels(): Promise<AdminRegistrantOption[]> {
+		return options(
+			await this.levels.find({ select: { id: true, name: true }, where: { status: "show" }, order: { id: "ASC" } }),
+		)
+	}
+
+	/** `Level::latest()->get()` — the edit widget's select */
+	private async latestLevels(): Promise<AdminRegistrantOption[]> {
+		return options(
+			await this.levels.find({
+				select: { id: true, name: true },
+				order: { createdAt: { direction: "DESC", nulls: "LAST" }, id: "DESC" },
+			}),
+		)
+	}
 
 	/** `academicYearList` */
 	async findAcademicYears(): Promise<AdminRegistrantAcademicYearRow[]> {
@@ -66,7 +86,7 @@ export class RegistrantAdminService {
 			newCount: Number(row.new_count),
 			approveCount: Number(row.approve_count),
 			rejectCount: Number(row.reject_count),
-			levels: options(await this.dataSource.query(SHOWN_LEVELS_SQL)),
+			levels: await this.shownLevels(),
 		}
 	}
 
@@ -109,7 +129,7 @@ export class RegistrantAdminService {
 		)) as Array<{ id: string; year: string | null }>
 		return {
 			academicYears: years.map((row) => ({ id: Number(row.id), year: row.year })),
-			levels: options(await this.dataSource.query(SHOWN_LEVELS_SQL)),
+			levels: await this.shownLevels(),
 		}
 	}
 
@@ -137,7 +157,7 @@ export class RegistrantAdminService {
 			indentTest: row.indent_test,
 			regularTest: row.regular_test,
 			approvalStatus: row.approval_status,
-			levels: options(await this.dataSource.query(LATEST_LEVELS_SQL)),
+			levels: await this.latestLevels(),
 			record,
 		}
 	}
