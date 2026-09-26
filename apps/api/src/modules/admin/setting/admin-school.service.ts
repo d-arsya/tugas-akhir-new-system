@@ -12,7 +12,8 @@ import {
 	fieldErrorsFromZod,
 	isTruthyFlag,
 	schoolFileErrors,
-} from "@admin/dto/admin-school.dto"
+} from "@admin/setting/dto/admin-school.dto"
+import { TIMEZONE } from "@admin/common/sql"
 
 export type AdminSchoolSetting = {
 	id: number
@@ -37,9 +38,6 @@ export type SchoolUploads = {
 // `resources/lang/id/admin.php`
 const UPDATE_SUCCESS = "Data berhasil diupdate."
 const UPDATE_FAILED = "Data gagal diupdate."
-
-// Legacy app timezone (config/app.php): `Carbon::now()->format('Y/m/d/')` builds the folder
-const TIMEZONE = "Asia/Jakarta"
 
 // The annotation is what lets TypeScript see that `throwFieldErrors` never returns
 const fail: (errors: FieldErrors) => never = throwFieldErrors

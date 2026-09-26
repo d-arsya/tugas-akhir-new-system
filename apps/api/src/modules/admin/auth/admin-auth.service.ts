@@ -8,7 +8,7 @@ import { Repository } from "typeorm"
 import { RedisService } from "@core/redis/redis.service"
 import { MailerService } from "@core/mailer/mailer.service"
 import { AuthLogWriter } from "@admin/auth/auth-log.writer"
-import { User } from "@admin/entities/user.entity"
+import { User } from "@admin/auth/entities/user.entity"
 import type { Env } from "@core/config/env.validation"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import type {
@@ -16,7 +16,7 @@ import type {
 	AdminForgotPasswordDto,
 	AdminResetPasswordDto,
 	AdminTwoFactorDto,
-} from "@admin/dto/admin-auth.dto"
+} from "@admin/auth/dto/admin-auth.dto"
 
 export type AdminAuthResult = {
 	requires2fa?: boolean

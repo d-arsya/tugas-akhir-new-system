@@ -44,11 +44,11 @@ import {
 	AdminStudentStatusBodyDto,
 	AdminStudentSubGradeBodyDto,
 	AdminStudentStepCheckBodyDto,
-} from "./student-admin.dto"
+} from "./dto/student-admin.dto"
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { StudentAdminService } from "./student-admin.service"
+import { sendXlsx, XLSX_TYPE } from "@admin/common/xlsx"
 
-const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 const STEPS: readonly SocietyStepKey[] = ["personal", "identity", "family", "guardian"]
 /** `attach_*` inputs of the attachment step / tab */
 const UPLOAD_FIELDS = FileFieldsInterceptor(
@@ -128,9 +128,7 @@ export class StudentAdminController {
 		@Res() res: Response,
 	): Promise<void> {
 		const file = await this.studentAdminService.export(academicYearId, grade, levelId)
-		res.setHeader("Content-Type", XLSX_TYPE)
-		res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`)
-		res.send(file.buffer)
+		sendXlsx(res, file)
 	}
 
 	@Get("options")

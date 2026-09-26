@@ -4,7 +4,7 @@ import type { EntityManager } from "typeorm"
 import { syncStudentWalletActive } from "../../../shared/ewallet/student-wallet"
 import { deleteDiseaseHistories } from "../../../shared/society/disease-history"
 
-import { TZ } from "./student-sql"
+import { TIMEZONE } from "@admin/common/sql"
 
 // Row-level operations the Santri writes share, each a port of a legacy model method or controller
 // helper. All take the request transaction's manager (approved fix: one transaction per request).
@@ -129,7 +129,7 @@ export const updateStudentAccount = async (
 export const deleteUnpaidInvoices = async (manager: EntityManager, studentGradeId: number): Promise<void> => {
 	await manager.query(
 		`DELETE FROM tbr_student_invoices
-		WHERE student_grade_id = $1 AND status = 'unpaid' AND due_date > (now() AT TIME ZONE '${TZ}')::date`,
+		WHERE student_grade_id = $1 AND status = 'unpaid' AND due_date > (now() AT TIME ZONE '${TIMEZONE}')::date`,
 		[studentGradeId],
 	)
 }

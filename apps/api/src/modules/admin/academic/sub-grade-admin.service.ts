@@ -1,8 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
 import { DataSource } from "typeorm"
 
-import { EPOCH_SECONDS, LOCAL_TIMESTAMP, indoDateTimeDot } from "@admin/academic/academic-format"
-import type { SubGradeWriteInput } from "@admin/dto/sub-grade-admin.dto"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
+import { indoDateTimeDot } from "@admin/common/date-format"
+import type { SubGradeWriteInput } from "@admin/academic/dto/sub-grade-admin.dto"
 
 export type SubGradeRow = {
 	id: number

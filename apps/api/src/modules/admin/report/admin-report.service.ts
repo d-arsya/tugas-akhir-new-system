@@ -7,8 +7,8 @@ import type {
 	IncomeDetailQuery,
 	IncomeFilter,
 	INCOME_DETAIL_SORT_KEYS,
-} from "@admin/dto/admin-report.dto"
-import { REPORT_TIMEZONE } from "./report-format"
+} from "@admin/report/dto/admin-report.dto"
+import { LOCAL_TIMESTAMP, SqlParams } from "@admin/common/sql"
 import {
 	ARREAR_FINAL_AMOUNT,
 	ARREAR_FROM,
@@ -17,7 +17,6 @@ import {
 	DETAIL_GROUP_BY,
 	detailWhere,
 	recapSql,
-	SqlParams,
 } from "./report-sql"
 
 export type ReportOptions = {
@@ -83,8 +82,6 @@ const ARREAR_SORT: Record<(typeof ARREAR_SORT_KEYS)[number], string> = {
 
 const toNumber = (value: unknown): number => Number(value ?? 0)
 const toNullableNumber = (value: unknown): number | null => (value === null || value === undefined ? null : Number(value))
-const localTimestamp = (column: string): string =>
-	`to_char(${column} AT TIME ZONE '${REPORT_TIMEZONE}', 'YYYY-MM-DD"T"HH24:MI:SS')`
 
 const pageClause = (paging: Paging, params: SqlParams): string =>
 	paging ? `LIMIT ${params.add(paging.limit)} OFFSET ${params.add((paging.page - 1) * paging.limit)}` : ""
@@ -194,7 +191,7 @@ export class AdminReportService {
 			`SELECT st.student_transaction_code AS code, s.nis, sg.fullname, st.amount, sg.grade, sg.sub_grade,
 				-- Legacy leaves the order to the planner; the pivot id keeps it stable (payment order)
 				STRING_AGG(si.name, ', ' ORDER BY sit.id) AS description,
-				${localTimestamp("st.paid_at")} AS paid_at, ${localTimestamp("st.created_at")} AS created_at
+				${LOCAL_TIMESTAMP("st.paid_at")} AS paid_at, ${LOCAL_TIMESTAMP("st.created_at")} AS created_at
 			${DETAIL_FROM} ${where} ${DETAIL_GROUP_BY}
 			ORDER BY ${order}, st.id ASC ${pageClause(paging, params)}`,
 			params.values,

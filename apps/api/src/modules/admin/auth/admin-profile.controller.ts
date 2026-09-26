@@ -8,8 +8,8 @@ import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
 import { AdminProfileService, type MyProfile } from "@admin/auth/admin-profile.service"
-import { MyProfileDto, MyProfileUpdateDto } from "@admin/dto/admin-profile.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { MyProfileDto, MyProfileUpdateDto } from "@admin/auth/dto/admin-profile.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 
 // WS-B: legacy MyprofileController (setting.myProfile)
 @ApiTags("Admin — Profil Saya")

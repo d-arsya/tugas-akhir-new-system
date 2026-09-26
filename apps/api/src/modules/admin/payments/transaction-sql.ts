@@ -9,24 +9,8 @@
 // Two legacy defects are fixed rather than transcribed — see `transactionListWhere` (F-2)
 // and the sort defaults in `transaction-admin.dto.ts` (`:59-60`).
 
-const TIMEZONE = "Asia/Jakarta"
-
-/** Legacy `whereDate()` compares the date part in the app timezone. */
-const localDate = (column: string): string => `(${column} AT TIME ZONE '${TIMEZONE}')::date`
-
-/** ISO timestamp rendered in the app timezone, as every other admin module returns it. */
-const localStamp = (column: string): string =>
-	`to_char(${column} AT TIME ZONE '${TIMEZONE}', 'YYYY-MM-DD"T"HH24:MI:SS')`
-
-/** Collects positional parameters ($1, $2 …) for raw SQL. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
+import { parseDmy } from "@admin/common/date-format"
+import { LOCAL_TIMESTAMP, localDate, type SqlParams } from "@admin/common/sql"
 
 /**
  * `:67-70`. Every join is a LEFT JOIN in legacy and stays one here.
@@ -56,14 +40,6 @@ export type TransactionListFilter = {
 	search?: string | undefined
 	from?: string | undefined
 	to?: string | undefined
-}
-
-/** `d/m/Y` from the bootstrap-datepicker, as `formatFromTo()` parses it. */
-export const parseDmy = (value: string | undefined): string | undefined => {
-	const match = value ? /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value) : null
-	if (!match) return undefined
-	const date = new Date(Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1])))
-	return Number.isNaN(date.getTime()) ? undefined : date.toISOString().slice(0, 10)
 }
 
 /**
@@ -144,7 +120,7 @@ export const transactionCountSql = (where: string): string =>
 export const transactionListSql = (where: string, orderExpr: string, orderDir: string, limitExpr: string, offsetExpr: string): string =>
 	`SELECT st.id,
 		st.student_transaction_code::text AS "transactionCode",
-		${localStamp("st.paid_at")} AS "paidAt",
+		${LOCAL_TIMESTAMP("st.paid_at")} AS "paidAt",
 		extract(epoch FROM st.paid_at)::bigint AS "paidAtTs",
 		st.amount,
 		count(si.id)::int AS "itemCount",
@@ -167,8 +143,8 @@ export const transactionListSql = (where: string, orderExpr: string, orderDir: s
  */
 export const TRANSACTION_DETAIL_SQL = `SELECT st.id,
 		st.student_transaction_code::text AS "transactionCode",
-		${localStamp("st.paid_at")} AS "paidAt",
-		${localStamp("st.created_at")} AS "createdAt",
+		${LOCAL_TIMESTAMP("st.paid_at")} AS "paidAt",
+		${LOCAL_TIMESTAMP("st.created_at")} AS "createdAt",
 		st.amount,
 		st."desc" AS description,
 		st.note,

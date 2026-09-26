@@ -3,8 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import { Repository } from "typeorm"
 
-import { User } from "@admin/entities/user.entity"
-import { isFilled, type MyProfileUpdateDto } from "@admin/dto/admin-profile.dto"
+import { User } from "@admin/auth/entities/user.entity"
+import { isFilled, type MyProfileUpdateDto } from "@admin/auth/dto/admin-profile.dto"
 
 export type MyProfile = {
 	id: number

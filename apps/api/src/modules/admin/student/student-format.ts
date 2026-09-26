@@ -10,6 +10,7 @@ import type {
 } from "@roja/types"
 
 import { societyFileUrl } from "../../../shared/society/files"
+import { MONTHS_ID } from "@admin/common/date-format"
 
 export type YearSqlRow = {
 	id: string
@@ -84,22 +85,6 @@ export const toRosterRow = (row: RosterSqlRow): AdminStudentRosterRow => ({
 	dropoutNote: row.dropoutNote,
 	isBlocked: row.isBlocked,
 })
-
-/** Carbon `translatedFormat('F')` for the `id` locale */
-const MONTHS_ID = [
-	"Januari",
-	"Februari",
-	"Maret",
-	"April",
-	"Mei",
-	"Juni",
-	"Juli",
-	"Agustus",
-	"September",
-	"Oktober",
-	"November",
-	"Desember",
-] as const
 
 /** `formatDate($date, 'd F Y \j\a\m H:i')` from parts already taken in Asia/Jakarta. */
 export const indoDateTime = (day: string | null, month: string | null, year: string | null, time: string | null): string | null => {

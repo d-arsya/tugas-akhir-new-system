@@ -10,7 +10,7 @@ import {
 	StudentTransactionDetailDto,
 	StudentTransactionListQueryDto,
 	StudentTransactionListRowDto,
-} from "@admin/dto/transaction-admin.dto"
+} from "@admin/payments/dto/transaction-admin.dto"
 import { TransactionAdminService } from "@admin/payments/transaction-admin.service"
 
 // Legacy `StudentTransactionController` — Riwayat Transaksi.

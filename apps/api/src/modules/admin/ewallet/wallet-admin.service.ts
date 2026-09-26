@@ -24,10 +24,11 @@ import { RedisService } from "@core/redis/redis.service"
 import { StorageService } from "@core/storage/storage.service"
 import { toAmount } from "@shared/billing/invoice-calculator"
 import { computeBalance } from "@shared/ewallet/balance"
-import type { EwalletFilter, EwalletListFilter } from "@admin/dto/ewallet-wallet.dto"
+import type { EwalletFilter, EwalletListFilter } from "@admin/ewallet/dto/ewallet-wallet.dto"
 import { resetEmailRetryAfter } from "@admin/ewallet/ewallet-mail"
 import { buildWalletWorkbook } from "@admin/ewallet/wallet-export"
 import { indoDateTime, ownerKind, ownerLabel, storageKey } from "@admin/ewallet/wallet-format"
+import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/ewallet/wallet-sql"
 
 // Legacy `EwalletController`: Akun Dompet list, widgets, badge, detail, per-wallet transactions,
@@ -55,9 +56,9 @@ export class EwalletWalletService {
 		const orderBy = query.orderBy ?? sql.DEFAULT_SORT.orderBy
 		const orderDir = (query.orderDir ?? sql.DEFAULT_SORT.orderDir).toUpperCase()
 
-		const filterParams = new sql.SqlParams()
+		const filterParams = new SqlParams()
 		const filterWhere = sql.walletListWhere(query, filterParams)
-		const pageParams = new sql.SqlParams()
+		const pageParams = new SqlParams()
 		const pageWhere = sql.walletListWhere(query, pageParams)
 		const limitExpr = pageParams.add(query.limit)
 		const offsetExpr = pageParams.add((query.page - 1) * query.limit)
@@ -85,7 +86,7 @@ export class EwalletWalletService {
 
 	/** `@ewalletWidget` — legacy ran six `SUM`s; this is one statement. */
 	async widget(filter: EwalletFilter): Promise<EwalletWidget> {
-		const params = new sql.SqlParams()
+		const params = new SqlParams()
 		const where = sql.walletListWhere(filter, params)
 		const rows = await this.dataSource.query<{ student: string; merchant: string }[]>(
 			sql.walletWidgetSql(where),
@@ -104,7 +105,7 @@ export class EwalletWalletService {
 
 	/** `@export` — `Laporan Saldo Akhir - {member} - {status}.xlsx`. */
 	async exportBalances(filter: EwalletFilter): Promise<WalletFile> {
-		const params = new sql.SqlParams()
+		const params = new SqlParams()
 		const where = sql.walletListWhere(filter, params)
 		const rows = await this.dataSource.query<sql.ExportSqlRow[]>(sql.walletExportSql(where), params.values)
 

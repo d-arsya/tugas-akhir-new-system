@@ -6,6 +6,7 @@ import type {
 } from "@roja/types"
 
 import type { DetailRow, ListRow, YearListRow } from "./registrant-sql"
+import { MONTHS_ID } from "@admin/common/date-format"
 
 // Row shaping for the PSB pages — the parts of `RegistrantController` / `RegistrantService` that turn a
 // model into a DataTables cell.
@@ -63,8 +64,6 @@ export const toYearRows = (rows: YearListRow[]): AdminRegistrantAcademicYearRow[
 			status: yearStatus(row),
 		}))
 }
-
-const MONTHS_ID = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 
 /** `formatDate($created_at, 'd F Y \j\a\m H:i')` with the `id` locale. */
 export const createdAtLabel = (row: Pick<DetailRow, "created_day" | "created_month" | "created_year" | "created_time">): string | null =>

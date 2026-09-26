@@ -6,19 +6,17 @@
 // rather than alphabetically. Following the phase-1 contract rule, the visible string and the
 // sort key ship as separate fields and the markup stays in the client.
 
-import type { StudentCostTermWriteInput } from "@admin/dto/student-cost-admin.dto"
+import type { StudentCostTermWriteInput } from "@admin/billing/dto/student-cost-admin.dto"
+import { addDays, formatIsoDate, parseIsoDate } from "@admin/common/civil-date"
 import {
-	addDays,
 	decodeAmounts,
 	decodeCostTerm,
-	formatIsoDate,
-	parseIsoDate,
 	type CostTermForm,
 	type CostTermPeriod,
 	type CostTermType,
 	type StoredCostTerm,
 } from "@admin/billing/cost-term-codec"
-import { indoDate, indoDateShort } from "@admin/academic/academic-format"
+import { indoDate, indoDateShort } from "@admin/common/date-format"
 
 // ─── Row shapes ─────────────────────────────────────────────────────────────────
 

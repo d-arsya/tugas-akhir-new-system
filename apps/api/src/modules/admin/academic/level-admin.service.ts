@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { DataSource, type EntityManager } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
-import { indoDateTimeDot } from "@admin/academic/academic-format"
+import { indoDateTimeDot } from "@admin/common/date-format"
 import {
 	DELETE_LEVEL_SQL,
 	DETACH_LEVEL_QUOTA_SQL,
@@ -22,7 +22,8 @@ import {
 	type LevelOptionSqlRow,
 	type LevelSqlRow,
 } from "@admin/academic/level-sql"
-import type { LevelDelegateInput, LevelWriteInput } from "@admin/dto/level-admin.dto"
+import type { LevelDelegateInput, LevelWriteInput } from "@admin/academic/dto/level-admin.dto"
+import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
 
 export type LevelDeleteTarget =
 	| "delete"
@@ -58,11 +59,6 @@ export type LevelDeleteStep = {
 	/** Every other level, in database order — the destination picker. Empty for a plain delete. */
 	levels: LevelOption[]
 	redirect: string | null
-}
-
-export type AdminRedirectResult = {
-	message: string
-	redirect: string
 }
 
 const STEPS: readonly LevelDeleteTarget[] = [

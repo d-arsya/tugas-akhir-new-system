@@ -8,7 +8,7 @@ import type { AdminAlumniDetail, AdminAlumniList, AdminAlumniRow, AdminAlumniVal
 import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
-import { MONTHS_ID } from "../academic/academic-format"
+import { MONTHS_ID } from "@admin/common/date-format"
 
 import { ALUMNI_EXPORT_FILE, buildAlumniWorkbook } from "./alumni-export"
 import * as sql from "./alumni-sql"

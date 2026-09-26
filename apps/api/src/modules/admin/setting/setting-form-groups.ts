@@ -1,4 +1,4 @@
-import type { SettingForm } from "@modules/psb/entities/setting-form.entity"
+import type { SettingForm } from "@shared/school/entities/setting-form.entity"
 
 // Port of `SettingFormController@index` (the grouping) and `SettingFormService::alpabhetIcon`
 // + `getSubGroupAllInvisible` (app/Helpers/Helper.php 176-197).

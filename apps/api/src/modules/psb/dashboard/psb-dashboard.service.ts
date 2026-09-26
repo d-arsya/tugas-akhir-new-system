@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 import { Registrant } from "@psb/entities/registrant.entity"
-import { SettingAnnc } from "@psb/entities/setting-annc.entity"
+import { SettingAnnc } from "@shared/school/entities/setting-annc.entity"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 
 @Injectable()

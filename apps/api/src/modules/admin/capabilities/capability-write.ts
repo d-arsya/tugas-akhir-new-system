@@ -1,8 +1,8 @@
 import type { EntityManager } from "typeorm"
 
 import { toAmount } from "@shared/billing/invoice-calculator"
-import { unmaskAmount } from "@admin/billing/cost-term-codec"
-import type { CapabilityWriteInput } from "@admin/dto/capability-publish.dto"
+import { unmaskAmount } from "@admin/common/amount-mask"
+import type { CapabilityWriteInput } from "@admin/capabilities/dto/capability-publish.dto"
 import type { GeneratedInvoice, GeneratorItem } from "@admin/capabilities/invoice-generator"
 import { invoiceUniqueId } from "@admin/capabilities/invoice-generator"
 import * as sql from "@admin/capabilities/publish-sql"

@@ -25,7 +25,8 @@ import {
 	type AccountancySqlRow,
 	type AccountancyTreeSqlRow,
 } from "@admin/billing/accountancy-sql"
-import type { AccountancyDelegateInput, AccountancyWriteInput } from "@admin/dto/accountancy-admin.dto"
+import type { AccountancyDelegateInput, AccountancyWriteInput } from "@admin/billing/dto/accountancy-admin.dto"
+import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
 
 export type AccountancyDeleteTarget = "delete" | "delegate-child"
 
@@ -59,8 +60,6 @@ export type AccountancyDeleteStep = {
 	parents: AccountancyOption[]
 	redirect: string | null
 }
-
-export type AdminRedirectResult = { message: string; redirect: string }
 
 const STEPS: readonly AccountancyDeleteTarget[] = ["delete", "delegate-child"]
 

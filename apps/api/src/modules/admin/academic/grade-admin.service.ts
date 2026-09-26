@@ -2,8 +2,9 @@ import { Injectable, InternalServerErrorException, Logger, NotFoundException } f
 import { DataSource } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
-import { EPOCH_SECONDS, LOCAL_TIMESTAMP, indoDateTimeDot } from "@admin/academic/academic-format"
-import type { GradeWriteInput } from "@admin/dto/grade-admin.dto"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
+import { indoDateTimeDot } from "@admin/common/date-format"
+import type { GradeWriteInput } from "@admin/academic/dto/grade-admin.dto"
 
 export type GradeRow = {
 	id: number

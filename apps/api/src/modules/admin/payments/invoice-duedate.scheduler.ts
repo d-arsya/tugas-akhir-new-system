@@ -5,9 +5,7 @@ import { InjectDataSource } from "@nestjs/typeorm"
 import { DataSource } from "typeorm"
 
 import type { Env } from "@core/config/env.validation"
-
-// `config/app.php` → `'timezone' => 'Asia/Jakarta'`, as phase 1's invoice SQL also assumes.
-const TZ = "Asia/Jakarta"
+import { TIMEZONE } from "@admin/common/sql"
 
 /**
  * Stamps the arrears snapshot onto invoices that have gone overdue: which academic year,
@@ -42,7 +40,7 @@ export class InvoiceDueDateScheduler {
 		private readonly configService: ConfigService<Env, true>,
 	) {}
 
-	@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: TZ })
+	@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT, { timeZone: TIMEZONE })
 	async stampArrears(): Promise<void> {
 		if (!this.configService.get("SCHEDULER_ENABLED", { infer: true })) return
 

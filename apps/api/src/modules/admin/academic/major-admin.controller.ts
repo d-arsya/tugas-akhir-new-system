@@ -6,8 +6,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { DestructiveGuard } from "@core/auth/guards/destructive.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { MajorDetailDto, MajorRowDto, MajorWriteDto } from "@admin/dto/major-admin.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { MajorDetailDto, MajorRowDto, MajorWriteDto } from "@admin/academic/dto/major-admin.dto"
 import { MajorAdminService, type MajorDetail, type MajorRow } from "@admin/academic/major-admin.service"
 
 // Legacy `MajorController` (Jurusan).

@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common"
 import { DataSource } from "typeorm"
 
-import { SqlParams } from "@admin/report/report-sql"
+import { SqlParams } from "@admin/common/sql"
 import { AUTH_LOG_FROM, AUTH_LOG_SELECT, authLogOrderBy, authLogWhere } from "@admin/auth/auth-log-sql"
-import type { AuthLogQuery } from "@admin/dto/auth-log.dto"
+import type { AuthLogQuery } from "@admin/auth/dto/auth-log.dto"
 
 /** Every field arrives ready to render, like the legacy controller's row array. */
 export type AuthLogRow = {

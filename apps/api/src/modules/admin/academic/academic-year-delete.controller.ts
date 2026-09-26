@@ -6,12 +6,12 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { DestructiveGuard } from "@core/auth/guards/destructive.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AcademicYearDeleteStepDto, AdminRedirectResultDto } from "@admin/dto/academic-year-admin.dto"
+import { AdminRedirectResultDto, type AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { AcademicYearDeleteStepDto } from "@admin/academic/dto/academic-year-admin.dto"
 import type { AcademicYearDeleteTarget } from "@admin/academic/academic-year-admin.service"
 import {
 	AcademicYearDeleteService,
 	type AcademicYearDeleteStep,
-	type AdminRedirectResult,
 } from "@admin/academic/academic-year-delete.service"
 
 // Legacy `AcademicYearController` delete flow. Each step is a full page in legacy, and the

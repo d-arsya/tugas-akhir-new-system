@@ -9,7 +9,8 @@ import type {
 
 import { StorageService } from "@core/storage/storage.service"
 import { toAmount } from "@shared/billing/invoice-calculator"
-import type { StudentTransactionListFilter } from "@admin/dto/transaction-admin.dto"
+import type { StudentTransactionListFilter } from "@admin/payments/dto/transaction-admin.dto"
+import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/payments/transaction-sql"
 
 // Legacy `StudentTransactionController` — the Riwayat Transaksi index and detail.
@@ -75,13 +76,13 @@ export class TransactionAdminService {
 		const orderBy = query.orderBy ?? sql.DEFAULT_SORT.orderBy
 		const orderDir = (query.orderDir ?? sql.DEFAULT_SORT.orderDir).toUpperCase()
 
-		const totalParams = new sql.SqlParams()
+		const totalParams = new SqlParams()
 		const totalWhere = sql.transactionListWhere({}, totalParams)
 
-		const filterParams = new sql.SqlParams()
+		const filterParams = new SqlParams()
 		const filterWhere = sql.transactionListWhere(query, filterParams)
 
-		const pageParams = new sql.SqlParams()
+		const pageParams = new SqlParams()
 		const pageWhere = sql.transactionListWhere(query, pageParams)
 		const limitExpr = pageParams.add(query.limit)
 		const offsetExpr = pageParams.add((query.page - 1) * query.limit)

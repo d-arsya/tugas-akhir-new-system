@@ -12,8 +12,8 @@ import {
 import {
 	SettingAnnouncementDto,
 	SettingAnnouncementUpdateDto,
-} from "@admin/dto/admin-announcement.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+} from "@admin/setting/dto/admin-announcement.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 
 // WS-B: legacy SettingAnncsController
 @ApiTags("Admin — Pengumuman PSB")

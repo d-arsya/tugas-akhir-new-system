@@ -13,7 +13,7 @@ import type {
 
 import type { Env } from "@core/config/env.validation"
 import { calculateInvoiceTotals, calculatePaid, calculateSetTotals, toAmount } from "@shared/billing/invoice-calculator"
-import type { InvoiceBillInput, StudentInvoiceListInput, UpdateInvoiceNoteInput } from "@admin/dto/invoice-admin.dto"
+import type { InvoiceBillInput, StudentInvoiceListInput, UpdateInvoiceNoteInput } from "@admin/payments/dto/invoice-admin.dto"
 import {
 	splitInvoiceName,
 	statusLabel,
@@ -27,6 +27,7 @@ import {
 	type LinkSqlRow,
 	type TransactionSqlRow,
 } from "@admin/payments/invoice-format"
+import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/payments/invoice-sql"
 
 const UPDATE_SUCCESS = "Data berhasil diupdate."
@@ -48,7 +49,7 @@ export class InvoiceAdminService {
 
 	/** `@studentListServerSide` — `leftjoin` throughout, so a santri with no invoices still lists at 0. */
 	async findStudents(query: StudentInvoiceListInput): Promise<ServerTableResult<StudentInvoiceListRow>> {
-		const params = new sql.SqlParams()
+		const params = new SqlParams()
 		const where = sql.studentWhere(query, params)
 		const limit = params.add(query.limit)
 		const offset = params.add((query.page - 1) * query.limit)
@@ -101,7 +102,7 @@ export class InvoiceAdminService {
 
 	/** `@listBillServerSide` — the Tagihan tab. */
 	async findBills(studentGradeId: number, query: InvoiceBillInput): Promise<ServerTableResult<InvoiceBillRow>> {
-		const params = new sql.SqlParams()
+		const params = new SqlParams()
 		const where = sql.billWhere(studentGradeId, query, params)
 		const limit = params.add(query.limit)
 		const offset = params.add((query.page - 1) * query.limit)

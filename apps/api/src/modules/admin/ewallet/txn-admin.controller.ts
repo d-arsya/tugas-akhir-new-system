@@ -14,7 +14,7 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	EwalletHistoryDetailDto,
 	EwalletHistoryExportDto,
@@ -22,10 +22,9 @@ import {
 	EwalletHistoryRowDto,
 	EwalletTransactionDetailDto,
 	EwalletTransactionUpdateDto,
-} from "@admin/dto/ewallet-txn.dto"
+} from "@admin/ewallet/dto/ewallet-txn.dto"
 import { EwalletTxnService } from "@admin/ewallet/txn-admin.service"
-
-const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+import { sendXlsx, XLSX_TYPE } from "@admin/common/xlsx"
 
 // Legacy `EwalletController` / `EwalletTransactionHistoryController`: transaction detail, status update and Riwayat Transaksi (workstream D-C).
 // Legacy gated every route with `can:do-as-cashier` — Superadmin or Kasir E-Wallet; Admin and
@@ -72,12 +71,7 @@ export class EwalletTxnController {
 	@ApiProduces(XLSX_TYPE)
 	async exportHistory(@Query() query: EwalletHistoryExportDto, @Res() res: Response): Promise<void> {
 		const file = await this.ewalletTxnService.exportHistory(query)
-		res.setHeader("Content-Type", XLSX_TYPE)
-		res.setHeader(
-			"Content-Disposition",
-			`attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
-		)
-		res.send(file.buffer)
+		sendXlsx(res, file)
 	}
 
 	@Get("history/:id")

@@ -6,8 +6,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { DestructiveGuard } from "@core/auth/guards/destructive.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { GradeDetailDto, GradeRowDto, GradeWriteDto } from "@admin/dto/grade-admin.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { GradeDetailDto, GradeRowDto, GradeWriteDto } from "@admin/academic/dto/grade-admin.dto"
 import { GradeAdminService, type GradeDetail, type GradeRow } from "@admin/academic/grade-admin.service"
 
 // Legacy `GradeController` (Kelas) — the left card of the Kelas page.

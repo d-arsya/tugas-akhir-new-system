@@ -28,7 +28,7 @@ import * as sql from "@admin/billing/student-cost-sql"
 import type {
 	StudentCostAppliedInput,
 	StudentCostTermWriteInput as Write,
-} from "@admin/dto/student-cost-admin.dto"
+} from "@admin/billing/dto/student-cost-admin.dto"
 
 export type {
 	StudentCostAccountPage,

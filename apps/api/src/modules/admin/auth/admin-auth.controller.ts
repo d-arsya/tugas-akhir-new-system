@@ -15,9 +15,9 @@ import {
 	AdminForgotPasswordDto,
 	AdminResetPasswordDto,
 	AdminTwoFactorDto,
-} from "@admin/dto/admin-auth.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { AdminJwtRefreshGuard } from "@admin/guards/admin-jwt-refresh.guard"
+} from "@admin/auth/dto/admin-auth.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { AdminJwtRefreshGuard } from "@admin/auth/guards/admin-jwt-refresh.guard"
 
 @ApiTags("Admin — Authentication")
 @Controller("admin/auth")

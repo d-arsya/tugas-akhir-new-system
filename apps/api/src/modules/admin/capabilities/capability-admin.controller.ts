@@ -23,7 +23,7 @@ import {
 	CapabilityItemRowDto,
 	CapabilityStudentPageDto,
 	CapabilityStudentRowDto,
-} from "@admin/dto/capability-admin.dto"
+} from "@admin/capabilities/dto/capability-admin.dto"
 import { CapabilityAdminService } from "@admin/capabilities/capability-admin.service"
 
 // Legacy `StudentCapabilityController` (read half) plus the two agreement documents — routes 1-6,

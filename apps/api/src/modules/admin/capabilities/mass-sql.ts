@@ -16,16 +16,6 @@
 // `tbr_student_capabilities` and `tbr_student_cost_capabilities` carry no `deleted_at` at all —
 // there is no soft delete to scope out, and no FK, UNIQUE or CHECK constraint anywhere.
 
-/** Positional parameters ($1, $2 …). Same shape as `payments/invoice-sql.ts`. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
-
 // ─── Route context ───────────────────────────────────────────────────────────
 
 /**

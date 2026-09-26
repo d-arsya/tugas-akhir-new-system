@@ -1,3 +1,5 @@
+import { TIMEZONE } from "@admin/common/sql"
+
 // Raw SQL for the read half of Akademik → Santri — legacy `StudentController` `academicYearList:62`,
 // `gradeList:111`, `students:288`, `studentList:317`, `edit:397` and the select lists of the wizard
 // (`Student\PersonalController::personal`) and the edit page.
@@ -5,9 +7,6 @@
 // `tbr_students` and `tbr_student_grades` are soft-deleted (`deleted_at`): every read filters it, as the
 // Eloquent `SoftDeletes` scope does. `StudentGrade::student()` is `hasOne(...)->withDefault()`, so the
 // account is LEFT JOINed on a live row — a trashed or missing account reads as an empty model.
-
-// `config/app.php` → `'timezone' => 'Asia/Jakarta'`
-export const TZ = "Asia/Jakarta"
 
 /**
  * `AcademicYearService::getStatusAkademik()`, flattened (same reading as `capabilities/capability-sql.ts`):
@@ -17,7 +16,7 @@ const STATUS_AKADEMIK = `CASE
 			WHEN ay.id = 1 THEN '-'
 			WHEN ay.is_current THEN 'Berjalan'
 			WHEN ay.cost_date_end IS NOT NULL
-				AND (now() AT TIME ZONE '${TZ}') > ay.cost_date_end::timestamp THEN 'Berakhir'
+				AND (now() AT TIME ZONE '${TIMEZONE}') > ay.cost_date_end::timestamp THEN 'Berakhir'
 			ELSE NULL
 		END`
 
@@ -89,10 +88,10 @@ export const DETAIL_SQL = `SELECT sg.id, sg.student_id AS "studentId", s.nis, s.
 		sg.grade_note AS "gradeNote", sg.dropout_note AS "dropoutNote", sg.sub_grade AS "subGrade",
 		sg.major_name AS "majorName", sg.current_academic_year AS "currentAcademicYear", sg.attach_photo AS "attachPhoto",
 		(SELECT ay.id FROM tbr_academic_years ay WHERE ay.year = sg.current_academic_year ORDER BY ay.id LIMIT 1) AS "academicYearId",
-		to_char(sg.created_at AT TIME ZONE '${TZ}', 'DD') AS "createdDay",
-		to_char(sg.created_at AT TIME ZONE '${TZ}', 'FMMM') AS "createdMonth",
-		to_char(sg.created_at AT TIME ZONE '${TZ}', 'YYYY') AS "createdYear",
-		to_char(sg.created_at AT TIME ZONE '${TZ}', 'HH24:MI') AS "createdTime"
+		to_char(sg.created_at AT TIME ZONE '${TIMEZONE}', 'DD') AS "createdDay",
+		to_char(sg.created_at AT TIME ZONE '${TIMEZONE}', 'FMMM') AS "createdMonth",
+		to_char(sg.created_at AT TIME ZONE '${TIMEZONE}', 'YYYY') AS "createdYear",
+		to_char(sg.created_at AT TIME ZONE '${TIMEZONE}', 'HH24:MI') AS "createdTime"
 	FROM tbr_student_grades sg
 	LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
 	LEFT JOIN tbr_levels l ON l.id = sg.level_id

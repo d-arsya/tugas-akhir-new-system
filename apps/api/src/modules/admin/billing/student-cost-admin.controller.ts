@@ -5,7 +5,7 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	StudentCostAccountPageDto,
 	StudentCostAppliedDto,
@@ -13,7 +13,7 @@ import {
 	StudentCostTermDetailDto,
 	StudentCostTermWriteDto,
 	StudentCostYearRowDto,
-} from "@admin/dto/student-cost-admin.dto"
+} from "@admin/billing/dto/student-cost-admin.dto"
 import {
 	StudentCostAdminService,
 	type StudentCostAccountPage,

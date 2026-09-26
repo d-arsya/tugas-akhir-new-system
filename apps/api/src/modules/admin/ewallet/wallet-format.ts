@@ -1,6 +1,6 @@
 import type { EwalletOwnerType } from "@roja/types"
 
-import { MONTHS_ID } from "@admin/academic/academic-format"
+import { MONTHS_ID } from "@admin/common/date-format"
 import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/balance"
 
 // Formatting for Akun Dompet (legacy `formatDate()`, `rupiah()` and the model accessors). Owned by WS D-A.

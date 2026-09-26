@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common"
 import { DataSource, type QueryRunner } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
-import { fromDmy, indoDateShort, toDmyDash, toDmySlash } from "@admin/academic/academic-format"
+import { fromDmy, indoDateShort, toDmyDash, toDmySlash } from "@admin/common/date-format"
 import {
 	ACADEMIC_YEAR_DETAIL_SQL,
 	ACADEMIC_YEAR_EXISTS_SQL,
@@ -19,7 +19,7 @@ import {
 import type {
 	AcademicYearCreateInput,
 	AcademicYearUpdateInput,
-} from "@admin/dto/academic-year-admin.dto"
+} from "@admin/academic/dto/academic-year-admin.dto"
 
 /** Where a row's destroy icon points — legacy picks this per row, server-side, at list-render time. */
 export type AcademicYearDeleteTarget =

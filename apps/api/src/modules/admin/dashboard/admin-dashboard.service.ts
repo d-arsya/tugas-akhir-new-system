@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { Not, Repository } from "typeorm"
-import { Registrant } from "@psb/entities/registrant.entity"
-import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { DataSource, Not, Repository } from "typeorm"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 
@@ -24,10 +22,7 @@ export type DashboardOptions = {
 @Injectable()
 export class AdminDashboardService {
 	constructor(
-		@InjectRepository(Registrant)
-		private readonly registrantRepo: Repository<Registrant>,
-		@InjectRepository(StudentGrade)
-		private readonly studentGradeRepo: Repository<StudentGrade>,
+		private readonly dataSource: DataSource,
 		@InjectRepository(AcademicYear)
 		private readonly academicYearRepo: Repository<AcademicYear>,
 		@InjectRepository(Grade)
@@ -37,8 +32,9 @@ export class AdminDashboardService {
 	// Legacy countPSB(): no year = every registrant. Legacy compared the selected year with `===`
 	// (int vs request string), so approve/reject were always 0 when filtered — fixed here.
 	async getStats(academicYearId?: number): Promise<DashboardStats> {
-		const qb = this.registrantRepo
-			.createQueryBuilder("r")
+		const qb = this.dataSource
+			.createQueryBuilder()
+			.from("tbr_registrants", "r")
 			.select("COUNT(*)", "total")
 			.addSelect("COUNT(*) FILTER (WHERE r.approval_status = 'approve')", "approve")
 			.addSelect("COUNT(*) FILTER (WHERE r.approval_status = 'reject')", "reject")
@@ -73,8 +69,9 @@ export class AdminDashboardService {
 	// Legacy chartStudent(): student_grades rows per year for the 5 years ending at the latest
 	// `current_academic_year` string, filtered by grade label
 	async getChartStudent(gradeLabel: number): Promise<DashboardChartItem[]> {
-		const latest = await this.studentGradeRepo
-			.createQueryBuilder("sg")
+		const latest = await this.dataSource
+			.createQueryBuilder()
+			.from("tbr_student_grades", "sg")
 			.select("MAX(sg.current_academic_year)", "year")
 			.where("sg.deleted_at IS NULL")
 			// Archived rows hold "archive", which would sort above every "YYYY/YYYY" string
@@ -86,8 +83,9 @@ export class AdminDashboardService {
 		// Oldest first: e.g. latest "2025/2026" → 2021/2022 … 2025/2026
 		const years = [4, 3, 2, 1, 0].map((i) => `${startYear - i}/${startYear - i + 1}`)
 
-		const rows = await this.studentGradeRepo
-			.createQueryBuilder("sg")
+		const rows = await this.dataSource
+			.createQueryBuilder()
+			.from("tbr_student_grades", "sg")
 			.select("sg.current_academic_year", "year")
 			.addSelect("COUNT(*)", "count")
 			.where("sg.deleted_at IS NULL")
@@ -109,8 +107,9 @@ export class AdminDashboardService {
 		const now = new Date().getFullYear()
 		const year = current?.year ?? `${now - 1}/${now}`
 
-		const activeRows = await this.studentGradeRepo
-			.createQueryBuilder("sg")
+		const activeRows = await this.dataSource
+			.createQueryBuilder()
+			.from("tbr_student_grades", "sg")
 			.innerJoin("tbr_students", "s", "s.id = sg.student_id AND s.deleted_at IS NULL")
 			.select("sg.grade", "grade")
 			.addSelect("COUNT(DISTINCT s.id)", "count")
@@ -122,8 +121,9 @@ export class AdminDashboardService {
 			.getRawMany<{ grade: number; count: string }>()
 		const activeByGrade = new Map(activeRows.map((r) => [Number(r.grade), Number(r.count)]))
 
-		const leftRow = await this.studentGradeRepo
-			.createQueryBuilder("sg")
+		const leftRow = await this.dataSource
+			.createQueryBuilder()
+			.from("tbr_student_grades", "sg")
 			.innerJoin("tbr_students", "s", "s.id = sg.student_id AND s.deleted_at IS NULL")
 			.select("COUNT(DISTINCT s.id)", "count")
 			.where("sg.deleted_at IS NULL")

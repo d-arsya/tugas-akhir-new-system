@@ -6,13 +6,13 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
 import { AdminUserService, type AdminUserDetail, type AdminUserRow } from "@admin/user/admin-user.service"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	AdminUserCreateDto,
 	AdminUserDetailDto,
 	AdminUserRowDto,
 	AdminUserUpdateDto,
-} from "@admin/dto/admin-user.dto"
+} from "@admin/user/dto/admin-user.dto"
 
 // Legacy `UserController` (user.index/create/edit/store/update/destroy), guarded by `UserPolicy`,
 // which grants every ability to Superadmin only

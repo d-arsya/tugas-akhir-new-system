@@ -1,4 +1,5 @@
-import type { InvoiceBillInput, StudentInvoiceListInput } from "@admin/dto/invoice-admin.dto"
+import { LOCAL_TIMESTAMP, TIMEZONE, truthy, type SqlParams } from "@admin/common/sql"
+import type { InvoiceBillInput, StudentInvoiceListInput } from "@admin/payments/dto/invoice-admin.dto"
 
 // Raw SQL for the read half of Tagihan Santri — legacy `StudentInvoiceController`
 // `@studentListServerSide`, `@edit`, `@listBillServerSide`, `@listTransaction`, `@listCancel`
@@ -11,25 +12,7 @@ import type { InvoiceBillInput, StudentInvoiceListInput } from "@admin/dto/invoi
 // standalone query (`COST_OPTIONS_SQL`). Money columns are `bigint`, which node-postgres returns
 // as strings, so the service normalises every figure through `toAmount()`.
 
-/** Positional parameters ($1, $2 …). Duplicated from `report-sql.ts` to keep the modules apart. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
-
-// `config/app.php` → `'timezone' => 'Asia/Jakarta'`; PHP `Carbon::now()` and `whereDate()` both use it
-const TZ = "Asia/Jakarta"
-const TODAY = `(now() AT TIME ZONE '${TZ}')::date`
-
-/** Local wall-clock ISO the admin's `formatIndoDate()` parses (`yyyy-mm-ddThh:mm:ss`). */
-const localStamp = (column: string): string => `to_char(${column} AT TIME ZONE '${TZ}', 'YYYY-MM-DD"T"HH24:MI:SS')`
-
-/** PHP truthiness: `null`, `""` and `"0"` are all falsy, so `if ($father)` falls through on each. */
-const truthy = (column: string): string => `(${column} IS NOT NULL AND ${column} <> '' AND ${column} <> '0')`
+const TODAY = `(now() AT TIME ZONE '${TIMEZONE}')::date`
 
 // ─── The santri picker (`@studentListServerSide`) ────────────────────────────
 
@@ -224,7 +207,7 @@ export const billRowsSql = (where: string, order: string, limit: string, offset:
 		to_char(si.due_date, 'YYYY-MM-DD') AS "dueDate",
 		-- Carbon::create($due_date)->timestamp is local midnight, not UTC midnight, and legacy's
 		-- rowCallback compares it against now() — so an invoice due today is already past due
-		EXTRACT(EPOCH FROM si.due_date::timestamp AT TIME ZONE '${TZ}')::bigint AS "dueDateTs",
+		EXTRACT(EPOCH FROM si.due_date::timestamp AT TIME ZONE '${TIMEZONE}')::bigint AS "dueDateTs",
 		si.due_date <= ${TODAY} AS "pastDue"
 	${BILL_FROM}
 	${where}
@@ -246,7 +229,7 @@ export const BILL_LINKS_SQL = `SELECT sit.student_invoice_id AS "studentInvoiceI
 /** Both tabs are one query with a different `status`; `latest()` orders by `created_at` desc. */
 export const STUDENT_TRANSACTIONS_SQL = `SELECT st.id,
 		st.student_transaction_code::text AS "transactionCode",
-		${localStamp("st.paid_at")} AS "paidAt",
+		${LOCAL_TIMESTAMP("st.paid_at")} AS "paidAt",
 		EXTRACT(EPOCH FROM st.paid_at)::bigint AS "paidAtTs",
 		st.amount,
 		(
@@ -268,7 +251,7 @@ export const INVOICE_SQL = `SELECT si.id,
 		si.note,
 		si.student_grade_id AS "studentGradeId",
 		to_char(si.due_date, 'YYYY-MM-DD') AS "dueDate",
-		${localStamp("si.created_at")} AS "createdAt"
+		${LOCAL_TIMESTAMP("si.created_at")} AS "createdAt"
 	FROM tbr_student_invoices si
 	WHERE si.id = $1`
 
@@ -278,7 +261,7 @@ export const INVOICE_SQL = `SELECT si.id,
 export const INVOICE_TRANSACTIONS_SQL = `SELECT st.id,
 		st.student_transaction_code::text AS "transactionCode",
 		st.note,
-		${localStamp("st.paid_at")} AS "paidAt",
+		${LOCAL_TIMESTAMP("st.paid_at")} AS "paidAt",
 		sit.pay
 	FROM tbr_student_invoice_transactions sit
 	JOIN tbr_student_transactions st ON st.id = sit.student_transaction_id

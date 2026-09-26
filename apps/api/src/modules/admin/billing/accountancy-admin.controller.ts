@@ -18,8 +18,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { DestructiveGuard } from "@core/auth/guards/destructive.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { AdminRedirectResultDto } from "@admin/dto/academic-year-admin.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { AdminRedirectResultDto, type AdminRedirectResult } from "@admin/common/admin-response.dto"
 import {
 	AccountancyDeleteStepDto,
 	AccountancyDelegateDto,
@@ -27,7 +27,7 @@ import {
 	AccountancyOptionDto,
 	AccountancyRowDto,
 	AccountancyWriteDto,
-} from "@admin/dto/accountancy-admin.dto"
+} from "@admin/billing/dto/accountancy-admin.dto"
 import {
 	AccountancyAdminService,
 	type AccountancyDeleteStep,
@@ -35,7 +35,6 @@ import {
 	type AccountancyDetail,
 	type AccountancyOption,
 	type AccountancyRow,
-	type AdminRedirectResult,
 } from "@admin/billing/accountancy-admin.service"
 
 // Legacy `AccountancyController` (Data Master ▸ Keuangan ▸ Akun). Legacy has no route gate at

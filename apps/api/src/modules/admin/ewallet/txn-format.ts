@@ -1,5 +1,4 @@
-import { MONTHS_ID, MONTHS_SHORT_ID, indoDate, indoDateShort } from "@admin/academic/academic-format"
-import { parseDmy } from "@admin/payments/transaction-sql"
+import { MONTHS_ID, MONTHS_SHORT_ID, indoDate, indoDateShort, parseDmy } from "@admin/common/date-format"
 
 // Formatting shared by the transaction detail, Riwayat and its export. `local` is the
 // Jakarta-local `YYYY-MM-DDTHH:MM:SS` string that `LOCAL_TIMESTAMP` produces.

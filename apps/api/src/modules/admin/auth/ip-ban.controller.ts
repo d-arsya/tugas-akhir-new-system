@@ -6,8 +6,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
 import { IpBanService } from "@core/ip-ban/ip-ban.service"
 import { PaginationQueryDto } from "@core/dto/pagination-query.dto"
-import { CreateIpBanDto, IpBanResponseDto } from "@admin/dto/ip-ban.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { CreateIpBanDto, IpBanResponseDto } from "@admin/auth/dto/ip-ban.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 
 @ApiTags("Admin — IP Ban Management")
 @Controller("admin/ip-bans")

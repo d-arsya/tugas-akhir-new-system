@@ -25,7 +25,7 @@ import type {
 	EwalletHistoryExportFilter,
 	EwalletHistoryFilter,
 	EwalletTransactionUpdateInput,
-} from "@admin/dto/ewallet-txn.dto"
+} from "@admin/ewallet/dto/ewallet-txn.dto"
 import { buildHistoryWorkbook, type ExportItem, type ExportRow } from "@admin/ewallet/txn-export"
 import {
 	dateSuffix,
@@ -34,6 +34,7 @@ import {
 	statusSuffix,
 	typeSuffix,
 } from "@admin/ewallet/txn-format"
+import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/ewallet/txn-sql"
 
 // Legacy Dompet: transaction detail, status update and Riwayat Transaksi (workstream D-C). Raw SQL
@@ -192,10 +193,10 @@ export class EwalletTxnService {
 		const orderBy = query.orderBy ?? sql.HISTORY_DEFAULT_SORT.orderBy
 		const orderDir = (query.orderDir ?? sql.HISTORY_DEFAULT_SORT.orderDir).toUpperCase()
 
-		const filterParams = new sql.SqlParams()
+		const filterParams = new SqlParams()
 		const filterWhere = sql.historyWhere(query, filterParams, false)
 
-		const pageParams = new sql.SqlParams()
+		const pageParams = new SqlParams()
 		const pageWhere = sql.historyWhere(query, pageParams, false)
 		const limitExpr = pageParams.add(query.limit)
 		const offsetExpr = pageParams.add((query.page - 1) * query.limit)
@@ -262,7 +263,7 @@ export class EwalletTxnService {
 	 * collection of every transaction in PHP) and the total is over the rows listed.
 	 */
 	async exportHistory(filter: EwalletHistoryExportFilter): Promise<EwalletHistoryFile> {
-		const params = new sql.SqlParams()
+		const params = new SqlParams()
 		const where = sql.historyWhere(filter, params, true)
 
 		const [rows, items] = await Promise.all([

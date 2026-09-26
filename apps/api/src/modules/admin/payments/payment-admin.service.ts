@@ -7,7 +7,7 @@ import type {
 	CreateTransactionInput,
 	InvoiceSelectionInput,
 	UpdateTransactionNoteInput,
-} from "@admin/dto/payment-admin.dto"
+} from "@admin/payments/dto/payment-admin.dto"
 import { StorageService } from "@core/storage/storage.service"
 import { renderPrintReceipt } from "@admin/payments/payment-print"
 import {

@@ -7,8 +7,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
 import { AdminSchoolService, type AdminSchoolSetting } from "@admin/setting/admin-school.service"
-import { AdminSchoolSettingDto } from "@admin/dto/admin-school.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminSchoolSettingDto } from "@admin/setting/dto/admin-school.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 
 // WS-B: legacy SettingSchoolController
 @ApiTags("Admin — Profil Pondok")

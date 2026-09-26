@@ -1,5 +1,5 @@
-import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/academic/academic-format"
-import { parseDmy } from "@admin/payments/transaction-sql"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP, TIMEZONE, type SqlParams } from "@admin/common/sql"
+import { parseDmy } from "@admin/common/date-format"
 import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/balance"
 
 // Raw SQL for the transaction detail, the status update and Riwayat Transaksi — legacy
@@ -8,18 +8,6 @@ import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/bal
 // Everything is raw SQL because the ewallet tables mix `bigint`, `numeric` and `varchar` ids:
 // `details.ewallet_transaction_id` and `items.ewallet_transaction_id` are numeric,
 // `ewalletable_id` is a varchar. See the plan's "Data reality".
-
-const TIMEZONE = "Asia/Jakarta"
-
-/** Collects positional parameters ($1, $2 …) for raw SQL. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
 
 /**
  * `EwalletTransaction::getTotalItemsPriceAttribute`: the items' sum when the row has items,

@@ -1,18 +1,6 @@
-import { parseDmy, REPORT_TIMEZONE } from "./report-format"
-import type { ArrearFilter, IncomeFilter } from "@admin/dto/admin-report.dto"
-
-// Collects positional parameters ($1, $2 …) for raw SQL
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
-
-// Legacy `whereDate()` compares the date part in the app timezone
-export const localDate = (column: string): string => `(${column} AT TIME ZONE '${REPORT_TIMEZONE}')::date`
+import { parseDmy } from "@admin/common/date-format"
+import { localDate, TIMEZONE, type SqlParams } from "@admin/common/sql"
+import type { ArrearFilter, IncomeFilter } from "@admin/report/dto/admin-report.dto"
 
 // Legacy only filters dates when both ends are present
 export const dateRange = (filter: { from?: string | undefined; to?: string | undefined }): { from: string; to: string } | null => {
@@ -123,8 +111,8 @@ export const recapSql = (filter: IncomeFilter, params: SqlParams): string => {
 			WHERE ${invoiceConditions.join(" AND ")}
 		)
 		SELECT acc.name AS acc_name, COALESCE(SUM(inv.calc), 0) AS total,
-			to_char(MIN(inv.created_at) AT TIME ZONE '${REPORT_TIMEZONE}', 'YYYY-MM-DD') AS first_at,
-			to_char(MAX(inv.created_at) AT TIME ZONE '${REPORT_TIMEZONE}', 'YYYY-MM-DD') AS last_at
+			to_char(MIN(inv.created_at) AT TIME ZONE '${TIMEZONE}', 'YYYY-MM-DD') AS first_at,
+			to_char(MAX(inv.created_at) AT TIME ZONE '${TIMEZONE}', 'YYYY-MM-DD') AS last_at
 		FROM acc LEFT JOIN inv ON inv.accountancy_id = acc.id
 		GROUP BY acc.id, acc.name
 		ORDER BY acc.id`
@@ -150,7 +138,7 @@ export const arrearWhere = (filter: ArrearFilter, params: SqlParams): string => 
 	const conditions = [
 		"si.validity_status = true",
 		// PHP now() in the app timezone, compared against the DATE column
-		`si.due_date < (now() AT TIME ZONE '${REPORT_TIMEZONE}')`,
+		`si.due_date < (now() AT TIME ZONE '${TIMEZONE}')`,
 		"si.status = 'unpaid'",
 	]
 	if (filter.search) {

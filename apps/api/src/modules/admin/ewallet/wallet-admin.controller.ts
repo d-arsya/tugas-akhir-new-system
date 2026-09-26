@@ -19,10 +19,9 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { EwalletFilterQueryDto, EwalletListQueryDto, EwalletSettingDto } from "@admin/dto/ewallet-wallet.dto"
+import { EwalletFilterQueryDto, EwalletListQueryDto, EwalletSettingDto } from "@admin/ewallet/dto/ewallet-wallet.dto"
 import { EwalletWalletService } from "@admin/ewallet/wallet-admin.service"
-
-const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+import { sendXlsx, XLSX_TYPE } from "@admin/common/xlsx"
 
 // Legacy `EwalletController`: Akun Dompet, detail, setting, QR and balance export (workstream D-A).
 // Legacy gated every route with `can:do-as-cashier` — Superadmin or Kasir E-Wallet; Admin and
@@ -65,13 +64,7 @@ export class EwalletWalletController {
 	@ApiProduces(XLSX_TYPE)
 	async exportBalances(@Query() query: EwalletFilterQueryDto, @Res() res: Response): Promise<void> {
 		const file = await this.ewalletWalletService.exportBalances(query)
-		// Streams the workbook directly, bypassing the JSON TransformInterceptor
-		res.setHeader("Content-Type", XLSX_TYPE)
-		res.setHeader(
-			"Content-Disposition",
-			`attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
-		)
-		res.send(file.buffer)
+		sendXlsx(res, file)
 	}
 
 	@Get("qr-all")

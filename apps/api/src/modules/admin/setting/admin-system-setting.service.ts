@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 
-import { Setting, type SmtpEncryption } from "@admin/entities/setting.entity"
+import { Setting, type SmtpEncryption } from "@admin/setting/entities/setting.entity"
 
 export type SystemSetting = {
 	id: number

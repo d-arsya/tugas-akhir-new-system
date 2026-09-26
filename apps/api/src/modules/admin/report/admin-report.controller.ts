@@ -12,7 +12,7 @@ import {
 	type IncomeRecap,
 	type ReportOptions,
 } from "@admin/report/admin-report.service"
-import { AdminReportExportService, type ReportFile } from "@admin/report/admin-report-export.service"
+import { AdminReportExportService } from "@admin/report/admin-report-export.service"
 import {
 	ArrearFilterDto,
 	ArrearQueryDto,
@@ -22,19 +22,8 @@ import {
 	IncomeFilterDto,
 	IncomeRecapResponseDto,
 	ReportOptionsResponseDto,
-} from "@admin/dto/admin-report.dto"
-
-const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-
-// Streams the workbook directly, bypassing the JSON TransformInterceptor
-const sendFile = (res: Response, file: ReportFile): void => {
-	res.setHeader("Content-Type", XLSX_TYPE)
-	res.setHeader(
-		"Content-Disposition",
-		`attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`,
-	)
-	res.send(file.buffer)
-}
+} from "@admin/report/dto/admin-report.dto"
+import { sendXlsx, XLSX_TYPE } from "@admin/common/xlsx"
 
 // Legacy `report` route group behind the `asBendahara` middleware (Superadmin & Bendahara)
 @ApiTags("Admin — Laporan")
@@ -66,7 +55,7 @@ export class AdminReportController {
 	@ApiOperation({ summary: "Export rincian pemasukkan (xlsx)" })
 	@ApiProduces(XLSX_TYPE)
 	async exportIncomeDetail(@Query() query: IncomeFilterDto, @Res() res: Response): Promise<void> {
-		sendFile(res, await this.exportService.exportDetail(query))
+		sendXlsx(res, await this.exportService.exportDetail(query))
 	}
 
 	@Get("income/recap")
@@ -80,7 +69,7 @@ export class AdminReportController {
 	@ApiOperation({ summary: "Export rekapitulasi pemasukkan (xlsx)" })
 	@ApiProduces(XLSX_TYPE)
 	async exportIncomeRecap(@Query() query: IncomeFilterDto, @Res() res: Response): Promise<void> {
-		sendFile(res, await this.exportService.exportRecap(query))
+		sendXlsx(res, await this.exportService.exportRecap(query))
 	}
 
 	@Get("arrears")
@@ -94,6 +83,6 @@ export class AdminReportController {
 	@ApiOperation({ summary: "Export laporan tunggakan (xlsx)" })
 	@ApiProduces(XLSX_TYPE)
 	async exportArrears(@Query() query: ArrearFilterDto, @Res() res: Response): Promise<void> {
-		sendFile(res, await this.exportService.exportArrear(query))
+		sendXlsx(res, await this.exportService.exportArrear(query))
 	}
 }

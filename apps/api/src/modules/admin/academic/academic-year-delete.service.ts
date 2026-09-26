@@ -9,6 +9,7 @@ import {
 import { DataSource, type EntityManager } from "typeorm"
 
 import type { AcademicYearDeleteTarget } from "@admin/academic/academic-year-admin.service"
+import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
 
 export type AcademicYearDeleteStep = {
 	id: number
@@ -22,11 +23,6 @@ export type AcademicYearDeleteStep = {
 	locked: boolean
 	/** Set when the data changed underneath and this step no longer applies. */
 	redirect: string | null
-}
-
-export type AdminRedirectResult = {
-	message: string
-	redirect: string
 }
 
 type YearSqlRow = {

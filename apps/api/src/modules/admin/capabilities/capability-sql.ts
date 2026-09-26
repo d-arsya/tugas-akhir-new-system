@@ -11,24 +11,7 @@
 // None of these lists is paged: legacy hand-builds the whole `['data' => …]` array and the browser
 // pages it, so each statement returns its complete set.
 
-/** Positional parameters ($1, $2 …). Duplicated from `payments/invoice-sql.ts` to keep modules apart. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
-
-// `config/app.php` → `'timezone' => 'Asia/Jakarta'`; `now()` in every legacy comparison uses it
-const TZ = "Asia/Jakarta"
-
-/** Local wall-clock ISO the admin's `formatIndoDate()` parses (`yyyy-mm-ddThh:mm:ss`). */
-const localStamp = (column: string): string => `to_char(${column} AT TIME ZONE '${TZ}', 'YYYY-MM-DD"T"HH24:MI:SS')`
-
-/** PHP truthiness: `null`, `""` and `"0"` are all falsy, so `$father ?: $mother` falls through on each. */
-const truthy = (column: string): string => `(${column} IS NOT NULL AND ${column} <> '' AND ${column} <> '0')`
+import { LOCAL_TIMESTAMP, TIMEZONE, truthy } from "@admin/common/sql"
 
 // ─── Level 1: academic years (`@academicYearList`) ───────────────────────────
 
@@ -49,7 +32,7 @@ const STATUS_AKADEMIK = `CASE
 			WHEN ay.year = 'Archive' THEN '-'
 			WHEN ay.is_current THEN 'Berjalan'
 			WHEN ay.cost_date_end IS NOT NULL
-				AND (now() AT TIME ZONE '${TZ}') > ay.cost_date_end::timestamp THEN 'Berakhir'
+				AND (now() AT TIME ZONE '${TIMEZONE}') > ay.cost_date_end::timestamp THEN 'Berakhir'
 			ELSE NULL
 		END`
 
@@ -184,7 +167,7 @@ export const CAPABILITY_STUDENT_CARD_SQL = `SELECT sg.id AS "studentGradeId",
  * letting the join decide which rows exist.
  */
 export const CAPABILITY_HISTORY_SQL = `SELECT c.id,
-		${localStamp("c.approve_date")} AS "approveDate",
+		${LOCAL_TIMESTAMP("c.approve_date")} AS "approveDate",
 		EXTRACT(EPOCH FROM c.approve_date)::bigint AS "approveDateTs",
 		c.status,
 		c.note,
@@ -218,7 +201,7 @@ export const CAPABILITY_SQL = `SELECT c.id,
 		c.student_grade_id AS "studentGradeId",
 		c.status,
 		c.note,
-		${localStamp("c.approve_date")} AS "approveDate",
+		${LOCAL_TIMESTAMP("c.approve_date")} AS "approveDate",
 		(
 			SELECT COUNT(*) FROM tbr_student_capabilities o
 			 WHERE o.student_grade_id = c.student_grade_id

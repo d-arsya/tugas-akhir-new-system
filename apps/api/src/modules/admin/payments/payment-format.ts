@@ -5,6 +5,7 @@
 // printable page) read the same helpers rather than a copy each.
 
 import { toId, type InvoiceLinkRow, type InvoiceRow } from "@shared/billing/invoice-calculator"
+import { MONTHS_ID } from "@admin/common/date-format"
 
 export type ReceiptTransaction = {
 	transactionCode: string | null
@@ -36,20 +37,6 @@ export type ReceiptData = {
 
 // Carbon `translatedFormat` under `config('app.locale') = 'id'`
 const DAYS_ID = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
-const MONTHS_ID = [
-	"Januari",
-	"Februari",
-	"Maret",
-	"April",
-	"Mei",
-	"Juni",
-	"Juli",
-	"Agustus",
-	"September",
-	"Oktober",
-	"November",
-	"Desember",
-]
 
 /** Blade `{{ }}` escapes with `htmlspecialchars($value, ENT_QUOTES, 'UTF-8', true)`. */
 export const escapeHtml = (value: unknown): string =>

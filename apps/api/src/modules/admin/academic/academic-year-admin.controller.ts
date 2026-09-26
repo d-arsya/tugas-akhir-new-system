@@ -5,14 +5,14 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	AcademicYearCreateDto,
 	AcademicYearDetailDto,
 	AcademicYearQuotaRowDto,
 	AcademicYearRowDto,
 	AcademicYearUpdateDto,
-} from "@admin/dto/academic-year-admin.dto"
+} from "@admin/academic/dto/academic-year-admin.dto"
 import {
 	AcademicYearAdminService,
 	type AcademicYearDetail,

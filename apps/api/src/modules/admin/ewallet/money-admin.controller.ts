@@ -9,7 +9,7 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
-import { EwalletAmountDto, EwalletPinDto } from "@admin/dto/ewallet-money.dto"
+import { EwalletAmountDto, EwalletPinDto } from "@admin/ewallet/dto/ewallet-money.dto"
 import { EwalletMoneyService, type MoneyOutcome } from "@admin/ewallet/money-admin.service"
 
 // Legacy `EwalletController`: cash top-up, the three-step withdraw, PIN reset (workstream D-B).

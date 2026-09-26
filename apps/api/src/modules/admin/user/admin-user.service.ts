@@ -9,10 +9,12 @@ import { throwFieldErrors } from "@core/errors/field-errors"
 import { MailerService } from "@core/mailer/mailer.service"
 import { REDIS_CLIENT } from "@core/redis/redis.constants"
 import { RedisService } from "@core/redis/redis.service"
-import { User } from "@admin/entities/user.entity"
+import { User } from "@admin/auth/entities/user.entity"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 import type { Env } from "@core/config/env.validation"
-import type { AdminUserCreateInput, AdminUserUpdateInput } from "@admin/dto/admin-user.dto"
+import type { AdminUserCreateInput, AdminUserUpdateInput } from "@admin/user/dto/admin-user.dto"
+import { MONTHS_ID } from "@admin/common/date-format"
+import { LOCAL_TIMESTAMP } from "@admin/common/sql"
 
 export type AdminUserRow = {
 	id: number
@@ -45,23 +47,6 @@ type UserListRow = {
 	createdAtTs: string
 }
 
-const TIMEZONE = "Asia/Jakarta"
-
-const MONTHS_ID = [
-	"Januari",
-	"Februari",
-	"Maret",
-	"April",
-	"Mei",
-	"Juni",
-	"Juli",
-	"Agustus",
-	"September",
-	"Oktober",
-	"November",
-	"Desember",
-]
-
 // `RegistrantService::datatableDate(..., 'd F Y \j\a\m H:i')` on a `yyyy-mm-ddThh:mm:ss` local string
 const indoDateTime = (local: string): string =>
 	`${local.slice(8, 10)} ${MONTHS_ID[Number(local.slice(5, 7)) - 1] ?? ""} ${local.slice(0, 4)} jam ${local.slice(11, 16)}`
@@ -92,7 +77,7 @@ export class AdminUserService {
 	async findAll(): Promise<AdminUserRow[]> {
 		const rows = await this.dataSource.query<UserListRow[]>(
 			`SELECT u.id, u.name, u.email, u.role, u.is_blocked AS "isBlocked",
-				to_char(u.created_at AT TIME ZONE '${TIMEZONE}', 'YYYY-MM-DD"T"HH24:MI:SS') AS "localCreatedAt",
+				${LOCAL_TIMESTAMP("u.created_at")} AS "localCreatedAt",
 				EXTRACT(EPOCH FROM u.created_at)::bigint AS "createdAtTs"
 			FROM tbr_users u
 			WHERE ${NOT_SUPERADMIN}

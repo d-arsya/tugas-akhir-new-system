@@ -5,8 +5,8 @@ import { Repository } from "typeorm"
 
 import { RedisService } from "@core/redis/redis.service"
 import { AdminAuthService, type AdminAuthResult } from "@admin/auth/admin-auth.service"
-import { User } from "@admin/entities/user.entity"
-import type { CreatePasswordInput } from "@admin/dto/admin-create-password.dto"
+import { User } from "@admin/auth/entities/user.entity"
+import type { CreatePasswordInput } from "@admin/auth/dto/admin-create-password.dto"
 
 export type CreatePasswordCheck = {
 	email: string

@@ -8,12 +8,12 @@ import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decora
 import { setAuthCookies } from "@admin/auth/admin-auth-cookies"
 import { AdminCreatePasswordService, type CreatePasswordCheck } from "@admin/auth/admin-create-password.service"
 import type { AdminAuthResult } from "@admin/auth/admin-auth.service"
-import { AdminAuthResultDto } from "@admin/dto/admin-auth.dto"
+import { AdminAuthResultDto } from "@admin/auth/dto/admin-auth.dto"
 import {
 	CreatePasswordCheckQueryDto,
 	CreatePasswordCheckResponseDto,
 	CreatePasswordDto,
-} from "@admin/dto/admin-create-password.dto"
+} from "@admin/auth/dto/admin-create-password.dto"
 
 // Legacy `Auth\CreatePasswordController` — guest routes, so every handler is `@Public()`
 @ApiTags("Admin — Buat Password")

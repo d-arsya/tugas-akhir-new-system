@@ -1,10 +1,9 @@
+import { EPOCH_SECONDS, TIMEZONE } from "@admin/common/sql"
+
 // Raw SQL behind the PSB pages (legacy `RegistrantController`). `tbr_registrants` has no soft deletes
 // and no foreign keys; every id / count comes back from node-postgres as a string.
 
-// `config/app.php` → `'timezone' => 'Asia/Jakarta'`; the lists print `d-m-Y, H:i` in it
-const TZ = "'Asia/Jakarta'"
-const DMY_HI = (column: string): string => `to_char(${column} AT TIME ZONE ${TZ}, 'DD-MM-YYYY, HH24:MI')`
-const EPOCH = (column: string): string => `extract(epoch FROM ${column})::bigint`
+const DMY_HI = (column: string): string => `to_char(${column} AT TIME ZONE '${TIMEZONE}', 'DD-MM-YYYY, HH24:MI')`
 
 /** `AcademicYear::with('registrants')->get()` reduced to the five counters of `academicYearList`. */
 export const YEAR_LIST_SQL = `
@@ -58,8 +57,8 @@ export const LATEST_LEVELS_SQL = `SELECT id, name FROM tbr_levels ORDER BY creat
 
 const LIST_COLUMNS = `
 	r.id, r.registrant_id, r.fullname, r.nis, r.school_name, l.name AS level_name,
-	${DMY_HI("r.created_at")} AS created_at, ${EPOCH("r.created_at")} AS created_ts,
-	${DMY_HI("r.updated_at")} AS updated_at, ${EPOCH("r.updated_at")} AS updated_ts,
+	${DMY_HI("r.created_at")} AS created_at, ${EPOCH_SECONDS("r.created_at")} AS created_ts,
+	${DMY_HI("r.updated_at")} AS updated_at, ${EPOCH_SECONDS("r.updated_at")} AS updated_ts,
 	r.registration_path, r.data_validation, r.indent_test, r.regular_test, r.approval_status`
 
 /**
@@ -111,10 +110,10 @@ export const DETAIL_SQL = `
 	SELECT r.id, r.registrant_id, r.fullname, r.academic_year_id, ay.year, r.level_id, r.registration_path,
 		r.email, r.is_blocked, r.registered_by_admin, r.attach_photo, r.data_validation, r.data_validation_note,
 		r.indent_test, r.regular_test, r.approval_status,
-		to_char(r.created_at AT TIME ZONE ${TZ}, 'DD') AS created_day,
-		to_char(r.created_at AT TIME ZONE ${TZ}, 'MM') AS created_month,
-		to_char(r.created_at AT TIME ZONE ${TZ}, 'YYYY') AS created_year,
-		to_char(r.created_at AT TIME ZONE ${TZ}, 'HH24:MI') AS created_time
+		to_char(r.created_at AT TIME ZONE '${TIMEZONE}', 'DD') AS created_day,
+		to_char(r.created_at AT TIME ZONE '${TIMEZONE}', 'MM') AS created_month,
+		to_char(r.created_at AT TIME ZONE '${TIMEZONE}', 'YYYY') AS created_year,
+		to_char(r.created_at AT TIME ZONE '${TIMEZONE}', 'HH24:MI') AS created_time
 	FROM tbr_registrants r
 	LEFT JOIN tbr_academic_years ay ON ay.id = r.academic_year_id
 	WHERE r.id = $1`

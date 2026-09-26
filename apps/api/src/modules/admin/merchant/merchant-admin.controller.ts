@@ -5,16 +5,15 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminRedirectResultDto } from "@admin/dto/academic-year-admin.dto"
+import { AdminRedirectResultDto, type AdminRedirectResult } from "@admin/common/admin-response.dto"
 import {
 	MerchantDetailDto,
 	MerchantNextNumberDto,
 	MerchantRowDto,
 	MerchantWriteDto,
-} from "@admin/dto/merchant-admin.dto"
+} from "@admin/merchant/dto/merchant-admin.dto"
 import {
 	MerchantAdminService,
-	type AdminRedirectResult,
 	type MerchantDetail,
 	type MerchantRow,
 } from "@admin/merchant/merchant-admin.service"

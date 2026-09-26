@@ -1,8 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
 import { DataSource } from "typeorm"
 
-import { EPOCH_SECONDS, LOCAL_TIMESTAMP, indoDateTimeDot } from "@admin/academic/academic-format"
-import type { MajorWriteInput } from "@admin/dto/major-admin.dto"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
+import { indoDateTimeDot } from "@admin/common/date-format"
+import type { MajorWriteInput } from "@admin/academic/dto/major-admin.dto"
 
 export type MajorRow = {
 	id: number

@@ -9,7 +9,7 @@ import {
 	SettingFormGroupsResponseDto,
 	SettingFormPatchDto,
 	SettingFormPatchResultDto,
-} from "@admin/dto/admin-setting-form.dto"
+} from "@admin/setting/dto/admin-setting-form.dto"
 import {
 	AdminSettingFormService,
 	type SettingFormPatchResult,

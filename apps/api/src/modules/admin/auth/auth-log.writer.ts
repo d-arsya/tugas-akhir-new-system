@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IsNull, Not, Repository } from "typeorm"
 
-import { AuthLog, type LoginStatus } from "@admin/entities/auth-log.entity"
+import { AuthLog, type LoginStatus } from "@admin/auth/entities/auth-log.entity"
 
 export type OpenAuthLog = {
 	userId: number | null

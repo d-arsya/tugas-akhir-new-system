@@ -9,23 +9,8 @@
 //   * `tbr_students` and `tbr_student_grades` are soft-deleted, and 38 santri hold more than one
 //     `active` grade — `studentGrades()->firstWhere('grade_status','active')` is the lowest id.
 
+import { LOCAL_TIMESTAMP, type SqlParams } from "@admin/common/sql"
 import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/balance"
-
-const TIMEZONE = "Asia/Jakarta"
-
-/** ISO timestamp rendered in the app timezone, as every other admin module returns it. */
-export const localStamp = (column: string): string =>
-	`to_char(${column} AT TIME ZONE '${TIMEZONE}', 'YYYY-MM-DD"T"HH24:MI:SS')`
-
-/** Collects positional parameters ($1, $2 …) for raw SQL. */
-export class SqlParams {
-	readonly values: unknown[] = []
-
-	add(value: unknown): string {
-		this.values.push(value)
-		return `$${this.values.length}`
-	}
-}
 
 // `standard_conforming_strings` is on, so the PHP class string's backslash is literal inside '…'
 const STUDENT = `'${EWALLET_STUDENT_TYPE}'`
@@ -201,7 +186,7 @@ export type WalletTransactionSqlRow = {
 export const walletTransactionsSql = (student: boolean): string => `
 SELECT t.id::text AS id, t.code, t.name, t.type, t.status, t.payment_method AS "paymentMethod",
 	COALESCE((SELECT SUM(i.price) FROM tbr_ewallet_transaction_items i WHERE i.ewallet_transaction_id = t.id), t.amount)::text AS amount,
-	${localStamp("t.created_at")} AS "createdAt",
+	${LOCAL_TIMESTAMP("t.created_at")} AS "createdAt",
 	EXTRACT(EPOCH FROM t.created_at)::bigint::text AS "createdAtTs",
 	EXISTS (SELECT 1 FROM tbr_ewallet_transaction_details d WHERE d.ewallet_transaction_id = t.id) AS "hasDetail",
 	(SELECT m.merchant_name FROM tbr_ewallets tw

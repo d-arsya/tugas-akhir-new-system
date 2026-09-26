@@ -1,235 +1,36 @@
 import { Module } from "@nestjs/common"
-import { JwtModule } from "@nestjs/jwt"
-import { TypeOrmModule } from "@nestjs/typeorm"
-import { IpBanModule } from "@core/ip-ban/ip-ban.module"
 
-// Domain Modules for Modular Monolith Decoupling
-import { MasterModule } from "@shared/master/master.module"
-import { SchoolModule } from "@shared/school/school.module"
-import { PsbModule } from "../psb/psb.module"
-import { SantriModule } from "../santri/santri.module"
-import { MerchantModule } from "../merchant/merchant.module"
-import { EwalletModule } from "../ewallet/ewallet.module"
-
-// Admin Entities
-import { User } from "./entities/user.entity"
-import { AuthLog } from "./entities/auth-log.entity"
-import { Accountancy } from "./entities/accountancy.entity"
-import { StudentCostTerm } from "./entities/student-cost-term.entity"
-import { StudentCost } from "./entities/student-cost.entity"
-import { Setting } from "./entities/setting.entity"
-import { SettingAnnc } from "../psb/entities/setting-annc.entity"
-import { SettingForm } from "../psb/entities/setting-form.entity"
-import { SettingSchool } from "../../shared/school/entities/setting-school.entity"
-
-// Feature Services & Controllers
-import { AdminAuthService } from "@admin/auth/admin-auth.service"
-import { AuthLogWriter } from "@admin/auth/auth-log.writer"
-import { AuthLogScheduler } from "@admin/auth/auth-log.scheduler"
-import { AuthLogService } from "@admin/auth/auth-log.service"
-import { AdminAuthController } from "@admin/auth/admin-auth.controller"
-import { AuthLogController } from "@admin/auth/auth-log.controller"
-import { AdminIpBanController } from "@admin/auth/ip-ban.controller"
-import { AdminCreatePasswordService } from "@admin/auth/admin-create-password.service"
-import { AdminCreatePasswordController } from "@admin/auth/admin-create-password.controller"
-import { AdminProfileService } from "@admin/auth/admin-profile.service"
-import { AdminProfileController } from "@admin/auth/admin-profile.controller"
-import { AdminUserService } from "@admin/user/admin-user.service"
-import { AdminUserController } from "@admin/user/admin-user.controller"
-
-import { AdminDashboardService } from "@admin/dashboard/admin-dashboard.service"
-import { AdminDashboardController } from "@admin/dashboard/admin-dashboard.controller"
-
-import { AdminSchoolService } from "@admin/setting/admin-school.service"
-import { AdminSchoolController } from "@admin/setting/admin-school.controller"
-import { AdminAnnouncementService } from "@admin/setting/admin-announcement.service"
-import { AdminAnnouncementController } from "@admin/setting/admin-announcement.controller"
-import { AdminSettingFormService } from "@admin/setting/admin-setting-form.service"
-import { AdminSettingFormController } from "@admin/setting/admin-setting-form.controller"
-import { AdminSystemSettingService } from "@admin/setting/admin-system-setting.service"
-import { AdminSystemSettingController } from "@admin/setting/admin-system-setting.controller"
-
-import { AcademicYearAdminService } from "@admin/academic/academic-year-admin.service"
-import { AcademicYearAdminController } from "@admin/academic/academic-year-admin.controller"
-import { AcademicYearDeleteService } from "@admin/academic/academic-year-delete.service"
-import { AcademicYearDeleteController } from "@admin/academic/academic-year-delete.controller"
-import { LevelAdminService } from "@admin/academic/level-admin.service"
-import { LevelAdminController } from "@admin/academic/level-admin.controller"
-import { MajorAdminService } from "@admin/academic/major-admin.service"
-import { MajorAdminController } from "@admin/academic/major-admin.controller"
-import { GradeAdminService } from "@admin/academic/grade-admin.service"
-import { GradeAdminController } from "@admin/academic/grade-admin.controller"
-import { SubGradeAdminService } from "@admin/academic/sub-grade-admin.service"
-import { SubGradeAdminController } from "@admin/academic/sub-grade-admin.controller"
-
-import { AccountancyAdminService } from "@admin/billing/accountancy-admin.service"
-import { AccountancyAdminController } from "@admin/billing/accountancy-admin.controller"
-import { StudentCostAdminService } from "@admin/billing/student-cost-admin.service"
-import { StudentCostAdminController } from "@admin/billing/student-cost-admin.controller"
-import { MerchantAdminService } from "@admin/merchant/merchant-admin.service"
-import { MerchantAdminController } from "@admin/merchant/merchant-admin.controller"
-
-import { AdminReportService } from "@admin/report/admin-report.service"
-import { AdminReportExportService } from "@admin/report/admin-report-export.service"
-import { AdminReportController } from "@admin/report/admin-report.controller"
-
-import { EwalletWalletService } from "@admin/ewallet/wallet-admin.service"
-import { EwalletWalletController } from "@admin/ewallet/wallet-admin.controller"
-import { EwalletMoneyService } from "@admin/ewallet/money-admin.service"
-import { EwalletMoneyController } from "@admin/ewallet/money-admin.controller"
-import { EwalletTxnService } from "@admin/ewallet/txn-admin.service"
-import { EwalletTxnController } from "@admin/ewallet/txn-admin.controller"
-
-// Akademik — each sub-menu registers its own controllers and providers in its module
-import { StudentAdminModule } from "@admin/student/student-admin.module"
-import { RegistrantAdminModule } from "@admin/registrant/registrant-admin.module"
+import { AcademicAdminModule } from "@admin/academic/academic-admin.module"
 import { AlumniAdminModule } from "@admin/alumni/alumni-admin.module"
-
-
-import { InvoiceAdminController } from "@admin/payments/invoice-admin.controller"
-import { InvoiceAdminService } from "@admin/payments/invoice-admin.service"
-import { InvoiceDueDateScheduler } from "@admin/payments/invoice-duedate.scheduler"
-import { PaymentAdminController } from "@admin/payments/payment-admin.controller"
-import { PaymentAdminService } from "@admin/payments/payment-admin.service"
-import { TransactionAdminController } from "@admin/payments/transaction-admin.controller"
-import { TransactionAdminService } from "@admin/payments/transaction-admin.service"
-import { CapabilityAdminController } from "@admin/capabilities/capability-admin.controller"
-import { CapabilityAdminService } from "@admin/capabilities/capability-admin.service"
-import { CapabilitySingleController } from "@admin/capabilities/capability-single.controller"
-import { MassCapabilityController } from "@admin/capabilities/mass-controller"
-import { MassCapabilityService } from "@admin/capabilities/mass-service"
-import {
-	CAPABILITY_DOCUMENT_QUEUE,
-	CapabilityPublishService,
-	type CapabilityDocumentQueue,
-} from "@admin/capabilities/publish-service"
-import { generateCapabilityPdfInBackground } from "@admin/capabilities/capability-pdf-store"
-import { StorageService } from "@core/storage/storage.service"
-import { DataSource } from "typeorm"
-
-/**
- * The Kesanggupan agreement PDF, rendered and uploaded after a publish has committed.
- *
- * Both writers inject this `@Optional()`, so leaving it unregistered silently produces no
- * document — hence the explicit registration here rather than a provider tucked inside the
- * capabilities folder. The helper it wraps returns `void` and cannot reject: an S3 outage must
- * never roll back an agreed capability, exactly as the phase 1 receipt does at
- * `payment-admin.service.ts:154-160`.
- */
-const capabilityDocumentQueue = {
-	provide: CAPABILITY_DOCUMENT_QUEUE,
-	inject: [StorageService, DataSource],
-	useFactory: (storageService: StorageService, dataSource: DataSource): CapabilityDocumentQueue => ({
-		generateInBackground: (capabilityId: number, studentGradeId: number): void =>
-			generateCapabilityPdfInBackground(storageService, dataSource, capabilityId, studentGradeId),
-	}),
-}
+import { AuthAdminModule } from "@admin/auth/auth-admin.module"
+import { BillingAdminModule } from "@admin/billing/billing-admin.module"
+import { CapabilitiesAdminModule } from "@admin/capabilities/capabilities-admin.module"
+import { DashboardAdminModule } from "@admin/dashboard/dashboard-admin.module"
+import { EwalletAdminModule } from "@admin/ewallet/ewallet-admin.module"
+import { MerchantAdminModule } from "@admin/merchant/merchant-admin.module"
+import { PaymentsAdminModule } from "@admin/payments/payments-admin.module"
+import { RegistrantAdminModule } from "@admin/registrant/registrant-admin.module"
+import { ReportAdminModule } from "@admin/report/report-admin.module"
+import { SettingAdminModule } from "@admin/setting/setting-admin.module"
+import { StudentAdminModule } from "@admin/student/student-admin.module"
+import { UserAdminModule } from "@admin/user/user-admin.module"
 
 @Module({
 	imports: [
-		TypeOrmModule.forFeature([
-			User,
-			AuthLog,
-			Accountancy,
-			StudentCostTerm,
-			StudentCost,
-			Setting,
-			SettingAnnc,
-			SettingForm,
-			SettingSchool,
-		]),
-		JwtModule.register({}),
-		IpBanModule,
-		MasterModule,
-		SchoolModule,
-		PsbModule,
-		SantriModule,
-		MerchantModule,
-		EwalletModule,
+		PaymentsAdminModule,
+		CapabilitiesAdminModule,
+		AuthAdminModule,
+		UserAdminModule,
+		SettingAdminModule,
+		AcademicAdminModule,
+		BillingAdminModule,
+		MerchantAdminModule,
+		DashboardAdminModule,
+		ReportAdminModule,
+		EwalletAdminModule,
 		StudentAdminModule,
 		RegistrantAdminModule,
 		AlumniAdminModule,
-	],
-	controllers: [
-		InvoiceAdminController,
-		PaymentAdminController,
-		TransactionAdminController,
-		CapabilityAdminController,
-		CapabilitySingleController,
-		MassCapabilityController,
-		AdminAuthController,
-		AdminCreatePasswordController,
-		AdminProfileController,
-		AdminUserController,
-		AuthLogController,
-		AdminIpBanController,
-		AdminSchoolController,
-		AdminAnnouncementController,
-		AdminSettingFormController,
-		AdminSystemSettingController,
-		AcademicYearAdminController,
-		AcademicYearDeleteController,
-		LevelAdminController,
-		MajorAdminController,
-		GradeAdminController,
-		SubGradeAdminController,
-		AccountancyAdminController,
-		StudentCostAdminController,
-		MerchantAdminController,
-		AdminDashboardController,
-		AdminReportController,
-		EwalletWalletController,
-		EwalletMoneyController,
-		EwalletTxnController,
-	],
-	providers: [
-		InvoiceAdminService,
-		PaymentAdminService,
-		TransactionAdminService,
-		AdminAuthService,
-		AuthLogWriter,
-		AuthLogScheduler,
-		InvoiceDueDateScheduler,
-		CapabilityAdminService,
-		CapabilityPublishService,
-		MassCapabilityService,
-		capabilityDocumentQueue,
-		AdminCreatePasswordService,
-		AdminProfileService,
-		AdminUserService,
-		AuthLogService,
-		AdminSchoolService,
-		AdminAnnouncementService,
-		AdminSettingFormService,
-		AdminSystemSettingService,
-		AcademicYearAdminService,
-		AcademicYearDeleteService,
-		LevelAdminService,
-		MajorAdminService,
-		GradeAdminService,
-		SubGradeAdminService,
-		AccountancyAdminService,
-		StudentCostAdminService,
-		MerchantAdminService,
-		AdminDashboardService,
-		AdminReportService,
-		AdminReportExportService,
-		EwalletWalletService,
-		EwalletMoneyService,
-		EwalletTxnService,
-	],
-	exports: [
-		AdminAuthService,
-		AcademicYearAdminService,
-		AcademicYearDeleteService,
-		LevelAdminService,
-		MajorAdminService,
-		GradeAdminService,
-		SubGradeAdminService,
-		AccountancyAdminService,
-		StudentCostAdminService,
-		MerchantAdminService,
-		AdminDashboardService,
 	],
 })
 export class AdminModule {}

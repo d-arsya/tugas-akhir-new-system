@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { Workbook, type Alignment, type Borders, type Worksheet } from "exceljs"
-import type { ArrearFilter, IncomeFilter } from "@admin/dto/admin-report.dto"
+import type { ArrearFilter, IncomeFilter } from "@admin/report/dto/admin-report.dto"
 import { AdminReportService } from "./admin-report.service"
 import { formatDmy } from "./report-format"
 

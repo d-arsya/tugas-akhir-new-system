@@ -6,9 +6,9 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { CapabilityPublishResultDto, CapabilityWriteDto } from "@admin/dto/capability-publish.dto"
-import { CapabilityPublishService } from "@admin/capabilities/publish-service"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { CapabilityPublishResultDto, CapabilityWriteDto } from "@admin/capabilities/dto/capability-publish.dto"
+import { CapabilityPublishService } from "@admin/capabilities/capability-publish.service"
 
 /** Legacy's own wording for both create paths, byte-for-byte (no full stop — legacy has none). */
 const CREATED = "Kesanggupan baru berhasil dibuat"

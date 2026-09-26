@@ -6,7 +6,7 @@ import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
 import { AuthLogService, type AuthLogPage } from "@admin/auth/auth-log.service"
-import { AuthLogQueryDto, AuthLogResponseDto } from "@admin/dto/auth-log.dto"
+import { AuthLogQueryDto, AuthLogResponseDto } from "@admin/auth/dto/auth-log.dto"
 
 // Legacy `AuthLogController` — the constructor applies `can:do-as-superadmin`
 @ApiTags("Admin — Auth Logs")

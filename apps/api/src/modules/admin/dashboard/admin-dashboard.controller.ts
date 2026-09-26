@@ -18,7 +18,7 @@ import {
 	DashboardPieItemDto,
 	DashboardStatsFilterDto,
 	DashboardStatsResponseDto,
-} from "@admin/dto/admin-dashboard.dto"
+} from "@admin/dashboard/dto/admin-dashboard.dto"
 
 // Legacy: the dashboard page is open to every non-cashier role, while the chart
 // endpoints sit behind `asAdmin` (Superadmin/Admin only)

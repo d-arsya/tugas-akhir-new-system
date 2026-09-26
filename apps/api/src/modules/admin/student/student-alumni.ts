@@ -3,7 +3,7 @@ import type { EntityManager } from "typeorm"
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
 
 import { fail, UPDATE_FAILED } from "./student-grade-ops"
-import { TZ } from "./student-sql"
+import { TIMEZONE } from "@admin/common/sql"
 
 // `StudentController::createAlumni:763-792`, called by Lulus for every graduated grade row.
 
@@ -34,7 +34,7 @@ const alumniSharedColumns = async (manager: EntityManager): Promise<string[]> =>
  */
 const selectExpression = (column: string): string =>
 	column === "created_at" || column === "updated_at"
-		? `(sg."${column}" AT TIME ZONE 'UTC') AT TIME ZONE '${TZ}'`
+		? `(sg."${column}" AT TIME ZONE 'UTC') AT TIME ZONE '${TIMEZONE}'`
 		: `sg."${column}"`
 
 /**
@@ -58,7 +58,7 @@ export const createAlumni = async (manager: EntityManager, studentGradeId: numbe
 			student_id, nis, academic_year_id, alumni_email, graduate_at, graduate_year)
 		SELECT ${columns.map(selectExpression).join(", ")},
 			sg.id, s.nis::bigint, s.academic_year_id, s.email, now(),
-			((now() AT TIME ZONE '${TZ}') + make_interval(years => $2::int - extract(year FROM now() AT TIME ZONE '${TZ}')::int)) AT TIME ZONE '${TZ}'
+			((now() AT TIME ZONE '${TIMEZONE}') + make_interval(years => $2::int - extract(year FROM now() AT TIME ZONE '${TIMEZONE}')::int)) AT TIME ZONE '${TIMEZONE}'
 		FROM tbr_student_grades sg
 		LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
 		WHERE sg.id = $1

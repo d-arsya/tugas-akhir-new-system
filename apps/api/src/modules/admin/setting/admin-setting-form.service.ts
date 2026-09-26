@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 
-import { SettingForm } from "@modules/psb/entities/setting-form.entity"
-import type { SettingFormPatchInput } from "@admin/dto/admin-setting-form.dto"
+import { SettingForm } from "@shared/school/entities/setting-form.entity"
+import type { SettingFormPatchInput } from "@admin/setting/dto/admin-setting-form.dto"
 import {
 	buildAlphabet,
 	buildSettingFormGroups,

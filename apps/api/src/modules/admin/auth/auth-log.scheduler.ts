@@ -4,7 +4,7 @@ import { Cron, CronExpression } from "@nestjs/schedule"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IsNull, LessThanOrEqual, Repository } from "typeorm"
 
-import { AuthLog } from "@admin/entities/auth-log.entity"
+import { AuthLog } from "@admin/auth/entities/auth-log.entity"
 import { durationForHumans } from "@admin/auth/auth-log.writer"
 import type { Env } from "@core/config/env.validation"
 

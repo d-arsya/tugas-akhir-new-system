@@ -18,8 +18,8 @@ import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { DestructiveGuard } from "@core/auth/guards/destructive.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
-import { AdminRedirectResultDto } from "@admin/dto/academic-year-admin.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
+import { AdminRedirectResultDto, type AdminRedirectResult } from "@admin/common/admin-response.dto"
 import {
 	LevelDelegateDto,
 	LevelDeleteStepDto,
@@ -27,10 +27,9 @@ import {
 	LevelOptionDto,
 	LevelRowDto,
 	LevelWriteDto,
-} from "@admin/dto/level-admin.dto"
+} from "@admin/academic/dto/level-admin.dto"
 import {
 	LevelAdminService,
-	type AdminRedirectResult,
 	type LevelDeleteStep,
 	type LevelDeleteTarget,
 	type LevelDetail,

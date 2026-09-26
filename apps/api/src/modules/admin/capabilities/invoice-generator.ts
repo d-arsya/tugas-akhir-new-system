@@ -20,7 +20,7 @@
 //      the santri portal prints. The month word comes from an explicit table — `toLocaleString`
 //      depends on the host's ICU build and would silently drift.
 
-import { addDays, daysFromCivil, parseIsoDate, type CivilDate } from "@admin/billing/cost-term-codec"
+import { addDays, daysFromCivil, parseIsoDate, type CivilDate } from "@admin/common/civil-date"
 
 /** `tbr_student_cost_terms.period`. The column is free text; `yearly` is enum-legal and unhandled. */
 export type GeneratorPeriod = "monthly" | "once"

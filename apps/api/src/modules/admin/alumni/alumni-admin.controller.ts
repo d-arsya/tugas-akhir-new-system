@@ -16,8 +16,7 @@ import type { SocietyUpload } from "../../../shared/society/society-rules"
 import { AlumniAdminService } from "./alumni-admin.service"
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import { AlumniWriteService } from "./alumni-write.service"
-
-const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+import { sendXlsx, XLSX_TYPE } from "@admin/common/xlsx"
 
 // `name` of every attachment input on the alumni attachment tab
 const ATTACHMENT_FIELDS = [
@@ -68,9 +67,7 @@ export class AlumniAdminController {
 	async export(@Param("year", ParseIntPipe) year: number, @Res() res: Response): Promise<void> {
 		const file = await this.alumniAdminService.export(year)
 		// Streams the workbook directly, bypassing the JSON TransformInterceptor
-		res.setHeader("Content-Type", XLSX_TYPE)
-		res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`)
-		res.send(file.buffer)
+		sendXlsx(res, file)
 	}
 
 	@Delete("graduation-years/:year")

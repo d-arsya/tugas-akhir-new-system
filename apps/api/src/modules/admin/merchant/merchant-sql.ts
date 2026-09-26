@@ -1,4 +1,4 @@
-import { LOCAL_TIMESTAMP, EPOCH_SECONDS } from "@admin/academic/academic-format"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
 
 // Raw SQL behind Data Master ▸ Merchant — legacy `MerchantController`.
 //

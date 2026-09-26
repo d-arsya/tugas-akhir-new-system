@@ -6,7 +6,7 @@ import { DataSource } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { MailerService } from "@core/mailer/mailer.service"
-import { indoDate } from "@admin/academic/academic-format"
+import { indoDate } from "@admin/common/date-format"
 import {
 	EWALLET_BY_UNIQUE_NUMBER_SQL,
 	EWALLET_SET_ACTIVE_SQL,
@@ -20,7 +20,8 @@ import {
 	type MerchantSqlRow,
 } from "@admin/merchant/merchant-sql"
 import type { Env } from "@core/config/env.validation"
-import type { MerchantWriteInput } from "@admin/dto/merchant-admin.dto"
+import type { MerchantWriteInput } from "@admin/merchant/dto/merchant-admin.dto"
+import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
 
 export type MerchantRow = {
 	id: number
@@ -46,8 +47,6 @@ export type MerchantDetail = {
 	photoUrl: string | null
 	isBlocked: boolean
 }
-
-export type AdminRedirectResult = { message: string; redirect: string }
 
 // `MerchantController` hard-codes both literals; neither comes from `resources/lang/id/admin.php`.
 const SAVE_SUCCESS = "Berhasil disimpan."

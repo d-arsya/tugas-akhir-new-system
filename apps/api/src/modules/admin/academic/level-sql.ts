@@ -1,4 +1,4 @@
-import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/academic/academic-format"
+import { EPOCH_SECONDS, LOCAL_TIMESTAMP } from "@admin/common/sql"
 
 // Raw SQL behind the Jenjang page and its delete/delegation chain — legacy
 // `LevelController` + `app/Http/Services/LevelService.php`.

@@ -13,7 +13,7 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	InvoiceBillDetailDto,
 	InvoiceBillQueryDto,
@@ -23,7 +23,7 @@ import {
 	StudentInvoiceListQueryDto,
 	StudentInvoiceListRowDto,
 	UpdateInvoiceNoteDto,
-} from "@admin/dto/invoice-admin.dto"
+} from "@admin/payments/dto/invoice-admin.dto"
 import { InvoiceAdminService } from "@admin/payments/invoice-admin.service"
 
 // Legacy `StudentInvoiceController` (read half). Legacy gated this whole menu with the

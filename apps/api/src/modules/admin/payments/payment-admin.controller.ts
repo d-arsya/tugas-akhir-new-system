@@ -7,7 +7,7 @@ import { Roles } from "@core/auth/decorators/roles.decorator"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { AdminMessageResponseDto } from "@admin/common/admin-response.dto"
 import {
 	CancelTransactionDto,
 	CreateTransactionDto,
@@ -15,7 +15,7 @@ import {
 	InvoiceSelectionDto,
 	InvoiceSelectionResultDto,
 	UpdateTransactionNoteDto,
-} from "@admin/dto/payment-admin.dto"
+} from "@admin/payments/dto/payment-admin.dto"
 import { PaymentAdminService } from "@admin/payments/payment-admin.service"
 
 // Legacy `StudentInvoiceController` (write half). Shares the `admin/student-invoices`

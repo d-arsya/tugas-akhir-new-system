@@ -1,11 +1,9 @@
-import type { SqlParams } from "@admin/report/report-sql"
-import type { AUTH_LOG_SORT_KEYS, AuthLogQuery } from "@admin/dto/auth-log.dto"
+import { TIMEZONE, type SqlParams } from "@admin/common/sql"
+import type { AUTH_LOG_SORT_KEYS, AuthLogQuery } from "@admin/auth/dto/auth-log.dto"
 
 // Raw SQL for the Authentication Log page. Legacy `AuthLogController@list` renders every row in
 // PHP and lets DataTables search/sort/page in the browser; the port does all three in Postgres,
 // so every displayed value has to be built here for the search to see the same text.
-
-const TIMEZONE = "Asia/Jakarta"
 
 const MONTHS_ID = `(ARRAY['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'])`
 
