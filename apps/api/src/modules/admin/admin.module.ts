@@ -17,7 +17,6 @@ import { AuthLog } from "./entities/auth-log.entity"
 import { Accountancy } from "./entities/accountancy.entity"
 import { StudentCostTerm } from "./entities/student-cost-term.entity"
 import { StudentCost } from "./entities/student-cost.entity"
-import { Alumni } from "./entities/alumni.entity"
 import { Setting } from "./entities/setting.entity"
 import { SettingAnnc } from "../psb/entities/setting-annc.entity"
 import { SettingForm } from "../psb/entities/setting-form.entity"
@@ -70,12 +69,6 @@ import { StudentCostAdminController } from "@admin/billing/student-cost-admin.co
 import { MerchantAdminService } from "@admin/merchant/merchant-admin.service"
 import { MerchantAdminController } from "@admin/merchant/merchant-admin.controller"
 
-import { PsbAdminService } from "@admin/psb/psb-admin.service"
-import { PsbAdminController } from "@admin/psb/psb-admin.controller"
-
-import { StudentAdminService } from "@admin/student/student-admin.service"
-import { StudentAdminController } from "@admin/student/student-admin.controller"
-
 import { AdminReportService } from "@admin/report/admin-report.service"
 import { AdminReportExportService } from "@admin/report/admin-report-export.service"
 import { AdminReportController } from "@admin/report/admin-report.controller"
@@ -87,8 +80,10 @@ import { EwalletMoneyController } from "@admin/ewallet/money-admin.controller"
 import { EwalletTxnService } from "@admin/ewallet/txn-admin.service"
 import { EwalletTxnController } from "@admin/ewallet/txn-admin.controller"
 
-import { AlumniAdminService } from "@admin/alumni/alumni-admin.service"
-import { AlumniAdminController } from "@admin/alumni/alumni-admin.controller"
+// Akademik — each sub-menu registers its own controllers and providers in its module
+import { StudentAdminModule } from "@admin/student/student-admin.module"
+import { RegistrantAdminModule } from "@admin/registrant/registrant-admin.module"
+import { AlumniAdminModule } from "@admin/alumni/alumni-admin.module"
 
 
 import { InvoiceAdminController } from "@admin/payments/invoice-admin.controller"
@@ -138,7 +133,6 @@ const capabilityDocumentQueue = {
 			Accountancy,
 			StudentCostTerm,
 			StudentCost,
-			Alumni,
 			Setting,
 			SettingAnnc,
 			SettingForm,
@@ -152,6 +146,9 @@ const capabilityDocumentQueue = {
 		SantriModule,
 		MerchantModule,
 		EwalletModule,
+		StudentAdminModule,
+		RegistrantAdminModule,
+		AlumniAdminModule,
 	],
 	controllers: [
 		InvoiceAdminController,
@@ -179,14 +176,11 @@ const capabilityDocumentQueue = {
 		AccountancyAdminController,
 		StudentCostAdminController,
 		MerchantAdminController,
-		PsbAdminController,
-		StudentAdminController,
 		AdminDashboardController,
 		AdminReportController,
 		EwalletWalletController,
 		EwalletMoneyController,
 		EwalletTxnController,
-		AlumniAdminController,
 	],
 	providers: [
 		InvoiceAdminService,
@@ -217,15 +211,12 @@ const capabilityDocumentQueue = {
 		AccountancyAdminService,
 		StudentCostAdminService,
 		MerchantAdminService,
-		PsbAdminService,
-		StudentAdminService,
 		AdminDashboardService,
 		AdminReportService,
 		AdminReportExportService,
 		EwalletWalletService,
 		EwalletMoneyService,
 		EwalletTxnService,
-		AlumniAdminService,
 	],
 	exports: [
 		AdminAuthService,
@@ -238,10 +229,7 @@ const capabilityDocumentQueue = {
 		AccountancyAdminService,
 		StudentCostAdminService,
 		MerchantAdminService,
-		PsbAdminService,
-		StudentAdminService,
 		AdminDashboardService,
-		AlumniAdminService,
 	],
 })
 export class AdminModule {}

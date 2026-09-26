@@ -1,38 +1,28 @@
-import { type JSX } from "react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
-import { adminApi } from "@/lib/api"
-import { PageLoader } from "@roja/ui"
-import { PsbLevel1Ay } from "@/components/registrants/psb-level1-ay"
+import type { JSX } from "react"
+import { createFileRoute } from "@tanstack/react-router"
 
+import AdminPageTitle from "@/components/layout/admin-page-title"
+import LegacyCard from "@/components/legacy/legacy-card"
+import RegistrantYearTable from "@/components/registrants/registrant-year-table"
+
+// Legacy registrant/index.blade.php (+ partials/index-page-header.blade.php) — "Data PSB - Pilih Tahun Ajaran".
 export const Route = createFileRoute("/_auth/registrants/")({
-	component: RegistrantsIndexLevel1Page,
+	component: Page,
 })
 
-function RegistrantsIndexLevel1Page(): JSX.Element {
-	const navigate = useNavigate()
-
-	const { data: ayData, isLoading } = useQuery({
-		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYearRows(),
-	})
-
-	const academicYears = ayData ?? []
-
-	if (isLoading) return <PageLoader />
-
+function Page(): JSX.Element {
 	return (
-		<PsbLevel1Ay
-			academicYears={academicYears}
-			onSelectAy={(ay) => {
-				navigate({
-					to: "/registrants/$academicYearId/workbench" as any,
-					params: { academicYearId: String(ay.id) } as any,
-				})
-			}}
-			onOpenCreate={() => {
-				navigate({ to: "/registrants/create" as any })
-			}}
-		/>
+		<>
+			<AdminPageTitle
+				title="Data PSB - Pilih Tahun Ajaran"
+				breadcrumbs={[{ label: "Akademik", to: "/registrants" }, { label: "PSB", to: "/registrants" }, { label: "Data PSB" }]}
+			/>
+			{/* `.row > .col > .card.tbr_card > .card-body.p-4` */}
+			<LegacyCard>
+				<RegistrantYearTable />
+			</LegacyCard>
+		</>
 	)
 }
+
+export default Page

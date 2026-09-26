@@ -54,24 +54,24 @@ export const SIDEBAR_MENU: SidebarMenuItem[] = [
 				key: "academic_student",
 				label: "Santri",
 				children: [
-					{ key: "academic_student_all", label: "Data Santri", condition: "legacy", to: "/students", legacyPath: "/student" },
-					{ key: "academic_student_add", label: "Tambah", condition: "legacy", to: "/students/create", legacyPath: "/student/create/personal?sidebar=true" },
+					{ key: "academic_student_all", label: "Data Santri", condition: "new", to: "/students", legacyPath: "/student" },
+					{ key: "academic_student_add", label: "Tambah", condition: "new", to: "/students/create", legacyPath: "/student/create/personal?sidebar=true" },
 				],
 			},
 			{
 				key: "academic_alumni",
 				label: "Alumni",
 				children: [
-					{ key: "academic_alumni_all", label: "Data Alumni", condition: "legacy", to: "/alumni", legacyPath: "/alumni" },
-					{ key: "academic_alumni_dashboard", label: "Dashboard", condition: "legacy", to: "/alumni/dashboard", legacyPath: "/coming-soon" },
+					{ key: "academic_alumni_all", label: "Data Alumni", condition: "new", to: "/alumni", legacyPath: "/alumni" },
+					{ key: "academic_alumni_dashboard", label: "Dashboard", condition: "new", to: "/alumni/dashboard", legacyPath: "/coming-soon" },
 				],
 			},
 			{
 				key: "academic_registrant",
 				label: "PSB",
 				children: [
-					{ key: "academic_registrant_all", label: "Data PSB", condition: "legacy", to: "/registrants", legacyPath: "/registrant" },
-					{ key: "academic_registrant_add", label: "Tambah", condition: "legacy", to: "/registrants/create", legacyPath: "/registrant/create/personal" },
+					{ key: "academic_registrant_all", label: "Data PSB", condition: "new", to: "/registrants", legacyPath: "/registrant" },
+					{ key: "academic_registrant_add", label: "Tambah", condition: "new", to: "/registrants/create", legacyPath: "/registrant/create/personal" },
 				],
 			},
 		],

@@ -1,89 +1,146 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
-import { InjectRepository } from "@nestjs/typeorm"
-import { Repository } from "typeorm"
-import { Alumni } from "@admin/entities/alumni.entity"
-import { AlumniFilterDto, UpdateAlumniDto } from "@admin/dto/alumni-admin.dto"
+// Nest DI reads constructor parameter types at runtime (emitDecoratorMetadata), so this stays a value import
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { DataSource } from "typeorm"
+
+import type { AdminAlumniDetail, AdminAlumniList, AdminAlumniRow, AdminAlumniValues, AdminAlumniYearRow } from "@roja/types"
+
+import { societyFileUrl } from "../../../shared/society/files"
+import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
+import { loadSocietyRecord } from "../../../shared/society/society-record"
+import { MONTHS_ID } from "../academic/academic-format"
+
+import { ALUMNI_EXPORT_FILE, buildAlumniWorkbook } from "./alumni-export"
+import * as sql from "./alumni-sql"
+
+// OWNER: AK-A. Legacy `AlumniController` reads: `list`, `listArchive`, `listByYear`, `download`, `edit`, `print`.
+
+type Row = Record<string, string | null>
+
+const NOT_FOUND = "Data alumni tidak ditemukan."
+
+const ALUMNI_KEYS: ReadonlyArray<keyof AdminAlumniValues> = [
+	"alumni_talent",
+	"advanced_study",
+	"profession",
+	"marriage_status",
+	"alumni_phone",
+	"alumni_email",
+	"alumni_province_id",
+	"alumni_regency_id",
+	"alumni_district_id",
+	"alumni_village",
+	"alumni_sub_village",
+	"alumni_rt",
+	"alumni_rw",
+	"alumni_street",
+]
+
+/** `formatDate($graduate_year, 'd F Y \j\a\m H:i')` (Carbon `id` locale) from a Jakarta `YYYY-MM-DD HH:MI`. */
+const graduatedAt = (local: string | null): string => {
+	if (!local) return ""
+	const month = MONTHS_ID[Number(local.slice(5, 7)) - 1] ?? ""
+	return `${local.slice(8, 10)} ${month} ${local.slice(0, 4)} jam ${local.slice(11, 16)}`
+}
+
+/** `StudentService::dbPhoto` / `getProvinceName` / `getRegencyName` cells. */
+const toRow = (row: Row): AdminAlumniRow => ({
+	id: Number(row["id"]),
+	photoUrl: societyFileUrl(row["attach_photo"] ?? null),
+	fullname: row["fullname"] ?? null,
+	alumniPhone: row["alumni_phone"] ?? null,
+	provinceName: row["province_name"] ? `Provinsi ${row["province_name"]}` : "",
+	regencyName: row["regency_name"] ?? "",
+	alumniTalent: row["alumni_talent"] ?? null,
+})
 
 @Injectable()
 export class AlumniAdminService {
-	constructor(
-		@InjectRepository(Alumni)
-		private readonly alumniRepo: Repository<Alumni>,
-	) {}
+	constructor(private readonly dataSource: DataSource) {}
 
-	async getGroupedByGraduationYear() {
-		const result = await this.alumniRepo
-			.createQueryBuilder("a")
-			.select("COALESCE(a.academic_year, 'Lainnya')", "graduationYear")
-			.addSelect("COUNT(a.id)", "count")
-			.groupBy("COALESCE(a.academic_year, 'Lainnya')")
-			.orderBy("graduationYear", "DESC")
-			.getRawMany()
+	/** `getInputLabel` / `getInputStatus` of setting 1 (the name column). */
+	private async nameSetting(): Promise<{ label: string; visible: boolean }> {
+		const rows = (await this.dataSource.query(`SELECT status, custom_name, "default" FROM tbr_setting_forms WHERE id = 1`)) as Array<{
+			status: boolean | null
+			custom_name: string | null
+			default: string | null
+		}>
+		const row = rows[0]
+		return { label: row?.custom_name ?? row?.default ?? "", visible: row?.status === true }
+	}
 
-		return result.map((r) => ({
-			graduationYear: r.graduationYear,
-			count: parseInt(r.count, 10),
+	private async list(query: string, params: unknown[]): Promise<AdminAlumniList> {
+		const [name, rows] = await Promise.all([this.nameSetting(), this.dataSource.query(query, params) as Promise<Row[]>])
+		return { nameLabel: name.label, nameVisible: name.visible, rows: rows.map(toRow) }
+	}
+
+	/** `list()` — the "Alumni" tab. */
+	async years(): Promise<AdminAlumniYearRow[]> {
+		const rows = (await this.dataSource.query(sql.ALUMNI_YEARS_SQL)) as Row[]
+		return rows.map((row) => ({
+			year: Number(row["year"]),
+			total: Number(row["total"]),
+			male: Number(row["male"]),
+			female: Number(row["female"]),
 		}))
 	}
 
-	async getArchiveYears() {
-		return this.getGroupedByGraduationYear()
+	/** `listArchive()` — the "Archive" tab. */
+	async archive(): Promise<AdminAlumniList> {
+		return this.list(sql.ALUMNI_ARCHIVE_SQL, [])
 	}
 
-	async findByGraduationYear(graduationYear: string, query: AlumniFilterDto) {
-		const { search, page = 1, limit = 10 } = query
-		const qb = this.alumniRepo.createQueryBuilder("a")
+	/** `listByYear()` — `/alumni/graduation-year/$year`. */
+	async byYear(year: number): Promise<AdminAlumniList> {
+		return this.list(sql.ALUMNI_BY_YEAR_SQL, [year])
+	}
 
-		if (graduationYear !== "all") {
-			qb.where("a.academic_year = :graduationYear", { graduationYear })
-		}
+	/** `download()` — "Hasil export data alumni.xlsx". */
+	async export(year: number): Promise<{ buffer: Buffer; fileName: string }> {
+		const [name, rows] = await Promise.all([this.nameSetting(), this.dataSource.query(sql.ALUMNI_EXPORT_SQL, [year]) as Promise<Row[]>])
+		const buffer = await buildAlumniWorkbook(
+			year,
+			rows.map((row) => ({
+				fullname: row["fullname"] ?? null,
+				alumniPhone: row["alumni_phone"] ?? null,
+				provinceName: row["province_name"] ?? null,
+				regencyName: row["regency_name"] ?? null,
+				alumniTalent: row["alumni_talent"] ?? null,
+			})),
+			name,
+		)
+		return { buffer, fileName: ALUMNI_EXPORT_FILE }
+	}
 
-		if (search) {
-			qb.andWhere("(a.fullname ILIKE :search OR a.nis ILIKE :search OR a.alumni_email ILIKE :search)", {
-				search: `%${search}%`,
-			})
-		}
+	/** `edit()` — the widget, the alumni tab and the five society tabs. */
+	async detail(id: number): Promise<AdminAlumniDetail> {
+		const rows = (await this.dataSource.query(sql.ALUMNI_DETAIL_SQL, [id])) as Row[]
+		const row = rows[0]
+		const record = row ? await loadSocietyRecord(this.dataSource.manager, "alumni", id) : null
+		if (!row || !record) throw new NotFoundException(NOT_FOUND)
 
-		qb.orderBy("a.id", "DESC")
-		qb.skip((page - 1) * limit).take(limit)
+		const local = row["graduated_local"] ?? null
+		const year = row["academic_year"] ?? null
+		const alumni = Object.fromEntries(ALUMNI_KEYS.map((key) => [key, row[key] ?? ""])) as AdminAlumniValues
 
-		const [items, total] = await qb.getManyAndCount()
 		return {
-			data: items,
-			meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+			id,
+			graduationYear: local ? local.slice(0, 4) : "",
+			widget: {
+				photoUrl: societyFileUrl(row["attach_photo"] ?? null),
+				fullname: row["fullname"] ?? null,
+				academicYear: `Tahun ajaran ${year === "Archive" ? "dihapus" : (year ?? "")}`,
+				graduatedAt: graduatedAt(local),
+			},
+			alumni,
+			record,
 		}
 	}
 
-
-	async exportByGraduationYear(graduationYear: string) {
-		const qb = this.alumniRepo.createQueryBuilder("a")
-		if (graduationYear !== "all") {
-			qb.where("a.academic_year = :graduationYear", { graduationYear })
-		}
-		qb.orderBy("a.fullname", "ASC")
-		return qb.getMany()
-	}
-
-	async findOne(id: number) {
-		const alumni = await this.alumniRepo.findOneBy({ id })
-		if (!alumni) throw new NotFoundException(`Alumni #${id} not found`)
-		return alumni
-	}
-
-	async update(id: number, dto: UpdateAlumniDto) {
-		const alumni = await this.findOne(id)
-		Object.assign(alumni, dto)
-		return this.alumniRepo.save(alumni)
-	}
-
-	async removeByGraduationYear(graduationYear: string) {
-		await this.alumniRepo.delete({ academicYear: graduationYear })
-		return { success: true, message: `Alumni untuk tahun kelulusan ${graduationYear} berhasil dihapus` }
-	}
-
-	async removeOne(id: number) {
-		const alumni = await this.findOne(id)
-		await this.alumniRepo.remove(alumni)
-		return { success: true, message: `Alumni #${id} berhasil dihapus` }
+	/** `print()` — `print/alumni.blade.php`. */
+	async print(id: number): Promise<string> {
+		const html = await renderSocietyPrintPage(this.dataSource.manager, { society: "alumni", id })
+		if (html === null) throw new NotFoundException(NOT_FOUND)
+		return html
 	}
 }

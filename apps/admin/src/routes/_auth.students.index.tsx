@@ -1,44 +1,33 @@
-import { type JSX } from "react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
-import { adminApi } from "@/lib/api"
-import { PageLoader } from "@roja/ui"
-import { StudentLevel1Ay } from "@/components/students/student-level1-ay"
+import type { JSX } from "react"
+import { createFileRoute } from "@tanstack/react-router"
 
+import AdminPageTitle from "@/components/layout/admin-page-title"
+import LegacyCard from "@/components/legacy/legacy-card"
+import StudentYearTable from "@/components/students/student-year-table"
+
+// Legacy student/index.blade.php (+ partials/index-page-header.blade.php) — Data Santri, pick an academic year.
 export const Route = createFileRoute("/_auth/students/")({
-	component: StudentIndexLevel1Page,
+	component: Page,
 })
 
-function StudentIndexLevel1Page(): JSX.Element {
-	const navigate = useNavigate()
-
-	const { data: ayData, isLoading: ayLoading } = useQuery({
-		queryKey: ["admin-academic-years"],
-		queryFn: () => adminApi.getAcademicYearRows(),
-	})
-
-	// AcademicYearRow has no semester; "Berjalan (Aktif)" comes from the akademik status.
-	const academicYears = (ayData ?? []).map((ay) => ({
-		id: ay.id,
-		year: ay.year ?? "",
-		semester: "",
-		isActive: ay.statusAkademik === "berjalan",
-	}))
-
-	if (ayLoading) return <PageLoader />
-
+function Page(): JSX.Element {
 	return (
-		<StudentLevel1Ay
-			academicYears={academicYears}
-			onSelectAy={(ay) => {
-				navigate({
-					to: "/students/$academicYearId/grades" as any,
-					params: { academicYearId: String(ay.id) } as any,
-				})
-			}}
-			onOpenCreateModal={() => {
-				navigate({ to: "/students/create" as any })
-			}}
-		/>
+		<>
+			<AdminPageTitle
+				title="Data Santri - Pilih Tahun Ajaran"
+				breadcrumbs={[{ label: "Akademik", to: "/students" }, { label: "Santri", to: "/students" }, { label: "Data Santri" }]}
+			/>
+
+			{/* `.row > .col > .card.tbr_card > .card-body.p-4` */}
+			<div className="mx-[-15px] flex flex-wrap">
+				<div className="w-full min-w-0 flex-1 px-[15px]">
+					<LegacyCard>
+						<StudentYearTable />
+					</LegacyCard>
+				</div>
+			</div>
+		</>
 	)
 }
+
+export default Page

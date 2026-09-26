@@ -17,6 +17,12 @@ type LegacySelectProps = {
 	mutedText?: boolean
 	// select2 `minimumResultsForSearch: -1` (e.g. the DataTables length menu) hides the search box
 	searchable?: boolean
+	/**
+	 * select2 `.select2-container--disabled`: public/assets/css/select2.css (disabled selection +
+	 * arrow on `--bg-form-disabled`, border `--bg-form-border`, text `--grey`) and
+	 * select2-bootstrap.css:242-245 (`cursor: not-allowed`). The dropdown never opens.
+	 */
+	disabled?: boolean
 	className?: string
 }
 
@@ -38,6 +44,7 @@ const LegacySelect = ({
 	variant = "default",
 	mutedText = false,
 	searchable = true,
+	disabled = false,
 	className,
 }: LegacySelectProps): JSX.Element => {
 	// Like a native <select> (which select2 wraps): an unknown value shows the first option
@@ -46,26 +53,33 @@ const LegacySelect = ({
 	const styles = TRIGGER_VARIANT[variant]
 
 	return (
-		<Popover open={state.open} onOpenChange={state.setOpen}>
+		<Popover open={!disabled && state.open} onOpenChange={(open) => (disabled ? undefined : state.setOpen(open))}>
 			<PopoverTrigger asChild>
 				<button
 					type="button"
+					disabled={disabled}
 					className={cn(
 						"relative flex min-h-[40px] w-full cursor-pointer items-center justify-start rounded-[6px] border-2 bg-[var(--bg-form)] pt-[5px] pr-[12px] pb-[6px] pl-[12px] text-left text-[12px] outline-none",
-						state.open ? styles.open : styles.closed,
+						state.open && !disabled ? styles.open : styles.closed,
+						disabled && "cursor-not-allowed border-[var(--bg-form-border)]! bg-[var(--bg-form-disabled)]",
 						className,
 					)}
 				>
 					<span
 						className={cn(
 							"block overflow-hidden text-ellipsis whitespace-nowrap",
-							mutedText ? "text-[var(--grey)]" : "text-[var(--body-txt-inverse)]",
+							mutedText || disabled ? "text-[var(--grey)]" : "text-[var(--body-txt-inverse)]",
 						)}
 					>
 						{selected?.label ?? ""}
 					</span>
 					{/* select2 positions the arrow from the border-less container: 7px outside = 5px inside our 2px border */}
-					<span className="absolute top-[1px] right-[5px] bottom-0 my-auto h-[24px] w-[24px] bg-[var(--bg-form)] bg-[url('/assets/svg/icons/form_select_arrow.svg')] bg-center bg-no-repeat" />
+					<span
+						className={cn(
+							"absolute top-[1px] right-[5px] bottom-0 my-auto h-[24px] w-[24px] bg-[url('/assets/svg/icons/form_select_arrow.svg')] bg-center bg-no-repeat",
+							disabled ? "bg-[var(--bg-form-disabled)]" : "bg-[var(--bg-form)]",
+						)}
+					/>
 				</button>
 			</PopoverTrigger>
 			<PopoverContent

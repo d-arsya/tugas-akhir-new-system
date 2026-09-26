@@ -1,10 +1,16 @@
-import { type JSX } from "react"
+import type { JSX } from "react"
 import { createFileRoute, Outlet } from "@tanstack/react-router"
 
+import { requireRoles } from "@/lib/route-guards"
+
+// Akademik → Alumni — legacy `asAdmin` middleware: Superadmin + Admin only.
 export const Route = createFileRoute("/_auth/alumni")({
-	component: AlumniLayoutPage,
+	beforeLoad: () => requireRoles("superadmin", "admin"),
+	component: Layout,
 })
 
-function AlumniLayoutPage(): JSX.Element {
+function Layout(): JSX.Element {
 	return <Outlet />
 }
+
+export default Layout

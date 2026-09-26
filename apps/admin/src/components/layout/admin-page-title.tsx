@@ -24,6 +24,13 @@ type AdminPageTitleProps = {
 	title: string
 	// Items after the home icon; the last one is the current page
 	breadcrumbs: AdminBreadcrumb[]
+	/**
+	 * Legacy `<h2 class="pr-2">…</h2><span class="tbr_label …">{{ $count }}</span>` headers
+	 * (e.g. registrant-page-header.blade.php): `.pr-2` (0.5rem !important, every breakpoint) on the
+	 * title, and app.css 2423 `.page-header .tbr_label { float: left; top: calc(50% - 15px) }`, which
+	 * is 10px inside the 50px header. Pass the label itself (e.g. a `LegacyLabel`).
+	 */
+	titleAddon?: ReactNode
 }
 
 // boxicons "bx-home-alt" (\ea75) glyph, sized like the legacy icon font (1.4rem). The 0.5px margin
@@ -77,7 +84,7 @@ const CrumbDropdown = ({ items }: { items: AdminBreadcrumb[] }): JSX.Element => 
 )
 
 // Port of the legacy `<header class="page-header">` (Porto `html.fixed.sidebar-left-sm` + header.css)
-const AdminPageTitle = ({ title, breadcrumbs }: AdminPageTitleProps): JSX.Element => {
+const AdminPageTitle = ({ title, breadcrumbs, titleAddon }: AdminPageTitleProps): JSX.Element => {
 	const { collapsed } = useAdminLayout()
 
 	return (
@@ -89,9 +96,15 @@ const AdminPageTitle = ({ title, breadcrumbs }: AdminPageTitleProps): JSX.Elemen
 			)}
 		>
 			{/* "!" utilities: globals.css styles h1–h6 outside any @layer, which beats plain utilities */}
-			<h2 className="float-left m-0! -ml-px! box-content inline-block h-[50px] max-w-full overflow-hidden px-[15px] text-ellipsis whitespace-nowrap md:max-w-none md:overflow-visible md:pr-[22px] md:pl-[20px] md:whitespace-normal text-[16px]! leading-[50px]! font-medium! tracking-[0.8px]! text-white!">
+			<h2
+				className={cn(
+					"float-left m-0! -ml-px! box-content inline-block h-[50px] max-w-full overflow-hidden px-[15px] text-ellipsis whitespace-nowrap md:max-w-none md:overflow-visible md:pr-[22px] md:pl-[20px] md:whitespace-normal text-[16px]! leading-[50px]! font-medium! tracking-[0.8px]! text-white!",
+					titleAddon !== undefined && "pr-[8px]!",
+				)}
+			>
 				{title}
 			</h2>
+			{titleAddon !== undefined ? <span className="relative top-[10px] float-left">{titleAddon}</span> : null}
 			<div className="text-right">
 				{/* Legacy hides the breadcrumbs below 768px */}
 				<ol className="m-0 mr-[30px] hidden p-0 md:inline-block text-[0px] leading-[50px]">

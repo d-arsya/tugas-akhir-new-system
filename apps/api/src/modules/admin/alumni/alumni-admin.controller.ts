@@ -1,84 +1,120 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Query, UseGuards } from "@nestjs/common"
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger"
-import { Roles } from "@core/auth/decorators/roles.decorator"
-import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
-import { RolesGuard } from "@core/auth/guards/roles.guard"
-import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decorator"
-import { AlumniAdminService } from "@admin/alumni/alumni-admin.service"
-import {
-	AlumniFilterDto,
-	UpdateAlumniDto,
-	AlumniResponseDto,
-	AlumniYearGroupResponseDto,
-} from "@admin/dto/alumni-admin.dto"
-import { AdminMessageResponseDto } from "@admin/dto/admin-response.dto"
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Res, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common"
+import { FileFieldsInterceptor } from "@nestjs/platform-express"
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiProduces, ApiTags } from "@nestjs/swagger"
+import type { Response } from "express"
 
-@ApiTags("Admin — Alumni Management")
-@Controller("admin/alumni")
+import type { AdminAlumniDetail, AdminAlumniList, AdminAlumniMessage, AdminAlumniYearRow } from "@roja/types"
+
+import { Roles } from "../../../core/auth/decorators/roles.decorator"
+import { DestructiveGuard } from "../../../core/auth/guards/destructive.guard"
+import { JwtAuthGuard } from "../../../core/auth/guards/jwt-auth.guard"
+import { RolesGuard } from "../../../core/auth/guards/roles.guard"
+import type { SocietyUpload } from "../../../shared/society/society-rules"
+
+// Nest DI reads constructor parameter types at runtime (emitDecoratorMetadata), so these stay value imports
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { AlumniAdminService } from "./alumni-admin.service"
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { AlumniWriteService } from "./alumni-write.service"
+
+const XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+// `name` of every attachment input on the alumni attachment tab
+const ATTACHMENT_FIELDS = [
+	"attach_certificate",
+	"attach_photo",
+	"attach_family_card",
+	"attach_ksp",
+	"attach_kip",
+	"attach_report_card",
+	"attach_birth_certificate",
+].map((name) => ({ name, maxCount: 1 }))
+
+// Legacy `AlumniController` (Akademik → Alumni, `L/routes/web.php:264-289`), behind legacy `asAdmin`:
+// Superadmin | Admin. Owned by workstream AK-A. Literal routes come before the `:alumniId` ones; every delete
+// also takes `DestructiveGuard`. Imports (`import`, `exportTemplate`, `delete-failed-data`) are not ported.
+@ApiTags("Admin — Akademik Alumni")
+@ApiBearerAuth("JWT-Auth")
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles("Superadmin", "Admin")
-@ApiBearerAuth("JWT-Auth")
+@Controller("admin/alumni")
 export class AlumniAdminController {
-	constructor(private readonly alumniAdminService: AlumniAdminService) {}
+	constructor(
+		private readonly alumniAdminService: AlumniAdminService,
+		private readonly alumniWriteService: AlumniWriteService,
+	) {}
 
-	@Get()
-	@ApiOperation({ summary: "Daftar alumni terkelompok per tahun kelulusan" })
-	@ApiResponseWrapped({ status: 200, description: "List kelulusan alumni", type: AlumniYearGroupResponseDto, isArray: true })
-	async getGroupedByGraduationYear() {
-		return this.alumniAdminService.getGroupedByGraduationYear()
+	@Get("years")
+	@ApiOperation({ summary: "Daftar tahun kelulusan (tab Alumni)" })
+	async years(): Promise<AdminAlumniYearRow[]> {
+		return this.alumniAdminService.years()
 	}
 
 	@Get("archive")
-	@ApiOperation({ summary: "Daftar arsip tahun kelulusan alumni" })
-	@ApiResponseWrapped({ status: 200, description: "Arsip kelulusan alumni", type: AlumniYearGroupResponseDto, isArray: true })
-	async getArchiveYears() {
-		return this.alumniAdminService.getArchiveYears()
+	@ApiOperation({ summary: "Alumni tahun ajaran Archive (tab Archive)" })
+	async archive(): Promise<AdminAlumniList> {
+		return this.alumniAdminService.archive()
 	}
 
-	@Get(":graduationYear")
-	@ApiOperation({ summary: "Daftar alumni per tahun kelulusan" })
-	@ApiResponseWrapped({ status: 200, description: "List alumni terpaginasi", type: AlumniResponseDto, isPaginated: true })
-	async findByGraduationYear(
-		@Param("graduationYear") graduationYear: string,
-		@Query() query: AlumniFilterDto,
-	) {
-		return this.alumniAdminService.findByGraduationYear(graduationYear, query)
+	@Get("graduation-years/:year")
+	@ApiOperation({ summary: "Alumni per tahun kelulusan" })
+	async byYear(@Param("year", ParseIntPipe) year: number): Promise<AdminAlumniList> {
+		return this.alumniAdminService.byYear(year)
 	}
 
-	@Get(":graduationYear/download")
-	@ApiOperation({ summary: "Export daftar alumni per tahun kelulusan" })
-	@ApiResponseWrapped({ status: 200, description: "Data export alumni", type: AlumniResponseDto, isArray: true })
-	async exportByGraduationYear(@Param("graduationYear") graduationYear: string) {
-		return this.alumniAdminService.exportByGraduationYear(graduationYear)
+	@Get("graduation-years/:year/export")
+	@ApiOperation({ summary: "Export alumni per tahun kelulusan (xlsx)" })
+	@ApiProduces(XLSX_TYPE)
+	async export(@Param("year", ParseIntPipe) year: number, @Res() res: Response): Promise<void> {
+		const file = await this.alumniAdminService.export(year)
+		// Streams the workbook directly, bypassing the JSON TransformInterceptor
+		res.setHeader("Content-Type", XLSX_TYPE)
+		res.setHeader("Content-Disposition", `attachment; filename="${file.fileName}"; filename*=UTF-8''${encodeURIComponent(file.fileName)}`)
+		res.send(file.buffer)
 	}
 
-	@Get("detail/:alumniId")
-	@ApiOperation({ summary: "Detail data alumni" })
-	@ApiResponseWrapped({ status: 200, description: "Detail alumni", type: AlumniResponseDto })
-	async findOne(@Param("alumniId", ParseIntPipe) alumniId: number) {
-		return this.alumniAdminService.findOne(alumniId)
+	@Delete("graduation-years/:year")
+	@UseGuards(DestructiveGuard)
+	@ApiOperation({ summary: "Hapus semua alumni satu tahun kelulusan" })
+	async destroyByYear(@Param("year", ParseIntPipe) year: number): Promise<AdminAlumniMessage> {
+		return this.alumniWriteService.destroyByYear(year)
+	}
+
+	@Get(":alumniId")
+	@ApiOperation({ summary: "Detail alumni" })
+	async detail(@Param("alumniId", ParseIntPipe) alumniId: number): Promise<AdminAlumniDetail> {
+		return this.alumniAdminService.detail(alumniId)
+	}
+
+	/**
+	 * `print()` — `print/alumni.blade.php`, opened with `target="_blank"` and printing itself on load. The link
+	 * carries no Authorization header, so it is reached with the `access_token` cookie the JWT strategy accepts.
+	 */
+	@Get(":alumniId/print")
+	@ApiOperation({ summary: "Cetak detail alumni" })
+	async print(@Param("alumniId", ParseIntPipe) alumniId: number, @Res() res: Response): Promise<void> {
+		const html = await this.alumniAdminService.print(alumniId)
+		res.setHeader("Content-Type", "text/html; charset=utf-8")
+		res.send(html)
 	}
 
 	@Patch(":alumniId")
-	@ApiOperation({ summary: "Update data alumni" })
-	@ApiResponseWrapped({ status: 200, description: "Data alumni diupdate", type: AlumniResponseDto })
-	async update(@Param("alumniId", ParseIntPipe) alumniId: number, @Body() dto: UpdateAlumniDto) {
-		return this.alumniAdminService.update(alumniId, dto)
-	}
-
-	@Delete("by-graduation-year/:graduationYear")
-	@Roles("Superadmin")
-	@ApiOperation({ summary: "Hapus masal alumni per tahun kelulusan (Superadmin Only)" })
-	@ApiResponseWrapped({ status: 200, description: "Alumni angkatan dihapus", type: AdminMessageResponseDto })
-	async removeByGraduationYear(@Param("graduationYear") graduationYear: string) {
-		return this.alumniAdminService.removeByGraduationYear(graduationYear)
+	@ApiOperation({ summary: "Simpan detail alumni" })
+	@ApiConsumes("multipart/form-data")
+	// No multer `limits`: the size rule answers with the legacy message on the field
+	@UseInterceptors(FileFieldsInterceptor(ATTACHMENT_FIELDS))
+	async update(
+		@Param("alumniId", ParseIntPipe) alumniId: number,
+		@Body() body: Record<string, unknown>,
+		@UploadedFiles() files: Record<string, SocietyUpload[] | undefined> | undefined,
+	): Promise<AdminAlumniMessage> {
+		return this.alumniWriteService.update(alumniId, body, files)
 	}
 
 	@Delete(":alumniId")
-	@Roles("Superadmin")
-	@ApiOperation({ summary: "Hapus satu data alumni (Superadmin Only)" })
-	@ApiResponseWrapped({ status: 200, description: "Data alumni dihapus", type: AdminMessageResponseDto })
-	async removeOne(@Param("alumniId", ParseIntPipe) alumniId: number) {
-		return this.alumniAdminService.removeOne(alumniId)
+	@UseGuards(DestructiveGuard)
+	@ApiOperation({ summary: "Hapus alumni (santri diaktifkan kembali)" })
+	async destroy(@Param("alumniId", ParseIntPipe) alumniId: number): Promise<AdminAlumniMessage> {
+		return this.alumniWriteService.destroy(alumniId)
 	}
 }

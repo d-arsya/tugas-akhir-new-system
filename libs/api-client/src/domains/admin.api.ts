@@ -6,21 +6,14 @@ import { createAdminLainnyaApi, type AdminLainnyaApi } from "./admin-lainnya.api
 import { createAdminMasterApi, type AdminMasterApi } from "./admin-master.api"
 import { createAdminMasterFinanceApi, type AdminMasterFinanceApi } from "./admin-master-finance.api"
 import { createAdminPaymentsApi, type AdminPaymentsApi } from "./admin-payments.api"
+import { createAdminStudentApi, type AdminStudentApi } from "./admin-student.api"
+import { createAdminRegistrantApi, type AdminRegistrantApi } from "./admin-registrant.api"
+import { createAdminAlumniApi, type AdminAlumniApi } from "./admin-alumni.api"
 import type {
 	ApiResponse,
 	PaginatedResponse,
 	BannedIpItem,
 	CreateBannedIpDto,
-	StudentItem,
-	AlumniItem,
-	AdminRegistrantItem,
-	CreateStudentDto,
-	StudentBulkPromoteDto,
-	StudentBulkRetainDto,
-	StudentBulkChangeSubGradeDto,
-	StudentBulkChangeMajorDto,
-	StudentBulkStatusDto,
-	StudentBulkGraduateDto,
 	ReportOptions,
 	ReportFilterParams,
 	ReportArrearFilterParams,
@@ -55,7 +48,10 @@ export interface AdminApi
 		AdminMasterFinanceApi,
 		AdminPaymentsApi,
 		AdminCapabilitiesApi,
-		AdminEwalletApi {
+		AdminEwalletApi,
+		AdminStudentApi,
+		AdminRegistrantApi,
+		AdminAlumniApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
@@ -68,28 +64,6 @@ export interface AdminApi
 	getBannedIps(params?: { search?: string | undefined; page?: number | undefined; limit?: number | undefined }): Promise<PaginatedResponse<BannedIpItem>>
 	createBannedIp(data: CreateBannedIpDto): Promise<ApiResponse<BannedIpItem>>
 	deleteBannedIp(id: number): Promise<ApiResponse<{ message: string }>>
-
-	// Sprint C: Student Management & Financial Billing
-	getStudents(params?: { search?: string; grade?: string; status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<StudentItem>>
-	getStudentById(id: number): Promise<ApiResponse<StudentItem>>
-	createStudent(data: CreateStudentDto): Promise<ApiResponse<StudentItem>>
-	updateStudent(id: number, data: Partial<CreateStudentDto>): Promise<ApiResponse<StudentItem>>
-	bulkPromoteStudents(data: StudentBulkPromoteDto): Promise<ApiResponse<{ count: number }>>
-	bulkRetainStudents(data: StudentBulkRetainDto): Promise<ApiResponse<{ count: number }>>
-	bulkChangeSubGrade(data: StudentBulkChangeSubGradeDto): Promise<ApiResponse<{ count: number }>>
-	bulkChangeMajor(data: StudentBulkChangeMajorDto): Promise<ApiResponse<{ count: number }>>
-	bulkChangeStatus(data: StudentBulkStatusDto): Promise<ApiResponse<{ count: number }>>
-	bulkGraduateStudents(data: StudentBulkGraduateDto): Promise<ApiResponse<{ count: number }>>
-
-	// Alumni
-	getAlumni(params?: { search?: string; year?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AlumniItem>>
-
-	// Sprint D: Registrant Admin (PSB)
-	getRegistrants(params?: { search?: string; status?: string; page?: number; limit?: number }): Promise<PaginatedResponse<AdminRegistrantItem>>
-	getRegistrantById(id: number): Promise<ApiResponse<AdminRegistrantItem>>
-	acceptRegistrant(id: number): Promise<ApiResponse<{ message: string }>>
-	rejectRegistrant(id: number, reason: string): Promise<ApiResponse<{ message: string }>>
-	markRegistrantInvalid(id: number, note: string): Promise<ApiResponse<{ message: string }>>
 
 	// Analytics & Reports
 	getDashboardStats(params?: { academicYearId?: number | undefined }): Promise<DashboardStats>
@@ -137,6 +111,9 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminPaymentsApi(client),
 	...createAdminCapabilitiesApi(client),
 	...createAdminEwalletApi(client),
+	...createAdminStudentApi(client),
+	...createAdminRegistrantApi(client),
+	...createAdminAlumniApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
@@ -162,28 +139,6 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	getBannedIps: (params) => unwrap(client.get("/admin/ip-bans", { params })),
 	createBannedIp: (data) => unwrap(client.post("/admin/ip-bans", data)),
 	deleteBannedIp: (id) => unwrap(client.delete(`/admin/ip-bans/${id}`)),
-
-
-	getStudents: (params) => unwrap(client.get("/admin/students", { params })),
-	getStudentById: (id) => unwrap(client.get(`/admin/students/${id}`)),
-	createStudent: (data) => unwrap(client.post("/admin/students", data)),
-	updateStudent: (id, data) => unwrap(client.patch(`/admin/students/${id}`, data)),
-	bulkPromoteStudents: (data) => unwrap(client.post("/admin/students/bulk-promote", data)),
-	bulkRetainStudents: (data) => unwrap(client.post("/admin/students/bulk-retain", data)),
-	bulkChangeSubGrade: (data) => unwrap(client.post("/admin/students/bulk-change-subgrade", data)),
-	bulkChangeMajor: (data) => unwrap(client.post("/admin/students/bulk-change-major", data)),
-	bulkChangeStatus: (data) => unwrap(client.post("/admin/students/bulk-change-status", data)),
-	bulkGraduateStudents: (data) => unwrap(client.post("/admin/students/bulk-graduate", data)),
-	
-
-	getAlumni: (params) => unwrap(client.get("/admin/alumni", { params })),
-
-	getRegistrants: (params) => unwrap(client.get("/admin/registrants", { params })),
-	getRegistrantById: (id) => unwrap(client.get(`/admin/registrants/${id}`)),
-	acceptRegistrant: (id) => unwrap(client.patch(`/admin/registrants/${id}/accept`)),
-	rejectRegistrant: (id, reason) => unwrap(client.patch(`/admin/registrants/${id}/reject`, { reason })),
-	markRegistrantInvalid: (id, note) => unwrap(client.patch(`/admin/registrants/${id}/invalid`, { note })),
-
 })
 
 
