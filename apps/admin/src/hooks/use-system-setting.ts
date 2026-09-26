@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query"
 
-import type { SystemSetting } from "@roja/types"
+import type { AdminMessageResult, SmtpPayload, SystemSetting } from "@roja/types"
 
 import { legacyNotify } from "@/components/legacy/legacy-notify"
+import { useLegacySubmit, type LegacySubmit } from "@/hooks/use-legacy-submit"
 import { adminApi } from "@/lib/api"
 import { saveBlob } from "@/lib/download"
 import { legacyErrors } from "@/lib/legacy-errors"
 
-// Legacy Lainnya > Pengaturan > Sistem (`SettingController`), the single `settings` row
 export const systemSettingKeys = {
 	all: ["admin-system-setting"] as const,
 	detail: () => [...systemSettingKeys.all, "detail"] as const,
@@ -16,7 +16,6 @@ export const systemSettingKeys = {
 export const useSystemSetting = (): UseQueryResult<SystemSetting> =>
 	useQuery({ queryKey: systemSettingKeys.detail(), queryFn: () => adminApi.getSystemSetting() })
 
-/** Legacy reloads the page after each save; the port refetches the row and keeps the open tab. */
 export const useRefetchSystemSetting = (): (() => void) => {
 	const queryClient = useQueryClient()
 	return () => {
@@ -24,7 +23,15 @@ export const useRefetchSystemSetting = (): (() => void) => {
 	}
 }
 
-// `a[href=setting.downloadDB]` — a plain link in legacy, an authenticated fetch + save here
+export const useUpdateBackupFrequency = (onDone: () => void): LegacySubmit<number, AdminMessageResult> =>
+	useLegacySubmit({ mutationFn: (backupFrequency: number) => adminApi.updateBackupFrequency(backupFrequency), onDone })
+
+export const useUpdateSmtp = (onDone: () => void): LegacySubmit<SmtpPayload, AdminMessageResult> =>
+	useLegacySubmit({ mutationFn: (payload: SmtpPayload) => adminApi.updateSmtp(payload), onDone })
+
+export const useUpdateTwoFactor = (onDone: () => void): LegacySubmit<boolean, AdminMessageResult> =>
+	useLegacySubmit({ mutationFn: (enabled2fa: boolean) => adminApi.updateTwoFactor(enabled2fa), onDone })
+
 export const useDownloadDatabase = (): UseMutationResult<void, unknown, void> =>
 	useMutation<void, unknown, void>({
 		mutationFn: async () => {

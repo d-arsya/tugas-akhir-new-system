@@ -15,10 +15,6 @@ import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 import { noticeLines, StudentLabel, type StudentLabelVariant } from "./student-ui"
 
-// The summary bar's Lulus / Naik Kelas / Tinggal Kelas / Keluar (`student/partials/edit/summary.blade.php`)
-// and their `edit-confirm-*.blade.php` modals, posted by `update.js` `specificFormWithFile`: PNotify, then
-// the roster 1000 ms later (`data-redirect`); a failure restores the button and leaves the modal open.
-
 type Action = "graduate" | "next" | "stay" | "dropout"
 
 const ACTION: Record<Action, { label: string; variant: StudentLabelVariant; becomes: string }> = {
@@ -30,7 +26,6 @@ const ACTION: Record<Action, { label: string; variant: StudentLabelVariant; beco
 
 const REDIRECT_MS = 1000
 
-/** Which summary buttons legacy renders (`summary.blade.php:37-60`); none unless the row is active. */
 const visibleActions = (detail: AdminStudentDetail): Action[] => {
 	if (detail.gradeStatus !== "active") return []
 	const note = detail.gradeNote
@@ -56,6 +51,20 @@ export const StudentEditActions = ({ detail }: { detail: AdminStudentDetail }): 
 
 	useEffect(() => () => window.clearTimeout(timer.current), [])
 
+	const leaveToRoster = (): void => {
+		const { academicYearId, grade, levelId } = detail
+		if (academicYearId === null) {
+			void navigate({ to: "/students" })
+		} else if (grade === null || levelId === null) {
+			void navigate({ to: "/students/academic-years/$academicYearId", params: { academicYearId: String(academicYearId) } })
+		} else {
+			void navigate({
+				to: "/students/academic-years/$academicYearId/grades/$grade/levels/$levelId",
+				params: { academicYearId: String(academicYearId), grade: String(grade), levelId: String(levelId) },
+			})
+		}
+	}
+
 	const confirm = (): void => {
 		if (open === null || submitting) return
 		setSubmitting(true)
@@ -65,14 +74,7 @@ export const StudentEditActions = ({ detail }: { detail: AdminStudentDetail }): 
 		request
 			.then((result) => {
 				legacyNotify.success(noticeLines(result.message))
-				timer.current = window.setTimeout(() => {
-					if (detail.academicYearId !== null && detail.grade !== null && detail.levelId !== null) {
-						void navigate({
-							to: "/students/academic-years/$academicYearId/grades/$grade/levels/$levelId",
-							params: { academicYearId: String(detail.academicYearId), grade: String(detail.grade), levelId: String(detail.levelId) },
-						})
-					}
-				}, REDIRECT_MS)
+				timer.current = window.setTimeout(leaveToRoster, REDIRECT_MS)
 			})
 			.catch((error: unknown) => {
 				setSubmitting(false)
@@ -83,7 +85,6 @@ export const StudentEditActions = ({ detail }: { detail: AdminStudentDetail }): 
 	const current = open ?? "dropout"
 	return (
 		<>
-			{/* `.tbr_summary_action.d-flex.flex-wrap.my-2` */}
 			<div className="my-[8px] flex flex-wrap">
 				{visibleActions(detail).map((action) => (
 					<a
@@ -121,7 +122,6 @@ export const StudentEditActions = ({ detail }: { detail: AdminStudentDetail }): 
 							Santri atas nama <span className="font-semibold">{detail.fullname}</span> akan diubah{" "}
 							<span className="font-semibold">keterangan KBM</span> nya menjadi {ACTION[current].becomes}.
 							{current === "dropout" ? (
-								// `.form-group.mt-4.pb-1.px-0.px-md-3 > textarea.tbr_disables_resizing[rows=3]`
 								<div className="mt-[24px] mb-[16px] px-0 pb-[4px] md:px-[16px]">
 									<LegacyTextarea
 										name="dropout_note"

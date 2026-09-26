@@ -2,22 +2,9 @@ import type { JSX } from "react"
 
 import LegacyCard from "@/components/legacy/legacy-card"
 
-// Split out of `-student-capability-mass.tsx` to keep both under 300 lines. The `-` prefix is
-// TanStack Router's `routeFileIgnorePrefix`, so neither file becomes a route.
-
-/**
- * `mass-edit.blade.php:46-62` — the `.special-condition` banner, shown when the selected santri
- * do not all hold the same accounts. The four bullets are verbatim, legacy's typos included
- * ("lainya", and no full stop on the third).
- *
- * app.css 3402-3443: `overflow: hidden`, a 5px `--primary` rail down the left inset 20px top and
- * bottom, a 160×150 warning glyph bleeding off the bottom right, and `--danger` list dots.
- */
-export const MassSpecialConditionBanner = (): JSX.Element => (
+const MassSpecialConditionBanner = (): JSX.Element => (
 	<LegacyCard className="mt-[24px]" bodyClassName="relative overflow-hidden">
-		{/* `.left-round` */}
 		<div className="absolute top-[20px] left-0 h-[calc(100%-40px)] w-[5px] rounded-[16px] bg-[var(--primary)]" />
-		{/* `.special-condition > img` — `Exclamation-Bg.svg`, decorative */}
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
 			viewBox="0 0 160.713 145.967"
@@ -33,7 +20,6 @@ export const MassSpecialConditionBanner = (): JSX.Element => (
 			<rect x="73.679" y="105.124" width="13.355" height="13.355" rx="6.677" fill="#f8374b" />
 		</svg>
 		<div className="flex">
-			{/* `assets/svg/icons/Exclamation.svg` */}
 			<svg xmlns="http://www.w3.org/2000/svg" width="78" height="78" viewBox="0 0 78 78" aria-hidden="true" className="shrink-0">
 				<circle cx="39" cy="39" r="30" fill="#f8374b" />
 				<path
@@ -55,3 +41,5 @@ export const MassSpecialConditionBanner = (): JSX.Element => (
 		</div>
 	</LegacyCard>
 )
+
+export default MassSpecialConditionBanner

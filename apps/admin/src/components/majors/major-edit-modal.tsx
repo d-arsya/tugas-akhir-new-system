@@ -16,20 +16,17 @@ type MajorEditModalProps = { majorId: number | null; onClose: () => void }
 
 type MajorFormState = { id: number; name: string; levelId: string; desc: string }
 
-// `major/edit.blade.php`, fetched over AJAX by `editData(event, '#edit-modal-mojor', url, id)`
 const MajorEditModal = ({ majorId, onClose }: MajorEditModalProps): JSX.Element => {
 	const detail = useMajor(majorId)
 	const { data: levels } = useLevelOptions("id-asc")
 	const [form, setForm] = useState<MajorFormState | null>(null)
 	const updateMajor = useUpdateMajor()
 
-	// `specificForm()` on `.tbr-edit-form`: PNotify, then a full reload 1000 ms later
 	const save = useLegacySubmit({
 		mutationFn: (payload: { id: number; payload: MajorPayload }) => updateMajor.mutateAsync(payload),
 		onDone: onClose,
 	})
 
-	// Every open starts from the placeholder card, exactly as `editData()` does
 	useEffect(() => {
 		if (majorId !== null) setForm(null)
 	}, [majorId])
@@ -72,7 +69,6 @@ const MajorEditModal = ({ majorId, onClose }: MajorEditModalProps): JSX.Element 
 			</AcademicField>
 
 			<AcademicField label="Jenjang" htmlFor="editLevel" hint="required">
-				{/* The edit modal's placeholder reads "Select", not the form's "Pilih Jenjang" */}
 				<LegacySelect
 					value={form?.levelId ?? ""}
 					options={levelSelectOptions(levels, "Select")}
@@ -81,7 +77,6 @@ const MajorEditModal = ({ majorId, onClose }: MajorEditModalProps): JSX.Element 
 				/>
 			</AcademicField>
 
-			{/* `.form-group.mb-1` — the last field tightens its bottom margin */}
 			<AcademicField label="Keterangan" htmlFor="desc" hint="optional" className="mb-[4px]">
 				<LegacyTextarea
 					id="desc"

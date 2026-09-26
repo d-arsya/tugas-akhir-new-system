@@ -14,14 +14,11 @@ import AccountancyChildFields from "./accountancy-child-fields"
 import AccountancyFieldLabel from "./accountancy-field-label"
 import AccountancyHelpModal from "./accountancy-help-modal"
 
-// `accountancy/index.blade.php` left card + `default-ajax2.js` (`specificForm`), which reloads
-// the page 1000 ms after the success notice — here: the tree refetches and the form clears.
 const IS_PARENT_OPTIONS = [
 	{ value: "1", label: "Induk akun", id: "parent" },
 	{ value: "0", label: "Anak akun", id: "child" },
 ]
 
-/** `assets/svg/icons`-style inline glyph, 24×24, `fill="#ffa800"` — opens `#modalHelp`. */
 const HelpCircleIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -36,10 +33,8 @@ const HelpCircleIcon = (): JSX.Element => (
 
 const AccountancyForm = (): JSX.Element => {
 	const [name, setName] = useState("")
-	// `value="1"` is `checked` in the blade, so the form opens on "Induk akun"
 	const [isParent, setIsParent] = useState("1")
 	const [parentId, setParentId] = useState("")
-	// `value="income"` is `checked`, and the radio is inside the hidden block from the start
 	const [group, setGroup] = useState<AccountancyGroup | "">("income")
 	const [isStudentCost, setIsStudentCost] = useState(false)
 	const [note, setNote] = useState("")
@@ -50,7 +45,6 @@ const AccountancyForm = (): JSX.Element => {
 
 	const submit = useLegacySubmit({
 		mutationFn: (payload: AccountancyPayload) => create.mutateAsync(payload),
-		// `default-ajax2.js` titles the failure notice "<strong>Gagal!</strong>"
 		errorTitle: "Gagal!",
 		onDone: () => {
 			setName("")
@@ -75,9 +69,6 @@ const AccountancyForm = (): JSX.Element => {
 					submit.submit({
 						name,
 						isParent: !child,
-						// Legacy's `#childData` is hidden with the HTML `hidden` attribute, which does not
-						// stop `serialize()` from posting its inputs — so creating a root sent `parent_id=""`,
-						// which persisted and made the account invisible for good. Null here (plan decision).
 						parentId: child && parentId !== "" ? Number(parentId) : null,
 						group: child && group !== "" ? group : null,
 						isStudentCost: child ? isStudentCost : false,
@@ -85,7 +76,6 @@ const AccountancyForm = (): JSX.Element => {
 					})
 				}}
 			>
-				{/* `.form-group.mb-3` */}
 				<div className="mb-[16px]">
 					<AccountancyFieldLabel htmlFor="name" badge="required">
 						Nama
@@ -101,17 +91,14 @@ const AccountancyForm = (): JSX.Element => {
 				</div>
 
 				<div className="mb-[16px]">
-					{/* `label.control-label.d-block.mb-3` > `.d-flex.align-items-center.flex-wrap` */}
 					<label className="mb-[16px] block leading-[20px]">
 						<span className="flex flex-wrap items-center">
 							<span className="mr-[8px]">Terapkan sebagai</span>
-							{/* Legacy binds `onclick` to the SVG itself; a button keeps it reachable by keyboard */}
 							<button type="button" onClick={() => setHelpOpen(true)} className="inline-flex cursor-pointer" aria-label="Bantuan">
 								<HelpCircleIcon />
 							</button>
 						</span>
 					</label>
-					{/* `.form-check.form-check-inline` > `.custom-control.custom-radio.mr-4`, last one bare */}
 					<LegacyRadioGroup
 						name="is_parent"
 						value={isParent}
@@ -123,7 +110,6 @@ const AccountancyForm = (): JSX.Element => {
 					/>
 				</div>
 
-				{/* `showChildData()` toggles `#childData.hidden` — unmounted here, so nothing stray is posted */}
 				{child ? (
 					<AccountancyChildFields
 						options={options ?? []}
@@ -151,7 +137,6 @@ const AccountancyForm = (): JSX.Element => {
 					/>
 				</div>
 
-				{/* `.text-right.pt-3` — no "Kembali" link on this form, unlike Jenjang */}
 				<div className="pt-[16px] text-right">
 					<LegacyButton type="submit" variant="primary" loading={submit.submitting}>
 						Simpan

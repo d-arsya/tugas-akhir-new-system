@@ -22,17 +22,12 @@ const MONTHS_ID = [
 	"Desember",
 ]
 
-/**
- * `StudentCapabilityService::datatableDate($approve_date, 'Y-m-d H:i:s', 'd F Y \j\a\m H:i')` —
- * "26 Juli 2026 jam 10:08", or the literal "Belum disepakati" when there is no approval date.
- */
-export const approveDateText = (local: string | null): string => {
+const approveDateText = (local: string | null): string => {
 	if (!local) return "Belum disepakati"
 	const month = MONTHS_ID[Number(local.slice(5, 7)) - 1] ?? ""
 	return `${local.slice(8, 10)} ${month} ${local.slice(0, 4)} jam ${local.slice(11, 16)}`
 }
 
-/** `StudentCapabilityService::getStatus()` — one badge colour per status. */
 const LABEL_VARIANT: Record<CapabilityStatusLabel, "success" | "danger" | "warning"> = {
 	Disepakati: "success",
 	Dirubah: "danger",
@@ -43,8 +38,6 @@ const cellText = (row: CapabilityHistoryRow, key: string): string => {
 	switch (key) {
 		case "ordinal":
 			return String(row.ordinal)
-		// `<div><span class="d-none">{unix}</span> 26 Juli 2026 jam 10:08</div>` — the hidden key leads,
-		// so the column sorts chronologically and "Belum disepakati" (no key) sorts after every date
 		case "approveDate":
 			return row.approveDateTs === null ? approveDateText(null) : `${row.approveDateTs} ${approveDateText(row.approveDate)}`
 		case "itemCount":
@@ -69,13 +62,6 @@ type CapabilityHistoryTableProps = {
 	onStateChange: (state: TableState) => void
 }
 
-/**
- * `student-capability.blade.php:142-154` + `student-capability-datatable.js`
- * (`initDatatable(url, [5])`, `order: [[0, "desc"]]` — newest first).
- *
- * `sDom: '<"d-none"lf>'` hides DataTables' own length and search; the page's `#search_filter`
- * drives the search, so the state is owned by the page.
- */
 const CapabilityHistoryTable = ({
 	studentGradeId,
 	rows,
@@ -104,7 +90,6 @@ const CapabilityHistoryTable = ({
 			width: "7%",
 			sortable: false,
 			cell: (row) => (
-				// `StudentCapabilityService::getAction()` — `data_detail.svg` in `.actions`
 				<div>
 					<Link
 						to="/student-capabilities/$capabilityId/students/$studentGradeId"

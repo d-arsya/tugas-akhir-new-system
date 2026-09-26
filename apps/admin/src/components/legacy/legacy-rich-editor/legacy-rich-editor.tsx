@@ -6,7 +6,6 @@ import LegacyEditorHelpDialog from "./legacy-editor-help-dialog"
 import LegacyEditorLinkDialog, { type EditorLink } from "./legacy-editor-link-dialog"
 import LegacyEditorToolbar, { type EditorMenu, type EditorToolbarVariant } from "./legacy-editor-toolbar"
 
-// Summernote's `dom.emptyPara`; `setting/annc-ajax.js` treats it as an empty field
 const EMPTY = "<p><br></p>"
 const STATE_COMMANDS = ["bold", "italic", "underline", "insertUnorderedList", "insertOrderedList", "justifyLeft", "justifyCenter", "justifyRight", "justifyFull"]
 
@@ -17,15 +16,9 @@ type LegacyRichEditorProps = {
 	value: string
 	onChange: (html: string) => void
 	height?: number
-	/** `compact` is the ewallet status-note toolbar; the default is the PSB/announcement one. */
 	toolbar?: EditorToolbarVariant
 }
 
-/**
- * Port of the legacy summernote editor (`default-summernote.js`, `height: 130`, `lang: "id-ID"`).
- * A `contentEditable` driven by `document.execCommand`, so the stored HTML stays byte-for-byte
- * what the browser produced — the PSB portal renders it with `{!! … !!}`.
- */
 const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: LegacyRichEditorProps): JSX.Element => {
 	const frame = useRef<HTMLDivElement>(null)
 	const editable = useRef<HTMLDivElement>(null)
@@ -40,16 +33,14 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 	const [area, setArea] = useState(height)
 	const [selectedText, setSelectedText] = useState("")
 
-	// Summernote's Enter produces `<p>`, not `<div>`
 	useEffect(() => {
 		try {
 			document.execCommand("defaultParagraphSeparator", false, "p")
 		} catch {
-			/* not supported — the browser default stands */
+			// Not supported: the browser's default paragraph separator stays
 		}
 	}, [])
 
-	// Only write into the DOM for values this editor did not produce, so typing never loses the caret
 	useEffect(() => {
 		const node = editable.current
 		if (node === null || value === emitted.current) return
@@ -57,7 +48,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		emitted.current = node.innerHTML
 	}, [value])
 
-	// `.note-dropdown-menu` closes on any click outside the toolbar
 	useEffect(() => {
 		if (menu === null) return undefined
 		const onDown = (event: MouseEvent): void => {
@@ -67,7 +57,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		return () => document.removeEventListener("mousedown", onDown)
 	}, [menu])
 
-	// Summernote normalises an emptied editor back to `dom.emptyPara`, caret inside the paragraph
 	const fillEmpty = (node: HTMLDivElement): void => {
 		if (node.innerHTML !== "" && node.innerHTML !== "<br>") return
 		node.innerHTML = EMPTY
@@ -110,7 +99,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		refresh()
 	}
 
-	// Only put the caret back when it left the editable (a dialog took focus); a live selection stands
 	const restore = (): void => {
 		const node = editable.current
 		if (node === null) return
@@ -130,7 +118,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		refresh()
 	}
 
-	// `dom.createTable`: `<table class="table table-bordered">` with a `<br>` in every cell
 	const insertTable = (rows: number, cols: number): void => {
 		const cells = "<td><br></td>".repeat(cols)
 		const body = `<tr>${cells}</tr>`.repeat(rows)
@@ -143,7 +130,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		run("insertHTML", `<a href="${escapeHtml(url)}"${target}>${escapeHtml(text)}</a>`)
 	}
 
-	// `codeview.activate()` swaps the editable for a textarea and `deactivate()` writes it back
 	const toggleCodeview = (): void => {
 		setMenu(null)
 		if (code === null) {
@@ -159,7 +145,6 @@ const LegacyRichEditor = ({ value, onChange, height = 130, toolbar = "full" }: L
 		setCode(null)
 	}
 
-	// `.note-statusbar .note-resizebar` (cursor `ns-resize`)
 	const startResize = (event: ReactMouseEvent): void => {
 		event.preventDefault()
 		const startY = event.clientY

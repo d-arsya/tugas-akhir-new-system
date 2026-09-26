@@ -4,8 +4,6 @@ import { findActiveChain, type SidebarMenuItem } from "@/components/layout/sideb
 
 type OpenMap = Record<string, string | null>
 
-// Every item in the active chain is marked expanded under its parent, like legacy pages
-// adding `nav-expanded` to their menu ancestors on load
 const chainToOpenMap = (chain: string[]): OpenMap => {
 	const map: OpenMap = {}
 	chain.forEach((key, index) => {
@@ -30,7 +28,6 @@ export const useSidebarNav = (
 		setOpenMap(chainToOpenMap(chainKey ? chainKey.split(">") : []))
 	}, [chainKey])
 
-	// Accordion: opening an item collapses its expanded sibling
 	const toggle = useCallback((parentKey: string, key: string): void => {
 		setOpenMap((prev) => ({ ...prev, [parentKey]: prev[parentKey] === key ? null : key }))
 	}, [])

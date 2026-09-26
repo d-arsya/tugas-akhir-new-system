@@ -1,37 +1,25 @@
-import { useState, type JSX } from "react"
+import type { JSX } from "react"
 
-import type { ReportExportKind, ReportOptions } from "@roja/types"
+import type { ReportArrearFilterParams, ReportExportKind, ReportOptions } from "@roja/types"
 import { cn } from "@roja/utils"
 
 import LegacyButton, { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyDateRange from "@/components/legacy/legacy-date-range"
-import { legacyNotify } from "@/components/legacy/legacy-notify"
 import LegacySelect from "@/components/legacy/legacy-select"
 import type { ReportFilters } from "@/hooks/use-report-filters"
-import { adminApi } from "@/lib/api"
-import { saveBlob } from "@/lib/download"
+import { useDownloadReport } from "@/hooks/use-reports"
 
 type SelectKey = "accountancy" | "academicYear" | "grade" | "subGrade"
 
 type ReportFilterBarProps = {
 	options: ReportOptions | undefined
-	// Selects shown after the date range, in legacy order
 	selects: SelectKey[]
 	draft: ReportFilters
 	onDraftChange: (patch: Partial<ReportFilters>) => void
 	onFilter: () => void
 	exportKind: ReportExportKind
-	// Legacy exports the last loaded request (`res.responseJSON.input`), including the search box
-	exportParams: Parameters<typeof adminApi.downloadReport>[1]
-	// report/arrear.blade.php adds `d-block` to the Export link, which drops the flex centring
+	exportParams: ReportArrearFilterParams
 	blockExport?: boolean
-}
-
-// Legacy fallbacks when the header is missing (same names as the Laravel downloads)
-const FILE_NAMES: Record<ReportExportKind, string> = {
-	"income-detail": "Laporan Pembayaran Santri (Rincian).xlsx",
-	"income-recap": "Laporan Pembayaran Santri (Rekapitulasi).xlsx",
-	arrears: "Laporan Tunggakan Pembayaran Santri.xlsx",
 }
 
 const selectOptions = (key: SelectKey, options: ReportOptions | undefined): { value: string; label: string }[] => {
@@ -68,10 +56,8 @@ const ExportIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `.tbr_report_input` column (public/assets/css/app.css "REPORT FILTER CSS")
 const INPUT_COL = "mb-[10px] w-full px-[10px] min-[481px]:w-[155px]"
 
-// Port of the legacy `.tbr_report_filter` bar
 const ReportFilterBar = ({
 	options,
 	selects,
@@ -82,19 +68,7 @@ const ReportFilterBar = ({
 	exportParams,
 	blockExport = false,
 }: ReportFilterBarProps): JSX.Element => {
-	const [downloading, setDownloading] = useState(false)
-
-	const download = async (): Promise<void> => {
-		setDownloading(true)
-		try {
-			const { blob, fileName } = await adminApi.downloadReport(exportKind, exportParams)
-			saveBlob(blob, fileName ?? FILE_NAMES[exportKind])
-		} catch {
-			legacyNotify.error("Terjadi kesalahan pada sistem. Silakan reload ulang halaman ini.")
-		} finally {
-			setDownloading(false)
-		}
-	}
+	const download = useDownloadReport()
 
 	return (
 		<div className="mb-[10px] flex flex-col flex-wrap min-[481px]:flex-row">
@@ -106,7 +80,6 @@ const ReportFilterBar = ({
 					<LegacySelect
 						value={draft[key]}
 						options={selectOptions(key, options)}
-						// The placeholder options carry a title, which select2 renders in grey
 						mutedText={draft[key] === ""}
 						onChange={(value) => onDraftChange({ [key]: value })}
 					/>
@@ -122,9 +95,9 @@ const ReportFilterBar = ({
 					href="#"
 					onClick={(event) => {
 						event.preventDefault()
-						if (!downloading) void download()
+						if (!download.isPending) download.mutate({ kind: exportKind, params: exportParams })
 					}}
-					aria-disabled={downloading}
+					aria-disabled={download.isPending}
 					className={legacyButtonClass(
 						"success",
 						cn(

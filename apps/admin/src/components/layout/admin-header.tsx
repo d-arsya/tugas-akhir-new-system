@@ -24,7 +24,6 @@ const LOGO_SRC = "/assets/images/Logo.png"
 const MENU_ITEM_CLASS =
 	"relative flex items-center justify-start gap-0 rounded-[6px] bg-transparent px-[16px] py-[10px] text-[12px] leading-[1.3rem] font-normal tracking-[1px] text-white transition-all duration-500 hover:bg-[rgba(17,30,44,0.6)] focus:bg-[rgba(17,30,44,0.6)] focus:text-white [&_svg]:mr-[12px] [&_svg]:size-auto [&_svg]:w-[24px] [&_svg]:min-w-[24px]"
 
-// Legacy Str::words($name, 2, '')
 const firstTwoWords = (name: string): string => name.trim().split(/\s+/).slice(0, 2).join(" ")
 
 const UserboxMenuLink = ({ to, icon, label }: { to: "/settings" | "/my-profile"; icon: ReactNode; label: string }): JSX.Element => (
@@ -36,11 +35,9 @@ const UserboxMenuLink = ({ to, icon, label }: { to: "/settings" | "/my-profile";
 	</DropdownMenuItem>
 )
 
-// Port of legacy header.blade.php (logo + userbox dropdown)
 const AdminHeader = ({ userName, roleLabel, onToggleMobileSidebar, onLogout }: AdminHeaderProps): JSX.Element => {
 	const isDesktop = useIsDesktop()
 
-	// Legacy borders are drawn as padding/inset shadow: globals.css forces border-color on every element
 	return (
 		<header className="static z-[1000] h-auto bg-[#17283C] pt-[3px] md:fixed md:top-0 md:right-0 md:left-0 md:z-[1020] md:h-[60px]">
 			<div className="fixed top-0 right-0 left-0 z-[1003] h-[60px] bg-[#17283C] pt-[3px] pb-[1px] shadow-[inset_0_-1px_0_rgba(17,30,44,0.5)] md:static md:h-auto md:bg-transparent md:p-0 md:shadow-none">

@@ -1,6 +1,7 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query"
+import { useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query"
 
 import type {
+	AdminMessageResult,
 	InvoiceBillDetail,
 	InvoiceBillQuery,
 	InvoiceBillRow,
@@ -9,12 +10,12 @@ import type {
 	ServerTableResult,
 	StudentInvoiceListQuery,
 	StudentInvoiceListRow,
+	UpdateInvoiceNoteDto,
 } from "@roja/types"
 
 import { adminApi } from "@/lib/api"
+import { useLegacySubmit, type LegacySubmit } from "@/hooks/use-legacy-submit"
 
-// Queries behind Tagihan Santri's three read pages (legacy `StudentInvoiceController`
-// @studentListServerSide, @edit, @listBillServerSide, @listTransaction, @listCancel, @detailBill).
 export const studentInvoiceKeys = {
 	all: ["admin-student-invoices"] as const,
 	students: () => [...studentInvoiceKeys.all, "students"] as const,
@@ -25,7 +26,6 @@ export const studentInvoiceKeys = {
 	bill: (invoiceId: number) => [...studentInvoiceKeys.all, "bill", invoiceId] as const,
 }
 
-/** `useServerTable` fetchers — the hook owns the paging state and supplies the query. */
 export const fetchStudentInvoiceRows = (
 	query: StudentInvoiceListQuery,
 ): Promise<ServerTableResult<StudentInvoiceListRow>> => adminApi.getStudentInvoiceRows(query)
@@ -41,10 +41,6 @@ export const useStudentInvoiceDetail = (studentGradeId: number): UseQueryResult<
 		queryFn: () => adminApi.getStudentInvoiceDetail(studentGradeId),
 	})
 
-/**
- * Riwayat Pembayaran. Legacy builds this tab's DataTable only on `shown.bs.tab`, so the request
- * does not fire until the tab is opened — `enabled` reproduces that.
- */
 export const useStudentPayments = (studentGradeId: number, enabled: boolean): UseQueryResult<InvoiceTransactionRow[]> =>
 	useQuery({
 		queryKey: studentInvoiceKeys.payments(studentGradeId),
@@ -52,7 +48,6 @@ export const useStudentPayments = (studentGradeId: number, enabled: boolean): Us
 		enabled,
 	})
 
-/** Dibatalkan. Same lazy-on-tab behaviour, except that `?cancel=1` opens it on load. */
 export const useStudentCancelled = (
 	studentGradeId: number,
 	enabled: boolean,
@@ -68,3 +63,13 @@ export const useInvoiceBill = (invoiceId: number): UseQueryResult<InvoiceBillDet
 		queryKey: studentInvoiceKeys.bill(invoiceId),
 		queryFn: () => adminApi.getInvoiceBill(invoiceId),
 	})
+
+export const useUpdateInvoiceNote = (invoiceId: number): LegacySubmit<UpdateInvoiceNoteDto, AdminMessageResult> => {
+	const queryClient = useQueryClient()
+	return useLegacySubmit({
+		mutationFn: (body: UpdateInvoiceNoteDto) => adminApi.updateInvoiceNote(invoiceId, body),
+		onDone: () => {
+			void queryClient.invalidateQueries({ queryKey: studentInvoiceKeys.bill(invoiceId) })
+		},
+	})
+}

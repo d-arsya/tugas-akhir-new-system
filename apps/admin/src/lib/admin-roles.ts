@@ -1,6 +1,5 @@
 export type LayoutRole = "superadmin" | "admin" | "bendahara" | "kasir"
 
-// Role strings arrive in several shapes (API: "Kasir E-Wallet", mocks: "KASIR_EWALLET")
 export const normalizeRole = (role: string | null | undefined): LayoutRole | null => {
 	const key = (role ?? "").toLowerCase().replace(/[\s_-]+/g, "")
 	if (key === "superadmin") return "superadmin"

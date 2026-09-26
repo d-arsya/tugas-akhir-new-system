@@ -1,18 +1,8 @@
 import type { JSX } from "react"
 
-// Inline SVGs the Kesanggupan blades write by hand, transcribed verbatim. The shared ones
-// (`InfoCircleIcon`, `BackArrowIcon`, `ChevronActionIcon`) come from the legacy kit instead.
-
-/**
- * `.tbr_academic_year_action` (app.css 3022-3042) — the pink pill the drill-down icons sit in.
- * Legacy's hover rule fills `#Path_295`, `#Path_954`, `#Rectangle_2779` and `#Rectangle_1086`
- * white **by id**, which skips the transparent backing rect; the icons below tag exactly those
- * shapes with `.cap-fill` so the hover reaches the same ones.
- */
 export const CAPABILITY_ACTION_CLASS =
 	"inline-block rounded-[7px] bg-[#fae3f0] p-[7px] align-middle transition-all duration-300 hover:bg-[var(--primary)] hover:shadow-[0px_8px_10px_0px_rgba(228,0,126,0.25)] [&:hover_.cap-fill]:fill-white"
 
-/** `StudentCapabilityService::getActionCapability()` — the level-3 "list" glyph. */
 export const ListActionIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -27,7 +17,6 @@ export const ListActionIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `Grade::studentCapabilityAction()` / `StudentCostService::action()` — the level-1/2 arrow. */
 export const ArrowActionIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M24,0H0V24H24Z" fill="none" fillRule="evenodd" />
@@ -49,7 +38,6 @@ export const ArrowActionIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `student-capability.blade.php:49-54` — the red warning triangle of "Belum ada kesanggupan". */
 export const WarningTriangleIcon = (): JSX.Element => (
 	<svg className="mr-[8px] shrink-0" xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 37 37" aria-hidden="true">
 		<rect width="37" height="37" fill="none" />
@@ -65,7 +53,6 @@ export const WarningTriangleIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `student-capability.blade.php:69-74` and `:83-88` — the clipboard tick, red or green. */
 export const ClipboardCheckIcon = ({ color }: { color: "#f8374b" | "#28af52" }): JSX.Element => (
 	<svg className="mr-[8px] shrink-0" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
 		<rect width="36" height="36" fill="none" />
@@ -91,7 +78,6 @@ export const ClipboardCheckIcon = ({ color }: { color: "#f8374b" | "#28af52" }):
 	</svg>
 )
 
-/** `capability-item.blade.php:65-69` — the white printer on the secondary button. */
 export const PrintIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -104,7 +90,6 @@ export const PrintIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `capability-item.blade.php:75-79` — the white cloud-download on the danger button. */
 export const DownloadIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
@@ -122,7 +107,6 @@ export const DownloadIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `capability-item.blade.php:83-87` — the double tick on "Telah Disepakati". */
 export const ApproveIcon = (): JSX.Element => (
 	<svg className="mr-[4px]" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />

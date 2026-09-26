@@ -10,8 +10,6 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import AccountancyEditModal from "./accountancy-edit-modal"
 
-// The row number is baked into the legacy payload (`$no++` over the flattened tree), so it keeps
-// its value while the table is searched or paged — and the tree cannot be re-sorted anyway.
 type NumberedAccountancy = AccountancyRow & { no: number }
 
 const cellText = (row: NumberedAccountancy, key: string): string => {
@@ -29,20 +27,11 @@ const cellText = (row: NumberedAccountancy, key: string): string => {
 
 const SEARCH_KEYS = ["no", "name", "group"]
 
-// `AccountancyService::getAction` picks the destroy href per row from `$account->childs->count()`
 const DESTROY_TO = {
 	delete: "/accountancy/$accountancyId/delete",
 	"delegate-child": "/accountancy/$accountancyId/delegate-child",
 } as const
 
-/**
- * `accountancy/index.blade.php` right card, driven by `assets/js/account/datatable.js`.
- *
- * That file differs from every other DataTables bootstrapper in the app: it sets
- * **`ordering: false`** and drops `columnDefs` entirely, so the `[0,1,2,3]` argument the blade
- * passes is ignored and no column is sortable. That is load-bearing — the payload is a flattened
- * depth-first tree, and sorting any column would scatter the parents from their children.
- */
 const AccountancyTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useAccountancies()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -59,8 +48,6 @@ const AccountancyTable = (): JSX.Element => {
 		{
 			key: "name",
 			header: "Nama",
-			// `AccountancyService::getName` — a Child.svg dash and a 15px gap from level 1, then
-			// `35 + 40 * (level - 2)` px of extra indent from level 2
 			cell: (row) => (
 				<LegacyTreeCell level={row.level}>{row.name}</LegacyTreeCell>
 			),
@@ -70,9 +57,6 @@ const AccountancyTable = (): JSX.Element => {
 			key: "actions",
 			header: "Actions",
 			width: "15%",
-			// `.table .actions a` is inline-block with `margin-right: 5px`, plus the newline Blade
-			// leaves between the two anchors — 5px + ~3.73px = the 8.73px legacy renders. The block
-			// wrapper is load-bearing: a flex row would discard that whitespace-only text node.
 			cell: (row) => (
 				<div className="align-middle">
 					<button
@@ -82,7 +66,6 @@ const AccountancyTable = (): JSX.Element => {
 					>
 						<img src="/assets/svg/icons/data_detail.svg" alt="Detail" width={24} height={24} />
 					</button>{" "}
-					{/* Both destinations are full pages; `.modal-with-zoom-anim` is inert on this blade */}
 					<Link
 						to={DESTROY_TO[row.deleteTarget]}
 						params={{ accountancyId: String(row.id) }}
@@ -97,7 +80,6 @@ const AccountancyTable = (): JSX.Element => {
 
 	return (
 		<>
-			{/* `<table … style="min-width: 625px;">` */}
 			<LegacyDataTable
 				columns={columns}
 				rows={page.rows}

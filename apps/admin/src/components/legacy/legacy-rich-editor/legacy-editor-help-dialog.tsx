@@ -2,7 +2,6 @@ import type { JSX } from "react"
 
 import EditorModal from "./legacy-editor-modal"
 
-// `options.keyMap.pc` paired with the `id-ID` `help` strings (porto/vendor/summernote/lang/summernote-id-ID.js)
 const SHORTCUTS: [string, string][] = [
 	["ENTER", "Tambahkan paragraf"],
 	["CTRL+Z", "Urungkan perintah terakhir"],
@@ -33,7 +32,6 @@ const SHORTCUTS: [string, string][] = [
 	["CTRL+K", "Tampilkan Link Dialog"],
 ]
 
-// `helpDialog` — `lang.shortcut.shortcuts` is the title, plus summernote's own credit line
 const LegacyEditorHelpDialog = ({ open, onClose }: { open: boolean; onClose: () => void }): JSX.Element => (
 	<EditorModal open={open} title="Jalan pintas" onClose={onClose}>
 		<div className="max-h-[300px] overflow-y-auto">

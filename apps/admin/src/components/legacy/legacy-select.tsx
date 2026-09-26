@@ -5,7 +5,6 @@ import { cn } from "@roja/utils"
 
 import { useLegacySelect, type LegacySelectOption } from "@/hooks/use-legacy-select"
 
-// Legacy wrappers that restyle select2: `.tbr_summary_widget_filter` / `.tbr_chart_filter`
 type LegacySelectVariant = "default" | "summary" | "chart"
 
 type LegacySelectProps = {
@@ -13,20 +12,12 @@ type LegacySelectProps = {
 	options: LegacySelectOption[]
 	onChange: (value: string) => void
 	variant?: LegacySelectVariant
-	// Legacy options with title="Select" (and similar) render the chosen text in grey
 	mutedText?: boolean
-	// select2 `minimumResultsForSearch: -1` (e.g. the DataTables length menu) hides the search box
 	searchable?: boolean
-	/**
-	 * select2 `.select2-container--disabled`: public/assets/css/select2.css (disabled selection +
-	 * arrow on `--bg-form-disabled`, border `--bg-form-border`, text `--grey`) and
-	 * select2-bootstrap.css:242-245 (`cursor: not-allowed`). The dropdown never opens.
-	 */
 	disabled?: boolean
 	className?: string
 }
 
-// Border colours use "!" because globals.css sets border-color on every element outside any @layer
 const TRIGGER_VARIANT: Record<LegacySelectVariant, { closed: string; open: string }> = {
 	default: { closed: "border-[#eeeeee]!", open: "rounded-[5px] border-[var(--secondary)]!" },
 	summary: { closed: "border-[var(--bg-inverse)]! bg-[var(--bg-inverse)]", open: "rounded-[5px] border-[var(--secondary)]!" },
@@ -36,7 +27,6 @@ const TRIGGER_VARIANT: Record<LegacySelectVariant, { closed: string; open: strin
 	},
 }
 
-// Port of the legacy select2 (bootstrap theme + public/assets/css/select2.css) with search box
 const LegacySelect = ({
 	value,
 	options,
@@ -47,7 +37,6 @@ const LegacySelect = ({
 	disabled = false,
 	className,
 }: LegacySelectProps): JSX.Element => {
-	// Like a native <select> (which select2 wraps): an unknown value shows the first option
 	const selected = options.find((o) => o.value === value) ?? options[0]
 	const state = useLegacySelect(options, selected?.value ?? value, onChange)
 	const styles = TRIGGER_VARIANT[variant]
@@ -73,7 +62,6 @@ const LegacySelect = ({
 					>
 						{selected?.label ?? ""}
 					</span>
-					{/* select2 positions the arrow from the border-less container: 7px outside = 5px inside our 2px border */}
 					<span
 						className={cn(
 							"absolute top-[1px] right-[5px] bottom-0 my-auto h-[24px] w-[24px] bg-[url('/assets/svg/icons/form_select_arrow.svg')] bg-center bg-no-repeat",

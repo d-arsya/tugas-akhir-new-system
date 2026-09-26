@@ -12,11 +12,6 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import { EMPTY_FILTERS, applyRegistrantFilters, dateCellText, type RegistrantFilters } from "./registrant-list-filters"
 
-// `registrant/partials/{new,accepted,rejected}-data-datatable.blade.php` + `registrant-datatable.js`
-// (`initCustomDatatable(url, [8], …)`) + `filter.js`; the name / school columns follow settings 1 / 19
-// (`columnVisible()`), and the name header is `Str::limit(getInputLabel(1), 20, ' ...')`.
-
-// `RegistrantService::progressLabel()`
 const PROGRESS: Record<AdminRegistrantProgress, { variant: "info" | "warning" | "danger" | "success"; text: string }> = {
 	validation: { variant: "info", text: "Validasi Data" },
 	indent: { variant: "warning", text: "Test Indent" },
@@ -61,14 +56,12 @@ const PATH_OPTIONS = [
 	{ value: "indent", label: "Indent" },
 ]
 
-/** `Str::limit($value, 20, ' ...')` */
 const limit = (value: string): string => (value.length > 20 ? `${value.slice(0, 20).trimEnd()} ...` : value)
 
 type RegistrantListTableProps = {
 	academicYearId: number
 	tab: AdminRegistrantListTab
 	levels: AdminRegistrantOption[]
-	/** `getInputLabel($setting_forms, 1)` / `(…, 19)`, or null when the setting is off (column hidden) */
 	nameLabel: string | null
 	schoolLabel: string | null
 	onDelete: (row: AdminRegistrantRow) => void
@@ -98,7 +91,6 @@ const RegistrantListTable = ({ academicYearId, tab, levels, nameLabel, schoolLab
 		key,
 		header,
 		sortable: true,
-		// `datatableDate()`: `<div><span class="d-none">{timestamp}</span> {d-m-Y, H:i}</div>`
 		cell: (row) => <div>{key === "createdAt" ? row.createdAt : row.updatedAt}</div>,
 	})
 
@@ -126,7 +118,6 @@ const RegistrantListTable = ({ academicYearId, tab, levels, nameLabel, schoolLab
 			key: "actions",
 			header: "Actions",
 			sortable: false,
-			// `RegistrantService::getAction()` — detail link + `deleteData(event, id, url, tab)`
 			cell: (row) => (
 				<div className="align-middle">
 					<Link to="/registrants/$registrantId" params={{ registrantId: String(row.id) }} className="mr-[5px] inline-block align-middle">
@@ -142,7 +133,6 @@ const RegistrantListTable = ({ academicYearId, tab, levels, nameLabel, schoolLab
 
 	return (
 		<>
-			{/* `div.row.justify-content-end.mb-3` */}
 			<div className="mx-[-15px] mb-[16px] flex flex-wrap justify-end">
 				<div className="w-full px-[15px] min-[992px]:w-1/2 min-[1200px]:w-5/12">
 					<div className="mb-[8px]">

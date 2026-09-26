@@ -19,24 +19,17 @@ type NumberedQuota = AcademicYearQuotaRow & { no: number }
 
 type AcademicYearQuotaCardProps = {
 	rows: AcademicYearQuotaRow[]
-	/** Level id → the raw string in that level's `quota[]` input, "" while it is untouched */
 	quotas: Record<number, string>
 	onQuotaChange: (levelId: number, quota: string) => void
-	/** The create and edit blades word this paragraph differently, typos included */
 	intro: string
 	processing: boolean
 	loaded: boolean
 }
 
-/**
- * `AcademicYearService::getRemainingQuota()` — note the `$quota != 0` guard: a zero-quota level
- * shows its (possibly negative) remainder instead of the "Penuh" badge. Live today for the
- * levels a year never funded.
- */
 const remainingQuota = (row: AcademicYearQuotaRow, quota: string): JSX.Element | number | null => {
-	// The create page's Kuota and Sisa cells start empty; legacy fills them only once the modal saves
 	if (quota === "") return null
 	const value = Number(quota) - (row.psb + row.tmq)
+	// A zero quota shows its (possibly negative) remainder, never the Penuh badge.
 	if (value <= 0 && Number(quota) !== 0) return <LegacyLabel variant="danger">Penuh</LegacyLabel>
 	return value
 }
@@ -60,8 +53,6 @@ const cellText = (row: NumberedQuota, key: string, quotas: Record<number, string
 
 const SEARCH_KEYS = ["no", "level", "quota", "psb", "tmq"]
 
-// The right-hand card of `academic-year/create.blade.php` and `edit.blade.php`, plus the
-// per-level `#add-quota-{id}` modal and `assets/js/add-quota.js` that drives it
 const AcademicYearQuotaCard = ({
 	rows,
 	quotas,
@@ -85,7 +76,6 @@ const AcademicYearQuotaCard = ({
 		setDraft(quotas[row.levelId] ?? "")
 	}
 
-	// `$(".saveQuota").on("click", …)` — both messages verbatim
 	const saveQuota = (): void => {
 		if (editing === null) return
 		if (draft === "") {
@@ -110,7 +100,6 @@ const AcademicYearQuotaCard = ({
 			header: (
 				<span className="inline-flex items-center">
 					TMQ
-					{/* `<svg class="ml-1" data-toggle="tooltip" title="Dari kenaikan jenjang.">` */}
 					<LegacyTooltip content="Dari kenaikan jenjang." className="ml-[4px]">
 						<InfoCircleIcon />
 					</LegacyTooltip>
@@ -123,11 +112,7 @@ const AcademicYearQuotaCard = ({
 		{
 			key: "actions",
 			header: "Actions",
-			// `initDatatable(url, [6])`
 			sortable: false,
-			// `AcademicYearService::addQuota()` — `<div class='pl-2 ml-1'>` around the pencil
-			// The anchor and the image are inline, as they are in the rendered HTML, so the row
-			// keeps legacy's 49px height instead of gaining an inline-block baseline gap
 			cell: (row) => (
 				<div className="ml-[4px] pl-[8px]">
 					<button type="button" className="inline cursor-pointer align-middle" onClick={() => openModal(row)}>
@@ -175,7 +160,6 @@ const AcademicYearQuotaCard = ({
 				<AcademicYearField label="Nama Jenjang" htmlFor="level_name" hint="required">
 					<LegacyInput id="level_name" type="text" autoComplete="off" spellCheck={false} readOnly value={editing?.levelName ?? ""} />
 				</AcademicYearField>
-				{/* `.form-group.mb-1` */}
 				<AcademicYearField label="Kuota Peserta" htmlFor="quota" hint="required" className="mb-[4px]">
 					<LegacyInput
 						id="quota"

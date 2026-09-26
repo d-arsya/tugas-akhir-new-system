@@ -3,7 +3,6 @@ import type { JSX } from "react"
 import { cn } from "@roja/utils"
 
 type LegacyPaginationProps = {
-	// 1-based
 	page: number
 	pages: number
 	onChange: (page: number) => void
@@ -11,7 +10,6 @@ type LegacyPaginationProps = {
 
 const ELLIPSIS = "ellipsis"
 
-// DataTables `simple_numbers` with the default 7 buttons (0-based internally, like `_numbers`)
 export const pageNumbers = (page: number, pages: number): (number | typeof ELLIPSIS)[] => {
 	const current = page - 1
 	const range = (from: number, to: number): number[] => Array.from({ length: to - from }, (_, i) => from + i)
@@ -21,7 +19,6 @@ export const pageNumbers = (page: number, pages: number): (number | typeof ELLIP
 	return [1, ELLIPSIS, current, current + 1, current + 2, ELLIPSIS, pages]
 }
 
-// Legacy paginate icons (assets/js/report/*-datatable.js `nextIcon` / `previousIcon`)
 const ChevronIcon = ({ previous }: { previous?: boolean }): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
 		<g transform={previous ? "translate(20 20.378) rotate(180)" : "translate(0 -0.378)"}>
@@ -38,7 +35,6 @@ const ChevronIcon = ({ previous }: { previous?: boolean }): JSX.Element => (
 const LINK_CLASS =
 	"relative ml-[-1px] inline-flex h-[34px] w-[34px] items-center justify-center rounded-[5px] border-0 p-0 text-[12px] leading-[15px]"
 
-// Port of the DataTables bootstrap4 pager restyled by public/assets/css/datatable.css
 const LegacyPagination = ({ page, pages, onChange }: LegacyPaginationProps): JSX.Element => {
 	const total = Math.max(pages, 1)
 	const item = (key: string, content: JSX.Element | number | string, target: number | null, state: "active" | "disabled" | "idle"): JSX.Element => (

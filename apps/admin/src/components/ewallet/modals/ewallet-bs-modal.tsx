@@ -3,11 +3,6 @@ import { createPortal } from "react-dom"
 
 import { cn } from "@roja/utils"
 
-// Bootstrap 4 `.modal.fade` + `.modal-backdrop.fade` as the Dompet blades use them (`.modal.tbr_custom_modal.fade`),
-// not the magnific-popup shell of the rest of the kit. Values from bootstrap.css 5946-6074 + 3155
-// (`.fade` 150 ms, `.modal.fade .modal-dialog` translateY(-50px) over 300 ms) and porto theme.css 13613
-// (`.modal { z-index: 1100 }`); `.tbr_custom_modal .modal-dialog { max-width: 440px }` and
-// `.modal-body { padding: 30px }` are app.css 1878-1884.
 const REMOVAL_MS = 300
 
 let openCount = 0
@@ -17,10 +12,8 @@ const lockBody = (lock: boolean): void => {
 }
 
 type EwalletBsModalProps = {
-	/** The blade's element id (`tbr_top_up_modal`, `modalResetPin`, …). */
 	id: string
 	open: boolean
-	/** Backdrop click and Escape. Legacy `data-backdrop="static" data-keyboard="false"` ignores both. */
 	onClose?: () => void
 	isStatic?: boolean
 	children: ReactNode
@@ -80,7 +73,6 @@ const EwalletBsModal = ({ id, open, onClose, isStatic = false, children }: Ewall
 						shown ? "transform-none" : "-translate-y-[50px]",
 					)}
 				>
-					{/* `.modal-content` with the blade's inline `border-radius: 20px`; `.modal-body` is padded 30px */}
 					<div className="pointer-events-auto relative flex w-full flex-col rounded-[20px] border border-black/20 bg-white bg-clip-padding outline-0">
 						<div className="relative flex-auto p-[30px]">{children}</div>
 					</div>

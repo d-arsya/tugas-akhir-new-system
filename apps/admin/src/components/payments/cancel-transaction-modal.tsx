@@ -5,18 +5,6 @@ import LegacyConfirmIcon from "@/components/legacy/legacy-confirm-icon"
 import { LegacyModalOverlay } from "@/components/legacy/legacy-modal"
 import LegacyTextarea from "@/components/legacy/legacy-textarea"
 
-// `student-invoice/partials/modal-cancel.blade.php` + `cancel-transaction.js`.
-//
-// The trigger lives on the Riwayat Pembayaran tab of the Tagihan detail page, which belongs to
-// the invoice workstream; the modal and `useCancelTransaction` live here because cancelling a
-// payment is a payment concern. Import both from the tab's action column:
-//
-//   const cancel = useCancelTransaction(transactionId)
-//   <CancelTransactionModal open={…} submitting={cancel.isPending} onConfirm={(note) => …} />
-//
-// On success legacy switches the page to the Dibatalkan tab and reloads with `?cancel=yes`, which
-// is what makes that tab the active one on the way back in.
-
 type CancelTransactionModalProps = {
 	open: boolean
 	submitting?: boolean
@@ -32,7 +20,6 @@ const CancelTransactionModal = ({
 }: CancelTransactionModalProps): JSX.Element => {
 	const [cancelNote, setCancelNote] = useState("")
 
-	// magnificPopup destroys the inline node on close, so the textarea always reopens empty
 	useEffect(() => {
 		if (!open) setCancelNote("")
 	}, [open])
@@ -65,7 +52,6 @@ const CancelTransactionModal = ({
 							value={cancelNote}
 							onChange={(event) => setCancelNote(event.target.value)}
 						/>
-						{/* `.tbr_confirm_actions.text-center.mt-4` */}
 						<div className="mt-[24px] text-center">
 							<LegacyButton variant="light" className="mr-[8px]" onClick={onCancel}>
 								Batal

@@ -1,13 +1,13 @@
 import { useEffect, useState, type FormEvent, type JSX } from "react"
 
-import type { SmtpEncryption, SmtpPayload, SystemSetting } from "@roja/types"
+import type { SmtpEncryption, SystemSetting } from "@roja/types"
 
 import { LegacyCardText, LegacyCardTitle } from "@/components/legacy/legacy-card"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacyInput from "@/components/legacy/legacy-input"
 import LegacyRadioGroup from "@/components/legacy/legacy-radio-group"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { adminApi } from "@/lib/api"
+import { useUpdateSmtp } from "@/hooks/use-system-setting"
+
 import SystemSubmitRow, { SYSTEM_FIELD_CLASS } from "./system-submit-row"
 
 type EmailTabProps = {
@@ -23,7 +23,6 @@ type SmtpForm = {
 	smtpPassword: string
 }
 
-// The blade prints `checked` on the SSL radio unconditionally, so it is also the fallback here
 const EMPTY_FORM: SmtpForm = {
 	fromName: "",
 	smtpHost: "",
@@ -37,7 +36,6 @@ const ENCRYPTIONS = [
 	{ value: "tls", label: "TLS 587", id: "type_of_encryption_tls" },
 ]
 
-// Port of `setting/partials/email.blade.php` (form.secondary_form)
 const EmailTab = ({ setting, onSaved }: EmailTabProps): JSX.Element => {
 	const [form, setForm] = useState<SmtpForm>(EMPTY_FORM)
 
@@ -48,15 +46,11 @@ const EmailTab = ({ setting, onSaved }: EmailTabProps): JSX.Element => {
 			smtpHost: setting.smtpHost ?? "",
 			typeOfEncryption: setting.typeOfEncryption ?? "ssl",
 			smtpUsername: setting.smtpUsername ?? "",
-			// Legacy renders the stored password in clear in this form, so the port does the same
 			smtpPassword: setting.smtpPassword ?? "",
 		})
 	}, [setting])
 
-	const { submit, submitting } = useLegacySubmit<SmtpPayload, { message: string }>({
-		mutationFn: (payload) => adminApi.updateSmtp(payload),
-		onDone: onSaved,
-	})
+	const { submit, submitting } = useUpdateSmtp(onSaved)
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
@@ -119,8 +113,8 @@ const EmailTab = ({ setting, onSaved }: EmailTabProps): JSX.Element => {
 					{field("smtpUsername", "smtp_username")}
 				</LegacyFormRow>
 
-				{/* `.form-group.row.mb-3` — the same 16px the default `.form-group` gives */}
 				<LegacyFormRow label="SMTP password" htmlFor="smtp_password" hint="required" labelCols={4}>
+					{/* Plain text on purpose: the stored password is shown as-is */}
 					{field("smtpPassword", "smtp_password")}
 				</LegacyFormRow>
 

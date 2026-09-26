@@ -9,61 +9,13 @@ import LegacyCheckbox from "@/components/legacy/legacy-checkbox"
 import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-data-table"
 import LegacyInput from "@/components/legacy/legacy-input"
 import LegacySelect from "@/components/legacy/legacy-select"
-import LegacyTooltip from "@/components/legacy/legacy-tooltip"
-import { EyeOffIcon, EyeOnIcon } from "@/components/student-invoices/invoice-icons"
+import InvoiceEyeToggle, { type EyeToggleState } from "@/components/student-invoices/invoice-eye-toggle"
 import InvoiceStatusLabelBadge from "@/components/student-invoices/invoice-status-label"
 import { fetchStudentBillRows, studentInvoiceKeys } from "@/hooks/use-student-invoices"
 import { useServerTable } from "@/hooks/use-server-table"
 import { formatIndoDate, rupiahLabel } from "@/lib/legacy-format"
 
-// `student-invoice/partials/bill.blade.php` + `student-bill-serverside.js` — the Tagihan tab.
-
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
-
-type Toggle = "active" | "deactive"
-
-/**
- * One eye-toggle. `detail-invoice.js` swaps `tbr_btn-light-*` for the solid variant and flips
- * which of the two nested SVGs carries `d-none`. `tbr_btn-light-success` is not in the shared
- * `LegacyButton` variant map, so both faces are spelled out here from app.css 649-700.
- */
-const EyeToggle = ({
-	state,
-	tone,
-	title,
-	placement,
-	onClick,
-}: {
-	state: Toggle
-	tone: "success" | "primary"
-	title: string
-	placement: "top" | "left"
-	onClick: () => void
-}): JSX.Element => {
-	const active = state === "active"
-	const solid =
-		tone === "success"
-			? "bg-[var(--success)] text-white shadow-[0px_8px_10px_0px_rgba(var(--success-rgb),0.25)]"
-			: "bg-[var(--primary)] text-white shadow-[0px_8px_10px_0px_rgba(var(--primary-rgb),0.25)]"
-	const light =
-		tone === "success"
-			? "bg-[rgba(var(--success-rgb),0.16)] text-[var(--success)] hover:bg-[var(--success)] hover:text-white"
-			: "bg-[rgba(var(--primary-rgb),0.16)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white"
-
-	return (
-		<LegacyTooltip content={title} placement={placement} className="mr-[8px]">
-			<button
-				type="button"
-				aria-pressed={active}
-				aria-label={title}
-				onClick={onClick}
-				className={cn(legacyButtonClass("light", "px-[8px] py-[8px]"), "bg-transparent", active ? solid : light)}
-			>
-				{active ? <EyeOnIcon /> : <EyeOffIcon fill={tone === "success" ? "#28af52" : "#E4007E"} />}
-			</button>
-		</LegacyTooltip>
-	)
-}
 
 type InvoiceBillTabProps = {
 	studentGradeId: number
@@ -72,10 +24,8 @@ type InvoiceBillTabProps = {
 }
 
 const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: InvoiceBillTabProps): JSX.Element => {
-	// Legacy's default is both toggles `deactive`, which is NOT "show everything": the server then
-	// narrows to `status = 'unpaid' AND reminder < now()`.
-	const [paid, setPaid] = useState<Toggle>("deactive")
-	const [unpaid, setUnpaid] = useState<Toggle>("deactive")
+	const [paid, setPaid] = useState<EyeToggleState>("deactive")
+	const [unpaid, setUnpaid] = useState<EyeToggleState>("deactive")
 	const [cost, setCost] = useState("")
 	const [checked, setChecked] = useState<number[]>([])
 
@@ -110,7 +60,6 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 					label=""
 				/>
 			),
-			// `addColumn('checkBox')` renders nothing at all unless the invoice is still unpaid
 			cell: (row) =>
 				row.selectable ? (
 					<LegacyCheckbox
@@ -147,7 +96,6 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 			width: "5%",
 			cell: (row) => (
 				<div>
-					{/* Tailwind's preflight makes `img` a block, which would break the anchor onto its own line */}
 					<Link
 						to="/student-invoices/bills/$invoiceId"
 						params={{ invoiceId: String(row.id) }}
@@ -162,7 +110,6 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 
 	return (
 		<>
-			{/* `.tbr_card_intro` — the heading count is `recordsFiltered`, the caption `recordsTotal` */}
 			<div className="relative">
 				<div className="mt-[2px] inline-block text-[16px] font-bold">{table.total} Tagihan</div>
 				<p className="m-0 text-[var(--grey)]">Dimunculkan dari total {table.totalUnfiltered} tagihan.</p>
@@ -170,7 +117,6 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 
 			<div className="mx-[-15px] flex flex-wrap items-center justify-between">
 				<div className="w-full px-[15px] min-[768px]:w-1/4">
-					{/* `#tbr_bulk_action` is 60% opaque and click-through until something is ticked */}
 					<div
 						className={cn(
 							"mb-[8px] transition-all duration-500",
@@ -190,14 +136,14 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 					<div className="mb-[16px] min-[768px]:mb-0">
 						<p className="mr-[8px] mb-[8px] block text-[var(--grey)] min-[768px]:inline">Tampilkan / Sembunyikan:</p>
 						<div className="block min-[768px]:inline">
-							<EyeToggle
+							<InvoiceEyeToggle
 								state={paid}
 								tone="success"
 								title="Tagihan sudah dibayar"
 								placement="top"
 								onClick={() => setPaid((current) => (current === "active" ? "deactive" : "active"))}
 							/>
-							<EyeToggle
+							<InvoiceEyeToggle
 								state={unpaid}
 								tone="primary"
 								title="Tagihan belum masuk masa pengingat"
@@ -258,12 +204,9 @@ const InvoiceBillTab = ({ studentGradeId, costOptions, onCreateTransaction }: In
 				onStateChange={table.setState}
 				processing={table.processing}
 				loaded={table.loaded}
-				// DataTables `order: [[7, "asc"]]` — Jatuh Tempo, ascending
 				initialSort={{ key: "dueDate", dir: "asc" }}
 				minWidth="1000px"
-				// `sDom` wraps `l` and `f` in a `d-none` div — this tab renders its own above
 				toolbar={false}
-				// `datatableRowCallback` paints the cells, not the row, so the hover tint stays below it
 				rowClassName={(row) => (row.isOverdue ? "[&>td]:bg-[#FDEDEF]" : undefined)}
 			/>
 		</>

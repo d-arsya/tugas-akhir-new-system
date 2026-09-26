@@ -8,7 +8,6 @@ export type EditorMenu = "style" | "para" | "table" | null
 export type EditorToolbarVariant = "full" | "compact"
 
 type ToolbarProps = {
-	/** `compact` is the two-group toolbar of the ewallet status-note editor (`transaction-detail/index.blade.php`). */
 	variant?: EditorToolbarVariant
 	state: Record<string, boolean>
 	menu: EditorMenu
@@ -24,15 +23,6 @@ type ToolbarProps = {
 	onFullscreen: () => void
 }
 
-/**
- * The exact groups of `public/assets/js/default-summernote.js`:
- * style | bold underline clear | ul ol paragraph | table | link | fullscreen codeview help,
- * with the `lang: "id-ID"` tooltips.
- *
- * The `compact` variant is the other summernote init in legacy, on the ewallet transaction
- * detail (`toolbar: [['font',['bold','italic','underline','clear']], ['para',['ul','ol','paragraph']]]`):
- * no style, table, link, fullscreen, code view or help.
- */
 const LegacyEditorToolbar = ({
 	variant = "full",
 	state,
@@ -86,7 +76,6 @@ const LegacyEditorToolbar = ({
 					active={state["insertOrderedList"] === true}
 					onAction={() => onCommand("insertOrderedList")}
 				/>
-				{/* `ui.buttonGroup` nested inside `.note-para`, so the menu lines up with this button */}
 				<div className="relative ml-[-1px] inline-flex">
 					<EditorButton title="Paragraf" icon="align" className={ROUND_R} caret onAction={() => onMenu(menu === "para" ? null : "para")} />
 					{menu === "para" ? <EditorParagraphMenu onCommand={onCommand} state={state} /> : null}

@@ -6,7 +6,8 @@ import { am4charts, am4core, styleLegacyTooltip } from "@/lib/amcharts"
 
 type LineChartCanvasProps = { data: DashboardChartItem[] }
 
-// Port of legacy public/assets/js/dashboard/line-chart.js (amCharts 4)
+const TOOLTIP_TEXT = "Total Santri\n    {valueY}"
+
 const LineChartCanvas = ({ data }: LineChartCanvasProps): JSX.Element => {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const chartRef = useRef<am4charts.XYChart | null>(null)
@@ -56,9 +57,7 @@ const LineChartCanvas = ({ data }: LineChartCanvasProps): JSX.Element => {
 		cursor.snapToSeries = series
 		chart.cursor = cursor
 
-		// Same template-literal text (incl. indentation) as legacy
-		series.tooltipText = `Total Santri
-    {valueY}`
+		series.tooltipText = TOOLTIP_TEXT
 		series.name = "Total Santri"
 		styleLegacyTooltip(series.tooltip)
 		if (series.tooltip) series.tooltip.pointerOrientation = "horizontal"

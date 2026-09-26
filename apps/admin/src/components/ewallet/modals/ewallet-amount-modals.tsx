@@ -8,13 +8,11 @@ import LegacyCurrencyInput from "@/components/legacy/legacy-currency-input"
 import { closeEwalletModal, openEwalletModal, useEwalletModalState, type EwalletModalName } from "@/components/ewallet/modals/ewallet-modal-store"
 import { EwalletTopUpIcon, EwalletWithdrawIcon } from "@/components/ewallet/modals/ewallet-modal-icons"
 import EwalletBsModal from "@/components/ewallet/modals/ewallet-bs-modal"
+import { EWALLET_TITLE_CLASS } from "@/components/ewallet/modals/ewallet-title-class"
 import { useEwalletParkWithdraw, useEwalletTopUp, useRefreshEwallets } from "@/hooks/use-ewallet-money"
 import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 
-// Legacy ewallet/top-up-modal.blade.php + top-up-confirmation-modal.blade.php and
-// withdraw-modal.blade.php + withdraw-confirmation-modal.blade.php. The two pairs differ only in
-// their words, icon, ids and the endpoint the form posts to, so one component renders both.
-export type AmountKind = "topUp" | "withdraw"
+type AmountKind = "topUp" | "withdraw"
 
 const COPY = {
 	topUp: {
@@ -41,13 +39,8 @@ const COPY = {
 	},
 } as const
 
-// `<h5 class="tbr_weight-bold text-center">`: app.css 306 (22px, 16px below 768px), line-height 1.4rem, porto `h5 { margin: 10px 0 }`; `!` beats globals.css
-const TITLE_CLASS =
-	"m-0! my-[10px]! text-center text-[22px]! leading-[22.4px]! font-bold! tracking-[0px]! text-[var(--heading-txt-inverse)]! max-[768px]:text-[16px]!"
-// porto `p { line-height: 24px; margin: 0 0 20px }`
 const PARAGRAPH_CLASS = "mt-0 mb-[20px] leading-[24px]"
 
-// bootstrap `.col-lg-1.col-md-1` spacer, `.col-5`, `.col-1`, `.col-5` inside `.row.w-100`
 const COL_SPACER = "relative w-full px-[15px] min-[768px]:w-[8.333333%] min-[768px]:flex-none"
 const COL_5 = "relative w-[41.666667%] flex-none px-[15px]"
 const COL_1 = "relative w-[8.333333%] flex-none px-[15px]"
@@ -65,7 +58,6 @@ const ConfirmRow = ({ label, children, valueIsParagraph = false }: { label: stri
 	</div>
 )
 
-// The `?` icon both confirmation blades carry, byte for byte
 const ConfirmIcon = (): JSX.Element => (
 	<svg width="67" height="67" viewBox="0 0 67 67" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline">
 		<path opacity="0.3" d="M33.5 62C49.2401 62 62 49.2401 62 33.5C62 17.7599 49.2401 5 33.5 5C17.7599 5 5 17.7599 5 33.5C5 49.2401 17.7599 62 33.5 62Z" fill="#FFA800" />
@@ -89,7 +81,6 @@ const EwalletAmountModals = ({ kind, detail }: AmountModalsProps): JSX.Element =
 	const park = useEwalletParkWithdraw(detail.id)
 	const mutation = kind === "topUp" ? topUp : park
 
-	// `defaultAjax`: notice, then `window.location = res.redirect` 1000 ms later (a reload when it is the same page)
 	const submission = useLegacySubmit<string, EwalletMoneyResult>({
 		mutationFn: (masked) => mutation.mutateAsync(masked),
 		onDone: (data) => {
@@ -107,7 +98,6 @@ const EwalletAmountModals = ({ kind, detail }: AmountModalsProps): JSX.Element =
 
 	return (
 		<>
-			{/* top-up-modal / withdraw-modal */}
 			<EwalletBsModal id={copy.modalId} open={state[copy.modal]} onClose={dismiss(copy.modal)}>
 				<copy.Icon />
 				<form
@@ -117,11 +107,10 @@ const EwalletAmountModals = ({ kind, detail }: AmountModalsProps): JSX.Element =
 						openEwalletModal(copy.confirm)
 					}}
 				>
-					<h5 className={TITLE_CLASS}>{copy.title}</h5>
+					<h5 className={EWALLET_TITLE_CLASS}>{copy.title}</h5>
 					<p className={`${PARAGRAPH_CLASS} text-center`}>
 						Masukkan nominal sesuai dengan uang <br /> {copy.lead} {who}.
 					</p>
-					{/* `.form-group.tbr_w-lg-290px.my-4.px-3` — the 290px class has no rule in app.css */}
 					<div className="my-[24px] px-[16px]">
 						<label className="m-0 flex" htmlFor={`${copy.modalId}-amount`}>
 							Nominal
@@ -151,12 +140,11 @@ const EwalletAmountModals = ({ kind, detail }: AmountModalsProps): JSX.Element =
 				</form>
 			</EwalletBsModal>
 
-			{/* top-up-confirmation-modal / withdraw-confirmation-modal */}
 			<EwalletBsModal id={copy.confirmId} open={state[copy.confirm]} onClose={dismiss(copy.confirm)}>
 				<div className="mb-[16px] text-center">
 					<ConfirmIcon />
 				</div>
-				<h5 className={`${TITLE_CLASS} mb-[24px]!`}>Konfirmasi</h5>
+				<h5 className={`${EWALLET_TITLE_CLASS} mb-[24px]!`}>Konfirmasi</h5>
 				<ConfirmRow label="ID eWallet">{detail.uniqueId}</ConfirmRow>
 				<ConfirmRow label="Total Pembayaran" valueIsParagraph>
 					<span id={copy.amountId}>Rp {shownAmount}</span>
@@ -177,7 +165,7 @@ const EwalletAmountModals = ({ kind, detail }: AmountModalsProps): JSX.Element =
 						variant="warning"
 						onClick={() => {
 							closeEwalletModal(copy.confirm)
-							// top-up waits 500 ms for the confirmation to fade; withdraw posts at once
+							// Only top-up waits for the confirmation to fade out before posting
 							if (kind === "topUp") timer.current = window.setTimeout(() => submission.submit(amount), 500)
 							else submission.submit(amount)
 						}}

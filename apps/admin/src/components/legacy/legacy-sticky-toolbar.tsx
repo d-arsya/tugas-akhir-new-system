@@ -5,7 +5,6 @@ import { cn } from "@roja/utils"
 
 import type { SidebarRoutePath } from "@/components/layout/sidebar-menu"
 
-// Port of `ul.tbr_sticky_toolbar` (public/assets/css/app.css "STICKY TOOLBAR")
 const ITEM_CLASS =
 	"group mb-[2px] flex h-[42px] min-h-[42px] w-[42px] min-w-[42px] items-center justify-center overflow-hidden rounded-l-[6px] bg-white shadow-[0_4px_12px_0_rgba(82,63,105,0.06)]"
 
@@ -14,7 +13,6 @@ const LINK_CLASS = {
 	info: "bg-[rgba(104,102,233,0.1)] hover:bg-[var(--info)]",
 } as const
 
-// On hover the legacy icon group goes to full opacity and its paths turn white
 const ICON_CLASS =
 	"[&>g]:opacity-50 [&>g]:transition-all [&>g]:duration-500 group-hover:[&>g]:opacity-100 [&_path]:transition-all [&_path]:duration-500 group-hover:[&_path]:fill-white"
 

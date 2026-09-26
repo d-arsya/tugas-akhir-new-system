@@ -9,23 +9,16 @@ import type { LegacyColumn } from "@/components/legacy/legacy-data-table"
 import StudentKbmStatus, { kbmNoteText } from "./student-kbm-status"
 import { ACTION_LINK_CLASS, DETAIL_ICON, DestroyAction, StudentLabel } from "./student-ui"
 
-// The columns of `student/student.blade.php` over `StudentController::studentList:317-354`, with the cell
-// renderers of `StudentService` (checkbox, dbPhoto, setSubGrade, kbmStatus), `RegistrantService::datatableDate`,
-// `UserService::getAccountStatus` and `AcademicYearService::getAction`.
-
 export type NumberedStudent = AdminStudentRosterRow & { no: number }
 
-/** `d-m-Y` of a `Y-m-d` date */
 const dmy = (ymd: string | null): string => {
 	if (!ymd) return ""
 	const [year, month, day] = ymd.split("-")
 	return `${day}-${month}-${year}`
 }
 
-/** `UserService::getAccountStatus()` — `$status == 0` is loose, so a missing account (null) reads Active. */
 const accountActive = (isBlocked: boolean | null): boolean => isBlocked !== true
 
-/** What DataTables searches and sorts: the cell's text with the tags stripped. */
 export const rosterCellText = (row: NumberedStudent, key: string): string => {
 	switch (key) {
 		case "no":
@@ -34,7 +27,6 @@ export const rosterCellText = (row: NumberedStudent, key: string): string => {
 			return row.nis ?? ""
 		case "fullname":
 			return row.fullname ?? ""
-		// The hidden unix stamp in front of the date is what orders the column; the ISO date orders the same
 		case "dateOfBirth":
 			return `${row.dateOfBirth ?? ""} ${dmy(row.dateOfBirth)}`
 		case "parentName":
@@ -54,7 +46,6 @@ export const rosterCellText = (row: NumberedStudent, key: string): string => {
 
 export const ROSTER_SEARCH_KEYS = ["no", "nis", "fullname", "dateOfBirth", "parentName", "majorName", "subGrade", "kbm", "account"]
 
-/** `Str::limit($label, 20, ' ...')` — cut at 20 characters, trailing spaces dropped, then " ...". */
 const limit20 = (label: string): string => (label.length <= 20 ? label : `${label.slice(0, 20).trimEnd()} ...`)
 
 type ColumnOptions = {
@@ -67,7 +58,6 @@ type ColumnOptions = {
 }
 
 const Photo = ({ url }: { url: string | null }): JSX.Element => (
-	// `.tbr_dt_photo` (app.css 2498-2508)
 	<div
 		className="relative h-[50px] w-[40px] overflow-hidden rounded-[5px] bg-[var(--primary)] bg-cover bg-center bg-no-repeat"
 		style={{ backgroundImage: `url(${url ?? "/assets/svg/etc/No-Photo.svg"})` }}
@@ -90,7 +80,6 @@ export const rosterColumns = ({ settings, checked, allChecked, onToggle, onToggl
 		{ key: "no", header: "No", width: "4%", sortable: true, cell: (row) => row.no },
 		{ key: "photo", header: "Foto", width: "6%", sortable: true, cell: (row) => <Photo url={row.photoUrl} /> },
 		{ key: "nis", header: "NISP", width: "8%", sortable: true, cell: (row) => row.nis },
-		// `columnVisible()` hides these when their setting is off
 		{ key: "fullname", header: limit20(setting(1)?.label ?? ""), width: "17%", sortable: true, visible: on(1), cell: (row) => row.fullname },
 		{
 			key: "dateOfBirth",
@@ -102,7 +91,6 @@ export const rosterColumns = ({ settings, checked, allChecked, onToggle, onToggl
 		},
 		{ key: "parentName", header: "Orang Tua", width: "11%", sortable: true, visible: on(37) || on(44), cell: (row) => row.parentName },
 		{ key: "majorName", header: "Jurusan", width: "8%", sortable: true, cell: (row) => row.majorName },
-		// `StudentService::setSubGrade()` hides "undefined" in a `d-none` span (still searchable)
 		{ key: "subGrade", header: "Subkelas", width: "8%", sortable: true, cell: (row) => (row.subGrade === "undefined" ? null : row.subGrade) },
 		{
 			key: "kbm",

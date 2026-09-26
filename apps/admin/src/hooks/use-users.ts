@@ -4,7 +4,6 @@ import type { AdminMessageResult, AdminUserDetail, AdminUserPayload, AdminUserRo
 
 import { adminApi } from "@/lib/api"
 
-// Legacy Pengelola pages (user.list / user.show / user.store / user.update / user.destroy)
 export const userKeys = {
 	all: ["admin-users"] as const,
 	list: () => [...userKeys.all, "list"] as const,
@@ -29,7 +28,6 @@ export const useUpdateUser = (id: number): UseMutationResult<AdminMessageResult,
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (payload: AdminUserPayload) => adminApi.updateUser(id, payload),
-		// Legacy reloads the edit page after saving, so the form shows what was stored
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
 	})
 }
@@ -38,7 +36,6 @@ export const useDeleteUser = (): UseMutationResult<AdminMessageResult, Error, nu
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (id: number) => adminApi.deleteUser(id),
-		// `InitDatatable.ajax.reload(cb, null)` — the table refreshes but stays on its page
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.list() }),
 	})
 }

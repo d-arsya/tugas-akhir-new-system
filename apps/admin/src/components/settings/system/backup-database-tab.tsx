@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type JSX, type KeyboardEvent } from "react"
+import { useEffect, useState, type FormEvent, type JSX } from "react"
 
 import type { SystemSetting } from "@roja/types"
 
@@ -6,10 +6,10 @@ import LegacyButton from "@/components/legacy/legacy-button"
 import { LegacyCardText, LegacyCardTitle, LegacyDivider } from "@/components/legacy/legacy-card"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacyInput from "@/components/legacy/legacy-input"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { useDownloadDatabase } from "@/hooks/use-system-setting"
-import { adminApi } from "@/lib/api"
+import { useDownloadDatabase, useUpdateBackupFrequency } from "@/hooks/use-system-setting"
+import { digitsOnly } from "@/lib/digits-only"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
+
 import SystemSubmitRow, { SYSTEM_FIELD_CLASS } from "./system-submit-row"
 
 type BackupDatabaseTabProps = {
@@ -17,13 +17,6 @@ type BackupDatabaseTabProps = {
 	onSaved: () => void
 }
 
-// `onkeypress="return isNumberKey(event)"` (public/assets/js/input-number-strict.js): digits only
-const digitsOnly = (event: KeyboardEvent<HTMLInputElement>): void => {
-	if (event.ctrlKey || event.metaKey || event.altKey) return
-	if (event.key.length === 1 && !/\d/.test(event.key)) event.preventDefault()
-}
-
-// Port of `setting/partials/backup-db.blade.php` (form.main_form)
 const BackupDatabaseTab = ({ setting, onSaved }: BackupDatabaseTabProps): JSX.Element => {
 	const [backupFrequency, setBackupFrequency] = useState("")
 
@@ -31,16 +24,12 @@ const BackupDatabaseTab = ({ setting, onSaved }: BackupDatabaseTabProps): JSX.El
 		setBackupFrequency(setting ? String(setting.backupFrequency) : "")
 	}, [setting])
 
-	const { submit, submitting } = useLegacySubmit<number, { message: string }>({
-		mutationFn: (value) => adminApi.updateBackupFrequency(value),
-		onDone: onSaved,
-	})
+	const { submit, submitting } = useUpdateBackupFrequency(onSaved)
 	const download = useDownloadDatabase()
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
-		// An empty field parses to NaN, which serialises as null — the same "required" failure the
-		// legacy `ConvertEmptyStringsToNull` produces for an empty `backup_frequency`
+		// An empty field sends NaN (null in JSON) on purpose, so the server's required rule answers
 		submit(Number.parseInt(backupFrequency, 10))
 	}
 
@@ -53,7 +42,6 @@ const BackupDatabaseTab = ({ setting, onSaved }: BackupDatabaseTabProps): JSX.El
 			</LegacyCardText>
 
 			<form onSubmit={onSubmit}>
-				{/* `.form-group > .form-group.row.mb-2` */}
 				<div className="mb-[16px]">
 					<LegacyFormRow label="Frekuensi" htmlFor="backup_frequency" hint="optional" labelCols={4} className="mb-[8px]">
 						<div className={SYSTEM_FIELD_CLASS}>
@@ -77,7 +65,6 @@ const BackupDatabaseTab = ({ setting, onSaved }: BackupDatabaseTabProps): JSX.El
 			<LegacyDivider />
 
 			<div className="mb-[8px] text-center">
-				{/* `p.mb-3` over Porto's `p { line-height: 24px; margin: 0 0 20px }` */}
 				<p className="mt-0 mb-[16px] leading-[24px]">Klik tombol di bawah ini untuk mendownload file backup secara langsung.</p>
 				<LegacyButton
 					variant="secondary"

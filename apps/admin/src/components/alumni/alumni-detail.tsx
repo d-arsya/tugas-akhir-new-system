@@ -7,10 +7,6 @@ import { useSocietySettings } from "@/hooks/use-society-settings"
 
 import AlumniDetailForm from "./alumni-detail-form"
 
-// OWNER: AK-A. Legacy `alumni/edit.blade.php` ("Detail Alumni", `/alumni/graduation-year/detail/{alumni}`) with
-// `alumni/partials/edit/page-header.blade.php`. After a save legacy reloads the page; here the record is read
-// again (every Akademik write invalidates it) and the form remounts on the fresh data.
-
 const AlumniDetail = ({ alumniId }: { alumniId: number }): JSX.Element => {
 	const detail = useAlumniDetail(alumniId)
 	const settings = useSocietySettings()
@@ -49,7 +45,7 @@ const AlumniDetail = ({ alumniId }: { alumniId: number }): JSX.Element => {
 
 			{detail.data && settings.data ? (
 				<AlumniDetailForm
-					// Only a save remounts the form: a background refetch must not wipe what is being typed
+					// Remount only after a save, so a background refetch never wipes unsaved input
 					key={generation}
 					detail={detail.data}
 					settings={settings.data}

@@ -7,20 +7,20 @@ import type {
 	EwalletHistoryQuery,
 	EwalletHistoryRow,
 	EwalletTransactionDetail,
+	EwalletTransactionKind,
+	EwalletTransactionStatus,
 	EwalletTransactionUpdateDto,
 	ServerTableResult,
 } from "@roja/types"
 
+import { legacyNotify } from "@/components/legacy/legacy-notify"
 import { ewalletKeys } from "@/hooks/use-ewallets"
 import { adminApi } from "@/lib/api"
+import { saveBlob } from "@/lib/download"
+import { legacyErrors } from "@/lib/legacy-errors"
 import useServerTable, { type UseServerTableResult } from "@/hooks/use-server-table"
 
-// Legacy `EwalletController@transactionDetail` / `@transactionUpdate` and
-// `EwalletTransactionHistoryController` (Dompet ▸ Riwayat Transaksi). Owned by WS D-C.
-
-// Under the same root as `ewalletKeys` on purpose: a top-up or withdraw (D-B) changes what Riwayat lists, and a
-// status change here changes the balances, the Akun list and the sidebar badge — one `invalidateQueries` on
-// `ewalletKeys.all` from either side has to reach both.
+// Nested under ewalletKeys.all so one invalidation refreshes balances, lists, Riwayat and the sidebar badge
 export const ewalletTransactionKeys = {
 	all: [...ewalletKeys.all, "txn"] as const,
 	detail: (transactionId: number) => [...ewalletTransactionKeys.all, "detail", transactionId] as const,
@@ -28,7 +28,6 @@ export const ewalletTransactionKeys = {
 	historyDetail: (transactionId: number) => [...ewalletTransactionKeys.all, "history-detail", transactionId] as const,
 }
 
-/** `ewallet/transaction-detail/index.blade.php` — Cash or Bank Transfer (Manual). */
 export const useEwalletTransaction = (transactionId: number): UseQueryResult<EwalletTransactionDetail> =>
 	useQuery({
 		queryKey: ewalletTransactionKeys.detail(transactionId),
@@ -36,7 +35,6 @@ export const useEwalletTransaction = (transactionId: number): UseQueryResult<Ewa
 		staleTime: 0,
 	})
 
-/** The two confirmation forms post the same PATCH; legacy reloads the page 1000 ms after the notice. */
 export const useUpdateEwalletTransaction = (
 	transactionId: number,
 ): UseMutationResult<AdminMessageResult, unknown, EwalletTransactionUpdateDto> => {
@@ -49,25 +47,30 @@ export const useUpdateEwalletTransaction = (
 	})
 }
 
-/** The `dd/mm/yyyy` pickers of `transaction-history/index.blade.php`, `""` when empty. */
 export type EwalletHistoryDateRange = { from: string; to: string }
 
-/** The advanced filter card (`#ewallet` status, `#type`). `""` = the placeholder option. */
 export type EwalletHistoryFilters = { status: string; type: string }
 
-/**
- * `date` as the page writes it into `#ewallet_date-export--filter`: a start with no end
- * defaults the end to today (`$('#date_start').on("change")`); an end with no start is what
- * legacy posted as `" - dd/mm/yyyy"` and 500'd on, so it is dropped here.
- */
-export const historyDateParam = (range: EwalletHistoryDateRange, today: string): string | undefined => {
+const historyDateParam = (range: EwalletHistoryDateRange, today: string): string | undefined => {
 	if (range.from === "") return undefined
 	return `${range.from} - ${range.to === "" ? today : range.to}`
 }
 
 export type EwalletHistoryExtra = Pick<EwalletHistoryQuery, "date" | "status" | "type">
 
-/** Legacy `initTransactionHistoryEwalletDT` — server-side, `created_at` descending. */
+export const historyCriteria = (
+	range: EwalletHistoryDateRange,
+	filters: EwalletHistoryFilters,
+	today: string,
+): EwalletHistoryExtra => {
+	const date = historyDateParam(range, today)
+	return {
+		...(date ? { date } : {}),
+		...(filters.status ? { status: filters.status as EwalletTransactionStatus } : {}),
+		...(filters.type ? { type: filters.type as EwalletTransactionKind } : {}),
+	}
+}
+
 export const useEwalletHistoryTable = (extra: EwalletHistoryExtra): UseServerTableResult<EwalletHistoryRow> =>
 	useServerTable<EwalletHistoryRow, EwalletHistoryExtra>({
 		queryKey: ewalletTransactionKeys.history(),
@@ -77,14 +80,17 @@ export const useEwalletHistoryTable = (extra: EwalletHistoryExtra): UseServerTab
 		staleTime: 0,
 	})
 
-/** `EwalletTransactionHistoryController@detail`. */
 export const useEwalletHistoryDetail = (transactionId: number): UseQueryResult<EwalletHistoryDetail> =>
 	useQuery({
 		queryKey: ewalletTransactionKeys.historyDetail(transactionId),
 		queryFn: () => adminApi.getEwalletHistoryDetail(transactionId),
 	})
 
-/** The export form's GET; the caller saves the blob. */
-export const downloadEwalletHistory = (
-	query: EwalletHistoryExportQuery,
-): Promise<{ blob: Blob; fileName: string | null }> => adminApi.downloadEwalletHistoryReport(query)
+export const useDownloadEwalletHistory = (): UseMutationResult<void, unknown, EwalletHistoryExportQuery> =>
+	useMutation<void, unknown, EwalletHistoryExportQuery>({
+		mutationFn: async (query) => {
+			const { blob, fileName } = await adminApi.downloadEwalletHistoryReport(query)
+			saveBlob(blob, fileName ?? "Laporan Riwayat Transaksi.xlsx")
+		},
+		onError: (error) => legacyNotify.error(legacyErrors(error)),
+	})

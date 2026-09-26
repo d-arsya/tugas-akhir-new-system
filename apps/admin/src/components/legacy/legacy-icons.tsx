@@ -1,10 +1,5 @@
 import type { JSX } from "react"
 
-// Inline SVGs the legacy blades write by hand (as opposed to the ones served from
-// /assets/svg/icons/*.svg, which stay asset files). Shared so that three workstreams
-// do not each paste their own copy with slightly different path data.
-
-/** `academic-year/create.blade.php` — the orange info circle that triggers a tooltip. */
 export const InfoCircleIcon = ({ className }: { className?: string }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +19,6 @@ export const InfoCircleIcon = ({ className }: { className?: string }): JSX.Eleme
 	</svg>
 )
 
-/** `academic-year/create.blade.php` — the grey calendar in a datepicker input-group prepend. */
 export const CalendarIcon = ({ className }: { className?: string }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +40,6 @@ export const CalendarIcon = ({ className }: { className?: string }): JSX.Element
 	</svg>
 )
 
-/** `grade/partials/grade.blade.php` — the pink floppy on the icon-only save button. */
 export const SaveIcon = ({ className }: { className?: string }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -64,7 +57,6 @@ export const SaveIcon = ({ className }: { className?: string }): JSX.Element => 
 	</svg>
 )
 
-/** `.tbr_btn-back` — the purple left arrow on the delete/delegate cards. */
 export const BackArrowIcon = ({ className }: { className?: string }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -84,28 +76,7 @@ export const BackArrowIcon = ({ className }: { className?: string }): JSX.Elemen
 	</svg>
 )
 
-/**
- * `StudentCostService::action()` (`app/Http/Services/StudentCostService.php` 20-34) — the pink
- * right-arrow that drills one level deeper on the Biaya Santri pages. Transcribed verbatim:
- * the tail lands at x 5.039→19, y 11→13 and the head is a `rotate(-90)` chevron, so the glyph
- * reads as `→`. (An earlier hand-derivation of this icon rotated the wrong way and sat 6px high
- * and 6px left, clipping the tail off-canvas and rendering a bare `›`.)
- *
- * Legacy always wraps it in `a.tbr_academic_year_action` — a `#fae3f0` pill, 7px padding and
- * 7px radius, which on hover turns `--primary` and fills both shapes white (app.css 3023-3043).
- * The icon is not a wrapper component because TanStack types `params` per route, which a generic
- * `Record<string, string>` cannot satisfy, so compose it yourself:
- *
- *   <div className="text-right">
- *     <Link to="/student-costs/$academicYearId" params={{ academicYearId }} className={STUDENT_COST_ACTION_CLASS}>
- *       <ChevronActionIcon />
- *     </Link>
- *   </div>
- *
- * Legacy's hover rule targets `#Path_295` and `#Rectangle_1086` by id; `STUDENT_COST_ACTION_CLASS`
- * matches them structurally instead, so the element order below — backing path, tail rect, head
- * path — is load-bearing.
- */
+// STUDENT_COST_ACTION_CLASS whitens the rect and the last path on hover, so keep this element order
 export const ChevronActionIcon = ({ className }: { className?: string }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"

@@ -10,15 +10,6 @@ import { useEwalletTransactions } from "@/hooks/use-ewallets"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 import { rupiahDots } from "@/lib/legacy-format"
 
-// Legacy `assets/js/ewallet/transaction-datatable.js` + `EwalletController@transactionList`.
-//
-// The port serves the wallet's rows in one answer and pages them in the browser (the brief's
-// decision — legacy ran `DataTables::collection` behind `serverSide: true`, which is the same rows
-// paged by the server). Orders and searches run over the same values the cells show, with the
-// unix stamp behind the date and the raw amount behind the money, as yajra sorts the model's own
-// attributes rather than the formatted text.
-
-// yajra's `addIndexColumn()` numbers the rows once, before any sorting
 type NumberedRow = EwalletWalletTransactionRow & { no: number }
 
 const STATUS_TEXT: Record<EwalletTransactionStatus, string> = {
@@ -30,7 +21,6 @@ const STATUS_TEXT: Record<EwalletTransactionStatus, string> = {
 
 const STATUS_VARIANT = { waiting: "warning", valid: "success", invalid: "danger", process: "primary" } as const
 
-/** `EwalletController@statusLabel` — anything outside the four states renders no label. */
 const statusText = (status: string): string => STATUS_TEXT[status as EwalletTransactionStatus] ?? ""
 
 const cellText = (row: NumberedRow, key: string): string => {
@@ -47,7 +37,6 @@ const cellText = (row: NumberedRow, key: string): string => {
 			return String(row.amount)
 		case "createdAt":
 			return String(row.createdAtTs).padStart(12, "0")
-		// Searched as displayed; only ever asked for by `SEARCH_KEYS`, never a sort key
 		case "createdAtDisplay":
 			return row.createdAt
 		case "status":
@@ -59,10 +48,8 @@ const cellText = (row: NumberedRow, key: string): string => {
 	}
 }
 
-// DataTables searches every column except `DT_RowIndex`
 const SEARCH_KEYS = ["code", "name", "paymentMethod", "amount", "createdAtDisplay", "status"]
 
-/** `MerchantService::editButton` — the same magnifier for all three targets; only `none` has no `href`. */
 const ActionCell = ({ row }: { row: EwalletWalletTransactionRow }): JSX.Element => {
 	const icon = <img src="/assets/svg/icons/data_detail.svg" alt="Detail" width={24} height={24} />
 	return (
@@ -92,7 +79,7 @@ const columns: LegacyColumn<NumberedRow>[] = [
 	{
 		key: "status",
 		header: "Status",
-		// `orderFalse = [6]` — the Status column is the one that cannot be sorted (Actions, the last, can)
+		// Status is the one column that cannot be sorted; Actions can
 		sortable: false,
 		cell: (row) => {
 			const label = statusText(row.status)
@@ -102,7 +89,6 @@ const columns: LegacyColumn<NumberedRow>[] = [
 	{ key: "action", header: "Actions", sortable: true, cell: (row) => <ActionCell row={row} /> },
 ]
 
-/** `.card.tbr_card > .card-body.p-4 > .table-responsive > table.tbr_table` */
 const EwalletTransactionTable = ({ ewalletId }: { ewalletId: number }): JSX.Element => {
 	const { data, isFetching, isSuccess } = useEwalletTransactions(ewalletId)
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -121,12 +107,10 @@ const EwalletTransactionTable = ({ ewalletId }: { ewalletId: number }): JSX.Elem
 				onStateChange={setState}
 				processing={isFetching}
 				loaded={isSuccess}
-				// No `order` option: DataTables' default `[[0, "asc"]]` sorts the No column ascending
 				initialSort={{ key: "no", dir: "asc" }}
 				minWidth="0px"
 				emptyText="Kamu belum memiliki transaksi"
 				zeroRecordsText="Transaksi yang kamu cari tidak ada"
-				// `if (data.status.includes("Diproses")) $(row).find("td").css("background-color", "#FFF6F7")`
 				rowClassName={(row) => (row.status === "process" ? "[&>td]:bg-[#FFF6F7]" : undefined)}
 			/>
 		</LegacyCard>

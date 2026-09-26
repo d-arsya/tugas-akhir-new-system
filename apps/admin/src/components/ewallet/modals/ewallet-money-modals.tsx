@@ -5,13 +5,9 @@ import type { EwalletDetail } from "@roja/types"
 import EwalletAmountModals from "@/components/ewallet/modals/ewallet-amount-modals"
 import { closeAllEwalletModals, openEwalletModal } from "@/components/ewallet/modals/ewallet-modal-store"
 
-// Seam 1 of the Dompet port: the detail page (D-A) mounts `<EwalletMoneyModals detail={…} />` once and opens
-// a modal from its buttons with `useEwalletModals()`; the setting page mounts `<EwalletResetPinModals ewalletId={…} />`
-// (ewallet-reset-pin-modals.tsx) and opens it the same way.
 type EwalletMoneyModalsProps = { detail: EwalletDetail }
 
-export const EwalletMoneyModals = ({ detail }: EwalletMoneyModalsProps): JSX.Element => {
-	// A modal left open must not greet the next wallet's page
+const EwalletMoneyModals = ({ detail }: EwalletMoneyModalsProps): JSX.Element => {
 	useEffect(() => closeAllEwalletModals, [])
 
 	return (
@@ -22,12 +18,9 @@ export const EwalletMoneyModals = ({ detail }: EwalletMoneyModalsProps): JSX.Ele
 	)
 }
 
-export type EwalletModalOpeners = {
-	/** `data-target="#tbr_top_up_modal"` */
+type EwalletModalOpeners = {
 	openTopUp: () => void
-	/** `data-target="#tbr_withdraw_modal"` */
 	openWithdraw: () => void
-	/** `data-target="#modalResetPin"` */
 	openResetPin: () => void
 }
 

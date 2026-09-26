@@ -8,10 +8,6 @@ import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 import { formatIndoDate, rupiahLabel } from "@/lib/legacy-format"
 
-// `student-invoice/partials/{history,cancel}.blade.php` + `@listTransaction` / `@listCancel`.
-// Both tabs are `initCustomDatatables` — client-side paged, unlike the Tagihan tab.
-
-// The `$no` counter legacy bakes into the payload, so it keeps its value when the table is re-sorted
 type NumberedTransaction = InvoiceTransactionRow & { no: number }
 
 const cellText = (row: NumberedTransaction, key: string): string => {
@@ -20,8 +16,6 @@ const cellText = (row: NumberedTransaction, key: string): string => {
 			return String(row.no)
 		case "code":
 			return `${row.transactionCode ?? ""} ${formatIndoDate(row.paidAt, true)}`
-		// `getCost()` hides a `<span class="d-none">{amount}%</span>` sort key behind the rupiah text,
-		// which the `any-number` sort type then reads — i.e. the column orders numerically
 		case "amount":
 			return String(row.amount)
 		case "itemCount":
@@ -39,9 +33,7 @@ type InvoiceTransactionTabProps = {
 	rows: InvoiceTransactionRow[]
 	loaded: boolean
 	processing: boolean
-	/** The Dibatalkan tab swaps the cancel cross for a tooltip carrying `cancel_note`. */
 	variant: "payments" | "cancelled"
-	/** Opens the cancel modal. Owned by the payment workstream; omitted the icon is inert. */
 	onCancel?: (row: InvoiceTransactionRow) => void
 }
 
@@ -57,7 +49,6 @@ const InvoiceTransactionTab = ({ rows, loaded, processing, variant, onCancel }: 
 			key: "code",
 			header: "ID Pembayaran",
 			sortable: true,
-			// `getcodeDate()`: the code in primary, a <br>, then the paid-at stamp in grey
 			cell: (row) => (
 				<>
 					<span className="text-[var(--primary)]">{row.transactionCode}</span> <br />{" "}
@@ -76,15 +67,11 @@ const InvoiceTransactionTab = ({ rows, loaded, processing, variant, onCancel }: 
 				<div>
 					{variant === "cancelled" ? (
 						<>
-							{/* `getActionCancel()` interpolated the note straight into `data-original-title`
-							    with `data-html="true"` — stored XSS (F-6). React escapes it instead. */}
 							<LegacyTooltip content={row.cancelNote ?? ""} placement="left" className="align-middle">
 								<img src="/assets/svg/icons/data_note.svg" alt="Detail" width={24} height={24} />
 							</LegacyTooltip>{" "}
 						</>
 					) : null}
-					{/* Tailwind's preflight makes `img` a block, which would stack the icons; legacy's
-					    two anchors sit on one line separated by the newline between them in the Blade */}
 					<Link
 						to="/student-invoices/transactions/$transactionId"
 						params={{ transactionId: String(row.id) }}
@@ -120,7 +107,6 @@ const InvoiceTransactionTab = ({ rows, loaded, processing, variant, onCancel }: 
 			onStateChange={setState}
 			processing={processing}
 			loaded={loaded}
-			// `initCustomDatatables` sets no `order`, so DataTables falls back to [[0, "asc"]]
 			initialSort={{ key: "no", dir: "asc" }}
 			minWidth="800px"
 		/>

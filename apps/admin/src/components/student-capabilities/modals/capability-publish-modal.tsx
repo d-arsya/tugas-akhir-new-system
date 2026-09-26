@@ -2,16 +2,6 @@ import type { JSX } from "react"
 
 import CapabilityConfirmModal, { ConfirmActions, ConfirmBullets } from "./capability-confirm-modal"
 
-/**
- * `student-capability/partials/modal-publish.blade.php` — the "Telah Disepakati" gate on the
- * level-5 item page. Legacy wrapped a real `POST publishInvoice` form here; the port calls
- * `publishCapability(capabilityId, studentGradeId)` from `onConfirm` instead.
- *
- * ⚠ Shares the dom id `#modalPublish` with `modal-publish-mass-create.blade.php`
- * (`capability-publish-mass-modal.tsx`). The two are never rendered on the same page and
- * their second bullet is different copy — this one warns about **empty** amounts, the mass
- * one warns about the **selection**.
- */
 type CapabilityPublishModalProps = {
 	open: boolean
 	submitting?: boolean
@@ -39,7 +29,6 @@ const CapabilityPublishModal = ({
 				Secara otomatis sistem akan membuat <span className="font-bold text-[var(--primary)]">tagihan</span> secara massal
 				untuk santri ini
 			</li>
-			{/* Legacy's lower-case "pastikan" is its own; kept verbatim */}
 			<li>
 				pastikan setiap item kesanggupan (akun) <span className="font-bold text-[var(--primary)]">sudah punya</span> nilai.
 				Apabila tidak punya nilai maka item kesanggupan (akun){" "}

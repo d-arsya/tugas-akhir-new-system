@@ -9,17 +9,11 @@ import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 import { BackArrowIcon } from "@/components/legacy/legacy-icons"
 import { formatIndoDate, rupiahLabel } from "@/lib/legacy-format"
 
-// `student-invoice/detail-bill.blade.php` 38-166 — one invoice and the payments against it.
-
-/** `formatDate($date, 'd F Y \j\a\m H:i')` — the same stamp as `d F Y, H:i` with "jam" for the comma. */
 const indoStampJam = (local: string | null): string =>
 	local ? `${formatIndoDate(local)} jam ${local.slice(11, 16)}` : ""
 
-// `.invoice-table tr td` (custom-detail.css): 6px/1px padding, 13px, top-aligned, 0.3px tracking
 const INVOICE_CELL = "px-[1px] py-[6px] align-top text-[13px] tracking-[0.3px]"
-// `table tr th` (custom-detail.css): #f7f7f7, normal weight, 12px/20px padding, no bottom border
 const HEAD_CELL = "bg-[#f7f7f7] px-[20px] py-[12px] text-left font-normal"
-// `.cost-table tr td`: 12px/20px padding over a 2px #f9f9f9 top rule
 const BODY_CELL = "border-t-2 border-[#f9f9f9] px-[20px] py-[12px]"
 
 const InfoRow = ({ label, value }: { label: string; value: ReactNode }): JSX.Element => (
@@ -33,11 +27,9 @@ const InvoiceBillCard = ({ bill }: { bill: InvoiceBillDetail }): JSX.Element => 
 	<LegacyCard className="mb-[24px]">
 		<div className="mx-[-15px] flex flex-wrap items-center">
 			<div className="w-full px-[15px] min-[768px]:w-10/12">
-				{/* `.tbr_card_intro` — the title is inline-block so the badge sits beside it */}
 				<div className="relative">
 					<div className="mt-[2px] mr-[8px] inline-block text-[16px] font-bold">{bill.title}</div>
 					{bill.periodBadge ? (
-						// `span.alert.tbr_alert-primary.rounded.font-weight-bold.p-1`
 						<span className="relative mb-[16px] rounded-[5px] border border-transparent bg-[rgba(var(--primary-rgb),0.1)] p-[4px] font-bold text-[var(--primary)]">
 							{bill.periodBadge}
 						</span>
@@ -47,7 +39,6 @@ const InvoiceBillCard = ({ bill }: { bill: InvoiceBillDetail }): JSX.Element => 
 			</div>
 			<div className="w-full px-[15px] min-[768px]:w-2/12">
 				<div className="mt-[16px] mb-[4px] flex items-center justify-start min-[992px]:mt-0 min-[992px]:mb-0 min-[992px]:justify-end">
-					{/* `a.btn.tbr_btn.mr-3.p-2.tbr_btn-light-info` — not in the shared variant map */}
 					<LegacyTooltip content="Kembali" placement="left" className="mr-[16px]">
 						<Link
 							to="/student-invoices/$studentGradeId"
@@ -92,7 +83,6 @@ const InvoiceBillCard = ({ bill }: { bill: InvoiceBillDetail }): JSX.Element => 
 		</div>
 
 		<span className="text-[var(--grey)] italic">Item transaksi</span>
-		{/* `.table-style` — a 2px #f7f7f7 frame with a 10px radius around the whole table */}
 		<div className="mt-[8px] mb-[20px] overflow-auto rounded-[10px] border-2 border-[#f7f7f7] bg-[#f7f7f7]">
 			<table className="mb-0 w-full">
 				<thead>
@@ -112,8 +102,6 @@ const InvoiceBillCard = ({ bill }: { bill: InvoiceBillDetail }): JSX.Element => 
 								<td className={`${BODY_CELL} font-semibold text-[var(--secondary)]`}>{transaction.transactionCode}</td>
 								<td className={BODY_CELL}>{transaction.note}</td>
 								<td className={BODY_CELL}>{indoStampJam(transaction.paidAt)}</td>
-								{/* Legacy printed `$amount[$key]`, an array built over every pivot row with 0 for the
-								    cancelled ones, so one cancellation shifted every later figure. `pay` travels with its row. */}
 								<td className={BODY_CELL}>{rupiahLabel(transaction.pay)}</td>
 							</tr>
 						))

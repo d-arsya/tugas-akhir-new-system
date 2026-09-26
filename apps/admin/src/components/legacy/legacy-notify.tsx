@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type JSX } from "react"
 import { createPortal } from "react-dom"
 
-// Port of the legacy PNotify notices (`new PNotify({ title, text, type, width: "340px", animate_speed: "fast" })`)
-
 type NoticeType = "error" | "success"
 type Notice = { id: number; title: string; lines: string[]; type: NoticeType; delay: number }
 
-// PNotify default delay
 const DISMISS_MS = 8000
 const FADE_MS = 200
 
@@ -25,10 +22,8 @@ const remove = (id: number): void => {
 	emit()
 }
 
-// Some legacy scripts pass their own `delay` (e.g. `setting/update-status.js` uses 2000)
 type NotifyOptions = { delay?: number }
 
-// Legacy texts use `<br />` between lines
 export const legacyNotify = {
 	error: (lines: string | string[], title = "Gagal!", options?: NotifyOptions): void =>
 		push("error", title, Array.isArray(lines) ? lines : [lines], options?.delay ?? DISMISS_MS),
@@ -62,7 +57,6 @@ const NoticeCard = ({ notice }: { notice: Notice }): JSX.Element => {
 		return () => cancelAnimationFrame(frame)
 	}, [])
 
-	// PNotify `mouse_reset`: hovering restarts the countdown
 	useEffect(() => {
 		if (hovered) return undefined
 		timer.current = window.setTimeout(close, notice.delay)
@@ -85,7 +79,6 @@ const NoticeCard = ({ notice }: { notice: Notice }): JSX.Element => {
 				>
 					<CloseIcon />
 				</button>
-				{/* "!" utilities: globals.css styles h4 outside any @layer */}
 				<h4 className="m-0! mb-[5.6px]! text-[14px]! leading-[22.4px]! font-semibold! text-white!">{notice.title}</h4>
 				<div className="text-[12px] leading-[18px] text-white">
 					{notice.lines.map((line, index) => (
@@ -105,7 +98,6 @@ const subscribe = (listener: () => void): (() => void) => {
 	return () => listeners.delete(listener)
 }
 
-// Mounted once by the admin shell; notices stack downwards from the top-right corner
 export const LegacyNotifyHost = (): JSX.Element => {
 	const list = useSyncExternalStore(subscribe, () => notices)
 	return createPortal(

@@ -3,7 +3,7 @@ import type { JSX } from "react"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacySelect from "@/components/legacy/legacy-select"
 import LegacyTextarea from "@/components/legacy/legacy-textarea"
-import { useDistricts, useProvinces, useRegencies } from "@/hooks/use-school-setting"
+import { useDistricts, useProvinces, useRegencies } from "@/hooks/use-locations"
 import type { LegacySelectOption } from "@/hooks/use-legacy-select"
 
 type SchoolAddressFieldsProps = {
@@ -17,8 +17,6 @@ type SchoolAddressFieldsProps = {
 	onFullAddressChange: (value: string) => void
 }
 
-// `province.js` / `regency.js` put `<option value="" selected disabled>Select</option>` back at the
-// top of a child list every time its parent changes
 const SELECT_PLACEHOLDER: LegacySelectOption = { value: "", label: "Select" }
 
 const toOptions = (rows: { id: number; name: string }[] | undefined, value: string): LegacySelectOption[] => {
@@ -26,7 +24,6 @@ const toOptions = (rows: { id: number; name: string }[] | undefined, value: stri
 	return value === "" ? [SELECT_PLACEHOLDER, ...options] : options
 }
 
-// The "Alamat pondok" half of `setting/school.blade.php`
 const SchoolAddressFields = ({
 	provinceId,
 	regencyId,

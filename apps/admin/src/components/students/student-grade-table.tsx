@@ -12,10 +12,6 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import { ACTION_LINK_CLASS, DETAIL_ICON, DestroyAction } from "./student-ui"
 
-// Legacy `student/grade.blade.php` table + `default-datatable.js` (`initDatatable(url, [7])`) over
-// `StudentController::gradeList:111-152`, and `default-delete.js` for the delete icon, which calls
-// `deleteStudentByGrade` (the grade in this year, whatever its level — kept legacy).
-
 type NumberedGrade = AdminStudentGradeRow & { no: number }
 
 const santri = (count: number): string => `${count} Santri`
@@ -43,7 +39,6 @@ const cellText = (row: NumberedGrade, key: string): string => {
 
 const SEARCH_KEYS = ["no", "grade", "levelName", "total", "active", "naikKelas", "tinggalKelas"]
 
-// `default-delete.js`: the popup closes 1000 ms after the answer, success or failure
 const CLOSE_AFTER_MS = 1000
 
 const StudentGradeTable = ({ academicYearId }: { academicYearId: number }): JSX.Element => {
@@ -86,7 +81,6 @@ const StudentGradeTable = ({ academicYearId }: { academicYearId: number }): JSX.
 			key: "action",
 			header: "Actions",
 			sortable: false,
-			// `AcademicYearService::getAction()`
 			cell: (row) => (
 				<div>
 					{row.grade !== null && row.levelId !== null ? (

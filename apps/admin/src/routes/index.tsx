@@ -1,4 +1,3 @@
-import type { JSX } from "react"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
 
@@ -6,11 +5,9 @@ export const Route = createFileRoute("/")({
 	beforeLoad: () => {
 		const auth = useAuthStore.getState()
 		if (auth.isAuthenticated) {
-			throw redirect({ to: "/dashboard" as any })
+			throw redirect({ to: "/dashboard" })
 		}
-		throw redirect({ to: "/login" as any })
+		throw redirect({ to: "/login" })
 	},
-	component: () => null as unknown as JSX.Element,
+	component: () => null,
 })
-
-export default Route

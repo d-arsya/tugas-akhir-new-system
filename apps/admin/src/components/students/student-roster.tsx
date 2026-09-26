@@ -18,15 +18,9 @@ import type { ListedStudent } from "./student-listing-modal"
 import { ROSTER_SEARCH_KEYS, rosterCellText, rosterColumns, type NumberedStudent } from "./student-roster-columns"
 import StudentRosterHeader from "./student-roster-header"
 
-// Legacy `student/student.blade.php` card: bulk actions, `datatable-tools` (Show / Subkelas filter / Search),
-// the table (`student-datatable.js`, `order: [[1, "asc"]]`, not sortable: [0, 11]) and the delete popup
-// (`default-delete.js`). Every draw unticks every row (`resetAllcheckbox`).
-
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
-// `default-delete.js`: the popup closes 1000 ms after the answer
 const CLOSE_AFTER_MS = 1000
 
-/** `parseStatusData()` — the label text of the Keterangan cell, kept only for Naik Kelas / Keluar. */
 const listStatus = (row: NumberedStudent): string | null => {
 	const text = kbmNoteText(row.gradeNote)
 	return text === "Naik Kelas" || text === "Keluar" ? text : null
@@ -46,14 +40,12 @@ const StudentRoster = ({ page }: { page: AdminStudentRosterPage }): JSX.Element 
 	const timer = useRef<number | undefined>(undefined)
 
 	const numbered = useMemo<NumberedStudent[]>(() => (data ?? []).map((row, index) => ({ ...row, no: index + 1 })), [data])
-	// `InitDatatable.column(8).search(value)` — a smart search on the Subkelas cell's text
 	const filtered = useMemo(() => {
 		const needle = subGradeFilter.trim().toLowerCase()
 		return needle === "" ? numbered : numbered.filter((row) => (row.subGrade ?? "").toLowerCase().includes(needle))
 	}, [numbered, subGradeFilter])
 	const view = useMemo(() => clientTable(filtered, state, rosterCellText, ROSTER_SEARCH_KEYS), [filtered, state])
 
-	// A redraw (page, sort, search, filter, reload) unticks every row
 	useEffect(() => setChecked(new Set()), [state, subGradeFilter, data])
 	useEffect(() => () => window.clearTimeout(timer.current), [])
 
@@ -105,7 +97,6 @@ const StudentRoster = ({ page }: { page: AdminStudentRosterPage }): JSX.Element 
 				levelName={page.levelName}
 				count={numbered.length}
 			/>
-			{/* `.card-body.overflow-hidden.tbr_table_container.p-4` */}
 			<div className="z-[1] min-h-px flex-auto overflow-hidden rounded-b-[12px] bg-[var(--bg-secondary)] p-[24px] shadow-[0px_8px_30px_0px_rgba(0,0,0,0.08)]">
 				<StudentBulk
 					selected={selected}
@@ -115,7 +106,6 @@ const StudentRoster = ({ page }: { page: AdminStudentRosterPage }): JSX.Element 
 					onDone={() => setChecked(new Set())}
 				/>
 
-				{/* `datatable-tools.blade.php` */}
 				<div className="mx-[-15px] mb-[4px] flex flex-wrap justify-center">
 					<div className="w-full px-[15px] md:w-1/4">
 						<div className="mx-auto mb-[8px] w-[75px] max-w-[75px] min-w-[75px] md:ml-0">
@@ -157,7 +147,6 @@ const StudentRoster = ({ page }: { page: AdminStudentRosterPage }): JSX.Element 
 					</div>
 				</div>
 
-				{/* `.tbr_student_table` (app.css 2561-2578): 6px row padding, no sort arrows on the check column */}
 				<div className="[&_td]:pt-[6px]! [&_td]:pb-[6px]! [&_th:first-child]:pr-0! [&_th:first-child]:before:hidden! [&_th:first-child]:after:hidden! [&_td:nth-child(2)]:pl-0! [&_th:nth-child(2)]:pl-0!">
 					<LegacyDataTable
 						columns={columns}

@@ -22,7 +22,6 @@ const ArrowIcon = (): JSX.Element => (
 	</svg>
 )
 
-// Port of the `a.card.tbr_card.h-100` menu entries in report/index.blade.php
 const ReportMenuCard = ({ to, icon, title, description }: ReportMenuCardProps): JSX.Element => (
 	<Link to={to} className="block h-full rounded-[4px] text-[var(--secondary)]">
 		<div className="relative h-full rounded-[12px] bg-[var(--bg-secondary)] p-[20px] shadow-[0px_8px_30px_0px_rgba(0,0,0,0.08)]">
@@ -31,7 +30,6 @@ const ReportMenuCard = ({ to, icon, title, description }: ReportMenuCardProps): 
 					<img src={icon} alt="icon" className="h-[60px] w-[60px]" />
 				</div>
 				<div className="mb-[16px]">
-					{/* "!" utilities: globals.css styles h6 outside any @layer */}
 					<h6 className="my-[10px]! text-[16px]! leading-[22.4px]! font-bold! tracking-normal! text-[#ffc107]!">{title}</h6>
 					<p className="m-0 mb-[20px] text-[12px] leading-[20.4px] text-[#999999]">{description}</p>
 				</div>

@@ -6,10 +6,6 @@ import { FieldError, SocietyFrame, SocietyRadios, SocietyText } from "./society-
 import { radioShown } from "./society-field"
 import { valueOf, type SocietyFieldContext } from "./society-field-context"
 
-// Setting 32 — `reading` (Jilid / Baca Al-Qur'an) with `div#toHide-1.toHide > input#jilid_chapter`.
-// The box starts visible only when the stored value is `jilid`; `edit-general.js` / `create-general.js`
-// then hide it on `quran` and show it on anything else.
-
 const SocietyReadingField = ({ ctx }: { ctx: SocietyFieldContext }): JSX.Element | null => {
 	const field = getSocietyField(32)
 	const [shown, setShown] = useState(() => valueOf(ctx, "reading") === "jilid")
@@ -17,7 +13,6 @@ const SocietyReadingField = ({ ctx }: { ctx: SocietyFieldContext }): JSX.Element
 
 	return (
 		<SocietyFrame layout={ctx.layout} htmlFor="reading" label={ctx.lookup.label(32)} info={ctx.lookup.info(32)}>
-			{/* `div.mt-1.pb-2` on the edit tab, `div.mt-2.pb-2` in the wizard */}
 			<SocietyRadios
 				name="reading"
 				value={radioShown(field, valueOf(ctx, "reading"))}

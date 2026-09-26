@@ -2,15 +2,6 @@ import type { JSX } from "react"
 
 import CapabilityConfirmModal, { ConfirmActions, ConfirmBullets } from "./capability-confirm-modal"
 
-/**
- * `student-capability/partials/modal-change.blade.php` — the `#modalChange` gate in front of
- * "Ubah kesepakatan" on the level-4 page. Legacy posted a form to `studentCapability.change`;
- * the port calls `changeCapability(studentGradeId)` from `onConfirm`.
- *
- * The two bullets describe the carry-over rules the publish path applies to the santri's
- * existing invoices; they are reproduced verbatim, including the missing space in
- * "belum dibayar(belum melewati…)".
- */
 type CapabilityChangeModalProps = {
 	open: boolean
 	submitting?: boolean

@@ -10,14 +10,10 @@ import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useDeleteUser, useUsers } from "@/hooks/use-users"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// The row number is baked into the legacy payload, so it keeps its value when the table is re-sorted
 type NumberedUser = AdminUserRow & { no: number }
 
-// `UserService::getAccountStatus()` — a null `is_blocked` counts as Active
 const statusText = (row: AdminUserRow): string => (row.isBlocked ? "Deactive" : "Active")
 
-// DataTables searches and sorts the rendered cell text; the "Dibuat Pada" cell hides the unix
-// timestamp in front of the date (`RegistrantService::datatableDate`), which is what makes it sort by date
 const cellText = (row: NumberedUser, key: string): string => {
 	switch (key) {
 		case "no":
@@ -39,7 +35,6 @@ const cellText = (row: NumberedUser, key: string): string => {
 
 const SEARCH_KEYS = ["no", "name", "email", "role", "createdAt", "status"]
 
-// `user/index.blade.php` + `default-datatable.js` / `default-delete.js`
 const UserTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useUsers()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -49,7 +44,6 @@ const UserTable = (): JSX.Element => {
 	const numbered = useMemo<NumberedUser[]>(() => (data ?? []).map((row, index) => ({ ...row, no: index + 1 })), [data])
 	const page = useMemo(() => clientTable(numbered, state, cellText, SEARCH_KEYS), [numbered, state])
 
-	// `done`: reload the table (the mutation invalidates it) and close the popup 1000 ms later
 	const remove = useLegacySubmit({
 		mutationFn: (id: number) => deleteUser.mutateAsync(id),
 		onDone: () => setPending(null),
@@ -76,7 +70,6 @@ const UserTable = (): JSX.Element => {
 			header: "Status",
 			width: "11%",
 			sortable: true,
-			// Legacy adds `text-truncate` to the Deactive label only
 			cell: (row) => (
 				<LegacyLabel variant={row.isBlocked ? "danger" : "success"} className={row.isBlocked ? "truncate" : ""}>
 					{statusText(row)}
@@ -87,11 +80,9 @@ const UserTable = (): JSX.Element => {
 			key: "actions",
 			header: "Actions",
 			width: "7%",
-			// `initDatatable(url, [6])`
 			sortable: false,
 			cell: (row) => (
 				<div className="flex items-center">
-					{/* `mr-2` plus the inline whitespace legacy leaves between the two anchors */}
 					<Link to="/users/$userId/edit" params={{ userId: String(row.id) }} className="mr-[12px]">
 						<img src="/assets/svg/icons/data_detail.svg" alt="Detail" width={24} height={24} />
 					</Link>
@@ -105,7 +96,6 @@ const UserTable = (): JSX.Element => {
 
 	return (
 		<>
-			{/* `<table … style="min-width: 1100px;">` */}
 			<LegacyDataTable
 				columns={columns}
 				rows={page.rows}

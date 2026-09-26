@@ -4,10 +4,6 @@ import LegacyConfirmDelete from "@/components/legacy/legacy-confirm-delete"
 import { useDeleteAlumni, useDeleteAlumniYear } from "@/hooks/use-alumni"
 import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 
-// OWNER: AK-A. `default-delete.js` + `include/modal-delete.blade.php` for the Alumni lists: `deleteData()` opens
-// `#modalDelete`; "Ya, hapus" spins, then a notice and the popup closes 1000 ms later — on success and, as the
-// legacy `fail` handler does too, on failure.
-
 export type AlumniDeleteTarget = { kind: "year"; year: number } | { kind: "alumni"; id: number }
 
 const CLOSE_AFTER_MS = 1000

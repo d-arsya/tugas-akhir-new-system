@@ -9,10 +9,8 @@ import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useDeleteSubGrade, useSubGrades } from "@/hooks/use-sub-grades"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// `grade/delete.js` closes the confirm popup 500 ms after the notice, not the usual 1000
 const DELETE_AFTER_MS = 500
 
-// The row number is baked into the legacy payload, so it keeps its value when the table is re-sorted
 type NumberedSubGrade = SubGradeRow & { no: number }
 
 const cellText = (row: NumberedSubGrade, key: string): string => {
@@ -32,7 +30,6 @@ const SEARCH_KEYS = ["no", "label", "createdAt"]
 
 type SubGradeTableProps = { onEdit: (id: number) => void }
 
-// `grade/partials/subgrade.blade.php` table + `default-datatable2.js` / `grade/delete.js`
 const SubGradeTable = ({ onEdit }: SubGradeTableProps): JSX.Element => {
 	const { data, isFetching, isSuccess } = useSubGrades()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -56,7 +53,6 @@ const SubGradeTable = ({ onEdit }: SubGradeTableProps): JSX.Element => {
 		{ key: "label", header: "Label", sortable: true, cell: (row) => row.label },
 		{
 			key: "createdAt",
-			// Lowercase "pada" here; every other table in this menu writes "Dibuat Pada"
 			header: "Dibuat pada",
 			sortable: true,
 			cell: (row) => (
@@ -68,7 +64,6 @@ const SubGradeTable = ({ onEdit }: SubGradeTableProps): JSX.Element => {
 		{
 			key: "actions",
 			header: "Actions",
-			// `initCustomDatatables(urlSubGrade, [3], ".sub-grade")`
 			sortable: false,
 			cell: (row) => <AcademicRowActions onEdit={() => onEdit(row.id)} onDelete={() => setPending(row)} />,
 		},
@@ -76,7 +71,6 @@ const SubGradeTable = ({ onEdit }: SubGradeTableProps): JSX.Element => {
 
 	return (
 		<>
-			{/* `<table class="table tbr_table level mb-0 sub-grade" style="min-width: 510px;">` */}
 			<LegacyDataTable
 				columns={columns}
 				rows={page.rows}

@@ -16,23 +16,17 @@ type FormEditModalProps = {
 	onSubmit: (data: SettingFormPatch) => void
 }
 
-// `.form-group .control-label .help-block` (form.css 11-19)
 const HELP_BLOCK_CLASS = "ml-[8px] m-0 mb-[4px] p-0 text-[11px] leading-[20px] font-normal text-[var(--grey)] opacity-80"
 
-// `#reset-custom-name` (app.css 2383) on top of `.btn.tbr_btn.tbr_btn-light-primary.p-2`
 const RESET_BUTTON_CLASS =
 	"ml-[16px] min-h-[40px] min-w-[40px] shrink-0 cursor-pointer rounded-[6px] border-0 bg-[rgba(228,0,126,0.16)] p-[8px] transition-all duration-300 outline-none hover:bg-[var(--primary)] focus:bg-[var(--primary)]"
 
-// Port of the `#change-title-{id}` modal in `card-setting.blade.php` / `card-accordion.blade.php`.
-// Legacy hard-codes `doc_basic_input.svg` in the header of the field modal and
-// `doc_accordion_label.svg` in the accordion one.
 const FormEditModal = ({ item, saving, onClose, onSubmit }: FormEditModalProps): JSX.Element => {
 	const isAccordion = item?.type === "accordion label"
 	const [description, setDescription] = useState("")
 	const [registrantRequired, setRegistrantRequired] = useState(false)
 	const [adminRequired, setAdminRequired] = useState(false)
 
-	// The legacy markup rebuilds every modal on reload; ours refills when a new row is opened
 	useEffect(() => {
 		if (!item) return
 		setDescription(item.customName ?? item.defaultLabel ?? "")
@@ -62,8 +56,6 @@ const FormEditModal = ({ item, saving, onClose, onSubmit }: FormEditModalProps):
 			}
 			footer={
 				<>
-					{/* `.tbr_btn-light` in a modal footer is `--bg-inverse`; the space stands in for the
-					    whitespace Blade emits between the two inline-block buttons */}
 					<LegacyButton variant="light" onClick={onClose} className="mr-[8px] bg-[var(--bg-inverse)]">
 						Batal
 					</LegacyButton>{" "}
@@ -88,7 +80,6 @@ const FormEditModal = ({ item, saving, onClose, onSubmit }: FormEditModalProps):
 						value={description}
 						onChange={(event) => setDescription(event.target.value)}
 					/>
-					{/* Legacy `reset-custom-name.js` looked up `#custom_name` and never matched — fixed here */}
 					<button
 						type="button"
 						className={RESET_BUTTON_CLASS}

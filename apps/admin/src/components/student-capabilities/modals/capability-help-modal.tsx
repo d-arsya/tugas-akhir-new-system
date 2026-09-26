@@ -4,10 +4,6 @@ import LegacyButton from "@/components/legacy/legacy-button"
 
 import CapabilityConfirmModal, { ConfirmBullets } from "./capability-confirm-modal"
 
-/**
- * `student-capability/partials/modal-help.blade.php` — `#modalHelp`, the "?" button on the
- * level-4 page header. One dismiss button ("Tutup"), no confirm action.
- */
 const CapabilityHelpModal = ({ open, onClose }: { open: boolean; onClose: () => void }): JSX.Element => (
 	<CapabilityConfirmModal
 		open={open}

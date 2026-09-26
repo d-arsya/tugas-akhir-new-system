@@ -13,7 +13,6 @@ type LinkDialogProps = {
 	onInsert: (link: EditorLink) => void
 }
 
-// `linkDialog` with the `id-ID` strings; `linkTargetBlank` defaults to true
 const LegacyEditorLinkDialog = ({ open, selectedText, onClose, onInsert }: LinkDialogProps): JSX.Element => {
 	const [text, setText] = useState(selectedText)
 	const [url, setUrl] = useState("http://")

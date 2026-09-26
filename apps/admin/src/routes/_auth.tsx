@@ -1,14 +1,10 @@
-import type { JSX } from "react"
-import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import useAuthStore from "@/stores/auth.store"
-import AdminShell from "@/components/layout/admin-shell"
-import { IS_DEV_HIJACK } from "@/lib/dev-hijack"
-import { adminApi, apiClient } from "@/lib/api"
-import { normalizeRole } from "@/lib/admin-roles"
+import AdminAuthLayout from "@/components/layout/admin-auth-layout"
+import { apiClient } from "@/lib/api"
 
 export const Route = createFileRoute("/_auth")({
 	beforeLoad: async () => {
-		if (IS_DEV_HIJACK) return
 		const auth = useAuthStore.getState()
 		if (!auth.isAuthenticated) {
 			try {
@@ -24,32 +20,5 @@ export const Route = createFileRoute("/_auth")({
 			throw redirect({ to: "/login" })
 		}
 	},
-	component: AuthLayout,
+	component: AdminAuthLayout,
 })
-
-function AuthLayout(): JSX.Element {
-	const auth = useAuthStore()
-	const navigate = useNavigate()
-
-	const handleLogout = async (): Promise<void> => {
-		try {
-			await adminApi.logout()
-		} catch {
-			// ignore
-		}
-		auth.logout()
-		navigate({ to: "/login" })
-	}
-
-	return (
-		<AdminShell
-			userName={auth.user?.name ?? ""}
-			role={normalizeRole(auth.user?.role)}
-			onLogout={handleLogout}
-		>
-			<Outlet />
-		</AdminShell>
-	)
-}
-
-export default AuthLayout

@@ -1,19 +1,23 @@
 import { useMutation, type UseMutationResult } from "@tanstack/react-query"
 
-import type { AdminMessageResult, AdminRegistrantStatusDto } from "@roja/types"
+import type {
+	AdminMessageResult,
+	AdminRegistrantCreateResult,
+	AdminRegistrantExportStatus,
+	AdminRegistrantStatusDto,
+	SocietyDraft,
+	SocietyDraftStepKey,
+} from "@roja/types"
 
 import { legacyNotify } from "@/components/legacy/legacy-notify"
 import { useLegacySubmit, type LegacySubmit } from "@/hooks/use-legacy-submit"
 import { useInvalidateAkademik } from "@/hooks/use-registrants"
 import { adminApi } from "@/lib/api"
-import { legacyErrors } from "@/lib/legacy-errors"
+import { saveBlob } from "@/lib/download"
+import { legacyErrors, SYSTEM_ERROR } from "@/lib/legacy-errors"
 
-// Akademik → PSB writes. Each one invalidates `akademikKeys.all` where legacy reloaded the page.
+const EXPORT_FILE = "Data PSB.xlsx"
 
-/**
- * `update.js` `specificFormWithFile` — the edit page's Simpan: PNotify, then `location.reload()`
- * 1000 ms later (here: refetch). The failure title is `<strong>Gagal!</strong>`.
- */
 export const useUpdateRegistrant = (registrantId: number, onSaved: () => void): LegacySubmit<FormData, AdminMessageResult> => {
 	const invalidate = useInvalidateAkademik()
 	return useLegacySubmit({
@@ -26,7 +30,6 @@ export const useUpdateRegistrant = (registrantId: number, onSaved: () => void): 
 	})
 }
 
-/** `custom-ajax.js` `specificForm` — the status modals; the page reloads 1000 ms after the notice. */
 export const useUpdateRegistrantStatus = (
 	registrantId: number,
 	onSaved: () => void,
@@ -42,10 +45,6 @@ export const useUpdateRegistrantStatus = (
 	})
 }
 
-/**
- * `registrant/delete.js` `deleteData`: the answer's message as a success notice (legacy answers 200 even
- * when the delete failed), the lists reload, and the modal closes 500 ms later.
- */
 export const useDeleteRegistrant = (onDeleted: () => void): UseMutationResult<AdminMessageResult, unknown, number> => {
 	const invalidate = useInvalidateAkademik()
 	return useMutation({
@@ -58,3 +57,20 @@ export const useDeleteRegistrant = (onDeleted: () => void): UseMutationResult<Ad
 		onError: (error) => legacyNotify.error(legacyErrors(error)),
 	})
 }
+
+export const useDownloadRegistrants = (academicYearId: number): UseMutationResult<void, unknown, AdminRegistrantExportStatus> =>
+	useMutation<void, unknown, AdminRegistrantExportStatus>({
+		mutationFn: async (status) => {
+			const { blob, fileName } = await adminApi.downloadRegistrants(academicYearId, status)
+			saveBlob(blob, fileName ?? EXPORT_FILE)
+		},
+		onError: () => legacyNotify.error(SYSTEM_ERROR),
+	})
+
+export const useValidateRegistrantStep = (): UseMutationResult<AdminMessageResult, unknown, { step: SocietyDraftStepKey; draft: SocietyDraft }> =>
+	useMutation({
+		mutationFn: ({ step, draft }: { step: SocietyDraftStepKey; draft: SocietyDraft }) => adminApi.validateRegistrantStep(step, draft),
+	})
+
+export const useCreateRegistrant = (): UseMutationResult<AdminRegistrantCreateResult, unknown, FormData> =>
+	useMutation({ mutationFn: (form: FormData) => adminApi.createRegistrant(form) })

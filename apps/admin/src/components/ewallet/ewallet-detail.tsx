@@ -8,12 +8,6 @@ import { EwalletOwnerCard, EwalletQrCard } from "./ewallet-owner-cards"
 import EwalletTransactionTable from "./ewallet-transaction-table"
 import EwalletMoneyModals from "./modals/ewallet-money-modals"
 
-/**
- * Legacy `ewallet/detail.blade.php` with `_partials/{student,merchant}-detail.blade.php`.
- *
- * `.row.tbr_ewallet` — `.content-body > .row:not(.tbr_dashboard)` has a min-height. The four money
- * modals are D-B's (Seam 1): mounted once here, opened by the header's buttons.
- */
 const EwalletDetail = ({ ewalletId }: { ewalletId: number }): JSX.Element => {
 	const { data: detail } = useEwalletDetail(ewalletId)
 

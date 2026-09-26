@@ -4,18 +4,10 @@ import { Link } from "@tanstack/react-router"
 import type { StudentTransactionDetail } from "@roja/types"
 
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
-import { adminApi } from "@/lib/api"
 import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 import { formatIndoDateJam } from "@/components/student-transactions/transaction-detail-tables"
+import { receiptPrintUrl } from "@/hooks/use-payments"
 
-// `student-invoice/detail-history.blade.php` 39-95 — the card intro and the three toolbar buttons.
-//
-// Same blade as the Riwayat Transaksi detail page, reached from the Tagihan side, so the back
-// button returns to the santri's invoices rather than to the Riwayat list. P1-C's header is the
-// other entry point; the two differ only in that link and in the "Dibatalkan" badge, which their
-// copy does not render.
-
-// `:56` — Group_2494
 const BackIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
@@ -28,7 +20,6 @@ const BackIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `:64` — Group_6797
 const PrintIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -41,7 +32,6 @@ const PrintIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `:70` — Group_6798
 const DownloadIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
@@ -59,8 +49,6 @@ const DownloadIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `.alert.rounded.font-weight-bold.p-1` — a `<span>`, so it stays inline beside the inline-block
-// title. Bootstrap's `.rounded` is `!important`, so it beats app.css's 8px radius.
 const BADGE_CLASS = "rounded-[0.25rem] p-[4px] font-bold"
 
 type PaymentDetailHeaderProps = {
@@ -76,35 +64,24 @@ const PaymentDetailHeader = ({
 	downloading,
 	onDownload,
 }: PaymentDetailHeaderProps): JSX.Element => (
-	// `.row.mb-3`
 	<div className="mx-[-15px] mb-[16px] flex flex-wrap">
-		{/* `.tbr_card_intro.col-md-6` */}
 		<div className="relative w-full px-[15px] min-[768px]:w-1/2">
-			{/* `.tbr_title` — Montserrat Bold 16px, inline-block */}
 			<div className="relative mt-[2px] inline-block text-[16px] font-bold">Detail Pembayaran</div>{" "}
 			<span className={`${BADGE_CLASS} bg-[rgba(var(--primary-rgb),0.1)] text-[var(--primary)]`}>
 				{detail.transactionCode}
 			</span>
-			{/* `:49-51` — only once the payment has been cancelled */}
 			{detail.status === "invalid" ? (
 				<>
 					{" "}
 					<span className={`${BADGE_CLASS} bg-[rgba(var(--danger-rgb),0.1)] text-[var(--danger)]`}>Dibatalkan</span>
 				</>
 			) : null}
-			{/* `:52` — `formatDate($transaction->created_at, 'd F Y \j\a\m H:i')` */}
 			<p className="m-0! text-[var(--grey)]">Dibayar pada tanggal {formatIndoDateJam(detail.createdAt)}</p>
 		</div>
 
 		<div className="w-full px-[15px] text-right min-[768px]:w-1/2">
-			{/* `.d-flex.align-items-center.justify-content-start.justify-content-lg-end.mt-3.mt-lg-0.mb-1.mb-lg-0` */}
 			<div className="mt-[16px] mb-[4px] flex items-center justify-start min-[992px]:mt-0 min-[992px]:mb-0 min-[992px]:justify-end">
 				<LegacyTooltip content="Kembali" placement="left">
-					{/*
-					 * `:54` links to `route('studentInvoice.edit', $studentGrade->id)` — the one place in
-					 * this blade that passes the student_grade id rather than the student id, and so the
-					 * one that lands on the right santri.
-					 */}
 					<Link
 						to="/student-invoices/$studentGradeId"
 						params={{ studentGradeId }}
@@ -117,13 +94,8 @@ const PaymentDetailHeader = ({
 					</Link>
 				</LegacyTooltip>
 
-				{/*
-				 * `:65` — `studentInvoice.printTransaction` with `target="_blank"`. A plain anchor, as
-				 * legacy has it: the page prints itself on load, and the api-client hands over the URL
-				 * so the base path stays in one place.
-				 */}
 				<a
-					href={adminApi.receiptPrintUrl(detail.id)}
+					href={receiptPrintUrl(detail.id)}
 					target="_blank"
 					rel="noreferrer"
 					title="Cetak"

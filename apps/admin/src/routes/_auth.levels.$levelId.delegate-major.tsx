@@ -1,29 +1,15 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 
-import AdminPageTitle from "@/components/layout/admin-page-title"
-import LevelDeleteCard from "@/components/levels/level-delete-card"
-import { useDelegateLevel } from "@/hooks/use-levels"
-
-// Legacy level/delete/delegate-major.blade.php — the heading keeps the space before its colon, verbatim.
-const HEADING = "Pindahkan data jurusan ke jenjang lain :"
+import LevelDelegatePage from "@/components/levels/level-delegate-page"
 
 export const Route = createFileRoute("/_auth/levels/$levelId/delegate-major")({
-	component: LevelDelegateMajorPage,
+	component: LevelDelegateMajorRoute,
 })
 
-function LevelDelegateMajorPage(): JSX.Element {
+function LevelDelegateMajorRoute(): JSX.Element {
 	const { levelId } = Route.useParams()
-	const id = Number(levelId)
-	const submit = useDelegateLevel(id, "delegate-major")
-
-	return (
-		<>
-			<AdminPageTitle title="Hapus Jenjang" breadcrumbs={[{ label: "…", dropdown: [{ label: "Data Master", to: "/levels" }] }, { label: "Akademik", to: "/levels" }, { label: "Jenjang", to: "/levels" }, { label: "Hapus" }]} />
-
-			<LevelDeleteCard levelId={id} step="delegate-major" heading={HEADING} noun="jurusan" submit={submit} />
-		</>
-	)
+	return <LevelDelegatePage levelId={Number(levelId)} step="delegate-major" />
 }
 
-export default LevelDelegateMajorPage
+export default LevelDelegateMajorRoute

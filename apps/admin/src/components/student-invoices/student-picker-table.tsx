@@ -11,8 +11,6 @@ import { useReportOptions } from "@/hooks/use-reports"
 import { fetchStudentInvoiceRows, studentInvoiceKeys } from "@/hooks/use-student-invoices"
 import { useServerTable } from "@/hooks/use-server-table"
 
-// `student-invoice/index.blade.php` 10-73 — the santri picker, server-side paged.
-
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
 
 const StudentPickerTable = (): JSX.Element => {
@@ -20,9 +18,6 @@ const StudentPickerTable = (): JSX.Element => {
 	const [subGrade, setSubGrade] = useState("")
 	const options = useReportOptions()
 
-	// `Grade::all()` / `SubGrade::all()`, in id order. Served by the report options endpoint, which
-	// runs exactly those two queries and is gated to the same Superadmin | Bendahara pair — the
-	// Data Master grade endpoints are Superadmin | Admin and would 403 for a bendahara.
 	const gradeOptions = useMemo(
 		() => [{ value: "", label: "Kelas" }, ...(options.data?.grades ?? []).map((value) => ({ value: String(value), label: String(value) }))],
 		[options.data],
@@ -72,7 +67,6 @@ const StudentPickerTable = (): JSX.Element => {
 
 	return (
 		<>
-			{/* `.row.mb-2` — search, length menu, then the two select2s pushed right */}
 			<div className="mx-[-15px] mb-[8px] flex flex-wrap">
 				<div className="w-full px-[15px] min-[768px]:w-1/4">
 					<LegacyInput
@@ -83,7 +77,6 @@ const StudentPickerTable = (): JSX.Element => {
 					/>
 				</div>
 				<div className="w-full px-[15px] min-[768px]:w-1/6">
-					{/* `.w-md-75` is legacy's own utility and kicks in at 992px, not 768px */}
 					<div className="mb-[8px] min-[992px]:w-3/4">
 						<LegacySelect
 							value={String(table.state.length)}
@@ -134,10 +127,8 @@ const StudentPickerTable = (): JSX.Element => {
 				onStateChange={table.setState}
 				processing={table.processing}
 				loaded={table.loaded}
-				// DataTables `order: [[1, "desc"]]` — NISP, descending
 				initialSort={{ key: "nis", dir: "desc" }}
 				minWidth="950px"
-				// `sDom` wraps `l` and `f` in a `d-none` div — this page renders its own above
 				toolbar={false}
 			/>
 		</>

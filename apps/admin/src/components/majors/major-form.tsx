@@ -13,16 +13,13 @@ import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useCreateMajor } from "@/hooks/use-majors"
 import { useLevelOptions } from "@/hooks/use-level-options"
 
-// Left card of `major/index.blade.php` (`col-xl-4 col-lg-4 col-md-12 col-sm-12 col-12`)
 const MajorForm = (): JSX.Element => {
-	// `MajorController@index` → `Level::get()`, i.e. insertion order
 	const { data: levels } = useLevelOptions("id-asc")
 	const [name, setName] = useState("")
 	const [levelId, setLevelId] = useState("")
 	const [desc, setDesc] = useState("")
 	const createMajor = useCreateMajor()
 
-	// `default-ajax.js` on `#main-form`: PNotify, then `window.location.reload()` 1000 ms later
 	const save = useLegacySubmit({
 		mutationFn: (payload: MajorPayload) => createMajor.mutateAsync(payload),
 		onDone: () => {
@@ -33,7 +30,6 @@ const MajorForm = (): JSX.Element => {
 	})
 
 	return (
-		// `.card.tbr_card.mb-3.mb-lg-0 > .card-body.p-4`
 		<LegacyCard className="mb-[16px] min-[992px]:mb-0">
 			<LegacyCardTitle>Tambah jurusan baru</LegacyCardTitle>
 			<LegacyCardText>Silakan tambahkan jurusan baru pada form di bawah ini.</LegacyCardText>
@@ -80,9 +76,9 @@ const MajorForm = (): JSX.Element => {
 				</AcademicField>
 
 				<div className="pt-[16px] text-right">
-					{/* Legacy's `<a href="">` reloads the current page rather than going anywhere */}
 					<button
 						type="button"
+						// Kembali deliberately reloads the current page.
 						onClick={() => window.location.reload()}
 						className={legacyButtonClass("light", "mr-[8px]")}
 					>

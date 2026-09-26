@@ -2,18 +2,12 @@ import type { JSX, ReactNode } from "react"
 
 import { cn } from "@roja/utils"
 
-
-// `.tbr_label` (app.css 1183-1229) sized by `.tbr_table tr td .tbr_label` (datatable.css 177-185)
-// app.css 1183-1232: every `.tbr_label-*` is `rgba(var(--rgb-<name>), 0.1)` over `var(--<name>)`.
-// The app names its channels `--<name>-rgb`; the numbers are identical to the literals these
-// replace, so the computed colours are unchanged.
 const VARIANT = {
 	success: "bg-[rgba(var(--success-rgb),0.1)] text-[var(--success)]",
 	danger: "bg-[rgba(var(--danger-rgb),0.1)] text-[var(--danger)]",
 	warning: "bg-[rgba(var(--warning-rgb),0.1)] text-[var(--warning)]",
 	primary: "bg-[rgba(var(--primary-rgb),0.1)] text-[var(--primary)]",
 	info: "bg-[rgba(var(--info-rgb),0.1)] text-[var(--info)]",
-	// `.tbr_label-solid-primary` — filled, not tinted; the badge on the santri card
 	"solid-primary": "bg-[var(--primary)] text-[var(--white)] shadow-[0px_8px_10px_0px_rgba(var(--primary-rgb),0.25)]",
 } as const
 

@@ -27,12 +27,10 @@ const cellText = (row: NumberedGrade, key: string): string => {
 
 const SEARCH_KEYS = ["no", "name", "appliedText"]
 
-// `student-cost-term/grade.blade.php` + `default-datatable.js` (`initDatatable(url, [3])`)
 const StudentCostGradeTable = ({ academicYearId }: { academicYearId: number }): JSX.Element => {
 	const { data, isFetching, isSuccess } = useStudentCostGrades(academicYearId)
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
 
-	// `Grade::orderByDesc('label')` decides the order and the `$no` counter follows it
 	const numbered = useMemo<NumberedGrade[]>(
 		() => (data ?? []).map((row, index) => ({ ...row, no: index + 1 })),
 		[data],
@@ -79,7 +77,6 @@ const StudentCostGradeTable = ({ academicYearId }: { academicYearId: number }): 
 			processing={isFetching}
 			loaded={isSuccess}
 			initialSort={{ key: "no", dir: "asc" }}
-			// This blade sets no inline `min-width` on the table
 			minWidth="auto"
 		/>
 	)

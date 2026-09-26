@@ -4,7 +4,6 @@ import type { AdminMessageResult, SubGradeDetail, SubGradePayload, SubGradeRow }
 
 import { adminApi } from "@/lib/api"
 
-// Legacy Subkelas card (sub-grade.list / sub-grade.edit / …store / …update / …destroy)
 export const subGradeKeys = {
 	all: ["admin-sub-grades"] as const,
 	list: () => [...subGradeKeys.all, "list"] as const,
@@ -14,7 +13,6 @@ export const subGradeKeys = {
 export const useSubGrades = (): UseQueryResult<SubGradeRow[]> =>
 	useQuery({ queryKey: subGradeKeys.list(), queryFn: () => adminApi.getSubGradeRows() })
 
-/** `grade/edit-data.js` refetches on every open, so the detail is never served from cache. */
 export const useSubGrade = (id: number | null): UseQueryResult<SubGradeDetail> =>
 	useQuery({
 		queryKey: subGradeKeys.detail(id ?? 0),
@@ -48,7 +46,6 @@ export const useDeleteSubGrade = (): UseMutationResult<AdminMessageResult, Error
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (id: number) => adminApi.deleteSubGrade(id),
-		// `window['subGradeDatatable'].ajax.reload(cb, null)` — only the Subkelas table reloads
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: subGradeKeys.list() }),
 	})
 }

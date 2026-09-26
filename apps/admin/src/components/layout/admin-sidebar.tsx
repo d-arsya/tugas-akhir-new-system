@@ -27,7 +27,6 @@ const HamburgerIcon = (): JSX.Element => (
 	</span>
 )
 
-// Port of legacy sidebar-left.blade.php (Porto `html.fixed.sidebar-left-sm` layout)
 const AdminSidebar = ({
 	role,
 	collapsed,

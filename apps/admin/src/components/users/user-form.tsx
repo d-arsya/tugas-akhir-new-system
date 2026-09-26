@@ -18,7 +18,6 @@ export type UserFormValues = {
 	isBlocked: boolean
 }
 
-// `create.blade.php` defaults: gender "male" and Status Akun "0" are pre-checked
 export const EMPTY_USER_FORM: UserFormValues = { name: "", gender: "male", role: "", email: "", isBlocked: false }
 
 type UserFormProps = {
@@ -38,7 +37,6 @@ const STATUS_OPTIONS = [
 	{ value: "1", label: "Deactive", id: "deactive" },
 ]
 
-// `<option value="" title="Select" selected>` plus the three roles the legacy form offers
 const ROLE_OPTIONS = [
 	{ value: "", label: "Select" },
 	{ value: "Admin", label: "Admin" },
@@ -46,8 +44,6 @@ const ROLE_OPTIONS = [
 	{ value: "Kasir E-Wallet", label: "Kasir E-Wallet" },
 ]
 
-// Shared port of `user/create.blade.php` and `user/edit.blade.php` (the same form; edit prefills
-// the values, locks the email and reloads instead of redirecting)
 const UserForm = ({ mode, initial, onSubmit, submitting }: UserFormProps): JSX.Element => {
 	const [values, setValues] = useState<UserFormValues>(initial)
 	const set = <K extends keyof UserFormValues>(key: K, value: UserFormValues[K]): void =>
@@ -60,16 +56,13 @@ const UserForm = ({ mode, initial, onSubmit, submitting }: UserFormProps): JSX.E
 			gender: values.gender,
 			role: values.role,
 			isBlocked: values.isBlocked,
-			// Legacy posts the email on both forms but only `store` reads it
 			email: values.email,
 		})
 	}
 
 	return (
-		// `.row.justify-content-center > .col-xl-9.col-lg-10.col-md-12.col-sm-12.col-12`
 		<div className="mx-[-15px] flex flex-wrap justify-center">
 			<div className="w-full min-w-0 px-[15px] min-[1200px]:max-w-[75%] min-[1200px]:flex-[0_0_75%] min-[992px]:max-w-[83.333333%] min-[992px]:flex-[0_0_83.333333%]">
-				{/* `.card-body.p-4.px-lg-5` */}
 				<LegacyCard bodyClassName="p-[24px] min-[992px]:px-[48px]">
 					<form id="main-form" onSubmit={handleSubmit} noValidate>
 						<LegacyFormRow label="Nama Lengkap" htmlFor="name" hint="required">
@@ -112,7 +105,6 @@ const UserForm = ({ mode, initial, onSubmit, submitting }: UserFormProps): JSX.E
 								name="email"
 								type="email"
 								spellCheck={false}
-								// Legacy locks the email on the edit form; the update ignores it anyway
 								readOnly={mode === "edit"}
 								autoComplete={mode === "edit" ? "off" : undefined}
 								value={values.email}
@@ -130,7 +122,6 @@ const UserForm = ({ mode, initial, onSubmit, submitting }: UserFormProps): JSX.E
 						</LegacyFormRow>
 
 						<div className="text-right">
-							{/* `mr-2`, then the whitespace Blade leaves between the two inline-block buttons */}
 							<Link to="/users" className={legacyButtonClass("light", "mr-[8px]")}>
 								Kembali
 							</Link>{" "}

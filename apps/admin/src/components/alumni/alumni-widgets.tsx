@@ -6,27 +6,18 @@ import { cn } from "@roja/utils"
 
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyCard, { LegacyCardText, LegacyCardTitle } from "@/components/legacy/legacy-card"
-import { adminApi } from "@/lib/api"
+import { alumniPrintUrl } from "@/hooks/use-alumni"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 import { BackArrowIcon, PrintIcon } from "./alumni-icons"
 
-// OWNER: AK-A. `alumni/partials/edit/widget-info.blade.php` and `widget-status.blade.php`, the two side cards
-// of the alumni detail page. Both are `.card.tbr_card > .card-body` without `p-4`, i.e. bootstrap's 20px.
-
-/** `.tbr_block_info` (app.css 2009-2030) */
 const BlockInfo = ({ label, value }: { label: string; value: ReactNode }): JSX.Element => (
 	<div className="relative -mx-[8px] rounded-[8px] border-b border-[var(--bg-tertiary)] px-[8px] py-[12px] last:border-b-0 hover:bg-[var(--bg-tertiary)]">
 		<div>{label}</div>
-		{/* `.tbr_weight-italic` */}
 		<div className="text-[var(--grey)] italic">{value}</div>
 	</div>
 )
 
-/**
- * The photo (or No-Photo.svg), then Nama / Awal Masuk / Lulus Pada. The blade's `registration_path` label
- * never renders: `tbr_alumnis` has no such column.
- */
 export const AlumniWidgetInfo = ({ detail }: { detail: AdminAlumniDetail }): JSX.Element => (
 	<LegacyCard className="mb-[16px] min-[992px]:mb-0" bodyClassName="p-[20px]">
 		<div className="relative mb-[12px] rounded-[10px]">
@@ -42,12 +33,10 @@ export const AlumniWidgetInfo = ({ detail }: { detail: AdminAlumniDetail }): JSX
 	</LegacyCard>
 )
 
-// `.tbr_btn:not(.tbr_btn-back):not(.tbr_btn-light):hover svg path:not(.tbr_except), svg .tbr_white { fill: #fff }`
 const ICON_BUTTON = "inline-flex p-[8px] [&:hover_path:not(.tbr-except)]:fill-white [&:hover_.tbr-white]:fill-white"
 
 type AlumniWidgetStatusProps = { detail: AdminAlumniDetail; saving: boolean }
 
-/** "Actions": back to the year (`.tbr_btn-light-info`), Print in a new tab (`.tbr_btn-light-danger`), Simpan. */
 export const AlumniWidgetStatus = ({ detail, saving }: AlumniWidgetStatusProps): JSX.Element => (
 	<LegacyCard bodyClassName="p-[20px]">
 		<LegacyCardTitle>Actions</LegacyCardTitle>
@@ -80,7 +69,7 @@ export const AlumniWidgetStatus = ({ detail, saving }: AlumniWidgetStatusProps):
 					</Link>
 				)}
 				<a
-					href={adminApi.alumniPrintUrl(detail.id)}
+					href={alumniPrintUrl(detail.id)}
 					target="_blank"
 					rel="noreferrer"
 					onMouseDown={triggerRipple}

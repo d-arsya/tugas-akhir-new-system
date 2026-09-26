@@ -12,28 +12,18 @@ import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 import StudentListingModal, { CONTENTS_KBM, type ListedStudent } from "./student-listing-modal"
 import { noticeLines } from "./student-ui"
 
-// `student/partials/listing-student/bulk-action.blade.php` + the six `listing-confirm-*` modals, driven by
-// `edit-general.js` (`drawStudentData*`, `getData`) and `bulk-action-ajax.js` (`bulkActionSubmit`).
-//
-// Fixed legacy bug (user request, 2026-09-26): the Subkelas modal's form shared the id `stay-grades-form` with
-// the Tinggal Kelas modal (included first), so it posted Tinggal Kelas. Here it posts `update-sub-grade`.
-
 type Modal = "next" | "graduate" | "stay" | "major" | "subGrade" | "status"
 
 type Props = {
-	/** The ticked rows of the current page, in table order (`getData()`). */
 	selected: ListedStudent[]
-	/** Lulus replaces Naik Kelas at the highest grade (`$max_grade == $student->grade`). */
 	isMaxGrade: boolean
 	majors: string[]
 	subGrades: string[]
-	/** The table reloads after a write, which unticks everything (`resetAllcheckbox`). */
 	onDone: () => void
 }
 
 const SELECT_WITH_BUTTON = "mr-[24px] mb-[16px] flex"
 
-// `.tbr_select2_with_btn .input-group-append` (app.css 2586-2606)
 const APPEND_CLASS = cn(
 	"z-[3] ml-[-2px] flex w-[40px] max-w-[40px] cursor-pointer items-center justify-center rounded-r-[6px] border-0 bg-[var(--primary)] px-0 shadow-[0px_8px_10px_rgba(var(--primary-rgb),0.25)] transition-all duration-300 hover:shadow-none",
 	RIPPLE_CLASS,
@@ -66,7 +56,6 @@ const StudentBulk = ({ selected, isMaxGrade, majors, subGrades, onDone }: Props)
 	const [major, setMajor] = useState("")
 	const [subGrade, setSubGrade] = useState("")
 	const [blocked, setBlocked] = useState("")
-	// Chosen when the modal was opened (the hidden inputs legacy writes then)
 	const [picked, setPicked] = useState({ major: "", subGrade: "", blocked: "" })
 	const [enabled, setEnabled] = useState({ major: false, subGrade: false, status: false })
 	const [submitting, setSubmitting] = useState(false)
@@ -168,7 +157,6 @@ const StudentBulk = ({ selected, isMaxGrade, majors, subGrades, onDone }: Props)
 
 	return (
 		<>
-			{/* `#tbr_bulk_action.tbr_bulk_action.mb-2` — faded and inert until a row is ticked (app.css 2612-2622) */}
 			<div
 				className={cn(
 					"mb-[8px] transition-all duration-500",

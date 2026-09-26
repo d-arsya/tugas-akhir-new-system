@@ -4,21 +4,12 @@ import { cn } from "@roja/utils"
 
 import { ensureLegacyStyle } from "./legacy-style"
 
-// `@keyframes expand-on|expand-off` (porto/css/theme.css 12508-12560): the handle stretches 9px mid-travel
 ensureLegacyStyle(
 	"legacy-ios-switch",
 	"@keyframes legacy-expand-on{0%{padding-right:0}40%{padding-right:9px}100%{padding-right:0}}" +
 		"@keyframes legacy-expand-off{0%{padding-right:0;left:2px}40%{padding-right:9px;left:-7px}100%{padding-right:0;left:2px}}",
 )
 
-/**
- * `default` is the form-builder switch, sized by `.tbr_form_panel .tbr_fp_display .ios-switch`
- * (app.css 2256-2292): 65×35 track, 36px fills, a 30px handle in `--bg-form-border`.
- *
- * `lg` is plain `.switch.switch-lg` as porto sizes it (theme.css 12407-12415, 12465-12476):
- * a 75×45 track and a **white** 41px handle. Tahun Ajaran's PSB and Akademik toggles use it.
- * In both cases the handle travels a fixed 30px — porto does not scale the translate.
- */
 type LegacySwitchSize = "default" | "lg"
 
 type LegacySwitchProps = {
@@ -48,7 +39,6 @@ const SIZES = {
 	},
 } as const satisfies Record<LegacySwitchSize, Record<string, string>>
 
-// Port of the ios7-switch markup built by the legacy jQuery plugin
 const LegacySwitch = ({
 	checked,
 	onChange,
@@ -65,7 +55,6 @@ const LegacySwitch = ({
 				s.label,
 				disabled ? "cursor-default opacity-50" : "cursor-pointer",
 			)}
-			// `.switch` wraps a `.d-none` checkbox; the plugin toggles `.on` / `.off` on the rendered switch
 		>
 			<input
 				type="checkbox"
@@ -81,7 +70,6 @@ const LegacySwitch = ({
 					s.track,
 				)}
 			>
-				{/* `.on-background.background-fill` — fades in over .3s (with a .2s delay when switching on) */}
 				<span
 					aria-hidden="true"
 					className={cn(
@@ -92,7 +80,6 @@ const LegacySwitch = ({
 							: "opacity-0 transition-[opacity] duration-300",
 					)}
 				/>
-				{/* `.state-background.background-fill` — collapses to scale(0) to reveal the colour underneath */}
 				<span
 					aria-hidden="true"
 					className={cn(
@@ -101,7 +88,6 @@ const LegacySwitch = ({
 						checked ? "scale-0" : "scale-100 delay-[250ms]",
 					)}
 				/>
-				{/* `.handle` — travels a fixed 30px right, with the legacy stretch animation */}
 				<span
 					aria-hidden="true"
 					className={cn(

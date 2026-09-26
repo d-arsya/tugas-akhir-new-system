@@ -1,4 +1,5 @@
-// Saves a downloaded file (e.g. an Excel export fetched with the auth header) under its name
+const REVOKE_DELAY_MS = 1000
+
 export const saveBlob = (blob: Blob, fileName: string): void => {
 	const url = URL.createObjectURL(blob)
 	const link = document.createElement("a")
@@ -7,6 +8,5 @@ export const saveBlob = (blob: Blob, fileName: string): void => {
 	document.body.appendChild(link)
 	link.click()
 	link.remove()
-	// Let the browser start the download before releasing the object URL
-	window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+	window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY_MS)
 }

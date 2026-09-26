@@ -5,8 +5,6 @@ import { cn } from "@roja/utils"
 import { legacyButtonClass } from "./legacy-button"
 import { legacyNotify } from "./legacy-notify"
 
-// `.tbr_logo_preview` / `.tbr_favicon_preview` (public/assets/css/form.css 354-376).
-// The shadow uses `--rgb-shadow-inverse: 171,180,190`, which the new globals.css sets to black
 const PREVIEW = {
 	logo: "h-[54px] w-[134px]",
 	favicon: "h-[62px] w-[62px]",
@@ -45,8 +43,7 @@ const LegacyFileUpload = ({
 			setDataUrl(null)
 			return
 		}
-		// `checkFileSize()`: the legacy threshold is `maxKb / 1000` MB, so 500 kB really means 0.5 MB.
-		// It never clears the input — the file still goes up and the server rejects it
+		// maxKb / 1000 (not 1024) and no early return are deliberate: the server rejects oversized files
 		if (file.size / 1024 / 1024 > maxKb / 1000) legacyNotify.error(sizeErrorText)
 
 		const fileReader = new FileReader()
@@ -67,13 +64,11 @@ const LegacyFileUpload = ({
 				<div
 					style={{ backgroundImage: `url(${url})`, opacity: faded ? 1 : 0 }}
 					className={cn(
-						// `.hide().fadeIn(650)` in `setting/upload-logo-school.js`
 						"mb-[10px] rounded-[6px] bg-[var(--bg-inverse)] bg-contain bg-left bg-no-repeat shadow-[0px_8px_10px_0px_rgba(171,180,190,0.25)] transition-opacity duration-[650ms]",
 						PREVIEW[variant],
 					)}
 				/>
 			) : null}
-			{/* `.tbr_form_upload > input.d-none + label.btn.tbr_btn.tbr_btn-secondary` */}
 			<div>
 				<input
 					type="file"
@@ -82,7 +77,6 @@ const LegacyFileUpload = ({
 					className="hidden"
 					onChange={(event) => pick(event.target.files?.[0] ?? null)}
 				/>
-				{/* Bootstrap reboot gives every label `margin-bottom: .5rem`, which makes the row 48px tall */}
 				<label htmlFor={id} className={legacyButtonClass("secondary", "mb-[8px]")}>
 					{buttonLabel}
 				</label>

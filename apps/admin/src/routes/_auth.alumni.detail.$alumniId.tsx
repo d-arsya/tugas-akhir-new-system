@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import AlumniDetail from "@/components/alumni/alumni-detail"
 
-// Legacy alumni/edit.blade.php — "Detail Alumni"
 export const Route = createFileRoute("/_auth/alumni/detail/$alumniId")({
 	component: Page,
 })

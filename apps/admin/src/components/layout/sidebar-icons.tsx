@@ -13,7 +13,6 @@ export type SidebarIconName =
 
 type IconProps = { className?: string }
 
-// Stops turn white while the owning `group/link` is hovered, focused or highlighted (legacy sidebar.css)
 const HIGHLIGHT_STOP_CLASS =
 	"transition-all duration-500 group-hover/link:[stop-color:#fff] group-focus-visible/link:[stop-color:#fff] group-data-[highlight=true]/link:[stop-color:#fff]"
 
@@ -33,7 +32,6 @@ const GradientIcon = ({
 	viewBox = "0 0 24 24",
 	render,
 }: GradientIconProps): JSX.Element => {
-	// useId output contains characters that are unsafe inside url(#...)
 	const id = `grad-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`
 	return (
 		<svg xmlns="http://www.w3.org/2000/svg" width={width} height={24} viewBox={viewBox} className={cn("inline-block shrink-0 align-middle", className)}>
@@ -148,14 +146,12 @@ export const SIDEBAR_ICONS: Record<SidebarIconName, (p: IconProps) => JSX.Elemen
 	other: GearIcon,
 }
 
-// simple-line-icons "icon-arrow-down" (\e604) glyph, sized to 1em like the icon font
 export const ArrowDownIcon = ({ className }: IconProps): JSX.Element => (
 	<svg viewBox="0 -960 1024 1024" width="1em" height="1em" fill="currentColor" className={className} aria-hidden="true">
 		<path transform="scale(1,-1)" d="M8.2002 684.6c0 8.59961 3.40039 17.4014 10 24.001c13.2002 13.2002 34.7998 13.2002 48 0l451.8 -451.8l445.2 445.2c13.2002 13.2002 34.7998 13.2002 48 0s13.2002 -34.7998 0 -48l-469.2 -469.4c-13.2002 -13.2002 -34.7998 -13.2002 -48 0l-475.8 475.8 c-6.7998 6.7998 -10 15.3994 -10 24.199z" />
 	</svg>
 )
 
-// Font Awesome 5 "fa-bars" (legacy mobile sidebar toggle)
 export const BarsIcon = ({ className }: IconProps): JSX.Element => (
 	<svg viewBox="0 0 448 512" width="0.875em" height="1em" fill="currentColor" className={className} aria-hidden="true">
 		<path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z" />

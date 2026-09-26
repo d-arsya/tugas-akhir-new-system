@@ -8,12 +8,9 @@ import { rupiahLabel } from "@/lib/legacy-format"
 
 import { Striped, StripedItem, StatusLabel, backButtonClass } from "./transaction-striped"
 
-// Legacy ewallet/transaction-detail/cash-detail.blade.php
-
 type CashDetailProps = { detail: EwalletTransactionDetail }
 
 const CashDetail = ({ detail }: CashDetailProps): JSX.Element => (
-	// `.tbr_custom_row.justify-content-center` > `.tbr_col_info.w-50.mx-0`
 	<div className="flex w-full flex-col justify-center min-[992px]:flex-row">
 		<div className="mb-[20px] w-1/2">
 			<LegacyCard>
@@ -36,12 +33,10 @@ const CashDetail = ({ detail }: CashDetailProps): JSX.Element => (
 					<StripedItem label="Total Pembayaran">{rupiahLabel(detail.totalAmount)}</StripedItem>
 					<StripedItem label="Jenis Transaksi">{detail.name}</StripedItem>
 					<StripedItem label="Metode">{detail.paymentMethod}</StripedItem>
-					{/* `@if income` / `@elseif expense`: the officer takes a top-up, the wallet owner a withdrawal; any other type leaves an empty row */}
 					{detail.type === "income" ? <StripedItem label="Penerima">{detail.paymentOnBehalfOf}</StripedItem> : null}
 					{detail.type === "expense" ? <StripedItem label="Penerima">{detail.recipientName}</StripedItem> : null}
 				</Striped>
 			</LegacyCard>
-			{/* `.btn.tbr_btn.tbr_btn-light-info.w-100.mt-4`, inside `.card` but under `.card-body` */}
 			<Link
 				to="/ewallets/$ewalletId"
 				params={{ ewalletId: String(detail.ewallet.id) }}

@@ -13,11 +13,6 @@ import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import AlumniTab from "./alumni-tab"
 import { AlumniWidgetInfo, AlumniWidgetStatus } from "./alumni-widgets"
 
-// OWNER: AK-A. `alumni/edit.blade.php`: `form#main-form` over widget-info (col-lg-3), the six tabs (col-lg-6)
-// and widget-status (col-lg-3). `alumni/update.js` posts every rendered input as FormData, empty Summernotes
-// as "", then a notice and `location.reload()` 1000 ms later; a failure is a notice listing every message
-// (the blade's `@error` blocks never render on this AJAX page, so no inline errors).
-
 const STEPS: readonly SocietyStepKey[] = ["personal", "identity", "family", "guardian", "attachment"]
 
 const ALUMNI_INPUTS = [
@@ -37,14 +32,9 @@ const ALUMNI_INPUTS = [
 	"alumni_sub_village",
 ] as const
 
-/** The `.summernote` textareas `update.js` empties when `summernote("isEmpty")` or `<p><br></p>`. */
 const SUMMERNOTES = new Set(["alumni_talent", "advanced_study", "profession", "learning_achievment", "gift"])
 const isEmptySummernote = (html: string): boolean => /^(<p>)?(<br\s*\/?>)?(<\/p>)?$/i.test(html.trim())
 
-/**
- * What the form posts: the alumni tab's inputs, then every rendered society input — a hidden setting (status
- * off) is not rendered, attachments travel as files. An unchecked Status Menikah radio posts nothing.
- */
 const postedValues = (values: SocietyValues, settings: readonly SettingFormItem[]): SocietyValues => {
 	const lookup = societySettingLookup(settings)
 	const out: SocietyValues = {}
@@ -61,7 +51,6 @@ const postedValues = (values: SocietyValues, settings: readonly SettingFormItem[
 type AlumniDetailFormProps = {
 	detail: AdminAlumniDetail
 	settings: SettingFormItem[]
-	/** `location.reload()` — the parent re-reads the record and remounts the form. */
 	onSaved: () => void
 }
 
@@ -91,7 +80,6 @@ const AlumniDetailForm = ({ detail, settings, onSaved }: AlumniDetailFormProps):
 	const submit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
 		const lookup = societySettingLookup(settings)
-		// A hidden repeater posts no `disease_name[]`, which legacy reads as "no rows" and clears the history
 		save.submit(toSocietyFormData(postedValues(values, settings), lookup.status(28) ? diseases : [], files))
 	}
 
@@ -118,9 +106,7 @@ const AlumniDetailForm = ({ detail, settings, onSaved }: AlumniDetailFormProps):
 	]
 
 	return (
-		// `noValidate` (legacy had none): the browser's own checks on inputs in a hidden tab blocked the save with
-		// "An invalid form control … is not focusable" and no message. The server runs the same rules and answers
-		// with the legacy messages in a notice.
+		// noValidate: required inputs in hidden tabs would block the save silently; the server validates
 		<form onSubmit={submit} noValidate>
 			<div className="mx-[-15px] flex flex-wrap">
 				<div className="w-full px-[15px] min-[992px]:w-1/4">

@@ -9,11 +9,6 @@ import LegacyRadioGroup from "@/components/legacy/legacy-radio-group"
 import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useLevel, useUpdateLevel } from "@/hooks/use-levels"
 
-/**
- * `level/edit-level.blade.php`, fetched per row by `edit-data-default.js` and opened with
- * magnific-popup. Title is "Edit keterangan", the radios are inline (they are stacked on the
- * create form) and the helper sentence is a `<p>` inside the label rather than a tooltip.
- */
 type LevelEditModalProps = {
 	levelId: number | null
 	onClose: () => void
@@ -31,7 +26,6 @@ const LevelEditModal = ({ levelId, onClose }: LevelEditModalProps): JSX.Element 
 	const [status, setStatus] = useState("")
 	const update = useUpdateLevel(id)
 
-	// Legacy renders the partial server-side with the row's values already in it
 	useEffect(() => {
 		setName(data?.name ?? "")
 		setStatus(data?.status ?? "")
@@ -40,7 +34,6 @@ const LevelEditModal = ({ levelId, onClose }: LevelEditModalProps): JSX.Element 
 	const submit = useLegacySubmit({
 		mutationFn: (payload: LevelPayload) => update.mutateAsync(payload),
 		errorTitle: "Gagal!",
-		// `default-ajax2.js` reloads the page 1000 ms later; here the list refetches and we close
 		onDone: onClose,
 	})
 
@@ -69,14 +62,10 @@ const LevelEditModal = ({ levelId, onClose }: LevelEditModalProps): JSX.Element 
 					save()
 				}}
 			>
-				{/* `.form-group.mb-4` — label and its grey "required" help block on one line */}
 				<div className="mb-[24px]">
 					<label htmlFor="name_edit" className="m-0 flex leading-[20px] min-[992px]:text-right">
 						Nama Jenjang
-						{/* `margin: 0 0 4px 0` (form.css 14) is load-bearing: the label is `d-flex`, so the
-					    badge's margin box sets the row height — 24px, not 20px. Without it every
-					    control below sits 4px high. */}
-					<span className="mb-[4px] ml-[8px] text-[11px] leading-[20px] font-normal text-[var(--grey)] opacity-80">
+						<span className="mb-[4px] ml-[8px] text-[11px] leading-[20px] font-normal text-[var(--grey)] opacity-80">
 							required
 						</span>
 					</label>
@@ -97,8 +86,6 @@ const LevelEditModal = ({ levelId, onClose }: LevelEditModalProps): JSX.Element 
 							Silakan pilih ingin ditampilkan pada halaman PSB atau tidak.
 						</p>
 					</label>
-					{/* `level/edit-level.blade.php` 34,45: bare `.custom-control-inline` siblings in a block
-					    container — margin-top 0, and the newline between them renders as 3.73px */}
 					<LegacyRadioGroup
 						name="status_edit"
 						value={status}

@@ -6,18 +6,11 @@ import type { AdminAlumniList, AdminAlumniRow } from "@roja/types"
 import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-data-table"
 import { clientTable, type TableState } from "@/lib/legacy-table"
 
-// OWNER: AK-A. The alumnus table of `alumni/alumni.blade.php` (a graduation year) and of the "Archive" tab of
-// `alumni/index.blade.php`, filled by `listByYear` / `listArchive` (`StudentService::dbPhoto`,
-// `getProvinceName`, `getRegencyName`, `AcademicYearService::getAction`).
-
-/** The payload's baked `$no`, so it survives re-sorting. */
 export type NumberedAlumni = AdminAlumniRow & { no: number }
 
-/** `Str::limit($value, 20, '...')` — `mb_strimwidth` then `rtrim`. */
 export const strLimit = (value: string, limit = 20): string =>
 	Array.from(value).length <= limit ? value : `${Array.from(value).slice(0, limit).join("").trimEnd()}...`
 
-/** DataTables' html type strips the tags before it searches or sorts a cell. */
 const plain = (html: string | null): string => (html ?? "").replace(/<[^>]*>/g, "")
 
 const cellText = (row: NumberedAlumni, key: string): string => {
@@ -41,14 +34,12 @@ const cellText = (row: NumberedAlumni, key: string): string => {
 
 const SEARCH_KEYS = ["no", "fullname", "phone", "province", "regency", "talent"]
 
-/** DataTables' smart column search (`columns(n).search(value)`): every word must appear in the cell. */
 const smartMatch = (cell: string, term: string): boolean => {
 	const words = term.trim().toLowerCase().split(/\s+/).filter((word) => word !== "")
 	const text = cell.toLowerCase()
 	return words.every((word) => text.includes(word))
 }
 
-/** `.tbr_dt_photo` (app.css 2498-2508): a 40×50 tile, 5px radius, the photo as a cover background. */
 const PhotoCell = ({ url }: { url: string | null }): JSX.Element => (
 	<div
 		className="relative h-[50px] w-[40px] overflow-hidden rounded-[5px] bg-[var(--primary)] bg-cover bg-center bg-no-repeat"
@@ -63,11 +54,8 @@ type AlumniRowTableProps = {
 	processing: boolean
 	loaded: boolean
 	onDelete: (row: NumberedAlumni) => void
-	/** The year page drives length/search from its own tool row (`.tbr_table_container` hides DataTables'). */
 	toolbar: boolean
-	/** `columnVisible()` — only the year page hides the name column when setting 1 is off. */
 	hideNameWhenOff: boolean
-	/** `columns(4|5).search(...)` from the Provinsi / Kabupaten filters. */
 	columnSearch?: { province: string; regency: string }
 }
 
@@ -107,7 +95,6 @@ const AlumniRowTable = ({
 			header: "Minat Bakat",
 			width: "23%",
 			sortable: true,
-			// The cell is the stored Summernote HTML: DataTables inserts cell data as HTML, as legacy shows it
 			cell: (row) => (row.alumniTalent ? <div dangerouslySetInnerHTML={{ __html: row.alumniTalent }} /> : null),
 		},
 		{
@@ -115,7 +102,6 @@ const AlumniRowTable = ({
 			header: "Actions",
 			width: "9%",
 			sortable: false,
-			// `AcademicYearService::getAction` — detail link + destroy (`deleteData` → `#modalDelete`)
 			cell: (row) => (
 				<div className="align-middle">
 					<Link

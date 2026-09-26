@@ -7,9 +7,6 @@ import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-d
 import { useAlumniYears } from "@/hooks/use-alumni"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// OWNER: AK-A. The "Alumni" tab of `alumni/index.blade.php`: `table.tbr_year` (min-width 750px) filled by
-// `AlumniController::list` and `initCustomDatatables(urlYear, [5], ".tbr_year")`.
-
 type NumberedYear = AdminAlumniYearRow & { no: number }
 
 const cellText = (row: NumberedYear, key: string): string => {
@@ -50,7 +47,6 @@ const AlumniYearTable = ({ onDelete }: AlumniYearTableProps): JSX.Element => {
 			key: "actions",
 			header: "Actions",
 			sortable: false,
-			// `AlumniService::getAction` — the year page, and `deleteData(event, year, …)`
 			cell: (row) => (
 				<div className="align-middle">
 					<Link

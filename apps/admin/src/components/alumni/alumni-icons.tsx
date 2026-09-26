@@ -1,13 +1,5 @@
 import type { JSX } from "react"
 
-// OWNER: AK-A. The inline SVGs of the Alumni blades, transcribed from
-// `alumni/partials/listing-alumni/card-header.blade.php` and `alumni/partials/edit/widget-status.blade.php`.
-
-/**
- * The left arrow of the back buttons. The detail page's copy marks the transparent frame `tbr_except` and
- * the bar `tbr_white`, so `.tbr_btn:hover svg path:not(.tbr_except), svg .tbr_white` turn white on hover;
- * the card-header copy does not (a `.tbr_btn-back` is excluded from that rule anyway).
- */
 export const BackArrowIcon = ({ hoverWhite = false }: { hoverWhite?: boolean }): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" {...(hoverWhite ? { className: "tbr-except" } : {})} />
@@ -28,7 +20,6 @@ export const BackArrowIcon = ({ hoverWhite = false }: { hoverWhite?: boolean }):
 	</svg>
 )
 
-/** `Group_2400` — the white export glyph on the green `.tbr_btn-success` button. */
 export const ExportIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -46,7 +37,6 @@ export const ExportIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `Group_2762` — the printer of the detail page's Print button (`.tbr_white` bar at .3). */
 export const PrintIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />

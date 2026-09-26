@@ -10,15 +10,8 @@ import { rupiahLabel } from "@/lib/legacy-format"
 
 import { Striped, StripedItem, backButtonClass } from "./transaction-striped"
 
-// Legacy ewallet/transaction-detail/bank-transfer-detail.blade.php
+const DESTINATION_BANK = "BSI 7192852646 a.n Tabungan Pondok ROJA"
 
-/**
- * The destination account is hard-coded in the blade (`{{-- destination_bank --}}` is commented out
- * in favour of this literal). Kept as legacy, in one place; moving it to settings is a follow-up.
- */
-export const DESTINATION_BANK = "BSI 7192852646 a.n Tabungan Pondok ROJA"
-
-// `#waiting`, `#process`, `#valid`, `#invalid` — in the blade's order
 const STATUS_OPTIONS: LegacyRadioOption[] = [
 	{ value: "waiting", label: "Menunggu" },
 	{ value: "process", label: "Diproses" },
@@ -31,12 +24,10 @@ const P = "mb-[20px] leading-[24px] text-[var(--body-txt-inverse)]"
 
 type BankTransferDetailProps = {
 	detail: EwalletTransactionDetail
-	/** `update-transaction.js`: a click on any unchecked radio opens a confirmation modal. */
 	onPickStatus: (status: EwalletTransactionStatus) => void
 }
 
 const BankTransferDetail = ({ detail, onPickStatus }: BankTransferDetailProps): JSX.Element => (
-	// `.tbr_custom_row`: a column below 992px, a row with `.tbr_col_info` 37% / 37% / `.tbr_col_status` 26% above
 	<div className="flex w-full flex-col min-[992px]:flex-row">
 		<div className="mb-[20px] w-full min-[992px]:mr-[30px] min-[992px]:w-[37%]">
 			<LegacyCard>
@@ -65,7 +56,6 @@ const BankTransferDetail = ({ detail, onPickStatus }: BankTransferDetailProps): 
 					<StripedItem label="Bank Tujuan">{DESTINATION_BANK}</StripedItem>
 					<StripedItem label="Keterangan">{detail.paymentNote}</StripedItem>
 					{detail.paymentAttachmentUrl ? (
-						// `.d-flex.flex-column` — not a `.tbr_striped_item`, so it takes no stripe
 						<div className="flex flex-col">
 							<img className="m-[24px] h-auto max-w-full shadow-[0_2px_4px_rgba(0,0,0,0.075)]" src={detail.paymentAttachmentUrl} alt="" />
 							<div className="flex justify-center">
@@ -89,7 +79,6 @@ const BankTransferDetail = ({ detail, onPickStatus }: BankTransferDetailProps): 
 		</div>
 		<div className="mb-[20px] w-full min-[992px]:w-[26%]">
 			<div className="mb-[24px]">
-				{/* `.card-body` without `.p-4`: bootstrap's 1.25rem */}
 				<LegacyCard bodyClassName="p-[20px]">
 					<h5 className={H5}>Status</h5>
 					<p className={P}>Tentukan status transaksi</p>

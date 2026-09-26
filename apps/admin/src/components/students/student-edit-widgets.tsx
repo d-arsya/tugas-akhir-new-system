@@ -8,15 +8,10 @@ import LegacyButton, { legacyButtonClass } from "@/components/legacy/legacy-butt
 import LegacyCard, { LegacyCardText } from "@/components/legacy/legacy-card"
 import LegacyInput from "@/components/legacy/legacy-input"
 import LegacySelect from "@/components/legacy/legacy-select"
-import { adminApi } from "@/lib/api"
+import { studentPrintUrl } from "@/hooks/use-students"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
-// The edit page's side columns: `student/partials/edit/widget-info.blade.php` (photo, NISP, email, date,
-// source) and `widget-status.blade.php` (year / Jenjang / Kelas locked, Subkelas and Jurusan, back, print,
-// Simpan). `widget-note.blade.php` tests a `kbm_note` column that does not exist, so it never renders (kept).
-
 const BlockInfo = ({ label, value }: { label: string; value: ReactNode }): JSX.Element => (
-	// `.tbr_block_info` (app.css 2009-2030)
 	<div className="relative -mx-[8px] rounded-[8px] border-b border-[var(--bg-tertiary)] px-[8px] py-[12px] last:border-b-0 hover:bg-[var(--bg-tertiary)]">
 		<div>{label}</div>
 		<div className="text-[var(--grey)] italic">{value}</div>
@@ -25,7 +20,6 @@ const BlockInfo = ({ label, value }: { label: string; value: ReactNode }): JSX.E
 
 export const StudentWidgetInfo = ({ detail, nis, onNisChange }: { detail: AdminStudentDetail; nis: string; onNisChange: (value: string) => void }): JSX.Element => (
 	<LegacyCard className="mb-[16px] min-[992px]:mb-0">
-		{/* `.tbr_user_image` — `tbr_student_grades` has no `registration_path`, so the path label never shows */}
 		<div className="relative mb-[12px] rounded-[10px]">
 			<img src={detail.photoUrl ?? "/assets/svg/etc/No-Photo.svg"} alt={detail.fullname ?? ""} className="h-auto w-full rounded-[10px]" />
 		</div>
@@ -53,7 +47,6 @@ const Select = ({ value, options, placeholder, onChange, disabled = false }: { v
 	)
 }
 
-/** `.tbr_btn:not(.tbr_btn-light):hover svg path:not(.tbr_except), svg .tbr_white { fill: #fff }` (app.css 708-717) */
 const SVG_WHITE_ON_HOVER = "[&:hover_path:not(.tbr-except)]:fill-white [&:hover_.tbr-white]:fill-white"
 
 const BackIcon = (): JSX.Element => (
@@ -90,7 +83,6 @@ type StatusProps = {
 export const StudentWidgetStatus = ({ detail, options, subGrade, onSubGradeChange, majorName, onMajorChange, onSave, saving }: StatusProps): JSX.Element => {
 	const years = (options?.academicYears ?? []).map((year) => ({ value: year.year ?? "", label: year.year ?? "" }))
 	const levels = (options?.levels ?? []).map((level) => ({ value: String(level.id), label: level.name ?? "" }))
-	// `Grade::orderBy('label', 'desc')`
 	const grades = [...(options?.grades ?? [])].reverse().map((grade) => ({ value: String(grade.label ?? ""), label: String(grade.label ?? "") }))
 	const subGrades = [{ value: "undefined", label: "Undefined" }, ...(options?.subGrades ?? []).map((label) => ({ value: label, label }))]
 	const majors = detail.majors.map((name) => ({ value: name, label: name }))
@@ -99,7 +91,6 @@ export const StudentWidgetStatus = ({ detail, options, subGrade, onSubGradeChang
 		<LegacyCard>
 			<LegacyCardText>Anda dapat merubah subkelas dan jurusan jika diperlukan.</LegacyCardText>
 			<Select value={detail.currentAcademicYear ?? ""} options={years} placeholder="Tahun ajaran" disabled />
-			{/* `in_array($student_grade->kbm_note, [...])` reads a column that does not exist: always disabled (kept) */}
 			<Select value={detail.levelId === null ? "" : String(detail.levelId)} options={levels} placeholder="Jenjang" disabled />
 			<Select value={detail.grade === null ? "" : String(detail.grade)} options={grades} placeholder="Kelas" disabled />
 			<Select value={subGrade} options={subGrades} placeholder="Subkelas" onChange={onSubGradeChange} />
@@ -125,7 +116,7 @@ export const StudentWidgetStatus = ({ detail, options, subGrade, onSubGradeChang
 						</Link>
 					) : null}
 					<a
-						href={adminApi.studentPrintUrl(detail.id)}
+						href={studentPrintUrl(detail.id)}
 						target="_blank"
 						rel="noreferrer"
 						onMouseDown={triggerRipple}

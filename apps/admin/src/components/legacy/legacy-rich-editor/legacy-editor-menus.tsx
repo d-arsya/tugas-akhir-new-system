@@ -2,7 +2,6 @@ import { useState, type JSX, type MouseEvent } from "react"
 
 import { EditorButton, EditorDropdown, EditorDropdownItem, ROUND_L, ROUND_R } from "./legacy-editor-ui"
 
-// `styleTags` defaults with the `id-ID` titles from porto/vendor/summernote/lang/summernote-id-ID.js
 const STYLE_ITEMS = [
 	{ tag: "p", title: "p" },
 	{ tag: "blockquote", title: "Kutipan" },
@@ -29,7 +28,6 @@ const preview = (tag: string, title: string): JSX.Element => {
 	return <h6 className={HEADING}>{title}</h6>
 }
 
-// `.note-style .note-dropdown-menu.show { min-width: 260px !important }` (summernote.css 59-61)
 export const EditorStyleMenu = ({ onPick }: { onPick: (tag: string) => void }): JSX.Element => (
 	<EditorDropdown className="min-w-[260px]!">
 		{STYLE_ITEMS.map((item) => (
@@ -42,7 +40,6 @@ export const EditorStyleMenu = ({ onPick }: { onPick: (tag: string) => void }): 
 
 type ParaProps = { onCommand: (command: string) => void; state: Record<string, boolean> }
 
-// `.note-para .note-dropdown-menu { min-width: 228px; padding: 5px }` with two button groups side by side
 export const EditorParagraphMenu = ({ onCommand, state }: ParaProps): JSX.Element => (
 	<EditorDropdown className="flex min-w-[228px] p-[5px]">
 		<div className="inline-flex">
@@ -58,14 +55,12 @@ export const EditorParagraphMenu = ({ onCommand, state }: ParaProps): JSX.Elemen
 	</EditorDropdown>
 )
 
-// The repeating 18px cell sprites from summernote-bs4.css (`.note-dimension-picker-*`)
 const CELL_PX = 18
 const UNHIGHLIGHTED =
 	"url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAgMAAAAroGbEAAAACVBMVEUAAIj4+Pjp6ekKlAqjAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfYAR0BKhmnaJzPAAAAG0lEQVQI12NgAAOtVatWMTCohoaGUY+EmIkEAEruEzK2J7tvAAAAAElFTkSuQmCC)"
 const HIGHLIGHTED =
 	"url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAgMAAAAroGbEAAAACVBMVEUAAIjd6vvD2f9LKLW+AAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfYAR0BKwNDEVT0AAAAG0lEQVQI12NgAAOtVatWMTCohoaGUY+EmIkEAEruEzK2J7tvAAAAAElFTkSuQmCC)"
 
-// `.note-table .note-dimension-picker` — `insertTableMaxSize` is 10x10
 export const EditorTableMenu = ({ onPick }: { onPick: (rows: number, cols: number) => void }): JSX.Element => {
 	const [dim, setDim] = useState({ c: 1, r: 1 })
 

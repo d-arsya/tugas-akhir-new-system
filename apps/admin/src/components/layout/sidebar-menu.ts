@@ -18,7 +18,6 @@ export type SidebarMenuItem = {
 	legacyPath?: string
 	condition?: MenuCondition
 	icon?: SidebarIconName
-	// Omitted = visible to every role (legacy items without @can)
 	roles?: LayoutRole[]
 	badge?: "ewalletProcess"
 	children?: SidebarMenuItem[]
@@ -26,11 +25,9 @@ export type SidebarMenuItem = {
 
 const SA_ADMIN: LayoutRole[] = ["superadmin", "admin"]
 const SA_BENDAHARA: LayoutRole[] = ["superadmin", "bendahara"]
-// Legacy Gate "do-as-cashier" passes for Kasir E-Wallet or Superadmin
 const CASHIER: LayoutRole[] = ["superadmin", "kasir"]
 const SA: LayoutRole[] = ["superadmin"]
 
-// Mirrors admin.pondokroja.com/resources/views/layouts/sidebar-left.blade.php 1:1
 export const SIDEBAR_MENU: SidebarMenuItem[] = [
 	{ key: "dashboard", label: "Dashboard", condition: "new", to: "/dashboard", legacyPath: "/dashboard", icon: "dashboard", roles: SA_ADMIN },
 	{ key: "report", label: "Laporan", condition: "new", to: "/reports", legacyPath: "/report", icon: "report", roles: SA_BENDAHARA },
@@ -177,7 +174,6 @@ export const filterMenuByRole = (
 const matchesPath = (to: string, pathname: string): boolean =>
 	pathname === to || pathname.startsWith(`${to}/`)
 
-// Returns the key chain (root → leaf) of the most specific item matching the path
 export const findActiveChain = (items: SidebarMenuItem[], pathname: string): string[] => {
 	const best = { chain: [] as string[], length: -1 }
 

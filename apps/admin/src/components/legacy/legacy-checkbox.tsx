@@ -13,7 +13,6 @@ type LegacyCheckboxProps = {
 	className?: string
 }
 
-// `assets/svg/etc/Checkbox-Bg.svg` drawn at `background-size: 69%` of the 20px box, centred
 const CheckMark = (): JSX.Element => (
 	<svg
 		aria-hidden="true"
@@ -30,8 +29,6 @@ const CheckMark = (): JSX.Element => (
 	</svg>
 )
 
-// Port of `.custom-control.custom-checkbox` (bootstrap 4 base + public/assets/css/form.css ~300-350):
-// a 20px rounded-4 box on `--bg-primary`, `--secondary` once checked, with the white tick on top
 const LegacyCheckbox = ({
 	id,
 	checked,
@@ -60,7 +57,6 @@ const LegacyCheckbox = ({
 				aria-hidden="true"
 				className={cn(
 					"pointer-events-none absolute top-0 left-[-24px] block h-[20px] w-[20px] rounded-[4px]",
-					// `.custom-control-input:disabled ~ .custom-control-label::before` → `--bg-form-radio-disabled` (#eeeeee)
 					disabled ? "bg-[#eeeeee]" : checked ? "bg-[var(--secondary)]" : "bg-[var(--bg-primary)]",
 				)}
 			/>

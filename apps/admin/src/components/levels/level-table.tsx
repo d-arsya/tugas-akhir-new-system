@@ -9,10 +9,8 @@ import LevelEditModal from "@/components/levels/level-edit-modal"
 import { useLevels } from "@/hooks/use-levels"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// The row number is baked into the legacy payload, so it keeps its value when the table is re-sorted
 type NumberedLevel = LevelRow & { no: number }
 
-// `LevelService::getLevelStatus()` — an unknown status renders no badge at all
 const statusText = (row: LevelRow): string => {
 	if (row.status === "show") return "Ditampilkan"
 	if (row.status === "hide") return "Tidak Ditampilkan"
@@ -36,7 +34,6 @@ const cellText = (row: NumberedLevel, key: string): string => {
 
 const SEARCH_KEYS = ["no", "name", "status", "createdAt"]
 
-// `LevelService::delegateAction` builds the destroy href server-side, per row
 const DESTROY_TO = {
 	delete: "/levels/$levelId/delete",
 	"delegate-major": "/levels/$levelId/delegate-major",
@@ -45,7 +42,6 @@ const DESTROY_TO = {
 	"delegate-student": "/levels/$levelId/delegate-student",
 } as const
 
-// `level/index.blade.php` right card + `default-datatable2.js` (`initCustomDatatables(url, [4], ".level")`)
 const LevelTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useLevels()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -61,7 +57,6 @@ const LevelTable = (): JSX.Element => {
 			key: "status",
 			header: "Halaman PSB",
 			sortable: true,
-			// Legacy adds `text-truncate` to the "Tidak Ditampilkan" label only
 			cell: (row) =>
 				row.status === null ? null : (
 					<LegacyLabel
@@ -76,8 +71,6 @@ const LevelTable = (): JSX.Element => {
 			key: "createdAt",
 			header: "Dibuat Pada",
 			sortable: true,
-			// `RegistrantService::datatableDate()` hides the unix seconds before the text so the
-			// column sorts chronologically. Note `jam H.i` with a dot here, not the colon Lainnya uses.
 			cell: (row) => (
 				<div>
 					<span className="hidden">{row.createdAtTs}</span> {row.createdAt}
@@ -87,14 +80,9 @@ const LevelTable = (): JSX.Element => {
 		{
 			key: "actions",
 			header: "Actions",
-			// `initCustomDatatables(url, [4], ".level")`
 			sortable: false,
-			// `.table .actions a` is inline-block with `margin-right: 5px`, plus the newline Blade
-			// leaves between the two anchors — 5px + ~3.73px = the 8.73px legacy renders. The block
-			// wrapper is load-bearing: a flex row would discard that whitespace-only text node.
 			cell: (row) => (
 				<div className="align-middle">
-					{/* Unlike Tahun Ajaran, the edit icon here opens a modal rather than a page */}
 					<button
 						type="button"
 						className="mr-[5px] inline-block cursor-pointer align-middle"
@@ -102,7 +90,6 @@ const LevelTable = (): JSX.Element => {
 					>
 						<img src="/assets/svg/icons/data_detail.svg" alt="Detail" width={24} height={24} />
 					</button>{" "}
-					{/* A plain link to the step the server picked from the child counts */}
 					<Link
 						to={DESTROY_TO[row.deleteTarget]}
 						params={{ levelId: String(row.id) }}
@@ -117,7 +104,6 @@ const LevelTable = (): JSX.Element => {
 
 	return (
 		<>
-			{/* `<table … style="min-width: 750px;">` */}
 			<LegacyDataTable
 				columns={columns}
 				rows={page.rows}

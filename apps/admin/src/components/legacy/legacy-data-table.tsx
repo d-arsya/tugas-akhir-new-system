@@ -9,56 +9,34 @@ import LegacySelect from "./legacy-select"
 
 export type LegacyColumn<T> = {
 	key: string
-	/** ReactNode, not string: Biaya Santri puts a check-all box and a tooltip icon in `<th>` */
 	header: ReactNode
-	// Legacy `<th width="…">`
 	width?: string
 	sortable?: boolean
-	// `index` is DataTables' DT_RowIndex (1-based across pages)
 	cell: (row: T, index: number) => ReactNode
 }
 
 type LegacyDataTableProps<T> = {
 	columns: LegacyColumn<T>[]
-	/** Legacy sets `style="min-width: …"` per table (1100px users, 1650px auth log, 950px reports). */
 	minWidth?: string
 	rows: T[]
 	rowKey: (row: T, index: number) => string | number
-	// recordsFiltered
 	total: number
 	state: TableState
 	onStateChange: (state: TableState) => void
 	processing: boolean
-	// Before the first response DataTables shows `loadingRecords` (empty in legacy) instead of zeroRecords
 	loaded: boolean
-	// DataTables `order` default (`[[0, "asc"]]`): applied once, while nothing else is sorted
 	initialSort?: { key: string; dir: SortDir }
-	/** `paging: false` — Biaya Santri's account table renders every row and hides the pager. */
 	paging?: boolean
-	/** `fixedColumns: { left: n }` — the first n columns stay put while the table scrolls. */
 	frozenColumns?: number
-	/** Legacy adds `.tbr_selected` to checked rows on the Biaya Santri account table. */
 	rowClassName?: (row: T, index: number) => string | undefined
-	/**
-	 * DataTables `language.emptyTable` — shown when the table has no rows at all.
-	 * Legacy sets this per page; only Riwayat Transaksi overrides it in this menu.
-	 */
 	emptyText?: string
-	/** DataTables `language.zeroRecords` — shown when a search matched nothing. */
 	zeroRecordsText?: string
-	/**
-	 * Legacy hides the built-in length/search row with a `dom` string like `<"d-none"lf>`
-	 * when the page renders those controls itself in its own filter row
-	 * (student-transaction/index.blade.php:14-67). Set false to suppress it.
-	 */
 	toolbar?: boolean
 }
 
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
-// DataTables `searchDelay` default for server-side processing
 const SEARCH_DELAY_MS = 400
 
-// DataTables bootstrap4 sort arrows (`\2191` / `\2193`) restyled by public/assets/css/datatable.css
 const SORT_ARROWS =
 	"before:absolute before:right-[12px] before:bottom-[14px] before:block before:[font-family:'Open_Sans',Arial,sans-serif] before:font-light before:opacity-30 before:content-['↑'] after:absolute after:right-[6px] after:bottom-[14px] after:block after:[font-family:'Open_Sans',Arial,sans-serif] after:font-light after:opacity-30 after:content-['↓']"
 const SORTED_ASC = "before:font-bold before:text-[var(--secondary)] before:opacity-100 after:font-bold"
@@ -68,7 +46,6 @@ const SpinnerIcon = (): JSX.Element => (
 	<span className="mr-[8px] inline-block h-[20px] w-[20px] animate-spin rounded-full border-2 border-white! border-r-transparent! align-[-0.125em] [animation-duration:0.75s]" role="status" />
 )
 
-// Port of the legacy server-side DataTables setup (`sDom: '<"row"<"col-lg-6"l><"col-lg-6"f>><"table-responsive"t>pr'`)
 const LegacyDataTable = <T,>({
 	columns,
 	rows,
@@ -90,10 +67,8 @@ const LegacyDataTable = <T,>({
 	const [search, setSearch] = useState(state.search)
 	const seeded = useRef(false)
 
-	// Parent resets (e.g. the sticky toolbar) clear the box too
 	useEffect(() => setSearch(state.search), [state.search])
 
-	// DataTables applies its default `order` on init, before the first draw
 	useEffect(() => {
 		if (seeded.current || initialSort === undefined || state.sort !== null) return
 		seeded.current = true
@@ -106,7 +81,6 @@ const LegacyDataTable = <T,>({
 		return () => window.clearTimeout(timer)
 	}, [search, state, onStateChange])
 
-	// DataTables `orderSequence: ["asc", "desc"]`: a sorted column toggles, a new one starts ascending
 	const toggleSort = (key: string): void => {
 		const dir: SortDir = state.sort?.key === key && state.sort.dir === "asc" ? "desc" : "asc"
 		onStateChange({ ...state, sort: { key, dir }, page: 1 })
@@ -115,7 +89,6 @@ const LegacyDataTable = <T,>({
 	const pages = Math.max(1, Math.ceil(total / state.length))
 	const offset = paging ? (state.page - 1) * state.length : 0
 
-	// `fixedColumns: { left: n }` — sticky cells need a left offset, so accumulate the widths
 	const frozenLeft = (index: number): string | undefined => {
 		if (index >= frozenColumns) return undefined
 		return columns
@@ -128,11 +101,6 @@ const LegacyDataTable = <T,>({
 		<div className="relative">
 			{toolbar ? (
 				<div className="mx-[-15px] flex flex-wrap">
-					{/*
-					 * The `dom` string keeps both half-width columns either way, but DataTables' own
-					 * `_fnFeatureHtmlLength` returns `null` when `bPaginate` is off, so the length menu
-					 * itself is never built on a non-paging table (Biaya Santri level 3).
-					 */}
 					<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-left">
 						{paging ? (
 							<label className="mb-[8px] inline-block">
@@ -147,13 +115,6 @@ const LegacyDataTable = <T,>({
 						) : null}
 					</div>
 					<div className="w-full px-[15px] text-center min-[992px]:w-1/2 min-[993px]:text-right">
-						{/*
-						 * `overflow-hidden` is load-bearing. Bootstrap makes the search `input` `display: block`,
-						 * so legacy's label has no in-flow line box and takes its baseline from its bottom margin
-						 * edge — the strut then hangs 7.41px below it, making the toolbar 15.41px taller than the
-						 * label at every width. Tailwind's preflight leaves the input inline-block, so without this
-						 * the port is 7.4px short: below 993px on every table, and at all widths when paging is off.
-						 */}
 						<label className="mb-[8px] inline-block w-full overflow-hidden min-[992px]:w-1/2">
 							<input
 								type="search"

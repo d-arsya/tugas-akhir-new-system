@@ -2,13 +2,8 @@ import { useEffect, useState, type JSX, type ReactNode } from "react"
 
 import { cn } from "@roja/utils"
 
-// OWNER: AK-P. The icon-only tab strip of the society edit pages — `{registrant,student}/partials/edit/nav-tabs.blade.php`
-// (identical) and `alumni/partials/edit/nav-tabs.blade.php` (an "award" tab first, no account tab), with
-// `.tbr_tabs` / `.tbr_tab_content` from app.css 1598-1690. Every pane stays mounted, like the markup.
-
 export type SocietyEditTabKey = "alumni" | "personal" | "identity" | "family" | "guardian" | "attachment" | "account"
 
-// Anchors as the blades spell them (`#familiy`, `#guardianTab`)
 const ANCHOR: Record<SocietyEditTabKey, string> = {
 	alumni: "alumni",
 	personal: "personal",
@@ -28,7 +23,6 @@ const Icon = ({ children }: { children: ReactNode }): JSX.Element => (
 	</svg>
 )
 
-// `g#award`, `g#person`, `g#clipboard`, `g#people`, `g#edit`, `g#attach`, `g#unlock`
 export const SOCIETY_TAB_ICONS: Record<SocietyEditTabKey, JSX.Element> = {
 	alumni: (
 		<Icon>
@@ -74,18 +68,14 @@ export const SOCIETY_TAB_ICONS: Record<SocietyEditTabKey, JSX.Element> = {
 export type SocietyEditTab = { key: SocietyEditTabKey; content: ReactNode }
 
 type SocietyEditTabsProps = {
-	/** In blade order: registrant / student `personal…account`, alumni `alumni, personal…attachment`. */
 	tabs: SocietyEditTab[]
-	/** Controlled active tab; defaults to the first one (the blade's `.active`). */
 	active?: SocietyEditTabKey
 	onChange?: (key: SocietyEditTabKey) => void
 }
 
-/** `ul.nav.nav-tabs.tbr_tabs#myTab` + `div.tab-content.tbr_tab_content.mb-3.mb-lg-0#myTabContent` */
 export default function SocietyEditTabs({ tabs, active, onChange }: SocietyEditTabsProps): JSX.Element {
 	const [own, setOwn] = useState<SocietyEditTabKey | undefined>(tabs[0]?.key)
 	const current = active ?? own
-	// Bootstrap `.fade`: the newly shown pane fades in over 150ms
 	const [shown, setShown] = useState(current)
 	useEffect(() => {
 		const frame = requestAnimationFrame(() => setShown(current))
@@ -116,7 +106,6 @@ export default function SocietyEditTabs({ tabs, active, onChange }: SocietyEditT
 								}}
 								className={cn(
 									"block rounded-[12px] border-0 px-[16px] py-[10px] text-[12px] leading-[22.4px] min-[993px]:rounded-b-none",
-									// `.nav-link.active svg path { fill: var(--warning) }`
 									isActive
 										? "bg-[var(--bg-secondary)] text-[var(--warning)] [&_path]:fill-[var(--warning)]"
 										: "bg-[var(--bg-form-disabled)] text-[var(--grey)]",

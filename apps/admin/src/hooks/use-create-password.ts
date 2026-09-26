@@ -5,7 +5,6 @@ import type { CreatePasswordCheck, CreatePasswordPayload } from "@roja/types"
 
 import { adminApi } from "@/lib/api"
 
-// Legacy `Auth\CreatePasswordController` — guest page opened from the "Buat Password" email
 export const createPasswordKeys = {
 	all: ["admin-create-password"] as const,
 	check: (token: string, email: string) => [...createPasswordKeys.all, "check", token, email] as const,

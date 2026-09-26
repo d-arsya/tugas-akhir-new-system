@@ -11,25 +11,18 @@ import { useUpdateEwalletTransaction } from "@/hooks/use-ewallet-transactions"
 
 import { PlainLabel, StatusLabel } from "./transaction-striped"
 
-// Legacy ewallet/transaction-detail/{update-modal,invalid-update-modal}.blade.php and
-// public/assets/js/ewallet/update-transaction.js + default-ajax2.js `specificForm`.
+export type PickableStatus = Exclude<EwalletTransactionStatus, "invalid">
 
-type PickableStatus = Exclude<EwalletTransactionStatus, "invalid">
-
-// `changeStatusLabel()`: the label colour and the word both follow the radio that was clicked
 const STATUS_TEXT: Record<PickableStatus, string> = { waiting: "Menunggu", process: "Diproses", valid: "Berhasil" }
 
-// `.tbr_label` inside `.tbr_confirm_title` keeps its own 12px Montserrat Medium, not the title's 20px bold
 const TITLE_LABEL = "text-[12px] leading-[22.4px] font-medium tracking-[0.5px]"
 
 type ModalProps = { open: boolean; transactionId: number; onClose: () => void }
 
-/** `.tbr_modal_confirm.tbr_modal_confirm-warning` > `.card > .card-body`, the shell both modals share. */
 const ConfirmShell = ({ open, maxWidth, children }: { open: boolean; maxWidth: string; children: ReactNode }): JSX.Element => (
 	<LegacyModalOverlay open={open} maxWidth={maxWidth}>
 		<section>
 			<div className="rounded-[20px] bg-[var(--bg-secondary)] p-[30px] shadow-[0px_8px_30px_0px_rgba(0,0,0,0.08)]">
-				{/* `.tbr_confirm_icon.text-center` */}
 				<div className="mb-[14px] text-center">
 					<LegacyConfirmIcon variant="warning" />
 				</div>
@@ -39,7 +32,6 @@ const ConfirmShell = ({ open, maxWidth, children }: { open: boolean; maxWidth: s
 	</LegacyModalOverlay>
 )
 
-/** `.tbr_confirm_actions.text-center.mt-4` — Batal / Ya, benar, the blade's newline kept between them. */
 const Actions = ({ onClose, submitting }: { onClose: () => void; submitting: boolean }): JSX.Element => (
 	<div className="mt-[24px] mb-[4px] text-center">
 		<LegacyButton variant="light" className="mr-[8px] inline-flex" onClick={onClose}>
@@ -51,7 +43,6 @@ const Actions = ({ onClose, submitting }: { onClose: () => void; submitting: boo
 	</div>
 )
 
-/** `#tbr_update_status_modal` — waiting, process and valid. */
 export const StatusUpdateModal = ({
 	open,
 	transactionId,
@@ -61,7 +52,6 @@ export const StatusUpdateModal = ({
 	const update = useUpdateEwalletTransaction(transactionId)
 	const { submit, submitting } = useLegacySubmit({
 		mutationFn: () => update.mutateAsync({ status }),
-		// `default-ajax2.js` reloads the page 1000 ms after the notice
 		onDone: onClose,
 	})
 
@@ -91,7 +81,6 @@ export const StatusUpdateModal = ({
 	)
 }
 
-/** `#tbr_update_invalid_status_modal` — `invalid`, with the summernote note. */
 export const InvalidUpdateModal = ({ open, transactionId, onClose }: ModalProps): JSX.Element => {
 	const [note, setNote] = useState("")
 	const update = useUpdateEwalletTransaction(transactionId)

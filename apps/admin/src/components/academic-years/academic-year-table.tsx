@@ -8,10 +8,8 @@ import LegacyLabel from "@/components/legacy/legacy-label"
 import { useAcademicYears } from "@/hooks/use-academic-years"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// The `$no` counter legacy bakes into the payload, so it keeps its value when the table is re-sorted
 type NumberedYear = AcademicYearRow & { no: number }
 
-/** `AcademicYearService::delegateAction()` picks the destroy link's target server-side, per row. */
 const DELETE_ROUTE: Record<AcademicYearDeleteTarget, string> = {
 	delete: "/academic-years/$academicYearId/delete",
 	"delegate-registrant": "/academic-years/$academicYearId/delegate-registrant",
@@ -19,11 +17,9 @@ const DELETE_ROUTE: Record<AcademicYearDeleteTarget, string> = {
 	"delegate-alumni": "/academic-years/$academicYearId/delegate-alumni",
 }
 
-// `getStatus()` — the Archive row renders a bare "-" instead of a badge
 const statusPsbText = (row: AcademicYearRow): string =>
 	row.statusPsb === "none" ? "-" : row.statusPsb === "open" ? "Dibuka" : "Ditutup"
 
-// `getStatusAkademik()` — "empty" is the blank cell a running or future period gets on a non-current year
 const statusAkademikText = (row: AcademicYearRow): string =>
 	row.statusAkademik === "none"
 		? "-"
@@ -52,7 +48,6 @@ const cellText = (row: NumberedYear, key: string): string => {
 
 const SEARCH_KEYS = ["no", "year", "period", "statusPsb", "statusAkademik"]
 
-// `academic-year/index.blade.php` + `default-datatable.js` (`initDatatable(url, [5])`)
 const AcademicYearTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useAcademicYears()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -82,7 +77,6 @@ const AcademicYearTable = (): JSX.Element => {
 			key: "statusAkademik",
 			header: "S. Akademik",
 			sortable: true,
-			// A future-or-running period on a non-current year renders nothing at all — kept as legacy
 			cell: (row) =>
 				row.statusAkademik === "none" ? (
 					"-"
@@ -95,13 +89,9 @@ const AcademicYearTable = (): JSX.Element => {
 		{
 			key: "actions",
 			header: "Actions",
-			// `initDatatable(url, [5])`
 			sortable: false,
-			// `delegateAction()` returns "" for the Archive row: no edit icon and no destroy icon
 			cell: (row) =>
 				row.actionable ? (
-					// `.table .actions a { display: inline-block; margin-right: 5px }` plus the newline
-					// Blade leaves between the two anchors — 5px + ~3.73px = the 8.73px legacy renders
 					<div className="align-middle">
 						<Link
 							to="/academic-years/$academicYearId/edit"
@@ -133,7 +123,6 @@ const AcademicYearTable = (): JSX.Element => {
 			processing={isFetching}
 			loaded={isSuccess}
 			initialSort={{ key: "no", dir: "asc" }}
-			// Unlike the other lists, this blade sets no inline `min-width` on the table
 			minWidth="auto"
 		/>
 	)

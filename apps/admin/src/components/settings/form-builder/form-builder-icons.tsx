@@ -1,10 +1,5 @@
 import type { JSX } from "react"
 
-// SVGs lifted from `setting/includes/card-setting.blade.php` and `card-accordion.blade.php`.
-// The fills stay literal because the legacy markup hard-codes them (the pencil keeps its pink
-// even while `.tbr_btn-light-primary` is hovered).
-
-/** `.tbr_required span svg`; `.tbr_is_required svg path` swaps the fill to `--danger`. */
 export const RequiredAsterisk = ({ required }: { required: boolean }): JSX.Element => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -24,7 +19,6 @@ export const RequiredAsterisk = ({ required }: { required: boolean }): JSX.Eleme
 	</svg>
 )
 
-/** `.tbr_fp_help` info icon (24×24, `#ffa800`). */
 export const HelperIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" transform="translate(24 24) rotate(180)" fill="#ffa800" opacity="0" />
@@ -37,7 +31,6 @@ export const HelperIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `.tbr_fp_setting` pencil (24×24, `#e4007e`). */
 export const EditIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="#e4007e" opacity="0" />
@@ -48,7 +41,6 @@ export const EditIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `#reset-custom-name` reset arrow (24×24, `#e4007e`). */
 export const ResetIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<rect width="24" height="24" fill="none" />
@@ -59,9 +51,7 @@ export const ResetIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** `assets/svg/icons/doc_{type with spaces → _}.svg` */
 export const typeIconSrc = (type: string): string => `/assets/svg/icons/doc_${type.replace(/ /g, "_")}.svg`
 
-/** Legacy `Str::limit($value, 30, ' ...')`: `rtrim` on the cut, then the ellipsis. */
 export const limitTitle = (value: string): string =>
 	value.length <= 30 ? value : `${value.slice(0, 30).replace(/\s+$/, "")} ...`

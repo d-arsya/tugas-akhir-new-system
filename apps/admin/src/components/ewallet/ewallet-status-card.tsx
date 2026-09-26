@@ -10,18 +10,10 @@ import { useUpdateEwalletSetting } from "@/hooks/use-ewallets"
 import { BlockedIcon } from "./ewallet-icons"
 import { CARD_TITLE_CLASS } from "./ewallet-reset-pin-card"
 
-// `setting.blade.php` — the "Dompet ini sedang di nonaktifkan" card and the "Status eWallet" form.
-
-/** `hr.solid` (porto theme.css 9424): a 1px `#ddd` bottom border on a zero-height rule, 22px margins. */
 const SolidRule = (): JSX.Element => <hr className="my-[22px] h-0 border-0 border-b border-[#ddd]" />
 
 type RadioProps = { id: string; checked: boolean; onSelect: () => void; label: string; children: string }
 
-/**
- * `.custom-control.custom-radio.mb-2` holding the input, its `label.custom-control-label.tbr_weight-semi-bold.pl-3`
- * and a `p.pl-3` description. The kit's `LegacyRadioGroup` renders labels only, so the same disc and
- * dot are drawn here (form.css ~240-350) around the paragraph.
- */
 const StatusRadio = ({ id, checked, onSelect, label, children }: RadioProps): JSX.Element => (
 	<div className="relative z-[1] mb-[8px] min-h-[24px] pl-[24px]">
 		<span className="absolute top-0 left-0 z-[-1] block h-[20px] w-[16px] overflow-hidden opacity-0">
@@ -42,7 +34,6 @@ const StatusRadio = ({ id, checked, onSelect, label, children }: RadioProps): JS
 	</div>
 )
 
-/** `@if($student->is_blocked)` — the owner's own account is blocked, so the wallet cannot be switched here. */
 export const EwalletBlockedNotice = ({ setting }: { setting: EwalletSettingPage }): JSX.Element => {
 	const who = setting.ownerType === "merchant" ? "Merchant" : "Santri"
 	return (
@@ -67,7 +58,6 @@ export const EwalletBlockedNotice = ({ setting }: { setting: EwalletSettingPage 
 	)
 }
 
-/** `#tbr_status_form` — PATCH `is_active`, then the notice and a reload (`setting.js`). */
 const EwalletStatusCard = ({ setting }: { setting: EwalletSettingPage }): JSX.Element => {
 	const [active, setActive] = useState(setting.isActive)
 	const update = useUpdateEwalletSetting(setting.id)

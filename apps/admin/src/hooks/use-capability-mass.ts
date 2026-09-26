@@ -4,15 +4,6 @@ import type { CapabilityItemRow, CapabilityMassPage, CapabilityMassResult, Capab
 import { adminApi } from "@/lib/api"
 import { useLegacySubmit, type LegacySubmit } from "@/hooks/use-legacy-submit"
 
-// Queries and the two submits behind the bulk Kesanggupan pages — legacy
-// `StudentCapabilityController@massCreate*`, `@massStore`, `@massEdit*` and `@massUpdate`.
-//
-// **The selection is the query key.** The ticked santri travel in the URL as `?students=1,2,3`
-// and nowhere else — no sessionStorage, no store, no server-side session — so two tabs open on
-// two grades cache separately and neither can write the other's santri. `massEdit` genuinely
-// depends on the whole list (the shown accounts are its intersection), so the joined ids are
-// part of the key rather than a fetch-time argument.
-
 export const capabilityMassKeys = {
 	all: ["admin-capability-mass"] as const,
 	createPage: (academicYearId: number, gradeId: number, students: string) =>
@@ -68,16 +59,36 @@ export const useCapabilityMassEditAccounts = (
 		enabled,
 	})
 
-/**
- * `mass-create-ajax.js`: PNotify on success, then `window.location = res.redirect` 1000 ms later.
- *
- * Which endpoint the submit hits is the caller's choice, because legacy switches the form's
- * `action` on the size of the selection — one santri posts to `@store` and gets an **unagreed**
- * capability with no invoices, two or more post to `@massStore`/`@massUpdate` and are approved
- * and published in the same request. That flip is deliberate and is reproduced, not fixed.
- */
+export type CapabilityMassMode = "create" | "edit"
+
+const createForOneStudent = (data: CapabilityMassWriteDto, backTo: string): Promise<CapabilityMassResult> =>
+	adminApi
+		.createCapability(data.studentGradeIds[0] as number, {
+			...(data.note ? { note: data.note } : {}),
+			items: data.items,
+		})
+		.then((result) => ({
+			message: result.message,
+			redirect: result.redirect ?? backTo,
+			studentsProcessed: 1,
+			invoicesCreated: result.invoicesCreated,
+			...(result.warning ? { warning: result.warning } : {}),
+		}))
+
 export const useCapabilityMassSubmit = (
-	mutationFn: (data: CapabilityMassWriteDto) => Promise<CapabilityMassResult>,
+	mode: CapabilityMassMode,
+	academicYearId: number,
+	gradeId: number,
+	backTo: string,
 	onDone: (result: CapabilityMassResult) => void,
 ): LegacySubmit<CapabilityMassWriteDto, CapabilityMassResult> =>
-	useLegacySubmit<CapabilityMassWriteDto, CapabilityMassResult>({ mutationFn, onDone })
+	useLegacySubmit<CapabilityMassWriteDto, CapabilityMassResult>({
+		mutationFn: (data) => {
+			// Deliberate: a single santri gets an unagreed capability with no invoices, not a mass publish
+			if (data.studentGradeIds.length === 1) return createForOneStudent(data, backTo)
+			return mode === "create"
+				? adminApi.massCreateCapability(academicYearId, gradeId, data)
+				: adminApi.massUpdateCapability(academicYearId, gradeId, data)
+		},
+		onDone,
+	})

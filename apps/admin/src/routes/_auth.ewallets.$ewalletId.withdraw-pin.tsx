@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import EwalletWithdrawPinPage from "@/components/ewallet/modals/ewallet-withdraw-pin-page"
 
-// Legacy ewallet/validate-pin.blade.php
 export const Route = createFileRoute("/_auth/ewallets/$ewalletId/withdraw-pin")({
 	component: WithdrawPinRoute,
 })

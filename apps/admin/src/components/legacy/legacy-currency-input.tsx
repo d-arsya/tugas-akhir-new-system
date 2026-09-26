@@ -6,15 +6,7 @@ import { maskWithCaret } from "@/lib/legacy-currency"
 
 import { legacyControlClass } from "./legacy-input"
 
-/**
- * The autoNumeric-masked rupiah field legacy uses for every cost amount
- * (`input.form-control.number-separator`). Thousands are grouped with dots as the user types,
- * and the caret is restored afterwards so typing mid-number does not jump to the end.
- *
- * Legacy renders it inside an `input-group` with an `Rp` prepend; pass that as `prefix`.
- */
 type LegacyCurrencyInputProps = {
-	/** Masked, e.g. "1.500.000". */
 	value: string
 	onChange: (masked: string) => void
 	id?: string
@@ -36,7 +28,6 @@ const LegacyCurrencyInput = ({
 	const ref = useRef<HTMLInputElement>(null)
 	const nextCaret = useRef<number | null>(null)
 
-	// Restore the caret after React has written the re-masked value back
 	useLayoutEffect(() => {
 		if (nextCaret.current === null || !ref.current) return
 		ref.current.setSelectionRange(nextCaret.current, nextCaret.current)
@@ -46,7 +37,6 @@ const LegacyCurrencyInput = ({
 	return (
 		<input
 			ref={ref}
-			// Legacy uses type=text: a number input would reject the thousands dots
 			type="text"
 			inputMode="numeric"
 			id={id}

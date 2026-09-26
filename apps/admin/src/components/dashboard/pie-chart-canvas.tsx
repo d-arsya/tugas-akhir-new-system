@@ -8,7 +8,6 @@ type PieChartCanvasProps = { data: DashboardPieItem[] }
 
 const PIE_COLORS = ["#E4007E", "#E93297", "#EC4BA4", "#EE65B1", "#F17EBD", "#F498CB", "#F6B1D7", "#F9CBE4", "#FCE4F1"]
 
-// Port of legacy public/assets/js/dashboard/pie-chart.js (amCharts 4)
 const PieChartCanvas = ({ data }: PieChartCanvasProps): JSX.Element => {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const chartRef = useRef<am4charts.PieChart | null>(null)
@@ -32,7 +31,6 @@ const PieChartCanvas = ({ data }: PieChartCanvasProps): JSX.Element => {
 		pieSeries.labels.template.disabled = true
 		pieSeries.ticks.template.disabled = true
 
-		// Initial animation
 		pieSeries.hiddenState.properties.opacity = 1
 		pieSeries.hiddenState.properties.endAngle = -90
 		pieSeries.hiddenState.properties.startAngle = -90

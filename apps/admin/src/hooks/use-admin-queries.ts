@@ -1,14 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+import type { AuthUser } from "@roja/types"
+import type { LoginSubmitValues, ResetPasswordSubmitValues } from "@roja/ui"
 import { adminApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
-import type { LoginSubmitValues, ResetPasswordSubmitValues } from "@roja/ui"
-
-export const adminKeys = {
-	all: ["admin"] as const,
-	auth: () => [...adminKeys.all, "auth"] as const,
-	profile: () => [...adminKeys.all, "profile"] as const,
-	dashboard: () => [...adminKeys.all, "dashboard"] as const,
-}
 
 export function useAdminLoginMutation() {
 	const auth = useAuthStore()
@@ -17,7 +12,7 @@ export function useAdminLoginMutation() {
 			adminApi.login({ email: values.identifier, password: values.password }),
 		onSuccess: (res) => {
 			if (res.user) {
-				auth.login(res.user as any)
+				auth.login(res.user as AuthUser)
 			}
 		},
 	})
@@ -30,7 +25,7 @@ export function useAdminVerify2faMutation() {
 			adminApi.verify2fa(code, adminId),
 		onSuccess: (res) => {
 			if (res.user) {
-				auth.login(res.user as any)
+				auth.login(res.user as AuthUser)
 			}
 		},
 	})
@@ -55,30 +50,14 @@ export function useAdminResetPasswordMutation(token: string) {
 	})
 }
 
-export function useAdminLogoutMutation() {
+export function useAdminLogout(): () => Promise<void> {
 	const auth = useAuthStore()
+	const navigate = useNavigate()
 	const queryClient = useQueryClient()
-	return useMutation({
-		mutationFn: () => adminApi.logout(),
-		onSettled: () => {
-			auth.logout()
-			queryClient.clear()
-		},
-	})
-}
-
-export function useAdminDashboardStats() {
-	return useQuery({
-		queryKey: adminKeys.dashboard(),
-		queryFn: () => adminApi.getDashboardStats(),
-		staleTime: 1000 * 60 * 5,
-	})
-}
-
-export function useAdminProfile() {
-	return useQuery({
-		queryKey: adminKeys.profile(),
-		queryFn: () => adminApi.getMyProfile(),
-		staleTime: 1000 * 60 * 10,
-	})
+	return async () => {
+		await adminApi.logout().catch(() => undefined)
+		auth.logout()
+		await navigate({ to: "/login" })
+		queryClient.clear()
+	}
 }

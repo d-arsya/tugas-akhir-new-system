@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from "react"
 
-// The open/close state of the six Dompet modals. D-A's detail and setting pages only ever *open* one
-// (`useEwalletModals()`); the modal components read and close them.
 export type EwalletModalName = "topUp" | "topUpConfirm" | "withdraw" | "withdrawConfirm" | "resetPin" | "doneReset"
 
 type ModalState = Record<EwalletModalName, boolean>
@@ -18,7 +16,6 @@ const set = (patch: Partial<ModalState>): void => {
 
 export const openEwalletModal = (name: EwalletModalName): void => set({ [name]: true })
 export const closeEwalletModal = (name: EwalletModalName): void => set({ [name]: false })
-/** A page that unmounts with a modal open must not leave it open for the next visit. */
 export const closeAllEwalletModals = (): void => set(CLOSED)
 
 const subscribe = (listener: () => void): (() => void) => {

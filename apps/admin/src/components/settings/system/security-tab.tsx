@@ -5,8 +5,8 @@ import type { SystemSetting } from "@roja/types"
 import { LegacyCardText, LegacyCardTitle } from "@/components/legacy/legacy-card"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacyRadioGroup from "@/components/legacy/legacy-radio-group"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { adminApi } from "@/lib/api"
+import { useUpdateTwoFactor } from "@/hooks/use-system-setting"
+
 import SystemSubmitRow, { SYSTEM_FIELD_CLASS } from "./system-submit-row"
 
 type SecurityTabProps = {
@@ -19,7 +19,6 @@ const TWO_FACTOR_OPTIONS = [
 	{ value: "0", label: "Nonaktif", id: "disabled_2fa" },
 ]
 
-// Port of `setting/partials/security.blade.php` (form.tertiary_form)
 const SecurityTab = ({ setting, onSaved }: SecurityTabProps): JSX.Element => {
 	const [enabled2fa, setEnabled2fa] = useState("0")
 
@@ -27,10 +26,7 @@ const SecurityTab = ({ setting, onSaved }: SecurityTabProps): JSX.Element => {
 		if (setting) setEnabled2fa(setting.enabled2fa ? "1" : "0")
 	}, [setting])
 
-	const { submit, submitting } = useLegacySubmit<boolean, { message: string }>({
-		mutationFn: (value) => adminApi.updateTwoFactor(value),
-		onDone: onSaved,
-	})
+	const { submit, submitting } = useUpdateTwoFactor(onSaved)
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
@@ -46,7 +42,6 @@ const SecurityTab = ({ setting, onSaved }: SecurityTabProps): JSX.Element => {
 			</LegacyCardText>
 
 			<form onSubmit={onSubmit}>
-				{/* `.form-group.row.mb-3` — the same 16px the default `.form-group` gives */}
 				<LegacyFormRow label="Two factor authentication" htmlFor="enabled_2fa" hint="optional" labelCols={4}>
 					<div className={SYSTEM_FIELD_CLASS}>
 						<LegacyRadioGroup

@@ -2,18 +2,17 @@ import type { JSX } from "react"
 
 import type { ReportIncomeDetailRow, ReportOptions } from "@roja/types"
 
-import LegacyDataTable from "@/components/legacy/legacy-data-table"
+import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-data-table"
 import LegacyInvoiceWidget from "@/components/legacy/legacy-invoice-widget"
-import type { LegacyColumn } from "@/components/legacy/legacy-data-table"
-import { emptyFilters } from "@/hooks/use-report-filters"
+import { todayFilters } from "@/hooks/use-report-filters"
 import { useReportPanel } from "@/hooks/use-report-panel"
-import { tableParams, useIncomeDetail, useLegacyLoadError } from "@/hooks/use-reports"
-import { formatIndoDate, rupiahDots, rupiahLabel, todayDmy } from "@/lib/legacy-format"
+import { useLegacyLoadError } from "@/hooks/use-legacy-load-error"
+import { tableParams, useIncomeDetail } from "@/hooks/use-reports"
+import { formatIndoDate, rupiahDots, rupiahLabel } from "@/lib/legacy-format"
 
 import IncomeDescriptionCell from "./income-description-cell"
 import ReportFilterBar from "./report-filter-bar"
 
-// report/income.blade.php `.tbr_detail_table` + income-datatable.js columns
 const COLUMNS: LegacyColumn<ReportIncomeDetailRow>[] = [
 	{ key: "no", header: "No", width: "7%", cell: (_, index) => index },
 	{
@@ -43,9 +42,6 @@ const COLUMNS: LegacyColumn<ReportIncomeDetailRow>[] = [
 
 type IncomeDetailPanelProps = { options: ReportOptions | undefined; resetSignal: number }
 
-const todayFilters = (): ReturnType<typeof emptyFilters> => emptyFilters(todayDmy(), todayDmy())
-
-// "Rincian" tab of Laporan Pemasukkan; both dates start (and reset) at today (income-filter.js)
 const IncomeDetailPanel = ({ options, resetSignal }: IncomeDetailPanelProps): JSX.Element => {
 	const panel = useReportPanel(todayFilters(), resetSignal, todayFilters)
 	const query = useIncomeDetail({ ...panel.params, ...tableParams(panel.table) }, panel.reload)

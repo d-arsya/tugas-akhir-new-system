@@ -19,8 +19,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 			isAuthenticated: false,
 
 			login: (userOrToken, _refreshToken, userObj) => {
-				const user: AuthUser = typeof userOrToken === "object" && userOrToken !== null ? userOrToken : userObj!
-				const adminUser = user ? { ...user, domain: "admin" } : null
+				const user = typeof userOrToken === "object" && userOrToken !== null ? userOrToken : userObj
+				const adminUser: AuthUser | null = user ? { ...user, domain: "admin" } : null
 				set({ user: adminUser, isAuthenticated: true })
 			},
 
@@ -36,4 +36,3 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 )
 
 export default useAuthStore
-

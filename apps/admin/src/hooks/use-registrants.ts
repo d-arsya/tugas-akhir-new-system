@@ -12,9 +12,6 @@ import type {
 import { akademikKeys } from "@/hooks/use-akademik-keys"
 import { adminApi } from "@/lib/api"
 
-// Akademik → PSB reads (legacy `RegistrantController`). Every Akademik write invalidates
-// `akademikKeys.all`; reads are never cached across page visits (`staleTime: 0`), like legacy's reloads.
-
 export const registrantKeys = {
 	years: () => [...akademikKeys.registrant, "years"] as const,
 	yearPage: (academicYearId: number) => [...akademikKeys.registrant, "year", academicYearId] as const,
@@ -46,8 +43,9 @@ export const useRegistrantDetail = (registrantId: number): UseQueryResult<AdminR
 export const useRegistrantCreateOptions = (): UseQueryResult<AdminRegistrantCreateOptions> =>
 	useQuery({ queryKey: registrantKeys.createOptions(), queryFn: () => adminApi.getRegistrantCreateOptions(), staleTime: 0 })
 
-/** Every Akademik write refetches every Akademik page (PSB approval creates a santri). */
 export const useInvalidateAkademik = (): (() => Promise<void>) => {
 	const queryClient = useQueryClient()
 	return () => queryClient.invalidateQueries({ queryKey: akademikKeys.all })
 }
+
+export const registrantPrintUrl = (registrantId: number): string => adminApi.registrantPrintUrl(registrantId)

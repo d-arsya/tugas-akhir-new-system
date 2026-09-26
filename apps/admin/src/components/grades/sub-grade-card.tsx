@@ -6,12 +6,10 @@ import SubGradeEditModal from "@/components/grades/sub-grade-edit-modal"
 import SubGradeForm from "@/components/grades/sub-grade-form"
 import SubGradeTable from "@/components/grades/sub-grade-table"
 
-// Right card of `grade/index.blade.php` — `grade/partials/subgrade.blade.php`
 const SubGradeCard = (): JSX.Element => {
 	const [editingId, setEditingId] = useState<number | null>(null)
 
 	return (
-		// `.card.tbr_card.mb-0 > .card-body.p-4`
 		<LegacyCard>
 			<LegacyCardTitle>Tambah subkelas</LegacyCardTitle>
 			<LegacyCardText>Silakan tambahkan subkelas baru pada form di bawah ini.</LegacyCardText>

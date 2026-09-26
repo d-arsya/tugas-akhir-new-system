@@ -9,11 +9,6 @@ import EwalletResetPinCard from "./ewallet-reset-pin-card"
 import EwalletStatusCard, { EwalletBlockedNotice } from "./ewallet-status-card"
 import EwalletResetPinModals from "./modals/ewallet-reset-pin-modals"
 
-/**
- * Legacy `ewallet/setting.blade.php`. The QR card here captions a merchant with the wallet's own id
- * (`'No Merchant ' . $ewallet->unique_id`), where the detail page prints the merchant's number.
- * The reset-PIN modals are D-B's (Seam 1), opened by the card's button.
- */
 const EwalletSetting = ({ ewalletId }: { ewalletId: number }): JSX.Element => {
 	const { data: setting } = useEwalletSetting(ewalletId)
 

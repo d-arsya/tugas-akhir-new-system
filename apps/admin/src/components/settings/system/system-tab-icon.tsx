@@ -4,9 +4,6 @@ export type SystemTabIconName = "hard-drive" | "paper-plane" | "shield"
 
 type SystemTabIconProps = { name: SystemTabIconName; active: boolean }
 
-// The three inline 24×24 icons of `setting/setting.blade.php`. Legacy paints them `#abb4be` and
-// repaints the open tab through `.tbr_tabs .nav-item .nav-link.active svg path|circle { fill: var(--warning) }`
-// (public/assets/css/app.css 1636-1639). The blade's invisible `rect` spacer is left out.
 const SystemTabIcon = ({ name, active }: SystemTabIconProps): JSX.Element => {
 	const fill = active ? "var(--warning)" : "#abb4be"
 

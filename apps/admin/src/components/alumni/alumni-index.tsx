@@ -9,14 +9,8 @@ import AlumniRowTable from "./alumni-row-table"
 import AlumniYearTable from "./alumni-year-table"
 import { useAlumniDelete } from "./use-alumni-delete"
 
-// OWNER: AK-A. Legacy `alumni/index.blade.php` ("Data Alumni - Pilih Tahun Kelulusan"): the Alumni / Archive
-// tabs, with the Archive table built the first time its tab is shown. Legacy's delete handler here calls
-// `InitDatatable.ajax.reload`, which this page never defines — the row goes but no notice shows and the popup
-// hangs; the port notifies and closes like every other delete (not replicated, brief §5).
-
 type TabKey = "alumni" | "archive"
 
-/** `span.mx-2.tbr_weight-bold` */
 const TabLabel = ({ text }: { text: string }): JSX.Element => <span className="font-bold">{text}</span>
 
 const AlumniIndex = (): JSX.Element => {
@@ -38,7 +32,6 @@ const AlumniIndex = (): JSX.Element => {
 				breadcrumbs={[{ label: "Akademik", to: "/alumni" }, { label: "Alumni", to: "/alumni" }, { label: "Data Alumni" }]}
 			/>
 
-			{/* `.content-body > .row` carries the page min-height */}
 			<div className="mx-[-15px] flex min-h-[calc(100vh-216px)] flex-wrap">
 				<div className="w-full min-w-0 flex-1 basis-0 px-[15px]">
 					<LegacyTabs<TabKey>

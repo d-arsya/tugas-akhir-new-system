@@ -39,18 +39,6 @@ const DAY_OPTIONS = [
 	...Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
 ]
 
-/**
- * `#monthly-option` — the chained pair from `assets/js/student-cost/general-monthly.js`.
- *
- * `callMonth()` fires on **every keystroke** of `Ditagihkan setiap N Bulan sekali`: it wipes
- * every option but the "Bulan ke" placeholder and re-appends `1..N`. So the list is always
- * `1..monthBill`, and retyping N drops whatever was selected — the parent clears
- * `monthOfMonth` in the same handler to match.
- *
- * The due-date row is the one place the two blades really diverge:
- *   create — `.row.no-gutters > .col-9.mr-2 > .row > .col-md-6.pr-md-2 + .col-md-6.pl-md-2`, `.col-2`
- *   edit   — `.row > .col-5.col-lg-4 + .col-5.col-lg-4 + .col-1`
- */
 const StudentCostMonthlyField = ({
 	mode,
 	monthBill,
@@ -62,7 +50,6 @@ const StudentCostMonthlyField = ({
 	reminderMonthly,
 	onReminderChange,
 }: StudentCostMonthlyFieldProps): JSX.Element => {
-	// The create blade bolds every `help-block`; the edit blade does not
 	const bold = mode === "create"
 	const months = Number(monthBill)
 	const monthOptions = [
@@ -80,7 +67,6 @@ const StudentCostMonthlyField = ({
 	)
 
 	return (
-		// `.row > .col` — the monthly card runs the full width, unlike the `col-lg-10` once card
 		<Row>
 			<Col className="min-w-0 flex-1">
 				<CostCard className="mt-[16px]">
@@ -90,7 +76,6 @@ const StudentCostMonthlyField = ({
 						</HelpLabel>
 						<Row>
 							<Col className="min-[768px]:max-w-[66.666667%] min-[768px]:flex-[0_0_66.666667%]">
-								{/* `.input-group.tbr_fix_period` — the append is pinned to 115px (form.css 222) */}
 								<div className="relative flex w-full flex-wrap items-stretch">
 									<input
 										type="number"
@@ -101,8 +86,6 @@ const StudentCostMonthlyField = ({
 										spellCheck={false}
 										value={monthBill}
 										onChange={(event) => onMonthBillChange(event.target.value)}
-										// `cn`, not a template string: twMerge has to drop the base `w-full` or
-										// the 115px "Bulan sekali" append wraps onto its own line
 										className={cn(legacyControlClass, "relative w-[1%] min-w-0 flex-auto rounded-r-none focus:z-[3]")}
 									/>
 									<span className="ml-[-2px] flex w-[115px] shrink-0 items-center justify-center rounded-r-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[12px] py-[4px] text-[var(--grey)]">
@@ -150,7 +133,6 @@ const StudentCostMonthlyField = ({
 						<HelpLabel bold={bold} htmlFor="reminder_monthly">
 							Ingatkan sebelum jatuh tempo (hari)
 						</HelpLabel>
-						{/* `.row > .col-md-5 > .d-flex.align-items-center` */}
 						<Row>
 							<Col className="min-[768px]:max-w-[41.666667%] min-[768px]:flex-[0_0_41.666667%]">
 								<div className="flex items-center">

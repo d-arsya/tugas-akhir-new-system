@@ -10,7 +10,6 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import { ArrowActionIcon, CAPABILITY_ACTION_CLASS } from "./capability-icons"
 
-// The `$no` counter legacy bakes into the payload, so it keeps its value when the table is re-sorted
 type NumberedYear = CapabilityAcademicYearRow & { no: number }
 
 const cellText = (row: NumberedYear, key: string): string => {
@@ -30,13 +29,6 @@ const cellText = (row: NumberedYear, key: string): string => {
 
 const SEARCH_KEYS = ["no", "year", "costPeriod", "statusLabel"]
 
-/**
- * `student-capability/academic-year.blade.php` + `default-datatable.js` (`initDatatable(url, [4])`).
- *
- * `AcademicYearService::getStatusAkademik()` renders green "Berjalan", red "Berakhir", the bare
- * text "-" for the Archive sentinel, and nothing at all for a running or future period on a
- * non-current year — `statusLabel: null`.
- */
 const CapabilityYearTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useCapabilityAcademicYears()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -61,12 +53,10 @@ const CapabilityYearTable = (): JSX.Element => {
 				),
 		},
 		{
-			// `<th witdh="5%">` — the typo means the width never applied
 			key: "action",
 			header: "",
 			sortable: false,
 			cell: (row) => (
-				// `StudentCostService::action($studentCapabilityUrl)`
 				<div>
 					<Link
 						to="/student-capabilities/academic-years/$academicYearId"

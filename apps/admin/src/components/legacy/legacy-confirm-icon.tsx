@@ -1,13 +1,5 @@
 import type { JSX } from "react"
 
-/**
- * `include/modal-delete.blade.php` — 69×69, circle r=28.5 at .2 opacity + question mark.
- * Shared by `legacy-confirm-delete` (the magnific modal) and `legacy-delete-page` (the
- * full-page delete/delegate shell), so neither owns it.
- *
- * `.tbr_modal_confirm-warning` re-fills the same glyph with `--warning` (app.css 1975-1978),
- * which is what the Tahun Ajaran save-confirmation modals use.
- */
 type LegacyConfirmIconProps = { variant?: "danger" | "warning" }
 
 const FILL = { danger: "#f8374b", warning: "#ffa800" } as const

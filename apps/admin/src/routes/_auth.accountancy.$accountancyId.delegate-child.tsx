@@ -1,29 +1,15 @@
 import type { JSX } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 
-import AccountancyDeleteCard from "@/components/accountancy/accountancy-delete-card"
-import AdminPageTitle from "@/components/layout/admin-page-title"
-import { useDelegateAccountancyChild } from "@/hooks/use-accountancy"
+import AccountancyDelegateChildPage from "@/components/accountancy/accountancy-delegate-child-page"
 
-// Legacy accountancy/delete/delegate-child.blade.php — linked instead of the plain confirm when
-// the account has children. Only the **direct** children are re-parented; a grandchild keeps
-// pointing at its own parent, so whole subtrees travel with the child that carries them.
 export const Route = createFileRoute("/_auth/accountancy/$accountancyId/delegate-child")({
-	component: AccountancyDelegateChildPage,
+	component: AccountancyDelegateChildRoute,
 })
 
-function AccountancyDelegateChildPage(): JSX.Element {
+function AccountancyDelegateChildRoute(): JSX.Element {
 	const { accountancyId } = Route.useParams()
-	const id = Number(accountancyId)
-	const submit = useDelegateAccountancyChild(id)
-
-	return (
-		<>
-			<AdminPageTitle title="Hapus Akun" breadcrumbs={[{ label: "…", dropdown: [{ label: "Data Master", to: "/accountancy" }] }, { label: "Keuangan", to: "/accountancy" }, { label: "Akun", to: "/accountancy" }, { label: "Hapus" }]} />
-
-			<AccountancyDeleteCard accountancyId={id} step="delegate-child" submit={submit} />
-		</>
-	)
+	return <AccountancyDelegateChildPage accountancyId={Number(accountancyId)} />
 }
 
-export default AccountancyDelegateChildPage
+export default AccountancyDelegateChildRoute

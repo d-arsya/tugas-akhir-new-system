@@ -12,13 +12,6 @@ type SubGradeEditModalProps = { subGradeId: number | null; onClose: () => void }
 
 type SubGradeFormState = { id: number; label: string }
 
-/**
- * `grade/sub-grade-edit.blade.php`. Legacy never includes this blade in the page, so the
- * fetched markup lands in the *grade* modal container (`GradeService` hard-codes
- * `'#edit-modal-grade'` for sub-grades too); the port simply gives it its own modal.
- *
- * The title capitalises differently from the other two: "Edit Subkelas", label "Label Subkelas".
- */
 const SubGradeEditModal = ({ subGradeId, onClose }: SubGradeEditModalProps): JSX.Element => {
 	const detail = useSubGrade(subGradeId)
 	const [form, setForm] = useState<SubGradeFormState | null>(null)
@@ -29,7 +22,6 @@ const SubGradeEditModal = ({ subGradeId, onClose }: SubGradeEditModalProps): JSX
 		onDone: onClose,
 	})
 
-	// Every open starts from the placeholder card, exactly as `editData()` does
 	useEffect(() => {
 		if (subGradeId !== null) setForm(null)
 	}, [subGradeId])
@@ -54,7 +46,6 @@ const SubGradeEditModal = ({ subGradeId, onClose }: SubGradeEditModalProps): JSX
 				save.submit({ id: form.id, payload: { label: form.label } })
 			}}
 		>
-			{/* `.form-group.mb-1` — the only field, with a tightened bottom margin */}
 			<AcademicField label="Label Subkelas" htmlFor="sub-grade" hint="required" className="mb-[4px]">
 				<LegacyInput
 					id="label"

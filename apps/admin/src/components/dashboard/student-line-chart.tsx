@@ -4,7 +4,6 @@ import type { DashboardChartItem, DashboardOptions } from "@roja/types"
 
 import LegacySelect from "@/components/legacy/legacy-select"
 
-// amCharts is large; keep it out of the main bundle
 const LineChartCanvas = lazy(() => import("./line-chart-canvas"))
 
 type StudentLineChartProps = {
@@ -14,7 +13,6 @@ type StudentLineChartProps = {
 	onGradeChange: (grade: number) => void
 }
 
-// Port of legacy dashboard/partials/line-chart.blade.php
 const StudentLineChart = ({ data, options, grade, onGradeChange }: StudentLineChartProps): JSX.Element => {
 	const gradeOptions = (options?.grades ?? []).map((g) => ({
 		value: String(g.label),
@@ -38,7 +36,6 @@ const StudentLineChart = ({ data, options, grade, onGradeChange }: StudentLineCh
 					<LineChartCanvas data={data ?? []} />
 				</Suspense>
 				<div className="text-center">
-					{/* "!" beats globals.css h4 (outside any @layer) */}
 					<h4 className="mt-[8px]! mb-0! text-[16px]! leading-[1.4rem]!">5 Tahun Ajaran Terakhir</h4>
 					<p className="mb-0 text-[var(--grey)]">Hover pada bullet untuk melihat jumlah per tahun.</p>
 				</div>

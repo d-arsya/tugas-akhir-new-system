@@ -7,20 +7,14 @@ import { rupiahLabel } from "@/lib/legacy-format"
 
 import { Striped, StripedItem, StatusLabel } from "./transaction-striped"
 
-// Legacy ewallet/transaction-history/{card-user,card-transaction}.blade.php
-
-// `EwalletTransactionHistoryController::typeLabel` — anything else is ''
 const TYPE_LABEL: Record<EwalletTransactionKind, string> = { purchase: "Jual Beli", income: "Isi Saldo", expense: "Tarik Saldo" }
 
 const H5 = "mt-0! mb-[24px]! text-[22px]! leading-[22.4px]! font-semibold! tracking-normal!"
 
-// `.card-body.px-4.pt-4.pb-0`
 const BODY = "px-[24px] pt-[24px] pb-0"
 
-/** `?? '-'` */
 const dash = (value: string | null): string => value ?? "-"
 
-/** `card-user.blade.php` — "Info pengguna". */
 export const HistoryUserCard = ({ detail }: { detail: EwalletHistoryDetail }): JSX.Element => (
 	<LegacyCard bodyClassName={BODY}>
 		<h5 className={H5}>Info pengguna</h5>
@@ -44,7 +38,6 @@ export const HistoryUserCard = ({ detail }: { detail: EwalletHistoryDetail }): J
 	</LegacyCard>
 )
 
-/** `card-transaction.blade.php` — "Info transaksi" with the purchase's items. */
 export const HistoryTransactionCard = ({ detail }: { detail: EwalletHistoryDetail }): JSX.Element => (
 	<LegacyCard bodyClassName={BODY}>
 		<div className="flex justify-between">
@@ -66,12 +59,10 @@ export const HistoryTransactionCard = ({ detail }: { detail: EwalletHistoryDetai
 			<StripedItem label="Tanggal Transaksi" leftValue>
 				{detail.createdAt}
 			</StripedItem>
-			{/* `.tbr_striped_item > .w-100` — no label cell */}
 			<div className="flex justify-between px-[24px] py-[20px] odd:bg-[#F1F1FC]">
 				<div className="w-full">
 					<span>Detail Transaksi</span>
 					{detail.items.map((item, index) => (
-						// `.item-transaction-ewallet` / `.tbr_item_user`
 						<div key={`${index}-${item.description}`} className="mt-[32px] flex justify-between">
 							<span>
 								{index + 1}. {item.description}

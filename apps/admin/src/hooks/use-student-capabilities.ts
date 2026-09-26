@@ -7,22 +7,26 @@ import {
 } from "@tanstack/react-query"
 
 import type {
+	AdminMessageResult,
 	CapabilityAcademicYearRow,
 	CapabilityGradeRow,
 	CapabilityHistoryRow,
 	CapabilityItemPage,
 	CapabilityItemRow,
+	CapabilityPublishResult,
 	CapabilitySelectionDto,
 	CapabilitySelectionResult,
 	CapabilityStudentPage,
 	CapabilityStudentRow,
+	CapabilityWriteDto,
 } from "@roja/types"
 
+import { legacyNotify } from "@/components/legacy/legacy-notify"
+import { useLegacySubmit, type LegacySubmit } from "@/hooks/use-legacy-submit"
 import { adminApi } from "@/lib/api"
+import { saveBlob } from "@/lib/download"
+import { legacyErrors } from "@/lib/legacy-errors"
 
-// Queries behind Kesanggupan's five drill-down pages (legacy `StudentCapabilityController`
-// @academicYearList, @gradeList, @capabilityList, @studentCapability(List), @studentCapabilityItem(List)).
-// Every list is complete rather than paged — legacy pages all of them in the browser.
 export const studentCapabilityKeys = {
 	all: ["admin-student-capabilities"] as const,
 	years: () => [...studentCapabilityKeys.all, "years"] as const,
@@ -37,6 +41,9 @@ export const studentCapabilityKeys = {
 		[...studentCapabilityKeys.all, "items", capabilityId, studentGradeId] as const,
 }
 
+export const capabilityPrintUrl = (capabilityId: number, studentGradeId: number): string =>
+	adminApi.capabilityPrintUrl(capabilityId, studentGradeId)
+
 export const useCapabilityAcademicYears = (): UseQueryResult<CapabilityAcademicYearRow[]> =>
 	useQuery({ queryKey: studentCapabilityKeys.years(), queryFn: () => adminApi.getCapabilityAcademicYears() })
 
@@ -46,10 +53,6 @@ export const useCapabilityGrades = (academicYearId: number): UseQueryResult<Capa
 		queryFn: () => adminApi.getCapabilityGrades(academicYearId),
 	})
 
-/**
- * Level 3. The API answers 422 when the grade has no applied cost term — legacy's `@capability`
- * guard, which redirected to level 2 — so this never retries: the page reacts to the first error.
- */
 export const useCapabilityStudents = (academicYearId: number, gradeId: number): UseQueryResult<CapabilityStudentRow[]> =>
 	useQuery({
 		queryKey: studentCapabilityKeys.students(academicYearId, gradeId),
@@ -81,11 +84,6 @@ export const useCapabilityItems = (capabilityId: number, studentGradeId: number)
 		queryFn: () => adminApi.getCapabilityItems(capabilityId, studentGradeId),
 	})
 
-/**
- * `save-data-to-session.js` — POST the tick list, then follow the answered redirect 1000 ms later.
- * Legacy shows no success notice on this one, only the spinner; a failure shows the PNotify error.
- * The redirect carries the list in `?students=` (brief, seam 1), so nothing else is stored.
- */
 export const useStoreCapabilitySelection = (
 	academicYearId: number,
 	gradeId: number,
@@ -94,11 +92,68 @@ export const useStoreCapabilitySelection = (
 		mutationFn: (data: CapabilitySelectionDto) => adminApi.storeCapabilitySelection(academicYearId, gradeId, data),
 	})
 
-/**
- * Legacy's `window.location.reload()` after a write on levels 4 and 5 — re-fetch everything the
- * santri's pages show, since a publish or a change touches both the history and the item pages.
- */
 export const useReloadStudentCapability = (): (() => Promise<void>) => {
 	const client = useQueryClient()
 	return () => client.invalidateQueries({ queryKey: studentCapabilityKeys.all })
 }
+
+export const useCreateCapability = (
+	studentGradeId: number,
+	onDone: (data: CapabilityPublishResult) => void,
+): LegacySubmit<void, CapabilityPublishResult> =>
+	useLegacySubmit({
+		mutationFn: () => adminApi.createCapability(studentGradeId, { items: [] }),
+		afterMs: 0,
+		onDone,
+	})
+
+export const useChangeCapability = (
+	studentGradeId: number,
+	onDone: (data: CapabilityPublishResult) => void,
+): LegacySubmit<void, CapabilityPublishResult> =>
+	useLegacySubmit({
+		mutationFn: () => adminApi.changeCapability(studentGradeId),
+		afterMs: 0,
+		onDone,
+	})
+
+export const useSaveCapabilityItems = (
+	capabilityId: number,
+	studentGradeId: number,
+	onDone: () => void,
+): LegacySubmit<CapabilityWriteDto, AdminMessageResult> =>
+	useLegacySubmit({
+		mutationFn: (payload: CapabilityWriteDto) => adminApi.updateCapabilityItems(capabilityId, studentGradeId, payload),
+		onDone,
+	})
+
+export const usePublishCapability = (
+	capabilityId: number,
+	studentGradeId: number,
+	unsavedItems: () => CapabilityWriteDto | null,
+	onDone: () => void,
+): LegacySubmit<void, CapabilityPublishResult> =>
+	useLegacySubmit({
+		mutationFn: async () => {
+			const draft = unsavedItems()
+			if (draft && draft.items.length > 0) {
+				await adminApi.updateCapabilityItems(capabilityId, studentGradeId, draft)
+			}
+			return adminApi.publishCapability(capabilityId, studentGradeId)
+		},
+		successMessage: (data: CapabilityPublishResult) => {
+			if (data.warning) legacyNotify.error(data.warning, "Peringatan!")
+			return data.message
+		},
+		onDone,
+	})
+
+export const useDownloadCapability = (
+	capabilityId: number,
+	studentGradeId: number,
+): UseMutationResult<{ blob: Blob; fileName: string | null }, unknown, void> =>
+	useMutation({
+		mutationFn: () => adminApi.downloadCapability(capabilityId, studentGradeId),
+		onSuccess: ({ blob, fileName }) => saveBlob(blob, fileName ?? "Kesanggupan.pdf"),
+		onError: (error) => legacyNotify.error(legacyErrors(error)),
+	})

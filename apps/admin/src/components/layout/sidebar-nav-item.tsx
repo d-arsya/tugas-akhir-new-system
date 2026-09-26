@@ -10,10 +10,8 @@ import { LEGACY_ADMIN_BASE_URL, type SidebarMenuItem } from "./sidebar-menu"
 
 export type SidebarNavState = {
 	activeChain: string[]
-	// parent key ("root" for top level) → key of its currently expanded child
 	openMap: Record<string, string | null>
 	toggle: (parentKey: string, key: string) => void
-	// Desktop collapsed sidebar that is not hovered: icons only
 	compact: boolean
 	badges: Partial<Record<NonNullable<SidebarMenuItem["badge"]>, number>>
 }
@@ -30,7 +28,6 @@ const CIRCLE_BULLET = "/assets/svg/icons/menu/circle.svg"
 const TOP_LINK_CLASS =
 	"group/link block w-full cursor-pointer rounded-[8px] py-[12px] text-left font-normal whitespace-nowrap text-white transition-all duration-500 hover:bg-[var(--primary)] hover:shadow-[0px_8px_10px_rgba(228,0,126,0.25)] focus-visible:bg-[var(--primary)] focus-visible:outline-none data-[highlight=true]:bg-[var(--primary)] data-[highlight=true]:shadow-[0px_8px_10px_rgba(228,0,126,0.25)]"
 
-// Child rows: a 5px primary bar slides in from the left edge (clipped by overflow-hidden)
 const CHILD_LINK_CLASS =
 	"group/link relative flex w-full cursor-pointer items-center justify-start overflow-hidden bg-transparent pr-[16px] text-left whitespace-nowrap text-white transition-all duration-500 before:absolute before:left-[-5px] before:w-[5px] before:bg-[var(--primary)] before:transition-all before:duration-200 before:content-[''] hover:before:left-0 data-[highlight=true]:before:left-0"
 
@@ -56,7 +53,6 @@ const SidebarNavItem = ({ item, parentKey, depth, nav }: SidebarNavItemProps): J
 
 	const content = (
 		<>
-			{/* Legacy markup has whitespace between the icon and label; inside a block link it renders as a gap */}
 			{Icon ? (
 				<>
 					<Icon className="mr-[12px]" />{" "}

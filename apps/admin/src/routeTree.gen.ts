@@ -20,7 +20,6 @@ import { Route as AuthDashboardRouteImport } from './routes/_auth.dashboard'
 import { Route as AuthEwalletTransactionsRouteImport } from './routes/_auth.ewallet-transactions'
 import { Route as AuthEwalletsRouteImport } from './routes/_auth.ewallets'
 import { Route as AuthGradesRouteImport } from './routes/_auth.grades'
-import { Route as AuthIpBansRouteImport } from './routes/_auth.ip-bans'
 import { Route as AuthLevelsRouteImport } from './routes/_auth.levels'
 import { Route as AuthMajorsRouteImport } from './routes/_auth.majors'
 import { Route as AuthMerchantsRouteImport } from './routes/_auth.merchants'
@@ -170,11 +169,6 @@ const AuthEwalletsRoute = AuthEwalletsRouteImport.update({
 const AuthGradesRoute = AuthGradesRouteImport.update({
   id: '/grades',
   path: '/grades',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthIpBansRoute = AuthIpBansRouteImport.update({
-  id: '/ip-bans',
-  path: '/ip-bans',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthLevelsRoute = AuthLevelsRouteImport.update({
@@ -739,7 +733,6 @@ export interface FileRoutesByFullPath {
   '/ewallet-transactions': typeof AuthEwalletTransactionsRouteWithChildren
   '/ewallets': typeof AuthEwalletsRouteWithChildren
   '/grades': typeof AuthGradesRoute
-  '/ip-bans': typeof AuthIpBansRoute
   '/levels': typeof AuthLevelsRouteWithChildren
   '/majors': typeof AuthMajorsRoute
   '/merchants': typeof AuthMerchantsRouteWithChildren
@@ -843,7 +836,6 @@ export interface FileRoutesByTo {
   '/auth-logs': typeof AuthAuthLogsRoute
   '/dashboard': typeof AuthDashboardRoute
   '/grades': typeof AuthGradesRoute
-  '/ip-bans': typeof AuthIpBansRoute
   '/majors': typeof AuthMajorsRoute
   '/my-profile': typeof AuthMyProfileRoute
   '/create-password': typeof GuestCreatePasswordRoute
@@ -944,7 +936,6 @@ export interface FileRoutesById {
   '/_auth/ewallet-transactions': typeof AuthEwalletTransactionsRouteWithChildren
   '/_auth/ewallets': typeof AuthEwalletsRouteWithChildren
   '/_auth/grades': typeof AuthGradesRoute
-  '/_auth/ip-bans': typeof AuthIpBansRoute
   '/_auth/levels': typeof AuthLevelsRouteWithChildren
   '/_auth/majors': typeof AuthMajorsRoute
   '/_auth/merchants': typeof AuthMerchantsRouteWithChildren
@@ -1055,7 +1046,6 @@ export interface FileRouteTypes {
     | '/ewallet-transactions'
     | '/ewallets'
     | '/grades'
-    | '/ip-bans'
     | '/levels'
     | '/majors'
     | '/merchants'
@@ -1159,7 +1149,6 @@ export interface FileRouteTypes {
     | '/auth-logs'
     | '/dashboard'
     | '/grades'
-    | '/ip-bans'
     | '/majors'
     | '/my-profile'
     | '/create-password'
@@ -1259,7 +1248,6 @@ export interface FileRouteTypes {
     | '/_auth/ewallet-transactions'
     | '/_auth/ewallets'
     | '/_auth/grades'
-    | '/_auth/ip-bans'
     | '/_auth/levels'
     | '/_auth/majors'
     | '/_auth/merchants'
@@ -1442,13 +1430,6 @@ declare module '@tanstack/react-router' {
       path: '/grades'
       fullPath: '/grades'
       preLoaderRoute: typeof AuthGradesRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/ip-bans': {
-      id: '/_auth/ip-bans'
-      path: '/ip-bans'
-      fullPath: '/ip-bans'
-      preLoaderRoute: typeof AuthIpBansRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/levels': {
@@ -2491,7 +2472,6 @@ interface AuthRouteChildren {
   AuthEwalletTransactionsRoute: typeof AuthEwalletTransactionsRouteWithChildren
   AuthEwalletsRoute: typeof AuthEwalletsRouteWithChildren
   AuthGradesRoute: typeof AuthGradesRoute
-  AuthIpBansRoute: typeof AuthIpBansRoute
   AuthLevelsRoute: typeof AuthLevelsRouteWithChildren
   AuthMajorsRoute: typeof AuthMajorsRoute
   AuthMerchantsRoute: typeof AuthMerchantsRouteWithChildren
@@ -2516,7 +2496,6 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthEwalletTransactionsRoute: AuthEwalletTransactionsRouteWithChildren,
   AuthEwalletsRoute: AuthEwalletsRouteWithChildren,
   AuthGradesRoute: AuthGradesRoute,
-  AuthIpBansRoute: AuthIpBansRoute,
   AuthLevelsRoute: AuthLevelsRouteWithChildren,
   AuthMajorsRoute: AuthMajorsRoute,
   AuthMerchantsRoute: AuthMerchantsRouteWithChildren,

@@ -13,21 +13,10 @@ import StudentCostApplyButton from "./student-cost-apply-button"
 
 type NumberedAccount = StudentCostAccountRow & { no: number }
 
-// `paging: false` renders every row, so the page length only has to stay above the nine
-// accountancies this table can hold. `legacy-data-table` still draws the length menu, which
-// legacy drops entirely when paging is off (`_fnFeatureHtmlLength` returns null) — kit follow-up.
 const ACCOUNT_TABLE_STATE: TableState = { ...INITIAL_TABLE_STATE, length: 100 }
 
 const REMINDER_TOOLTIP = "Tagihan akan muncul pada admin dan santri sekian hari sebelum jatuh tempo"
 
-/**
- * The searchable/sortable text of a cell.
- *
- * Columns 3, 4 and 6 carry a hidden `<span class="d-none">` numeric key in front of the visible
- * text so DataTables' `any-number` type sorts them by value rather than by the rupiah string.
- * That span is part of the cell's text content, so legacy searches it too — concatenating the
- * `*Sort` number in front of the display string reproduces both behaviours at once.
- */
 const cellText = (row: NumberedAccount, key: string): string => {
 	switch (key) {
 		case "no":
@@ -53,10 +42,8 @@ const cellText = (row: NumberedAccount, key: string): string => {
 
 const SEARCH_KEYS = ["no", "name", "maximum", "option", "period", "reminder", "dueDate", "note"]
 
-// `student-cost-term/account.blade.php` + `student-cost/account-datatable.js`
 const StudentCostAccountTable = ({ page: data }: { page: StudentCostAccountPage }): JSX.Element => {
 	const [state, setState] = useState<TableState>(ACCOUNT_TABLE_STATE)
-	// `checkboxBulkAction()` renders each row `checked` from its own `applied` flag
 	const [checked, setChecked] = useState<number[]>([])
 
 	useEffect(() => {
@@ -89,7 +76,6 @@ const StudentCostAccountTable = ({ page: data }: { page: StudentCostAccountPage 
 					label={null}
 				/>
 			),
-			// An accountancy with no saved term gets no checkbox at all
 			cell: (row) => {
 				const termId = row.termId
 				if (termId === null) return null
@@ -118,7 +104,6 @@ const StudentCostAccountTable = ({ page: data }: { page: StudentCostAccountPage 
 			header: "Option",
 			width: "10%",
 			sortable: true,
-			// `implode('<br/>')`, with a trailing comma on every entry but the last
 			cell: (row) =>
 				row.optionCosts.length === 0
 					? "-"
@@ -151,7 +136,6 @@ const StudentCostAccountTable = ({ page: data }: { page: StudentCostAccountPage 
 			header: "Actions",
 			width: "5%",
 			sortable: false,
-			// `actionAccount()` — the pencil points at edit when a term exists, at create otherwise
 			cell: (row) => (
 				<div className="text-center">
 					<Link
@@ -194,7 +178,6 @@ const StudentCostAccountTable = ({ page: data }: { page: StudentCostAccountPage 
 				minWidth="1500px"
 				paging={false}
 				frozenColumns={2}
-				// `html tr.tbr_selected td { background-color: #F0F8F3 }` (app.css 3361)
 				rowClassName={(row) =>
 					row.termId !== null && checked.includes(row.termId) ? "[&>td]:bg-[#F0F8F3]" : undefined
 				}

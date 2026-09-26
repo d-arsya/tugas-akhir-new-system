@@ -3,10 +3,6 @@ import type { JSX } from "react"
 import type { AdminRegistrantDetail } from "@roja/types"
 import { cn } from "@roja/utils"
 
-// The `.tbr_progress_widget` steps of `registrant/partials/edit/widget-status.blade.php:29-183`
-// (widget.css 101-240): Validasi Data, Tes Indent (indent path), Tes Regular; each a link that opens
-// its modal once it is reachable, otherwise a plain `span`.
-
 export type RegistrantStepModal = "validation" | "indent" | "regular"
 
 type ItemState = "success" | "waiting" | "failed" | "plain"
@@ -27,7 +23,6 @@ const NOTE: Record<ItemState, string> = {
 	failed: "text-[var(--danger)]",
 }
 
-/** `.tbr_progress_item` with its dashed connector (`::before`, 18px in, `--bg-quaternary`) */
 export const PROGRESS_ITEM =
 	"relative flex items-center justify-start py-[8px] whitespace-normal before:absolute before:top-[1px] before:left-[18px] before:h-full before:w-px before:border-l before:border-dashed before:border-[var(--bg-quaternary)]! before:bg-transparent before:content-['']"
 
@@ -72,7 +67,6 @@ const RegistrantProgress = ({ detail, onOpen }: RegistrantProgressProps): JSX.El
 		) : dataValidation === "fixed" ? (
 			<ProgressItem state="waiting" title="Validasi Data" note="Sudah diperbaiki" onOpen={open("validation")} />
 		) : (
-			// `<a … disabled>` — the attribute means nothing on a link, it still opens the modal
 			<ProgressItem state="plain" title="Validasi Data" onOpen={open("validation")} />
 		)
 

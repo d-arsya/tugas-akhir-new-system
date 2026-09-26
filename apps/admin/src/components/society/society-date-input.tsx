@@ -11,13 +11,11 @@ import { INVALID_CLASS } from "./society-controls"
 
 const pad = (n: number): string => String(n).padStart(2, "0")
 
-/** Stored `Y-m-d` → the `d-m-Y` the blades print (`formatDate($value, 'd-m-Y')`). */
 export const ymdToDmy = (value: string): string => {
 	const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
 	return match ? `${match[3]}-${match[2]}-${match[1]}` : value
 }
 
-/** A typed or picked `d-m-Y` → `Y-m-d`; anything else is passed through for the server to judge. */
 export const dmyToYmd = (value: string): string => {
 	const match = /^\s*(\d{1,2})-(\d{1,2})-(\d{4})\s*$/.exec(value)
 	return match ? `${match[3]}-${pad(Number(match[2]))}-${pad(Number(match[1]))}` : value
@@ -30,25 +28,18 @@ const parseYmd = (value: string): Date | null => {
 
 type SocietyDateInputProps = {
 	name: string
-	/** `Y-m-d` (or whatever was typed, when it is not a date). */
 	value: string
 	onChange: (value: string) => void
 	disabled?: boolean
 	invalid?: boolean
 }
 
-/**
- * `div.input-group.tbr_fix_ig > input#date_of_birth[data-plugin-datepicker] + div.input-group-append.p-0 > svg`.
- * The value is shown as `d-m-Y` (the edit blade's `formatDate(..., 'd-m-Y')`, the wizard's
- * `dd-mm-yyyy`) and handed up as `Y-m-d`, which is what the server stores.
- */
 const SocietyDateInput = ({ name, value, onChange, disabled, invalid }: SocietyDateInputProps): JSX.Element => {
 	const [open, setOpen] = useState(false)
 	const [text, setText] = useState(() => ymdToDmy(value))
 	const wrapper = useRef<HTMLDivElement>(null)
 
-	// A value that changed from outside (record loaded, draft restored) replaces the typed text;
-	// `text` is left out of the deps on purpose — typing must not re-run this
+	// Resync only when the value changes from outside; typing must not re-run this
 	useEffect(() => {
 		if (dmyToYmd(text) !== value) setText(ymdToDmy(value))
 	}, [value])

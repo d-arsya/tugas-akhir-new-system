@@ -4,14 +4,10 @@ import type { SocietyDraft, SocietyDraftStepKey, SocietyStepKey, SocietyValues }
 
 import SocietyWizard from "@/components/society/wizard/society-wizard"
 import { toSocietyFormData } from "@/components/society/wizard/society-multipart"
-import { useStudentCreate, useStudentOptions } from "@/hooks/use-students"
-import { adminApi } from "@/lib/api"
+import { useStudentCreate, useStudentOptions, useValidateStudentStep } from "@/hooks/use-students"
 
 import { setCreatedFlash } from "./student-flash"
 import { StudentStepOneHeader } from "./student-step-one"
-
-// The Santri create wizard — `student/create/data/*.blade.php` over `Student\{Personal,Identity,Family,
-// Guardian,Attachment}Controller`, on the shared `SocietyWizard` shell.
 
 const STEP_PATH: Record<SocietyStepKey, string> = {
 	personal: "/students/create",
@@ -21,22 +17,21 @@ const STEP_PATH: Record<SocietyStepKey, string> = {
 	attachment: "/students/create/attachment",
 }
 
-// The Subkelas select starts on its first option, "Undefined" (`value="undefined" selected`)
 const STEP_DEFAULTS: Partial<Record<SocietyDraftStepKey, SocietyValues>> = { personal: { sub_grade: "undefined" } }
 
 const StudentWizard = ({ step, lockedValues }: { step: SocietyStepKey; lockedValues?: SocietyValues }): JSX.Element => {
 	const { data: options } = useStudentOptions()
 	const create = useStudentCreate()
+	const validate = useValidateStudentStep()
 
 	const submit = async (draft: SocietyDraft, files: Partial<Record<string, File>>): Promise<string> => {
 		const result = await create.mutateAsync(toSocietyFormData(draft.values, draft.diseases, files))
-		// `session()->flash('success', true)` — the edit page greets the new santri once
 		setCreatedFlash(result.studentGradeId)
 		return `/students/${result.studentGradeId}`
 	}
 
 	const validateStep = async (key: SocietyDraftStepKey, draft: SocietyDraft): Promise<void> => {
-		await adminApi.validateStudentStep(key, draft)
+		await validate.mutateAsync({ step: key, draft })
 	}
 
 	return (

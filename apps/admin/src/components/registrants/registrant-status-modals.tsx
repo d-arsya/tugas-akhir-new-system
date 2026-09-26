@@ -9,9 +9,6 @@ import LegacyRichEditor from "@/components/legacy/legacy-rich-editor/legacy-rich
 
 import RegistrantMegaRadio from "./registrant-mega-radio"
 
-// `registrant/partials/edit/modals/{data-validation,test-indent,test-regular}.blade.php` + `summernote.js`
-// + `custom-ajax.js` (`specificForm`: a summernote left empty posts "").
-
 const EMPTY_NOTE = "<p><br></p>"
 
 type ModalProps = {
@@ -22,7 +19,6 @@ type ModalProps = {
 	onSubmit: (data: AdminRegistrantStatusDto) => void
 }
 
-// The modal content is portalled to <body>, so Simpan is wired by click rather than through a DOM <form>
 const Footer = ({ submitting, onCancel, onSave }: { submitting: boolean; onCancel: () => void; onSave: () => void }): ReactNode => (
 	<>
 		<LegacyButton variant="light" className="mr-[8px]" onClick={onCancel}>
@@ -34,11 +30,9 @@ const Footer = ({ submitting, onCancel, onSave }: { submitting: boolean; onCance
 	</>
 )
 
-/** `#modalDataValidation.modal-block-lg` (porto: 900px) — the `.tbr_custom_modal` card of `LegacyModal`. */
 export const DataValidationModal = ({ open, detail, submitting, onCancel, onSubmit }: ModalProps): JSX.Element => {
 	const [value, setValue] = useState("")
 	const [note, setNote] = useState("")
-	// `disabled` until "invalid" is picked; summernote("disable") later greys the editor but the textarea stays posted
 	const [notePosted, setNotePosted] = useState(false)
 
 	useEffect(() => {
@@ -49,7 +43,6 @@ export const DataValidationModal = ({ open, detail, submitting, onCancel, onSubm
 	}, [open, detail])
 
 	const submit = (): void => {
-		// `input[type=hidden][name=data_validation][value=""]` before the radios: nothing picked posts ""
 		const data: AdminRegistrantStatusDto = { data_validation: value }
 		if (notePosted) data.data_validation_note = note === EMPTY_NOTE ? "" : note
 		onSubmit(data)
@@ -58,7 +51,6 @@ export const DataValidationModal = ({ open, detail, submitting, onCancel, onSubm
 	return (
 		<LegacyModalOverlay open={open} maxWidth="900px">
 			<section className="flex max-h-[calc(100vh-70px)] flex-col overflow-hidden rounded-[20px]">
-				{/* `header.card-header.flex-wrap > h2.card-title + span.tbr_text-grey {fullname}` */}
 				<header className="flex min-h-[68px] shrink-0 flex-wrap items-center justify-between rounded-t-[20px] border-0 bg-[var(--bg-tertiary)] px-[30px]">
 					<h2 className="m-0! p-0! text-[16px]! leading-[18px]! font-semibold! tracking-normal! text-[var(--heading-txt-inverse)]!">
 						Pengaturan validasi data
@@ -85,7 +77,6 @@ export const DataValidationModal = ({ open, detail, submitting, onCancel, onSubm
 							</div>
 						</div>
 					</div>
-					{/* `div.tbr_visibility_area > hr.tbr_divider_solid.mt-4.mt-sm-2.mb-3` */}
 					<div>
 						<hr className="mt-[24px] mb-[16px] h-[2px] border-0 bg-[var(--bg-primary)] min-[576px]:mt-[8px]" />
 						<p className="mt-0 mb-[8px] leading-[24px] text-[var(--grey)] italic">
@@ -111,7 +102,6 @@ export const DataValidationModal = ({ open, detail, submitting, onCancel, onSubm
 
 type TestModalProps = ModalProps & { kind: "indent" | "regular" }
 
-/** `#modalTestIndent` / `#modalTestRegular` (`.modal-block-sm`): "Tidak Lolos" / "Lolos". */
 export const TestModal = ({ open, kind, detail, submitting, onCancel, onSubmit }: TestModalProps): JSX.Element => {
 	const current = kind === "indent" ? detail.indentTest : detail.regularTest
 	const [value, setValue] = useState("")

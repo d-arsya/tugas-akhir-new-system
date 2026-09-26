@@ -11,11 +11,8 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import { STUDENT_COST_ACTION_CLASS } from "./student-cost-action"
 
-// The `$no` counter legacy bakes into the payload, so it keeps its value when the table is re-sorted
 type NumberedYear = StudentCostYearRow & { no: number }
 
-// `AcademicYearService::getStatusAkademik()` — "empty" is the blank cell a running or future
-// period gets on a non-current year, and "none" is the Archive row, which this list never shows
 const statusText = (row: StudentCostYearRow): string =>
 	row.statusAkademik === "none"
 		? "-"
@@ -42,7 +39,6 @@ const cellText = (row: NumberedYear, key: string): string => {
 
 const SEARCH_KEYS = ["no", "year", "period", "statusAkademik"]
 
-// `student-cost-term/index.blade.php` + `default-datatable.js` (`initDatatable(url, [4])`)
 const StudentCostYearTable = (): JSX.Element => {
 	const { data, isFetching, isSuccess } = useStudentCostYears()
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
@@ -62,7 +58,6 @@ const StudentCostYearTable = (): JSX.Element => {
 			header: "Status tahun ajaran",
 			width: "30%",
 			sortable: true,
-			// A future-or-running period on a non-current year renders nothing at all — kept as legacy
 			cell: (row) =>
 				row.statusAkademik === "none" ? (
 					"-"
@@ -73,12 +68,10 @@ const StudentCostYearTable = (): JSX.Element => {
 				),
 		},
 		{
-			// The header is an empty `<th witdh="5%">` — the typo means the width never applied
 			key: "action",
 			header: "",
 			sortable: false,
 			cell: (row) => (
-				// `StudentCostService::action()` — a plain anchor, so legacy does a full page load
 				<div>
 					<Link
 						to="/student-costs/$academicYearId"

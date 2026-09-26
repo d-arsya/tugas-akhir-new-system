@@ -1,15 +1,16 @@
-import { useEffect, useState, type FormEvent, type JSX, type KeyboardEvent } from "react"
+import { useEffect, useState, type FormEvent, type JSX } from "react"
 
-import type { AdminSchoolPayload, AdminSchoolSetting } from "@roja/types"
+import type { AdminSchoolSetting } from "@roja/types"
 
 import LegacyButton, { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { LegacyCardText, LegacyCardTitle, LegacyDivider } from "@/components/legacy/legacy-card"
 import LegacyFileUpload from "@/components/legacy/legacy-file-upload"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacyInput from "@/components/legacy/legacy-input"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { adminApi } from "@/lib/api"
+import { useUpdateSchool } from "@/hooks/use-school-setting"
+import { digitsOnly } from "@/lib/digits-only"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
+
 import SchoolAddressFields from "./school-address-fields"
 
 type SchoolFormProps = {
@@ -17,7 +18,7 @@ type SchoolFormProps = {
 	onSaved: () => void
 }
 
-type SchoolForm = {
+type SchoolValues = {
 	name: string
 	slogan: string
 	phone: string
@@ -27,7 +28,7 @@ type SchoolForm = {
 	fullAddress: string
 }
 
-const EMPTY_FORM: SchoolForm = {
+const EMPTY_FORM: SchoolValues = {
 	name: "",
 	slogan: "",
 	phone: "",
@@ -37,21 +38,12 @@ const EMPTY_FORM: SchoolForm = {
 	fullAddress: "",
 }
 
-// `div.help-block.tbr_text-grey.tbr_weight-italic` (porto theme.css 11101 + app.css 358/401)
 const HELP_CLASS = "mt-[5px] mb-[10px] block text-[12px] text-[var(--grey)] italic"
 
-// `accept=".png, .jpg, .jpeg, .svg"` — the blade uses the same list for both inputs
 const ACCEPT = ".png, .jpg, .jpeg, .svg"
 
-// `onkeypress="return isNumberKey(event)"` (public/assets/js/input-number-strict.js): digits only
-const digitsOnly = (event: KeyboardEvent<HTMLInputElement>): void => {
-	if (event.ctrlKey || event.metaKey || event.altKey) return
-	if (event.key.length === 1 && !/\d/.test(event.key)) event.preventDefault()
-}
-
-// Port of `setting/school.blade.php` + `setting/upload-logo-school.js`, `province.js`, `regency.js`
 const SchoolForm = ({ school, onSaved }: SchoolFormProps): JSX.Element => {
-	const [values, setValues] = useState<SchoolForm>(EMPTY_FORM)
+	const [values, setValues] = useState<SchoolValues>(EMPTY_FORM)
 	const [logo, setLogo] = useState<File | null>(null)
 	const [favicon, setFavicon] = useState<File | null>(null)
 
@@ -71,25 +63,18 @@ const SchoolForm = ({ school, onSaved }: SchoolFormProps): JSX.Element => {
 		)
 	}, [school])
 
-	const set = <K extends keyof SchoolForm>(key: K, value: SchoolForm[K]): void =>
+	const set = <K extends keyof SchoolValues>(key: K, value: SchoolValues[K]): void =>
 		setValues((current) => ({ ...current, [key]: value }))
 
-	// `province.js`: a new province empties both child selects; `regency.js` empties the district one
 	const onProvinceChange = (value: string): void =>
 		setValues((current) => ({ ...current, provinceId: value, regencyId: "", districtId: "" }))
 	const onRegencyChange = (value: string): void =>
 		setValues((current) => ({ ...current, regencyId: value, districtId: "" }))
 
-	const { submit, submitting } = useLegacySubmit<AdminSchoolPayload, { message: string }>({
-		mutationFn: (payload) => adminApi.updateSchool(payload),
-		// `default-ajax-with-file.js` titles its failure notice "<strong>Gagal!</strong>"
-		errorTitle: "Gagal!",
-		onDone: onSaved,
-	})
+	const { submit, submitting } = useUpdateSchool(onSaved)
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
-		// The legacy page has no "hapus" control, so both hidden inputs always submit 0
 		submit({ ...values, logo, favicon, emptyLogo: false, emptyFavicon: false })
 	}
 
@@ -118,7 +103,6 @@ const SchoolForm = ({ school, onSaved }: SchoolFormProps): JSX.Element => {
 					previewUrl={school?.faviconUrl ?? null}
 					accept={ACCEPT}
 					maxKb={250}
-					// Legacy said "logo" here too; the port names the field it belongs to
 					sizeErrorText="Ukuran favicon maksimal 250kb!"
 					onChange={setFavicon}
 				/>
@@ -151,7 +135,6 @@ const SchoolForm = ({ school, onSaved }: SchoolFormProps): JSX.Element => {
 			</LegacyFormRow>
 
 			<LegacyFormRow label="Telepon Pondok" htmlFor="phone" hint="optional">
-				{/* `span.input-group-prepend.tbr_text-grey` holding a static "62" — the column has no prefix */}
 				<LegacyInput
 					type="number"
 					id="phone"
@@ -182,7 +165,6 @@ const SchoolForm = ({ school, onSaved }: SchoolFormProps): JSX.Element => {
 			/>
 
 			<div className="pt-[16px] text-right">
-				{/* `a[href=""]`: legacy reloads the page, dropping whatever was typed */}
 				<a href="" className={legacyButtonClass("light", `mr-[8px] ${RIPPLE_CLASS}`)} onClick={triggerRipple}>
 					Kembali
 				</a>{" "}

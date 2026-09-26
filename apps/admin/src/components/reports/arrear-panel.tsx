@@ -6,12 +6,12 @@ import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-d
 import LegacyInvoiceWidget from "@/components/legacy/legacy-invoice-widget"
 import { emptyFilters, type ReportFilters } from "@/hooks/use-report-filters"
 import { useReportPanel } from "@/hooks/use-report-panel"
-import { tableParams, useArrears, useLegacyLoadError } from "@/hooks/use-reports"
+import { useLegacyLoadError } from "@/hooks/use-legacy-load-error"
+import { tableParams, useArrears } from "@/hooks/use-reports"
 import { formatIndoDate, rupiahDots, rupiahLabel } from "@/lib/legacy-format"
 
 import ReportFilterBar from "./report-filter-bar"
 
-// report/arrear.blade.php `.tbr_arrear_table` + arrear-datatable.js columns
 const COLUMNS: LegacyColumn<ReportArrearRow>[] = [
 	{ key: "no", header: "No", width: "7%", cell: (_, index) => index },
 	{ key: "nis", header: "NISP", width: "10%", sortable: true, cell: (row) => row.nis },
@@ -23,11 +23,11 @@ const COLUMNS: LegacyColumn<ReportArrearRow>[] = [
 	{ key: "subGrade", header: "Subkelas", width: "10%", sortable: true, cell: (row) => row.subGrade },
 ]
 
-// arrear-filter.js reset: clears the dates, year, grade and sub grade, but keeps "Nama Biaya"
 const resetKeepingAccountancy = (draft: ReportFilters): ReportFilters => ({ ...emptyFilters(), accountancy: draft.accountancy })
 
-// Laporan Tunggakan (ReportArrearController): overdue unpaid invoices, no default date range
-const ArrearPanel = ({ options, resetSignal }: { options: ReportOptions | undefined; resetSignal: number }): JSX.Element => {
+type ArrearPanelProps = { options: ReportOptions | undefined; resetSignal: number }
+
+const ArrearPanel = ({ options, resetSignal }: ArrearPanelProps): JSX.Element => {
 	const panel = useReportPanel(emptyFilters(), resetSignal, resetKeepingAccountancy)
 	const query = useArrears({ ...panel.params, ...tableParams(panel.table) }, panel.reload)
 	useLegacyLoadError(query.isError)

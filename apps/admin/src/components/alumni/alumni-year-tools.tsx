@@ -2,13 +2,8 @@ import type { JSX } from "react"
 
 import LegacyInput from "@/components/legacy/legacy-input"
 import LegacySelect from "@/components/legacy/legacy-select"
-import { useProvinces, useRegencies } from "@/hooks/use-school-setting"
+import { useProvinces, useRegencies } from "@/hooks/use-locations"
 import type { TableState } from "@/lib/legacy-table"
-
-// OWNER: AK-A. `alumni/partials/listing-alumni/datatable-tools.blade.php` + `alumni/datatable-tools.js` +
-// `alumni/province.js`: Show, Provinsi, Kabupaten and Search, each in a `.col-md-3 > .form-group.mb-2`.
-// Picking a province filters the Provinsi column by its name and reloads the Kabupaten options (valued by
-// name); the empty "Provinsi" option clears both column searches (the regency URL 404s in legacy).
 
 const ENTRIES = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
 
@@ -33,10 +28,8 @@ const AlumniYearTools = ({ state, onStateChange, filter, onFilterChange }: Alumn
 	const cell = "w-full px-[15px] min-[768px]:w-1/4"
 
 	return (
-		// `.row.justify-content-center.mb-1`
 		<div className="mx-[-15px] mb-[4px] flex flex-wrap justify-center">
 			<div className={cell}>
-				{/* `.tbr_results_per_page` — 75px wide, centred below md */}
 				<div className="mx-auto mb-[8px] w-[75px] min-w-[75px] min-[768px]:ml-0">
 					<LegacySelect
 						value={String(state.length)}
@@ -74,7 +67,6 @@ const AlumniYearTools = ({ state, onStateChange, filter, onFilterChange }: Alumn
 				</div>
 			</div>
 			<div className={cell}>
-				{/* `.tbr_search_term` — DataTables `search()` on every keyup */}
 				<div className="mb-[8px]">
 					<LegacyInput
 						type="text"

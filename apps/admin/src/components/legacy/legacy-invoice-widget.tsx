@@ -4,8 +4,6 @@ import { cn } from "@roja/utils"
 
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
-// widget.css 41-63: each `.tbr_widget-*` is `background-color: var(--<name>)` with a
-// `rgba(var(--rgb-<name>), 0.25)` shadow. The app names its channels `--<name>-rgb`.
 const VARIANT = {
 	primary: {
 		widget: "bg-[var(--primary)] shadow-[0px_8px_10px_0px_rgba(var(--primary-rgb),0.25)]",
@@ -25,11 +23,6 @@ const VARIANT = {
 	},
 } as const
 
-/**
- * Laporan renders four across (`col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12`); the Tagihan
- * detail page renders three (`col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12`,
- * student-invoice/detail.blade.php:41-70). Both collapse to halves at sm and full at xs.
- */
 const COLUMN = {
 	4: "w-full px-[15px] min-[576px]:w-1/2 min-[992px]:w-1/4",
 	3: "w-full px-[15px] min-[576px]:w-1/2 min-[992px]:w-1/3",
@@ -39,12 +32,9 @@ type LegacyInvoiceWidgetProps = {
 	variant: keyof typeof VARIANT
 	value: string | number
 	label: string
-	/** How many widgets share the row. Defaults to the four-across Laporan layout. */
 	across?: keyof typeof COLUMN
 }
 
-// Port of `span.tbr_widget.tbr_widget-invoice[anim=ripple]` (public/assets/css/widget.css) inside its
-// `col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12` column
 const LegacyInvoiceWidget = ({ variant, value, label, across = 4 }: LegacyInvoiceWidgetProps): JSX.Element => (
 	<div className={COLUMN[across]}>
 		<span

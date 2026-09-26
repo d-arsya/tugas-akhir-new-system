@@ -1,9 +1,9 @@
-import { useEffect } from "react"
-import { keepPreviousData, useQuery, type UseQueryResult } from "@tanstack/react-query"
+import { keepPreviousData, useMutation, useQuery, type UseMutationResult, type UseQueryResult } from "@tanstack/react-query"
 
 import type {
 	ReportArrearFilterParams,
 	ReportArrearPage,
+	ReportExportKind,
 	ReportFilterParams,
 	ReportIncomeDetailPage,
 	ReportIncomeRecap,
@@ -13,12 +13,19 @@ import type {
 
 import { legacyNotify } from "@/components/legacy/legacy-notify"
 import { adminApi } from "@/lib/api"
+import { saveBlob } from "@/lib/download"
+import { SYSTEM_ERROR } from "@/lib/legacy-errors"
 import type { TableState } from "@/lib/legacy-table"
+
+const EXPORT_FILE_NAMES: Record<ReportExportKind, string> = {
+	"income-detail": "Laporan Pembayaran Santri (Rincian).xlsx",
+	"income-recap": "Laporan Pembayaran Santri (Rekapitulasi).xlsx",
+	arrears: "Laporan Tunggakan Pembayaran Santri.xlsx",
+}
 
 export const reportKeys = {
 	all: ["admin-reports"] as const,
 	options: () => [...reportKeys.all, "options"] as const,
-	// `reload` counts "Filter" clicks: legacy reloads the table even when nothing changed
 	incomeDetail: (params: ReportFilterParams & ReportTableParams, reload: number) =>
 		[...reportKeys.all, "income-detail", params, reload] as const,
 	incomeRecap: (params: ReportFilterParams, reload: number) => [...reportKeys.all, "income-recap", params, reload] as const,
@@ -26,7 +33,6 @@ export const reportKeys = {
 		[...reportKeys.all, "arrears", params, reload] as const,
 }
 
-// DataTables request → API table params
 export const tableParams = (table: TableState): ReportTableParams => ({
 	page: table.page,
 	limit: table.length,
@@ -44,11 +50,9 @@ export const useIncomeDetail = (
 	useQuery({
 		queryKey: reportKeys.incomeDetail(params, reload),
 		queryFn: () => adminApi.getReportIncomeDetail(params),
-		// Keep the rows on screen under the "Sedang memproses" overlay, like DataTables
 		placeholderData: keepPreviousData,
 	})
 
-// Legacy creates the recap DataTable on the first `shown.bs.tab`
 export const useIncomeRecap = (
 	params: ReportFilterParams,
 	reload: number,
@@ -71,9 +75,13 @@ export const useArrears = (
 		placeholderData: keepPreviousData,
 	})
 
-// DataTables `ajax.error` in the legacy report scripts
-export const useLegacyLoadError = (isError: boolean): void => {
-	useEffect(() => {
-		if (isError) legacyNotify.error("Terjadi kesalahan pada sistem. Silakan reload ulang halaman ini.")
-	}, [isError])
-}
+type ReportDownload = { kind: ReportExportKind; params: ReportArrearFilterParams }
+
+export const useDownloadReport = (): UseMutationResult<void, unknown, ReportDownload> =>
+	useMutation<void, unknown, ReportDownload>({
+		mutationFn: async ({ kind, params }) => {
+			const { blob, fileName } = await adminApi.downloadReport(kind, params)
+			saveBlob(blob, fileName ?? EXPORT_FILE_NAMES[kind])
+		},
+		onError: () => legacyNotify.error(SYSTEM_ERROR),
+	})

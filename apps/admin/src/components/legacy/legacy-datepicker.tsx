@@ -7,15 +7,12 @@ import { DP_DAYS_MIN, DP_MONTHS, DP_MONTHS_SHORT, dayOf, monthGrid, sameDay } fr
 type View = "days" | "months" | "years"
 
 type LegacyDatepickerProps = {
-	// The picker's own date (`.active`)
 	value: Date | null
-	// Input-daterange endpoints: both get `.selected`, the days between get `.range`
 	range: [Date | null, Date | null]
 	initialView: Date
 	onPick: (date: Date) => void
 }
 
-// Hover/selected colours come from public/assets/css/datepicker.css (all `!important` in legacy)
 const CELL = "h-[32px] w-[32px] cursor-pointer p-[1px] text-center"
 const HOVER = "hover:bg-[var(--secondary)] hover:text-white"
 const SELECTED = "rounded-[5px] bg-[var(--secondary)] text-white"
@@ -26,7 +23,6 @@ const HeadCell = ({ children, className, onClick, colSpan }: { children: ReactNo
 	</th>
 )
 
-// Port of the bootstrap-datepicker dropdown (datepicker3 + Porto + legacy datepicker.css), days/months/years views
 const LegacyDatepicker = ({ value, range, initialView, onPick }: LegacyDatepickerProps): JSX.Element => {
 	const [view, setView] = useState<View>("days")
 	const [cursor, setCursor] = useState(() => dayOf(initialView.getFullYear(), initialView.getMonth(), 1))

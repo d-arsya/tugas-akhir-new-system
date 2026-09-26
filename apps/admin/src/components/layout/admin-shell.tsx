@@ -19,15 +19,12 @@ type AdminShellProps = {
 	children: ReactNode
 }
 
-// Port of legacy layouts/app.blade.php with `<html class="fixed sidebar-left-sm">`
 const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JSX.Element => {
 	const pathname = useRouterState({ select: (state) => state.location.pathname })
-	// Legacy keeps the collapsed state per page load only, so it is not persisted
 	const [collapsed, setCollapsed] = useState(false)
 	const [mobileOpen, setMobileOpen] = useState(false)
-	// Legacy `ViewServiceProvider` counts `process` transactions on every page, but the menu (and so the
-	// badge) exists only under `@can('do-as-cashier')` — the API answers 403 to anyone else, so only ask them
-	const { data: ewalletBadge } = useEwalletBadge(role === "superadmin" || role === "kasir")
+	const canActAsCashier = role === "superadmin" || role === "kasir"
+	const { data: ewalletBadge } = useEwalletBadge(canActAsCashier)
 
 	useEffect(() => {
 		setMobileOpen(false)
@@ -50,7 +47,6 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 					onLogout={onLogout}
 				/>
 
-				{/* Legacy `html.fixed .inner-wrapper`: 60px header + 50px fixed page title */}
 				<div className="md:pt-[110px]">
 					<AdminSidebar
 						role={role}
@@ -60,8 +56,6 @@ const AdminShell = ({ userName, role, onLogout, children }: AdminShellProps): JS
 						badges={{ ewalletProcess: ewalletBadge?.count ?? 0 }}
 					/>
 
-					{/* Porto `html.flexbox.fixed`: content-body fills the viewport below the page title (flex: 2) and
-						`.flex-grow-1` pushes the footer to the bottom on short pages */}
 					<main
 						className={cn(
 							"block px-[15px] pt-0 pb-[15px] md:flex md:min-h-[calc(100vh-110px)] md:flex-col md:p-[30px] md:transition-[margin] md:duration-300",

@@ -2,8 +2,6 @@ import { useMemo, useState, type KeyboardEvent } from "react"
 
 export type LegacySelectOption = { value: string; label: string }
 
-// select2 behaviour: opening resets the search and highlights the selected option;
-// arrow keys move the highlight, Enter picks it
 export const useLegacySelect = (
 	options: LegacySelectOption[],
 	value: string,

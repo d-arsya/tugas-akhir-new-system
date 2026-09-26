@@ -13,9 +13,7 @@ import { ArrowActionIcon, CAPABILITY_ACTION_CLASS } from "./capability-icons"
 
 type NumberedGrade = CapabilityGradeRow & { no: number }
 
-// `Grade::masterCostStatus()` — the badge copy, which is also what the search box matches
 const masterCostText = (row: CapabilityGradeRow): string => (row.masterCostDefined ? "Sudah ditentukan" : "Belum ditentukan")
-// `$grade->getTotalStudentGrade($academic_year) . " Santri"`
 const studentCountText = (row: CapabilityGradeRow): string => `${row.studentCount} Santri`
 
 const cellText = (row: NumberedGrade, key: string): string => {
@@ -39,23 +37,11 @@ const SEARCH_KEYS = ["no", "name", "masterCost", "studentCount", "note"]
 
 type CapabilityGradeTableProps = { academicYearId: number; year: string | null }
 
-/**
- * `student-capability/grade.blade.php` + `default-datatable.js` (`initDatatable(url, [5])`).
- *
- * "Total Santri" counts `grade_status = 'active'` only, while the level-3 list behind the arrow
- * does not filter on it — so the two numbers legitimately disagree (2025/2026 Kelas 1 reads
- * "6 Santri" here and lists 43 there). Replicated, not fixed.
- *
- * A grade without an applied cost term gets the same arrow, but legacy's click handler
- * (`.tbr_student_cost_btn`, `grade.blade.php:52-57`) opens "Master biaya belum ditentukan!"
- * instead of following it; the modal's confirm then links to Data Master ▸ Biaya Santri.
- */
 const CapabilityGradeTable = ({ academicYearId, year }: CapabilityGradeTableProps): JSX.Element => {
 	const { data, isFetching, isSuccess } = useCapabilityGrades(academicYearId)
 	const [state, setState] = useState<TableState>(INITIAL_TABLE_STATE)
 	const [missing, setMissing] = useState<CapabilityGradeRow | null>(null)
 
-	// `Grade::orderByDesc('label')` decides the order and the `$no` counter follows it
 	const numbered = useMemo<NumberedGrade[]>(() => (data ?? []).map((row, index) => ({ ...row, no: index + 1 })), [data])
 	const page = useMemo(() => clientTable(numbered, state, cellText, SEARCH_KEYS), [numbered, state])
 
@@ -110,15 +96,12 @@ const CapabilityGradeTable = ({ academicYearId, year }: CapabilityGradeTableProp
 				processing={isFetching}
 				loaded={isSuccess}
 				initialSort={{ key: "no", dir: "asc" }}
-				// This blade sets no inline `min-width` on the table
 				minWidth="auto"
 			/>
 			<CapabilityCostMissingModal
 				open={missing !== null}
-				// `modal.js:22` — `#tbr_grade` gets `Kelas ${grade}` from the button's `data-grade`
 				gradeLabel={`Kelas ${missing?.label ?? ""}`}
 				academicYear={year}
-				// `route('studentCost.accounts', [academic_year, grade])` — Data Master level 3
 				studentCostTo={`/student-costs/${academicYearId}/grades/${missing?.id ?? ""}`}
 				onCancel={() => setMissing(null)}
 			/>

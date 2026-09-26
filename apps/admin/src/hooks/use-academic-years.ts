@@ -10,12 +10,10 @@ import type {
 
 import { adminApi } from "@/lib/api"
 
-// Legacy Tahun Ajaran pages (academic-year.list / levelList / editLevelList / edit / store / update)
 export const academicYearKeys = {
 	all: ["admin-academic-years"] as const,
 	list: () => [...academicYearKeys.all, "list"] as const,
 	detail: (id: number) => [...academicYearKeys.all, "detail", id] as const,
-	/** `academic-year.levelList` — the create page's quota table, which has no year context */
 	quotaRows: () => [...academicYearKeys.all, "quota"] as const,
 	quotaRowsFor: (id: number) => [...academicYearKeys.all, "quota", id] as const,
 }
@@ -54,7 +52,6 @@ export const useUpdateAcademicYear = (
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (payload: AcademicYearPayload) => adminApi.updateAcademicYear(id, payload),
-		// The edit form has no `data-redirect`, so `default-ajax.js` reloads the page: refetch everything
 		onSuccess: () => queryClient.invalidateQueries({ queryKey: academicYearKeys.all }),
 	})
 }

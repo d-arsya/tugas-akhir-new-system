@@ -26,7 +26,6 @@ export const useDashboardOptions = (): UseQueryResult<DashboardOptions> =>
 		staleTime: 5 * 60 * 1000,
 	})
 
-// Charts are Superadmin/Admin only (legacy `asAdmin`); other roles get an empty chart
 export const useDashboardChartStudent = (grade: number, enabled: boolean): UseQueryResult<DashboardChartItem[]> =>
 	useQuery({
 		queryKey: dashboardKeys.chartStudent(grade),

@@ -8,13 +8,9 @@ import { societySettingLookup } from "@/components/society/society-settings"
 import { toSocietyFormData } from "@/components/society/wizard/society-multipart"
 import SocietyWizard, { type SocietyWizardStepOneContext } from "@/components/society/wizard/society-wizard"
 import { useInvalidateAkademik, useRegistrantCreateOptions } from "@/hooks/use-registrants"
-import { adminApi } from "@/lib/api"
+import { useCreateRegistrant, useValidateRegistrantStep } from "@/hooks/use-registrants-write"
 
 import { flashRegistrantCreated } from "./registrant-flash"
-
-// The PSB create wizard — `registrant/create/data/*.blade.php` on AK-S's `SocietyWizard`. Step 1 starts with
-// Tahun Ajaran (every year but Archive, newest first), Jenjang (`status = show`) and Jalur
-// (`create/data/personal.blade.php:31-145`), then `hr.tbr_divider_solid` when any field 1–21 is on.
 
 const STEP_PATH: Record<SocietyStepKey, string> = {
 	personal: "/registrants/create",
@@ -32,7 +28,6 @@ const PATH_OPTIONS = [
 const StepOneHeader = ({ values, onChange, errors, settings }: SocietyWizardStepOneContext): JSX.Element => {
 	const { data } = useRegistrantCreateOptions()
 	const row = (id: string, name: string, label: string, options: { value: string; label: string }[]): JSX.Element => (
-		// `div.form-group.row > label.col-lg-4.control-label.text-lg-right.m-0 {label}<span.help-block>required` + `div.col-lg-6`
 		<LegacyFormRow label={label} htmlFor={id} hint="required" labelCols={4} fieldCols={6}>
 			<SocietySelect
 				id={name}
@@ -68,14 +63,15 @@ const StepOneHeader = ({ values, onChange, errors, settings }: SocietyWizardStep
 
 const RegistrantWizard = ({ step }: { step: SocietyStepKey }): JSX.Element => {
 	const invalidate = useInvalidateAkademik()
+	const validate = useValidateRegistrantStep()
+	const create = useCreateRegistrant()
 
 	const validateStep = async (key: SocietyDraftStepKey, draft: SocietyDraft): Promise<void> => {
-		await adminApi.validateRegistrantStep(key, draft)
+		await validate.mutateAsync({ step: key, draft })
 	}
 
-	// `AttachmentController::validateAttachmentData` → `redirect: route('registrant.edit')` + `session()->flash('success')`
 	const submit = async (draft: SocietyDraft, files: Partial<Record<string, File>>): Promise<string> => {
-		const result = await adminApi.createRegistrant(toSocietyFormData(draft.values, draft.diseases, files))
+		const result = await create.mutateAsync(toSocietyFormData(draft.values, draft.diseases, files))
 		flashRegistrantCreated(result.id)
 		void invalidate()
 		return result.redirect

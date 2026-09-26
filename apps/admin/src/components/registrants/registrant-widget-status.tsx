@@ -7,17 +7,12 @@ import { cn } from "@roja/utils"
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyCard from "@/components/legacy/legacy-card"
 import { SocietySelect } from "@/components/society/society-controls"
-import { adminApi } from "@/lib/api"
+import { registrantPrintUrl } from "@/hooks/use-registrants"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 import type { ApprovalKind } from "./registrant-confirm-modal"
 import RegistrantProgress, { PROGRESS_ITEM, type RegistrantStepModal } from "./registrant-progress"
 
-// `registrant/partials/edit/widget-status.blade.php` — the right-hand card: Jenjang (disabled for a portal
-// row), year and path, the progress steps, "Pengumuman Hasil" with the four result radios
-// (`edit-general.js`: a click opens `#modal-{value}` instead of checking), then Kembali / Print / Simpan.
-
-/** `collapseRegistrantStatus()` (Helper.php 347-368) */
 const collapseStatus = (detail: AdminRegistrantDetail): boolean =>
 	detail.registrationPath === "indent" ? detail.indentTest === "success" || detail.regularTest !== null : detail.regularTest !== null
 
@@ -28,7 +23,6 @@ const RESULTS: ReadonlyArray<{ value: ApprovalKind; label: string }> = [
 	{ value: "reject", label: "Tidak Diterima" },
 ]
 
-// `.tbr_btn-light-info` / `.tbr_btn-light-danger` icon buttons (`p-2`); hover fills the svg white
 const ICON_BUTTON = "inline-flex p-[8px] [&:hover_path:not(.tbr-except)]:fill-white [&:hover_.tbr-white]:fill-white"
 
 const ucfirst = (value: string | null): string => (value ? value.charAt(0).toUpperCase() + value.slice(1) : "")
@@ -50,7 +44,6 @@ const RegistrantWidgetStatus = ({ detail, levelId, onLevelChange, onOpenStep, on
 	return (
 		<LegacyCard bodyClassName="p-[20px]">
 			<div className="mb-[24px]">
-				{/* `<option value="" selected>Select</option>` carries no `title`, so it is not greyed */}
 				<SocietySelect
 					id="level_id"
 					value={levelId}
@@ -65,11 +58,9 @@ const RegistrantWidgetStatus = ({ detail, levelId, onLevelChange, onOpenStep, on
 			<p className="mt-0 mb-0 leading-[24px] font-semibold">Tahun Ajaran {detail.academicYear}</p>
 			<p className="mt-0 mb-[20px] leading-[24px] text-[var(--grey)]">Jalur {ucfirst(detail.registrationPath)}</p>
 
-			{/* `div.tbr_progress_widget.mb-0#data-validation-checkbox` */}
 			<div className="mb-0">
 				<RegistrantProgress detail={detail} onOpen={onOpenStep} />
 				<div className={PROGRESS_ITEM}>
-					{/* `div.custom-control.custom-checkbox` (58px in) with the 36px box as `label::after` */}
 					<div className="relative min-h-[24px] pl-[58px]">
 						<span className="absolute top-0 left-0 z-[-1] block h-[20px] w-[16px] overflow-hidden opacity-0">
 							<input
@@ -97,7 +88,6 @@ const RegistrantWidgetStatus = ({ detail, levelId, onLevelChange, onOpenStep, on
 				</div>
 			</div>
 
-			{/* `div.tbr_registrant_status.mb-4.pl-5` — `.custom-radio.tbr_cr_status`, the current one `checked disabled` */}
 			<div hidden={!showResults} className="mb-[24px] pl-[48px]">
 				<div className="mb-[16px] pt-[16px]">
 					{RESULTS.map((result, index) => {
@@ -165,7 +155,7 @@ const RegistrantWidgetStatus = ({ detail, levelId, onLevelChange, onOpenStep, on
 						</svg>
 					</Link>
 					<a
-						href={adminApi.registrantPrintUrl(detail.id)}
+						href={registrantPrintUrl(detail.id)}
 						target="_blank"
 						rel="noreferrer"
 						onMouseDown={triggerRipple}

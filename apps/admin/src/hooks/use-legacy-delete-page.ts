@@ -6,18 +6,6 @@ import type { AdminRedirectResult } from "@roja/types"
 import { legacyNotify } from "@/components/legacy/legacy-notify"
 import { legacyErrors } from "@/lib/legacy-errors"
 
-/**
- * The rhythm of `assets/js/academic-year/delegate-ajax.js`, which drives **every** delete and
- * delegate page in Data Master.
- *
- * It differs from `useLegacySubmit` in exactly one way that matters: on success it navigates
- * to `res.redirect` **immediately**, with no 1000 ms wait and no `data-redirect` fallback.
- * That is what makes the chain feel continuous when a delete walks the user through several
- * consecutive steps (registrants → santri → alumni → the list).
- *
- * The success notice stays on screen across the navigation because `legacyNotify` renders
- * outside the route tree — same as PNotify surviving a legacy full-page load.
- */
 type LegacyDeletePageOptions<TPayload> = {
 	mutationFn: (payload: TPayload) => Promise<AdminRedirectResult>
 }

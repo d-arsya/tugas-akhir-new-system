@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import EwalletSetting from "@/components/ewallet/ewallet-setting"
 
-// Legacy ewallet/setting.blade.php
 export const Route = createFileRoute("/_auth/ewallets/$ewalletId/setting")({
 	component: EwalletSettingPage,
 })

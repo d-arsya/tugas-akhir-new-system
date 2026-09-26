@@ -7,19 +7,17 @@ import LegacyCheckbox from "@/components/legacy/legacy-checkbox"
 import LegacyInput from "@/components/legacy/legacy-input"
 import LegacyPasswordMeter, { passwordStrength } from "@/components/legacy/legacy-password-meter"
 
-type FormValues = Pick<CreatePasswordPayload, "password" | "passwordConfirmation" | "weakPassword">
+export type CreatePasswordFormValues = Pick<CreatePasswordPayload, "password" | "passwordConfirmation" | "weakPassword">
 
 type CreatePasswordFormProps = {
 	email: string
-	onSubmit: (values: FormValues) => void
+	onSubmit: (values: CreatePasswordFormValues) => void
 	submitting: boolean
-	// `@error('password')` renders under the field; `@error('weak_password')` renders as a top alert
 	errors: Record<string, string[]>
 }
 
 const LABEL_CLASS = "mb-[8px] block text-[12px] leading-[20px] text-[var(--body-txt-inverse)]"
 
-// Port of `resources/views/auth/passwords/create.blade.php` (+ `assets/js/auth-password-meter.js`)
 const CreatePasswordForm = ({ email, onSubmit, submitting, errors }: CreatePasswordFormProps): JSX.Element => {
 	const [password, setPassword] = useState("")
 	const [passwordConfirmation, setPasswordConfirmation] = useState("")
@@ -31,8 +29,6 @@ const CreatePasswordForm = ({ email, onSubmit, submitting, errors }: CreatePassw
 		onSubmit({
 			password,
 			passwordConfirmation,
-			// The legacy form posts `weak_password=""` (→ null) while the box is on screen but unchecked,
-			// and leaves the field out entirely when the password is not weak
 			...(weak ? { weakPassword: weakConfirmed ? true : null } : {}),
 		})
 	}
@@ -66,7 +62,6 @@ const CreatePasswordForm = ({ email, onSubmit, submitting, errors }: CreatePassw
 				))}
 			</div>
 
-			{/* The page restyles `.strength`: grey track, 4px radius, 10px margins (create.blade.php @push('style')) */}
 			<div className="[&>div]:my-[10px] [&>div]:overflow-hidden [&>div]:rounded-[4px] [&>div]:bg-[#ccc] [&_span]:rounded-none">
 				<LegacyPasswordMeter password={password} weakConfirmed={weakConfirmed} onWeakConfirmedChange={setWeakConfirmed} />
 			</div>
@@ -85,7 +80,6 @@ const CreatePasswordForm = ({ email, onSubmit, submitting, errors }: CreatePassw
 				/>
 			</div>
 
-			{/* `addCheckbox()` — this page spells the label "password", unlike the Profil Saya meter */}
 			{weak ? (
 				<div className="mb-[24px]">
 					<LegacyCheckbox

@@ -4,10 +4,6 @@ import LegacyButton from "@/components/legacy/legacy-button"
 import LegacyConfirmIcon from "@/components/legacy/legacy-confirm-icon"
 import { LegacyModalOverlay } from "@/components/legacy/legacy-modal"
 
-// `registrant/partials/edit/modals/{accepted,rejected,reserved,waiting}.blade.php` —
-// `#modal-{approve,reject,reserve,wait}.tbr_modal_confirm.tbr_modal_confirm-warning`, each posting one
-// hidden `approval_status` through `specificForm()`.
-
 export type ApprovalKind = "approve" | "reject" | "reserve" | "wait"
 
 const COPY: Record<ApprovalKind, { question: string; button: string }> = {
@@ -43,7 +39,6 @@ const RegistrantConfirmModal = ({ kind, fullname, registrantId, submitting, onCa
 						</span>{" "}
 						{copy.question}
 					</div>
-					{/* `div.tbr_confirm_actions.text-center` — a block, so the newline between the buttons renders */}
 					<div className="mb-[4px] text-center">
 						<LegacyButton variant="light" className="mr-[8px]" onClick={onCancel}>
 							Batal

@@ -19,49 +19,28 @@ import SocietyReadingField from "./society-reading-field"
 import SocietyRichText from "./society-richtext"
 import { societySettingLookup, type SocietySettingLookup } from "./society-settings"
 
-// OWNER: AK-P. One step / tab of the legacy society form, driven by the setting forms and
-// `SOCIETY_FIELDS`. Sources (admin.pondokroja.com):
-//   stacked    = resources/views/registrant/partials/edit/data/{personal,identity,family,guardian,attachment}.blade.php
-//   horizontal = resources/views/registrant/create/data/{personal,identity,family,guardian,attachment}.blade.php
-// (the student and alumni partials are the same markup over `$student_grade` / `$alumni`).
-// The wizard's "Kami belum membutuhkan data…" alert and the step-1 `hr` belong to the wizard shell.
-
 export type SocietyFormSectionProps = {
 	society: SocietyKind
 	step: SocietyStepKey
-	/**
-	 * "stacked" = the edit tabs (label above the input, `partials/edit/data/*.blade.php`);
-	 * "horizontal" = the create wizard (label col-lg-4 right, input col-lg-6, `create/data/*.blade.php`).
-	 */
 	layout: "stacked" | "horizontal"
-	/** Every `tbr_setting_forms` row, sorted by id (visibility, label, required flag). */
 	settings: SettingFormItem[]
 	values: SocietyValues
-	/**
-	 * One call per input change. A province pick calls it three times in a row (the province, then
-	 * "" for the regency and the district), so keep the state update functional.
-	 */
 	onChange: (name: string, value: string) => void
 	diseases: SocietyDisease[]
 	onDiseasesChange: (next: SocietyDisease[]) => void
-	/** Chosen `attach_*` files by column (the attachment step / tab). */
 	files: Partial<Record<string, File>>
 	onFileChange: (name: string, file: File | null) => void
-	/** Current attachment URLs on an edit page. */
 	attachmentUrls?: Record<string, string | null>
 	errors: SocietyFieldErrors
-	/** PSB edit of a portal-registered row (`registered_by_admin = 0`): every input disabled. */
 	disabled?: boolean
 }
 
-// `hr.tbr_divider_solid` (app.css 486-490) over porto's 22px `hr` margins
 const Divider = (): JSX.Element => <hr className="my-[22px] h-[2px] border-0 bg-[var(--bg-primary)]" />
 
 const range = (from: number, to: number): number[] => Array.from({ length: to - from + 1 }, (_, i) => from + i)
 
 type Part = number | { divider: (lookup: SocietySettingLookup) => boolean }
 
-// The fields of each step in blade order, with the blades' `lineVisible` dividers between them
 const STEP_PARTS: Record<SocietyStepKey, Part[]> = {
 	personal: range(1, 21),
 	identity: [
@@ -81,12 +60,11 @@ const STEP_PARTS: Record<SocietyStepKey, Part[]> = {
 		{ divider: (s) => s.lineVisible(44, 50) && s.status(52) },
 		52,
 	],
-	// Legacy writes `getInputStatus($setting_forms, 54, 60)`, which only looks at 54
+	// Only setting 54 decides this divider, deliberately not lineVisible(54, 60)
 	guardian: [...range(54, 60), { divider: (s) => s.status(54) && s.status(62) }, 62],
 	attachment: range(63, 69),
 }
 
-/** One step / tab of the legacy society form, driven by the setting forms and `SOCIETY_FIELDS`. */
 export default function SocietyFormSection({
 	step,
 	layout,
@@ -104,7 +82,6 @@ export default function SocietyFormSection({
 	const lookup = useMemo(() => societySettingLookup(settings), [settings])
 	const ctx: SocietyFieldContext = { layout, lookup, values, set: onChange, errors, disabled }
 
-	// An unset radio still shows its first option checked, and legacy posts that value — hand it up
 	useEffect(() => {
 		if (disabled || settings.length === 0) return
 		for (const field of SOCIETY_FIELDS) {

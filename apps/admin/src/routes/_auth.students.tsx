@@ -3,7 +3,6 @@ import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 import { requireRoles } from "@/lib/route-guards"
 
-// Akademik → Santri — legacy `asAdmin` middleware: Superadmin + Admin only.
 export const Route = createFileRoute("/_auth/students")({
 	beforeLoad: () => requireRoles("superadmin", "admin"),
 	component: Layout,

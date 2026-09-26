@@ -9,13 +9,8 @@ import type { SocietyWizardStepOneContext } from "@/components/society/wizard/so
 import { WizardFieldError } from "@/components/society/wizard/wizard-errors"
 import { lineVisible } from "@/components/society/wizard/wizard-settings"
 
-// The Santri-only rows at the top of step 1 — `student/create/data/personal.blade.php:31-274`: Tahun
-// Ajaran, Kelas, Subkelas, Jenjang (always disabled, filled from the Kelas by `autofill-level.js`), Sumber,
-// the divider (`lineVisible($setting_forms, 1, 21)`) and the optional NISP.
-
 type Option = { value: string; label: string }
 
-// `.help-block` under the label (form.css 1-29), as `LegacyFormRow` renders it
 const HelpBlock = ({ children }: { children: ReactNode }): JSX.Element => (
 	<span className="m-0 mb-[4px] block p-0 text-[11px] leading-[20px] font-normal text-[var(--grey)] opacity-80">{children}</span>
 )
@@ -25,7 +20,6 @@ type SelectRowProps = {
 	name: string
 	value: string
 	options: Option[]
-	/** The first option's text; "Select" options carry `title="Select"`, which select2.css paints grey */
 	placeholder: Option
 	onChange: (value: string) => void
 	disabled: boolean
@@ -71,7 +65,6 @@ export const StudentStepOneHeader = ({
 	const levels = (options?.levels ?? []).map((level) => ({ value: String(level.id), label: level.name ?? "" }))
 	const subGrades = (options?.subGrades ?? []).map((label) => ({ value: label, label }))
 
-	// `autofill-level.js`: POST /get-level-by-grade/{label} binds `Grade` by id — the ids equal the labels
 	const pickGrade = (value: string): void => {
 		onChange("grade", value)
 		const level = options?.grades.find((grade) => grade.id === Number(value))?.levelId
@@ -140,7 +133,6 @@ export const StudentStepOneHeader = ({
 				hint="required"
 			/>
 
-			{/* `hr.tbr_divider_solid` (app.css 486-490) over porto's 22px `hr` margins */}
 			{lineVisible(settings, 1, 21) ? <hr className="my-[22px] h-[2px] border-0 bg-[var(--bg-primary)]" /> : null}
 
 			<LegacyFormRow

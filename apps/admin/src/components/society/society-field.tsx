@@ -9,20 +9,13 @@ import { FieldError, INVALID_CLASS, PhoneInput, SocietyFrame, SocietyRadios, Soc
 import SocietyDateInput from "./society-date-input"
 import { valueOf, type SocietyFieldContext } from "./society-field-context"
 
-// One field of the society form for the plain widgets of `SOCIETY_FIELDS` (text, number pair,
-// phone, select, radio, date, textarea). The blades repeat the same block per field; the per-field
-// deviations they contain are listed here.
-
-/** Radio ids as the blades write them (`#male`, `#hearing_normal`, …). */
 const radioId = (column: string, value: string): string => (column === "hearing_condition" ? `hearing_${value}` : value)
 
-/** Radios pre-check the first option unless the stored value is the second one (`!= 'female' ? 'checked'`). */
 export const radioShown = (field: SocietyField, value: string): string => {
 	const [first, second] = field.options ?? []
 	return second !== undefined && value === second.value ? second.value : (first?.value ?? "")
 }
 
-/** The wizard's family step labels `katolik` "Khatolik" (`create/data/family.blade.php:73, :281`). */
 const optionsFor = (ctx: SocietyFieldContext, field: SocietyField): { value: string; label: string }[] =>
 	(field.options ?? []).map((option) =>
 		ctx.layout === "horizontal" && (field.id === 38 || field.id === 45) && option.value === "katolik"
@@ -30,7 +23,6 @@ const optionsFor = (ctx: SocietyFieldContext, field: SocietyField): { value: str
 			: { value: option.value, label: option.label },
 	)
 
-// `div.col-xl-5.col-lg-5.col-md-6.col-6.mb-2` ("Anak ke") and `div.col-md-6.mb-2` (Berat / Tinggi)
 const PAIR_COL: Record<number, string> = {
 	9: "mb-[8px] w-1/2 px-[15px] min-[768px]:w-1/2 min-[992px]:w-5/12",
 	23: "mb-[8px] w-full px-[15px] min-[768px]:w-1/2",
@@ -105,7 +97,6 @@ const SocietyFieldView = ({ ctx, field }: SocietyFieldProps): JSX.Element | null
 			)
 			return (
 				<SocietyFrame layout={layout} htmlFor={column} label={label} info={info}>
-					{/* Golongan Darah sits in `div.row > div.col-md-6` */}
 					{field.id === 24 ? (
 						<div className="mx-[-15px] flex flex-wrap">
 							<div className="w-full px-[15px] min-[768px]:w-1/2">{select}</div>
@@ -141,7 +132,6 @@ const SocietyFieldView = ({ ctx, field }: SocietyFieldProps): JSX.Element | null
 
 		case "textarea":
 			return (
-				// The wizard gives "hafalan" a `.col-lg-7`
 				<SocietyFrame layout={layout} htmlFor={column} label={label} info={info} fieldCols={7}>
 					<LegacyTextarea
 						name={column}

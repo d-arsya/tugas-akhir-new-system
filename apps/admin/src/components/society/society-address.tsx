@@ -3,13 +3,10 @@ import type { JSX, ReactNode } from "react"
 import type { SocietyAddressGroup } from "@roja/utils"
 
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
-import { useDistricts, useProvinces, useRegencies } from "@/hooks/use-school-setting"
+import { useDistricts, useProvinces, useRegencies } from "@/hooks/use-locations"
 
 import { FieldError, SocietySelect, SocietyText, StackedLabel } from "./society-controls"
 import { valueOf, type SocietyFieldContext } from "./society-field-context"
-
-// The four address-like groups of the society form (settings 13, 21, 52, 62):
-// province → regency → district selects (`province.js` / `regency.js`) plus the free-text rows.
 
 const idOf = (value: string): number | null => {
 	const id = Number(value)
@@ -20,7 +17,6 @@ type Option = { value: string; label: string }
 const toOptions = (rows: readonly { id: number; name: string }[] | undefined): Option[] =>
 	(rows ?? []).map((row) => ({ value: String(row.id), label: row.name }))
 
-/** `div.form-group.mb-2` around one input (`mb-0` / plain `form-group` on the last one). */
 const Group = ({ className = "mb-[8px]", children }: { className?: string; children: ReactNode }): JSX.Element => (
 	<div className={className}>{children}</div>
 )
@@ -28,15 +24,9 @@ const Group = ({ className = "mb-[8px]", children }: { className?: string; child
 type AddressProps = {
 	ctx: SocietyFieldContext
 	group: SocietyAddressGroup
-	/** Personal (13) ends in a plain `.form-group`; family/guardian end in `.form-group.mb-0`. */
 	lastClassName: string
 }
 
-/**
- * `initProvince(province, regency, district)` + `initRegency(regency, district)`: a new province
- * reloads the regencies and empties both lower selects (their first option, value "", stays
- * selected); a new regency does the same for the districts.
- */
 const SocietyAddress = ({ ctx, group, lastClassName }: AddressProps): JSX.Element => {
 	const provinceValue = valueOf(ctx, group.province)
 	const regencyValue = valueOf(ctx, group.regency)
@@ -97,7 +87,6 @@ const SocietyAddress = ({ ctx, group, lastClassName }: AddressProps): JSX.Elemen
 			) : (
 				<>
 					{text(group.village, "Kelurahan")}
-					{/* `div.row > div.col-md-6 | div.col-md-3 | div.col-md-3` */}
 					<div className="mx-[-15px] flex flex-wrap">
 						<div className="w-full px-[15px] min-[768px]:w-1/2">{text(group.street, "Jalan")}</div>
 						<div className="w-full px-[15px] min-[768px]:w-1/4">{text(group.rt, "RT")}</div>

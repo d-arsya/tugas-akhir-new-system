@@ -12,8 +12,6 @@ import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useCreateLevel } from "@/hooks/use-levels"
 
-// `level/index.blade.php` left card + `default-ajax2.js` (`specificForm`), which reloads the
-// page 1000 ms after the success notice — here: the list refetches and the form clears.
 const OPTIONS = [
 	{ value: "show", label: "Ditampilkan", id: "show" },
 	{ value: "hide", label: "Tidak ditampilkan", id: "hide" },
@@ -26,7 +24,6 @@ const LevelForm = (): JSX.Element => {
 
 	const submit = useLegacySubmit({
 		mutationFn: (payload: LevelPayload) => create.mutateAsync(payload),
-		// `default-ajax2.js` titles the failure notice "<strong>Gagal!</strong>"
 		errorTitle: "Gagal!",
 		onDone: () => {
 			setName("")
@@ -42,11 +39,9 @@ const LevelForm = (): JSX.Element => {
 			<form
 				onSubmit={(event) => {
 					event.preventDefault()
-					// Legacy posts the form as it stands; the validator answers the blank fields
 					submit.submit({ name, status: status as LevelPayload["status"] })
 				}}
 			>
-				{/* `.form-group.mb-3` — no label, the placeholder is the only cue */}
 				<div className="mb-[16px]">
 					<LegacyInput
 						id="name"
@@ -68,11 +63,9 @@ const LevelForm = (): JSX.Element => {
 							</LegacyTooltip>
 						</span>
 					</label>
-					{/* Stacked here; the edit modal renders the same two radios inline */}
 					<LegacyRadioGroup name="status" value={status} options={OPTIONS} onChange={setStatus} />
 				</div>
 
-				{/* `.text-right.pt-3` */}
 				<div className="pt-[16px] text-right">
 					<Link to="/levels" className={legacyButtonClass("light", "mr-[8px]")}>
 						Kembali

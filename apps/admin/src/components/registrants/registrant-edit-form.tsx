@@ -16,13 +16,8 @@ import { DataValidationModal, TestModal } from "./registrant-status-modals"
 import RegistrantWidgetInfo from "./registrant-widget-info"
 import RegistrantWidgetStatus from "./registrant-widget-status"
 
-// `registrant/edit.blade.php`: `form#main-form` over three columns — widget-info (col-lg-3), the six
-// tabs (col-lg-6) and widget-status (col-lg-3) — plus the seven status modals. `update.js` posts the whole
-// form (disabled inputs are not posted); a portal-registered row is read-only except its status radios.
-
 const STEPS: readonly SocietyStepKey[] = ["personal", "identity", "family", "guardian", "attachment"]
 
-/** What the blade form posts: every rendered input — a hidden setting (status off) is not rendered. */
 const postedValues = (values: SocietyValues, settings: readonly SettingFormItem[]): SocietyValues => {
 	const lookup = societySettingLookup(settings)
 	const out: SocietyValues = {}
@@ -76,7 +71,6 @@ const RegistrantEditForm = ({ detail, settings }: RegistrantEditFormProps): JSX.
 		const lookup = societySettingLookup(settings)
 		const payload: SocietyValues = {
 			...postedValues(values, settings),
-			// widget-status: the level select and the two hidden inputs
 			level_id: levelId,
 			registration_path: detail.registrationPath ?? "",
 			academic_year_id: detail.academicYearId === null ? "" : String(detail.academicYearId),

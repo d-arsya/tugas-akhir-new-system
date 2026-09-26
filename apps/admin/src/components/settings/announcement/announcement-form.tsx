@@ -1,14 +1,13 @@
 import { useEffect, useState, type FormEvent, type JSX } from "react"
 
-import type { SettingAnnouncement, SettingAnnouncementPayload } from "@roja/types"
+import type { SettingAnnouncement } from "@roja/types"
 
 import LegacyButton, { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { LegacyCardText, LegacyCardTitle, LegacyDivider } from "@/components/legacy/legacy-card"
 import LegacyDateRange from "@/components/legacy/legacy-date-range"
 import LegacyFormRow from "@/components/legacy/legacy-form-row"
 import LegacyRichEditor from "@/components/legacy/legacy-rich-editor/legacy-rich-editor"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { adminApi } from "@/lib/api"
+import { useUpdateAnnouncement } from "@/hooks/use-announcement-setting"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 type AnnouncementFormProps = {
@@ -16,7 +15,7 @@ type AnnouncementFormProps = {
 	onSaved: () => void
 }
 
-type AnnouncementForm = {
+type AnnouncementValues = {
 	successDesc: string
 	failedDesc: string
 	failedIndentTestDesc: string
@@ -26,7 +25,7 @@ type AnnouncementForm = {
 	additionalInformation: string
 }
 
-const EMPTY_FORM: AnnouncementForm = {
+const EMPTY_FORM: AnnouncementValues = {
 	successDesc: "",
 	failedDesc: "",
 	failedIndentTestDesc: "",
@@ -36,13 +35,11 @@ const EMPTY_FORM: AnnouncementForm = {
 	additionalInformation: "",
 }
 
-// Summernote's `isEmpty`, which `setting/annc-ajax.js` runs before serialising the form
-const EMPTY_HTML = /^\s*(?:<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>\s*)*$/i
-const clean = (html: string): string => (EMPTY_HTML.test(html) ? "" : html)
+const BLANK_EDITOR_HTML = /^\s*(?:<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>\s*)*$/i
+const clean = (html: string): string => (BLANK_EDITOR_HTML.test(html) ? "" : html)
 
-// Port of `setting/annc.blade.php` + `default-summernote.js` and `setting/annc-ajax.js`
 const AnnouncementForm = ({ announcement, onSaved }: AnnouncementFormProps): JSX.Element => {
-	const [values, setValues] = useState<AnnouncementForm>(EMPTY_FORM)
+	const [values, setValues] = useState<AnnouncementValues>(EMPTY_FORM)
 
 	useEffect(() => {
 		setValues(
@@ -60,17 +57,13 @@ const AnnouncementForm = ({ announcement, onSaved }: AnnouncementFormProps): JSX
 		)
 	}, [announcement])
 
-	const set = <K extends keyof AnnouncementForm>(key: K, value: AnnouncementForm[K]): void =>
+	const set = <K extends keyof AnnouncementValues>(key: K, value: AnnouncementValues[K]): void =>
 		setValues((current) => ({ ...current, [key]: value }))
 
-	const { submit, submitting } = useLegacySubmit<SettingAnnouncementPayload, { message: string }>({
-		mutationFn: (payload) => adminApi.updateAnnouncement(payload),
-		onDone: onSaved,
-	})
+	const { submit, submitting } = useUpdateAnnouncement(onSaved)
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()
-		// `annc-ajax.js` empties every editor that only holds `<p><br></p>` so the required rule fires
 		submit({
 			successDesc: clean(values.successDesc),
 			failedDesc: clean(values.failedDesc),
@@ -122,7 +115,6 @@ const AnnouncementForm = ({ announcement, onSaved }: AnnouncementFormProps): JSX
 			<LegacyCardTitle>Informasi daftar ulang</LegacyCardTitle>
 			<LegacyCardText>Berikan informasi untuk keperluan daftar ulang bagi pendaftar yang DITERIMA.</LegacyCardText>
 
-			{/* The only row where the field column is narrower than the label implies: `col-lg-6` */}
 			<LegacyFormRow label="Tanggal daftar ulang" htmlFor="date_start" hint="required" labelCols={3} fieldCols={6}>
 				<LegacyDateRange
 					from={values.dateStart}
@@ -144,7 +136,6 @@ const AnnouncementForm = ({ announcement, onSaved }: AnnouncementFormProps): JSX
 			</LegacyFormRow>
 
 			<div className="pt-[16px] text-right">
-				{/* `a[href=""]`: legacy reloads the page, dropping whatever was typed */}
 				<a href="" className={legacyButtonClass("light", `mr-[8px] ${RIPPLE_CLASS}`)} onClick={triggerRipple}>
 					Kembali
 				</a>{" "}

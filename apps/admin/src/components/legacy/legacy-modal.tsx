@@ -3,16 +3,10 @@ import { createPortal } from "react-dom"
 
 import { cn } from "@roja/utils"
 
-// magnific-popup `removalDelay: 300` — the node stays mounted while `.mfp-removing` plays
 const REMOVAL_DELAY_MS = 300
 
 type OverlayProps = { open: boolean; maxWidth: string; children: ReactNode }
 
-/**
- * The `.modal-with-zoom-anim` shell: `.mfp-bg` + `.zoom-anim-dialog.modal-block.tbr_modal_zoom_anim`
- * (porto/css/theme.css 12636-12663, 13617-13648; app.css 1870-1885, 2378-2381).
- * magnific's `modal: true` disables the backdrop click, the close button and the escape key.
- */
 export const LegacyModalOverlay = ({ open, maxWidth, children }: OverlayProps): JSX.Element | null => {
 	const [mounted, setMounted] = useState(open)
 	const [ready, setReady] = useState(false)
@@ -57,7 +51,6 @@ export const LegacyModalOverlay = ({ open, maxWidth, children }: OverlayProps): 
 
 type LegacyModalProps = {
 	open: boolean
-	// Legacy modals are dismissed by their own "Batal"/close control, never by the backdrop — wire it in `footer`
 	onClose: () => void
 	size?: "default" | "sm"
 	title?: ReactNode
@@ -66,7 +59,6 @@ type LegacyModalProps = {
 	children: ReactNode
 }
 
-// `.tbr_custom_modal` card (app.css 1878-1931): 20px radius, 68px header/footer on `--bg-tertiary`, 30px padding
 const LegacyModal = ({ open, size = "default", title, icon, footer, children }: LegacyModalProps): JSX.Element | null => (
 	<LegacyModalOverlay open={open} maxWidth={size === "sm" ? "400px" : "600px"}>
 		<section className="flex max-h-[calc(100vh-70px)] flex-col overflow-hidden rounded-[20px]">
@@ -88,16 +80,7 @@ const LegacyModal = ({ open, size = "default", title, icon, footer, children }: 
 				{children}
 			</div>
 			{footer !== undefined ? (
-				// `-mt-[5px]` is porto's `.card-footer { margin-top: -5px }` (theme.css 7571-7575),
-				// which `.tbr_custom_modal .card-footer` re-skins but never resets. Without it every
-				// modal in the app stands 5px taller than legacy.
 				<footer className="-mt-[5px] flex min-h-[68px] shrink-0 items-center justify-end rounded-b-[20px] border-0 bg-[var(--bg-tertiary)] px-[30px]">
-					{/*
-					 * Legacy nests the buttons in `div.text-right` inside the flex footer. That block
-					 * wrapper is load-bearing: inline whitespace between two inline-flex buttons only
-					 * renders in normal flow — a flex container discards whitespace-only text nodes,
-					 * which silently drops the ~3.73px the blade puts between them.
-					 */}
 					<div className="text-right">{footer}</div>
 				</footer>
 			) : null}

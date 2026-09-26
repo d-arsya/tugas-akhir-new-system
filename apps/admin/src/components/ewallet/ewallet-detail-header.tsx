@@ -13,12 +13,6 @@ import { InactiveNoticeIcon, SettingIcon, TopUpIcon, WithdrawIcon } from "./ewal
 import { EwalletTile } from "./ewallet-widgets"
 import { useEwalletModals } from "./modals/ewallet-money-modals"
 
-// The band above the table in `_partials/student-detail.blade.php` / `merchant-detail.blade.php`:
-// `.row.justify-content-between.align-items-center.mb-4` with the balance tile in `.col-xl-5` and
-// the action buttons in `.col-xl-6`. The `@if` ladder that picks which buttons are live is decided
-// by the API (`canTopUp`, `canWithdraw`, `showInactiveNotice`).
-
-/** `a.btn.tbr_btn.tbr_btn-info.mr-3` — live opens its modal, `disabled` is Bootstrap's greyed, click-proof anchor. */
 const ActionButton = ({
 	enabled,
 	onOpen,
@@ -56,7 +50,6 @@ const EwalletDetailHeader = ({ detail }: { detail: EwalletDetail }): JSX.Element
 	return (
 		<div className="mx-[-15px] mb-[24px] flex flex-wrap items-center justify-between">
 			<div className="w-full px-[15px] min-[1200px]:w-5/12">
-				{/* `mb-3 mb-xl-0 p-3` */}
 				<EwalletTile
 					variant="info"
 					value={rupiahDots(detail.balance)}

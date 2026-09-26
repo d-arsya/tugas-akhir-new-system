@@ -4,17 +4,6 @@ import LegacyButton from "@/components/legacy/legacy-button"
 
 import CapabilityConfirmModal, { ConfirmBullets } from "./capability-confirm-modal"
 
-/**
- * `student-capability/partials/modal-help-create-capability.blade.php` —
- * `#modalHelpCreateCapability`, the "?" button on the level-3 santri list.
- *
- * The only one of the six confirm modals whose `.card-body` is `px-4` rather than `px-2`,
- * and the only one with a nested list (`<ul class="ml-n3">`, a **negative** -16px indent that
- * pulls the sub-bullets back under the parent's text).
- *
- * Its third bullet is where the red-row rule is documented, so it is the copy the level-3
- * highlight must agree with.
- */
 const CapabilityHelpCreateModal = ({ open, onClose }: { open: boolean; onClose: () => void }): JSX.Element => (
 	<CapabilityConfirmModal
 		open={open}

@@ -1,15 +1,15 @@
-import { useEffect, useRef, useState, type JSX, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type JSX } from "react"
 
 import LegacyDatepicker from "@/components/legacy/legacy-datepicker"
 import { CalendarIcon } from "@/components/legacy/legacy-icons"
 import { legacyControlClass } from "@/components/legacy/legacy-input"
+import { digitsOnly } from "@/lib/digits-only"
 import { dayOf } from "@/lib/legacy-date"
 
 type AcademicYearKbmInputProps = { value: string; onChange: (value: string) => void }
 
 const pad = (value: number): string => String(value).padStart(2, "0")
 
-/** `data-plugin-options='{"format":"dd-mm-yyyy"}'` — a different separator from the cost dates. */
 const formatDmyDash = (date: Date | null): string =>
 	date ? `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()}` : ""
 
@@ -18,11 +18,6 @@ const parseDmyDash = (value: string): Date | null => {
 	return match ? dayOf(Number(match[3]), Number(match[2]) - 1, Number(match[1])) : null
 }
 
-/**
- * "Tanggal mulai aktif KBM" — `.input-group.tbr_fix_ig` with a 42px calendar prepend and a
- * bootstrap-datepicker bound with `autoclose: true`. `onkeypress="return isNumberKey(event)"`
- * lets only digits be typed, which means the separators can only come from the picker.
- */
 const AcademicYearKbmInput = ({ value, onChange }: AcademicYearKbmInputProps): JSX.Element => {
 	const [open, setOpen] = useState(false)
 	const wrapper = useRef<HTMLDivElement>(null)
@@ -36,17 +31,11 @@ const AcademicYearKbmInput = ({ value, onChange }: AcademicYearKbmInputProps): J
 		return () => document.removeEventListener("mousedown", onMouseDown)
 	}, [open])
 
-	// `isNumberKey(event)` (assets/js/input-number-strict.js)
-	const onKeyPress = (event: KeyboardEvent<HTMLInputElement>): void => {
-		if (event.key.length === 1 && !/[0-9]/.test(event.key)) event.preventDefault()
-	}
-
 	const picked = parseDmyDash(value)
 
 	return (
 		<div ref={wrapper} className="relative">
 			<div className="relative flex w-full flex-nowrap items-stretch">
-				{/* `.input-group-prepend.p-0` sized by `.tbr_fix_ig` */}
 				<span className="mr-[-2px] flex h-[40px] w-[42px] shrink-0 items-center justify-center rounded-l-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] p-0">
 					<CalendarIcon />
 				</span>
@@ -57,7 +46,7 @@ const AcademicYearKbmInput = ({ value, onChange }: AcademicYearKbmInputProps): J
 					spellCheck={false}
 					autoComplete="off"
 					value={value}
-					onKeyPress={onKeyPress}
+					onKeyPress={digitsOnly}
 					onFocus={() => setOpen(true)}
 					onClick={() => setOpen(true)}
 					onChange={(event) => onChange(event.target.value)}
@@ -75,7 +64,6 @@ const AcademicYearKbmInput = ({ value, onChange }: AcademicYearKbmInputProps): J
 						initialView={picked ?? new Date()}
 						onPick={(date) => {
 							onChange(formatDmyDash(date))
-							// `autoclose: "true"`
 							setOpen(false)
 						}}
 					/>

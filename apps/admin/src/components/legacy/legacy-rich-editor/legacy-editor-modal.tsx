@@ -5,10 +5,6 @@ import EditorIcon from "./legacy-editor-icons"
 
 type EditorModalProps = { open: boolean; title: string; onClose: () => void; footer?: ReactNode; children: ReactNode }
 
-/**
- * `div.modal.note-modal > .modal-dialog > .modal-content` restyled by public/assets/css/summernote.css 96-160:
- * 20px radius, 68px header/footer on `--bg-tertiary`, 30px body padding and a `row-reverse` header.
- */
 const EditorModal = ({ open, title, onClose, footer, children }: EditorModalProps): JSX.Element | null => {
 	if (!open) return null
 

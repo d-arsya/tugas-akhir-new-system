@@ -6,14 +6,9 @@ import { cn } from "@roja/utils"
 
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { BackArrowIcon } from "@/components/legacy/legacy-icons"
-import { legacyNotify } from "@/components/legacy/legacy-notify"
 import LegacyTooltip from "@/components/legacy/legacy-tooltip"
-import { adminApi } from "@/lib/api"
-import { saveBlob } from "@/lib/download"
+import { useDownloadRegistrants } from "@/hooks/use-registrants-write"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
-
-// `registrant/partials/group-actions.blade.php` — `.tbr_gorup_actions` (app.css 2398-2411, 2950, 3004):
-// Kembali, the Export dropdown and Tambah. The Import button is gone (user decision: no imports).
 
 const EXPORTS: ReadonlyArray<{ status: AdminRegistrantExportStatus; label: string }> = [
 	{ status: "", label: "Semua" },
@@ -22,7 +17,6 @@ const EXPORTS: ReadonlyArray<{ status: AdminRegistrantExportStatus; label: strin
 	{ status: "reject", label: "Tidak Diterima" },
 ]
 
-// `.tbr_btn-success` (app.css 799-816)
 const SUCCESS_BUTTON =
 	"bg-[var(--success)] text-white shadow-[0px_8px_10px_0px_rgba(40,175,82,0.25)] hover:shadow-none focus:shadow-none"
 
@@ -67,6 +61,7 @@ const PlusIcon = (): JSX.Element => (
 const RegistrantGroupActions = ({ academicYearId }: { academicYearId: number }): JSX.Element => {
 	const [open, setOpen] = useState(false)
 	const wrapper = useRef<HTMLDivElement>(null)
+	const exportRegistrants = useDownloadRegistrants(academicYearId)
 
 	useEffect(() => {
 		if (!open) return undefined
@@ -77,15 +72,9 @@ const RegistrantGroupActions = ({ academicYearId }: { academicYearId: number }):
 		return () => document.removeEventListener("mousedown", close)
 	}, [open])
 
-	// Legacy links straight to `registrant.download`; the API needs the bearer token, so the file is fetched and saved
-	const download = async (status: AdminRegistrantExportStatus): Promise<void> => {
+	const download = (status: AdminRegistrantExportStatus): void => {
 		setOpen(false)
-		try {
-			const { blob, fileName } = await adminApi.downloadRegistrants(academicYearId, status)
-			saveBlob(blob, fileName ?? "Data PSB.xlsx")
-		} catch {
-			legacyNotify.error("Terjadi kesalahan pada sistem. Silakan reload ulang halaman ini.")
-		}
+		exportRegistrants.mutate(status)
 	}
 
 	return (
@@ -100,7 +89,6 @@ const RegistrantGroupActions = ({ academicYearId }: { academicYearId: number }):
 				</Link>
 			</LegacyTooltip>
 
-			{/* `div.dropdown.tbr_dropdown-success.tbr_dropdown-bullet` */}
 			<div ref={wrapper} className="relative">
 				<LegacyTooltip content="Export" placement="top">
 					<button
@@ -114,14 +102,12 @@ const RegistrantGroupActions = ({ academicYearId }: { academicYearId: number }):
 						<span className="mr-[24px] pr-[8px]">
 							<ExportIcon />
 						</span>
-						{/* `.tbr_btn_dropdown_arrow` (app.css 1153-1164) */}
 						<span className="absolute top-0 right-0 flex h-full w-[30px] items-center justify-center rounded-r-[6px] bg-[rgba(29,33,39,0.1)]">
 							<DropdownArrow />
 						</span>
 					</button>
 				</LegacyTooltip>
 				{open ? (
-					// `.dropdown-menu.dropdown-menu-right` (app.css 1035-1044)
 					<div className="absolute top-full right-0 z-[1000] my-[10px] min-w-[160px] rounded-[6px] bg-[var(--bg-inverse)] p-[10px] shadow-[0px_18px_32px_0px_rgba(0,0,0,0.12)]">
 						{EXPORTS.map((item) => (
 							<a
@@ -129,7 +115,7 @@ const RegistrantGroupActions = ({ academicYearId }: { academicYearId: number }):
 								href="#"
 								onClick={(event) => {
 									event.preventDefault()
-									void download(item.status)
+									download(item.status)
 								}}
 								className="relative block w-full rounded-[6px] py-[11px] pr-[24px] pl-[40px] text-[12px] font-normal whitespace-nowrap text-[var(--body-txt-inverse)] before:absolute before:top-[calc(50%-4px)] before:left-[15px] before:h-[8px] before:w-[8px] before:rounded-full before:bg-[var(--bg-primary)] before:content-[''] hover:bg-[var(--success)] hover:text-white hover:shadow-[0px_8px_10px_0px_rgba(40,175,82,0.25)]"
 							>

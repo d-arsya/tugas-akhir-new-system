@@ -2,9 +2,6 @@ import type { JSX } from "react"
 
 import { cn } from "@roja/utils"
 
-// `.tbr_mega_radio` (form.css 383-471): big bordered radio cards — the validation modal puts two side by
-// side (`.tbr_mega_radio_inline`, 47% each from 480px), the test modals stack them.
-
 export type MegaRadioOption = { id: string; value: string; title: string; description: string; className?: string }
 
 type RegistrantMegaRadioProps = {
@@ -20,7 +17,6 @@ const RegistrantMegaRadio = ({ name, value, options, onChange, inline = false }:
 		{options.map((option) => {
 			const checked = option.value === value
 			return (
-				// `div.custom-control.custom-radio.d-flex` — `margin: 18px 20px 32px 0` (last: no right margin)
 				<div
 					key={option.id}
 					className={cn(
@@ -33,7 +29,6 @@ const RegistrantMegaRadio = ({ name, value, options, onChange, inline = false }:
 						<input type="radio" id={option.id} name={name} value={option.value} checked={checked} onChange={() => onChange(option.value)} />
 					</span>
 					<label htmlFor={option.id} className="relative mb-0 inline-block w-full cursor-pointer px-[15px] align-top">
-						{/* `::before` disc and `::after` dot, 24px at `left: -26px` */}
 						<span
 							aria-hidden="true"
 							className={cn(
@@ -46,7 +41,6 @@ const RegistrantMegaRadio = ({ name, value, options, onChange, inline = false }:
 						) : null}
 						<p className="mt-0 mb-[4px] leading-[24px] font-semibold">{option.title}</p>
 						<p className="m-0 leading-[24px] text-[var(--grey)] italic">{option.description}</p>
-						{/* `span.tbr_mr_border::after` — the card outline, `--secondary` when checked */}
 						<span
 							aria-hidden="true"
 							className={cn(

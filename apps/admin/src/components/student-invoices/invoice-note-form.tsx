@@ -1,30 +1,16 @@
 import { useState, type FormEvent, type JSX } from "react"
 import { Link } from "@tanstack/react-router"
-import { useQueryClient } from "@tanstack/react-query"
 
 import LegacyButton, { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyCard from "@/components/legacy/legacy-card"
 import LegacyTextarea from "@/components/legacy/legacy-textarea"
-import { studentInvoiceKeys } from "@/hooks/use-student-invoices"
-import { useLegacySubmit } from "@/hooks/use-legacy-submit"
-import { adminApi } from "@/lib/api"
-
-// `student-invoice/detail-bill.blade.php` 167-192 — `StudentInvoiceController@update`, the only
-// write on the read half. Legacy answers "Data berhasil diupdate." and `default-ajax.js` then
-// reloads the page; the port refetches the invoice instead.
+import { useUpdateInvoiceNote } from "@/hooks/use-student-invoices"
 
 type InvoiceNoteFormProps = { invoiceId: number; studentGradeId: number; note: string | null }
 
 const InvoiceNoteForm = ({ invoiceId, studentGradeId, note }: InvoiceNoteFormProps): JSX.Element => {
 	const [value, setValue] = useState(note ?? "")
-	const queryClient = useQueryClient()
-
-	const { submit, submitting } = useLegacySubmit({
-		mutationFn: (body: { note: string | null }) => adminApi.updateInvoiceNote(invoiceId, body),
-		onDone: () => {
-			void queryClient.invalidateQueries({ queryKey: studentInvoiceKeys.bill(invoiceId) })
-		},
-	})
+	const { submit, submitting } = useUpdateInvoiceNote(invoiceId)
 
 	const onSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		event.preventDefault()

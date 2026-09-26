@@ -6,21 +6,16 @@ import LegacyInput from "@/components/legacy/legacy-input"
 import LegacySelect from "@/components/legacy/legacy-select"
 import AcademicEditModal from "@/components/academic/academic-edit-modal"
 import AcademicField from "@/components/academic/academic-field"
-import { blockNonDigits, levelSelectOptions, numberOrBlank } from "@/components/academic/academic-inputs"
+import { levelSelectOptions, numberOrBlank } from "@/components/academic/academic-inputs"
 import { useGrade, useUpdateGrade } from "@/hooks/use-grades"
 import { useLegacySubmit } from "@/hooks/use-legacy-submit"
 import { useLevelOptions } from "@/hooks/use-level-options"
+import { digitsOnly } from "@/lib/digits-only"
 
 type GradeEditModalProps = { gradeId: number | null; onClose: () => void }
 
 type GradeFormState = { id: number; levelId: string; label: string }
 
-/**
- * `grade/edit-grade.blade.php`, fetched over AJAX by `editData(event, '#edit-modal-grade', …)`.
- *
- * The blade also posts a hidden `id`, which is what makes `unique:grades,label,{id}` ignore the
- * row being edited; the port takes it from the URL instead.
- */
 const GradeEditModal = ({ gradeId, onClose }: GradeEditModalProps): JSX.Element => {
 	const detail = useGrade(gradeId)
 	const { data: levels } = useLevelOptions("id-desc")
@@ -32,7 +27,6 @@ const GradeEditModal = ({ gradeId, onClose }: GradeEditModalProps): JSX.Element 
 		onDone: onClose,
 	})
 
-	// Every open starts from the placeholder card, exactly as `editData()` does
 	useEffect(() => {
 		if (gradeId !== null) setForm(null)
 	}, [gradeId])
@@ -63,7 +57,6 @@ const GradeEditModal = ({ gradeId, onClose }: GradeEditModalProps): JSX.Element 
 			}}
 		>
 			<AcademicField label="Jenjang" htmlFor="edit-level-id" hint="required">
-				{/* The edit modal's placeholder reads "Select", not the card's "Pilih Jenjang" */}
 				<LegacySelect
 					value={form?.levelId ?? ""}
 					options={levelSelectOptions(levels, "Select")}
@@ -72,7 +65,6 @@ const GradeEditModal = ({ gradeId, onClose }: GradeEditModalProps): JSX.Element 
 				/>
 			</AcademicField>
 
-			{/* `.form-group.mb-1` — the last field tightens its bottom margin */}
 			<AcademicField label="Label Kelas" htmlFor="edit-label" hint="required" className="mb-[4px]">
 				<LegacyInput
 					id="edit-label"
@@ -81,7 +73,7 @@ const GradeEditModal = ({ gradeId, onClose }: GradeEditModalProps): JSX.Element 
 					autoComplete="off"
 					spellCheck={false}
 					value={form?.label ?? ""}
-					onKeyDown={blockNonDigits}
+					onKeyDown={digitsOnly}
 					onChange={(event) => set("label", event.target.value)}
 				/>
 			</AcademicField>

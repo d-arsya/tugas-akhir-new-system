@@ -2,11 +2,6 @@ import type { SocietyDisease, SocietyMultipartDiseasesField, SocietyValues } fro
 
 const DISEASES_FIELD: SocietyMultipartDiseasesField = "diseases"
 
-/**
- * The multipart convention of `libs/types/src/admin-society.ts` (final wizard save and edit saves):
- * every value under its input name, `diseases` as one JSON text field, each chosen `attach_*` file
- * under its column. Shared by the Santri and PSB clients so both post the same shape.
- */
 export const toSocietyFormData = (
 	values: SocietyValues,
 	diseases: SocietyDisease[],

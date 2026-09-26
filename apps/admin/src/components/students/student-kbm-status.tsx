@@ -6,9 +6,6 @@ import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 
 import { StudentLabel, type StudentLabelVariant } from "./student-ui"
 
-// `StudentService::kbmStatus()` — the roster's "Keterangan" cell: a status dot (tooltip "Status KBM : …")
-// and the grade note as a label; "keluar" adds a read-more button opening the dropout note.
-
 const NOTE: Record<string, { text: string; variant: StudentLabelVariant }> = {
 	pendaftaran: { text: "Pendaftaran", variant: "primary" },
 	"naik kelas": { text: "Naik Kelas", variant: "success" },
@@ -20,12 +17,10 @@ const NOTE: Record<string, { text: string; variant: StudentLabelVariant }> = {
 	lulus: { text: "Lulus", variant: "secondary" },
 }
 
-/** The label text legacy renders for a grade note, or "" when it renders nothing. */
 export const kbmNoteText = (note: string | null): string => (note === null ? "" : (NOTE[note]?.text ?? ""))
 
 type Props = { gradeStatus: string | null; gradeNote: string | null; fullname: string | null; dropoutNote: string | null }
 
-// `.tbr_label_dot` (app.css 2514-2527): 12px, #eeeeee, success / danger
 const Dot = ({ active }: { active: boolean }): JSX.Element => (
 	<LegacyTooltip content={`Status KBM : ${active ? "Active" : "Deactive"}`} className="mr-[8px]">
 		<span className={cn("inline-block h-[12px] w-[12px] rounded-[12px]", active ? "bg-[var(--success)]" : "bg-[var(--danger)]")} />
@@ -42,7 +37,6 @@ const ReadMoreDots = (): JSX.Element => (
 	</svg>
 )
 
-/** `.dropdown > .tbr_label_group.tbr_label_group_do` with the bootstrap dropdown the "…" button opens. */
 const DropoutNote = ({ active, fullname, dropoutNote }: { active: boolean; fullname: string | null; dropoutNote: string | null }): JSX.Element => {
 	const [open, setOpen] = useState(false)
 	const ref = useRef<HTMLDivElement>(null)
@@ -89,7 +83,6 @@ const StudentKbmStatus = ({ gradeStatus, gradeNote, fullname, dropoutNote }: Pro
 	const note = gradeNote === null ? undefined : NOTE[gradeNote]
 	if (!note) return null
 	return (
-		// `.tbr_label_group.d-flex.align-items-center` (min-width 100%); its label is at least 122px wide
 		<div className="flex min-w-full items-center">
 			<Dot active={active} />
 			<StudentLabel variant={note.variant} className="min-w-[122px]!">

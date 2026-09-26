@@ -6,22 +6,16 @@ import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { InfoCircleIcon } from "@/components/legacy/legacy-icons"
 import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 
-// The page furniture the five Kesanggupan blades share: the card with a `.card-header`, the two
-// back-button skins, the orange "?" help button, and the parameterised breadcrumb links.
-
-/** `.tbr_btn-back` (app.css 893): a 40×40 square on `--bg-inverse`, no padding — the card-header back. */
 export const CARD_BACK_CLASS = legacyButtonClass(
 	"light",
 	"h-[40px] w-[40px] min-w-[40px] bg-[var(--bg-inverse)] p-0 hover:shadow-none",
 )
 
-/** `.btn.tbr_btn.mr-2.p-2.tbr_btn-light.d-inline-flex` — the back button inside a card body. */
 export const LIGHT_BACK_CLASS = legacyButtonClass("light", "p-[8px]")
 
-/**
- * `.btn.tbr_btn.mr-2.p-2.tbr_btn-light-warning.d-inline-flex` (app.css 672-676, 788-796): orange
- * at 16%, solid orange on hover, where `.tbr_btn:hover svg path` and `svg .tbr_white` turn white.
- */
+export const SEARCH_INPUT_CLASS =
+	"h-[40px] w-full rounded-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] py-[6px] text-[12px] leading-[22.2px] text-[var(--body-txt-inverse)] outline-none placeholder:text-[var(--grey)] focus:border-[var(--secondary)]!"
+
 export const HelpButton = ({ onClick }: { onClick: () => void }): JSX.Element => (
 	<button
 		type="button"
@@ -35,7 +29,6 @@ export const HelpButton = ({ onClick }: { onClick: () => void }): JSX.Element =>
 	</button>
 )
 
-/** A back link wrapped in legacy's `data-toggle="tooltip" data-placement="left" title="Kembali"`. */
 export const Kembali = ({ children }: { children: ReactNode }): JSX.Element => (
 	<LegacyTooltip content="Kembali" placement="left">
 		{children}
@@ -43,20 +36,13 @@ export const Kembali = ({ children }: { children: ReactNode }): JSX.Element => (
 )
 
 type CapabilityCardProps = {
-	/** `.tbr_card_intro .tbr_title` — Montserrat Bold 16px, with the pink `.pl-1` span after it. */
 	title: string
 	highlight: string | number | null
-	/** The line under the title; legacy uses a grey `<p>` on level 3 and a plain `<div>` on level 2. */
 	subtitle: ReactNode
 	back: ReactNode
 	children: ReactNode
 }
 
-/**
- * `partials/{grade-,}card-header.blade.php` over `.card.tbr_card`. `LegacyCard` renders a body
- * only, and `.tbr_card .card-header` + `.card-header + .card-body` (app.css 1413-1431) move the
- * shadow and the radii onto the body, so the card is built here, as Biaya Santri's is.
- */
 export const CapabilityCard = ({ title, highlight, subtitle, back, children }: CapabilityCardProps): JSX.Element => (
 	<div className="relative flex min-w-0 flex-col border-0 bg-transparent shadow-none">
 		<div className="rounded-t-[12px] border-b-0 bg-[var(--bg-tertiary)] px-[24px] py-[18px]">
@@ -83,13 +69,9 @@ export const CapabilityCard = ({ title, highlight, subtitle, back, children }: C
 	</div>
 )
 
-// ─── Breadcrumb links ─────────────────────────────────────────────────────────
-// TanStack types `params` per route, so each parameterised crumb is its own `<Link>`.
-
 type YearCrumbProps = {
 	academicYearId: number
 	year: string | null
-	/** Level 5 nests the year inside the three-dot crumb, where items render as full-width blocks. */
 	inDropdown?: boolean
 }
 

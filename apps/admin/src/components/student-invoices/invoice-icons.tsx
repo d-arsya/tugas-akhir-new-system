@@ -1,16 +1,5 @@
 import type { JSX } from "react"
 
-// SVGs transcribed verbatim from the legacy Tagihan Santri markup.
-
-/**
- * `StudentInvoiceController@studentListServerSide`'s `addColumn('action')` — the pink "list"
- * glyph (`#Group_6786`) that opens one santri's bills.
- *
- * Its wrapper is `a.tbr_academic_year_action` (app.css 3023-3043): a `#fae3f0` pill with 7px
- * padding and a 7px radius that turns `--primary` on hover and fills both shapes white. Legacy
- * targets `#Rectangle_2779` and `#Path_954` by id; `ACTION_PILL_CLASS` matches them structurally,
- * so the element order below — backing rect, bar rect, two-line path — is load-bearing.
- */
 export const ACTION_PILL_CLASS =
 	"group inline-block rounded-[7px] bg-[#fae3f0] p-[7px] align-middle transition-all duration-300 hover:bg-[#e4007e] hover:shadow-[0px_8px_10px_0px_rgba(var(--primary-rgb),0.25)] [&:hover_rect+rect]:fill-white [&:hover_path]:fill-white"
 
@@ -27,10 +16,6 @@ export const StudentBillsIcon = (): JSX.Element => (
 	</svg>
 )
 
-/**
- * The struck-through eye on the two filter buttons (`partials/bill.blade.php`), shown while the
- * toggle is `tbr_deactive`. The success button draws it in `#28af52`, the primary one in `#E4007E`.
- */
 export const EyeOffIcon = ({ fill }: { fill: string }): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<g opacity="0.8">
@@ -51,7 +36,6 @@ export const EyeOffIcon = ({ fill }: { fill: string }): JSX.Element => (
 	</svg>
 )
 
-/** The open eye, shown while a toggle is `tbr_active` — always white, on the solid button. */
 export const EyeOnIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<g>

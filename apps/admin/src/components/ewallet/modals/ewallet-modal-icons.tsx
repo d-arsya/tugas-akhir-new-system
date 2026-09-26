@@ -1,9 +1,5 @@
 import type { JSX } from "react"
 
-// The five Dompet modal / page icons, copied from legacy public/assets/svg/icons (eWallet-Top-Up, eWallet-With-Draw,
-// ic_done, ic_ewallet_blocked, ic_pin). Inline because libs/ui/public does not carry them; each blade renders one as
-// `<img class="mx-auto d-block mb-3">`, which is what the classes below reproduce.
-
 export const EwalletTopUpIcon = (): JSX.Element => (
 	<svg className="mx-auto mb-[16px] block" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="76" height="76" viewBox="0 0 76 76">
   <g transform="translate(10735 14261)">

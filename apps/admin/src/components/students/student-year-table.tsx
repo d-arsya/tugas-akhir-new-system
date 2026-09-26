@@ -8,9 +8,6 @@ import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-
 
 import { StudentLabel, YearDetailAction } from "./student-ui"
 
-// Legacy `student/index.blade.php` + `default-datatable.js` (`initDatatable(url, [6])`) over
-// `StudentController::academicYearList:62-94`. The counts are rendered "N Jenjang", "N Kelas", "N Santri".
-
 type NumberedYear = AdminStudentYearRow & { no: number }
 
 const cellText = (row: NumberedYear, key: string): string => {
@@ -44,7 +41,6 @@ const columns: LegacyColumn<NumberedYear>[] = [
 		key: "statusLabel",
 		header: "Status tahun ajaran",
 		sortable: true,
-		// `AcademicYearService::getStatusAkademik()`: "-" for Archive, a green / red label, or nothing
 		cell: (row) =>
 			row.statusLabel === null ? null : row.statusLabel === "-" ? (
 				"-"
@@ -72,7 +68,6 @@ const StudentYearTable = (): JSX.Element => {
 			onStateChange={setState}
 			processing={isFetching}
 			loaded={isSuccess}
-			// DataTables' default `order: [[0, "asc"]]`
 			initialSort={{ key: "no", dir: "asc" }}
 			minWidth="950px"
 		/>

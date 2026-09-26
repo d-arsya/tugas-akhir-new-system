@@ -7,12 +7,8 @@ import { cn } from "@roja/utils"
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
-// Frame of the legacy create wizard — `resources/views/{student,registrant}/create/data/partials/wizard.blade.php`
-// (identical for Santri and PSB) and the `.tbr_wizard_*` rules of `public/assets/css/wizard.css`.
-
 export const WIZARD_STEPS: readonly SocietyStepKey[] = ["personal", "identity", "family", "guardian", "attachment"]
 
-// `svg.tbr_arrow` (8×14, #abb4be at .3) — every step but the first
 const StepArrow = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" className="tbr-arrow absolute left-[-3px] block">
 		<path
@@ -34,14 +30,12 @@ const StepIconFrame = ({ children }: { children: ReactNode }): JSX.Element => (
 )
 
 const STEP_ICON: Record<SocietyStepKey, JSX.Element> = {
-	// g#person
 	personal: (
 		<StepIconFrame>
 			<path d="M12,11A4,4,0,1,0,8,7,4,4,0,0,0,12,11Zm0-6a2,2,0,1,1-2,2A2,2,0,0,1,12,5Z" fill="#abb4be" />
 			<path d="M12,13a7,7,0,0,0-7,7,1,1,0,0,0,2,0,5,5,0,0,1,10,0,1,1,0,0,0,2,0,7,7,0,0,0-7-7Z" fill="#abb4be" />
 		</StepIconFrame>
 	),
-	// g#clipboard
 	identity: (
 		<StepIconFrame>
 			<path
@@ -50,7 +44,6 @@ const STEP_ICON: Record<SocietyStepKey, JSX.Element> = {
 			/>
 		</StepIconFrame>
 	),
-	// g#people
 	family: (
 		<StepIconFrame>
 			<path d="M9,11A4,4,0,1,0,5,7,4,4,0,0,0,9,11ZM9,5A2,2,0,1,1,7,7,2,2,0,0,1,9,5Z" fill="#abb4be" />
@@ -61,7 +54,6 @@ const STEP_ICON: Record<SocietyStepKey, JSX.Element> = {
 			/>
 		</StepIconFrame>
 	),
-	// g#edit
 	guardian: (
 		<StepIconFrame>
 			<path
@@ -70,7 +62,6 @@ const STEP_ICON: Record<SocietyStepKey, JSX.Element> = {
 			/>
 		</StepIconFrame>
 	),
-	// g#attach
 	attachment: (
 		<StepIconFrame>
 			<path
@@ -89,11 +80,6 @@ const STEP_LABEL: Record<SocietyStepKey, string> = {
 	attachment: "Lampiran",
 }
 
-/**
- * `.tbr_wizard_header` + `ul.tbr_subwizard_label`. Each page adds `.tbr_active` to its own step
- * and every step before it (`$(".tbr_personal, .tbr_identity").addClass('tbr_active')`); the
- * steps are not links.
- */
 export const WizardStepper = ({ step }: { step: SocietyStepKey }): JSX.Element => {
 	const current = WIZARD_STEPS.indexOf(step)
 	return (
@@ -121,17 +107,14 @@ export const WizardStepper = ({ step }: { step: SocietyStepKey }): JSX.Element =
 	)
 }
 
-/** `.tbr_wizard_body` */
 export const WizardBody = ({ children }: { children: ReactNode }): JSX.Element => (
 	<div className="min-h-[80px] bg-[var(--bg-secondary)] p-[40px] shadow-[0px_8px_30px_0px_rgba(0,0,0,0.08)] max-[480px]:px-[20px] max-[480px]:py-[10px]">
 		{children}
 	</div>
 )
 
-/** `.tbr_btn-lg` over `.tbr_btn` (app.css 634-640) */
 const LG = "h-[47px] min-h-0 rounded-[7px] px-[20px]"
 
-// `svg` in `.tbr_btn.tbr_icon-right` / `.tbr_icon-left` (app.css 647-652)
 const NextArrow = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" className="ml-[8px] inline-block align-middle">
 		<path
@@ -143,16 +126,10 @@ const NextArrow = (): JSX.Element => (
 )
 
 type WizardFooterProps = {
-	/** Route of the previous step; the first step has none (`justify-content-end`). */
 	previous: string | null
 	submitting: boolean
 }
 
-/**
- * `.tbr_wizard_footer` with "Sebelumnya" (a plain link, `.tbr_btn-light` on `var(--bg-inverse)`)
- * and the submit button "Selanjutnya". `submit-data.js` disables the button, appends
- * `.spinner-grow.text-light` and hides `.tbr_btn_text` while the request runs.
- */
 export const WizardFooter = ({ previous, submitting }: WizardFooterProps): JSX.Element => (
 	<div
 		className={cn(
@@ -196,10 +173,6 @@ export const WizardFooter = ({ previous, submitting }: WizardFooterProps): JSX.E
 	</div>
 )
 
-/**
- * `.alert.tbr_alert-danger.m-0` (bootstrap `.alert` padding, app.css 1322 + 1342) — the create
- * blades' notice when every field of a step is switched off (`getGroupAllDisable`).
- */
 export const WizardGroupDisabledAlert = (): JSX.Element => (
 	<div role="alert" className="relative m-0 rounded-[8px] border-0 bg-[rgba(248,55,75,0.1)] px-[20px] py-[12px] text-[var(--danger)]">
 		Kami belum membutuhkan data dibagian atau bidang ini. Silakan abaikan dan klik tombol selanjutnya.

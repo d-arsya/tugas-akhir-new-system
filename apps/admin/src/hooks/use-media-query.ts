@@ -16,5 +16,4 @@ export const useMediaQuery = (query: string): boolean => {
 	return matches
 }
 
-// Legacy Porto layout switches between mobile and desktop at 768px
 export const useIsDesktop = (): boolean => useMediaQuery("(min-width: 768px)")

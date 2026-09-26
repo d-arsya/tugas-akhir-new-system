@@ -10,7 +10,6 @@ import type {
 
 import { adminApi } from "@/lib/api"
 
-// Legacy Biaya Santri pages (studentCost.academicYearList / gradeList / accountList / applied)
 export const studentCostKeys = {
 	all: ["admin-student-costs"] as const,
 	years: () => [...studentCostKeys.all, "years"] as const,
@@ -39,12 +38,6 @@ export const useStudentCostAccounts = (
 		enabled: Number.isFinite(academicYearId) && Number.isFinite(gradeId),
 	})
 
-/**
- * The bulk "Terapkan item yang di checklist" action.
- *
- * Legacy reloads the whole page a second after the toast; refetching the level-3 list is the
- * same thing, and the level-2 "N dari M item biaya" counts move with it, so both are invalidated.
- */
 export const useApplyStudentCostItems = (
 	academicYearId: number,
 	gradeId: number,

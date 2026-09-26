@@ -9,14 +9,6 @@ import { formatDmy, parseDmy } from "@/lib/legacy-date"
 
 type StudentCostDueDateInputProps = { value: string; onChange: (value: string) => void }
 
-/**
- * `input#once_bill.form-control.time-span[data-plugin-datepicker]` with the calendar SVG in an
- * `.input-group-append.p-0` — `general.js` binds it with `{ format: "dd/mm/yyyy", language: "id" }`.
- *
- * No `autoclose` here, unlike the Tahun Ajaran KBM field, so bootstrap-datepicker keeps the
- * dropdown open after a pick and closes it on the next outside click. The value can also be
- * typed: legacy puts no key filter on this input, and the server validates `date_format:d/m/Y`.
- */
 const StudentCostDueDateInput = ({ value, onChange }: StudentCostDueDateInputProps): JSX.Element => {
 	const [open, setOpen] = useState(false)
 	const wrapper = useRef<HTMLDivElement>(null)
@@ -34,7 +26,6 @@ const StudentCostDueDateInput = ({ value, onChange }: StudentCostDueDateInputPro
 
 	return (
 		<div ref={wrapper} className="relative">
-			{/* `.input-group.tbr_fix_ig` — the 42px append holds the calendar with no padding */}
 			<div className="relative flex w-full flex-nowrap items-stretch">
 				<input
 					type="text"
@@ -45,8 +36,6 @@ const StudentCostDueDateInput = ({ value, onChange }: StudentCostDueDateInputPro
 					onFocus={() => setOpen(true)}
 					onClick={() => setOpen(true)}
 					onChange={(event) => onChange(event.target.value)}
-					// `cn`, not a template string: twMerge has to drop the base `w-full` or the
-					// `.input-group` wraps the calendar append onto its own line
 					className={cn(legacyControlClass, "relative w-[1%] min-w-0 flex-auto rounded-r-none focus:z-[3]")}
 				/>
 				<span className="ml-[-2px] flex h-[40px] w-[42px] shrink-0 items-center justify-center rounded-r-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] p-0">

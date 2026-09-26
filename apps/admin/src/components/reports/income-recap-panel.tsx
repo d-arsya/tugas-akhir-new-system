@@ -4,17 +4,18 @@ import type { ReportOptions } from "@roja/types"
 
 import LegacyDataTable, { type LegacyColumn } from "@/components/legacy/legacy-data-table"
 import LegacyInvoiceWidget from "@/components/legacy/legacy-invoice-widget"
-import { emptyFilters } from "@/hooks/use-report-filters"
+import { todayFilters } from "@/hooks/use-report-filters"
 import { useReportPanel } from "@/hooks/use-report-panel"
-import { useIncomeRecap, useLegacyLoadError } from "@/hooks/use-reports"
-import { rupiahDots, rupiahLabel, todayDmy } from "@/lib/legacy-format"
+import { useLegacyLoadError } from "@/hooks/use-legacy-load-error"
+import { useIncomeRecap } from "@/hooks/use-reports"
+import { rupiahDots, rupiahLabel } from "@/lib/legacy-format"
 import { clientTable } from "@/lib/legacy-table"
 
 import ReportFilterBar from "./report-filter-bar"
 
 type RecapRow = { accName: string; totalAmount: number }
 
-// yajra searches / orders the formatted columns (`acc_name`, `total_amount` as "Rp …")
+// Search and sort run on the formatted "Rp …" text, not on the number
 const cellText = (row: RecapRow, key: string): string => (key === "accName" ? row.accName : rupiahLabel(row.totalAmount))
 
 const COLUMNS: LegacyColumn<RecapRow>[] = [
@@ -26,16 +27,11 @@ const COLUMNS: LegacyColumn<RecapRow>[] = [
 type IncomeRecapPanelProps = {
 	options: ReportOptions | undefined
 	resetSignal: number
-	// Legacy builds this table on the first `shown.bs.tab`
 	started: boolean
 }
 
-const todayFilters = (): ReturnType<typeof emptyFilters> => emptyFilters(todayDmy(), todayDmy())
-
-// "Rekapitulasi" tab of Laporan Pemasukkan: one row per student-cost account (ReportController::recapList)
 const IncomeRecapPanel = ({ options, resetSignal, started }: IncomeRecapPanelProps): JSX.Element => {
 	const panel = useReportPanel(todayFilters(), resetSignal, todayFilters)
-	// The collection is paged, searched and ordered in memory, so the search box is not sent
 	const { search: _search, ...filterParams } = panel.params
 	const query = useIncomeRecap(filterParams, panel.reload, started)
 	useLegacyLoadError(query.isError)

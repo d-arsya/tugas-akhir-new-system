@@ -4,23 +4,13 @@ import type { InvoiceSelectionResult } from "@roja/types"
 
 import { formatIndoDate, rupiahLabel } from "@/lib/legacy-format"
 
-import PaymentTable, { TH_BOLD_CLASS, tdClass } from "./payment-table"
-
-// `student-invoice/create-transaction.blade.php` 44-112 — the invoices the bendahara ticked on
-// the Tagihan tab, and the total the payment is billed against.
-//
-// The "Biaya" column is each invoice's **outstanding balance**, not its face value: legacy builds
-// `$installment[]` as `amount - sum(pay)` for an invoice already on instalments and `amount`
-// otherwise. That figure now arrives keyed by invoice id (fix F-8) — legacy appended it only for
-// unpaid invoices while reading it back by the position of `$invoices`, so one invoice paid by
-// somebody else between opening this page and pressing Simpan shifted every row below it.
+import PaymentTable, { TD_CLASS, TH_BOLD_CLASS, TH_CLASS } from "./payment-table"
 
 type PaymentSelectionTableProps = {
 	selection: InvoiceSelectionResult | undefined
 	onRemove: (invoiceId: number) => void
 }
 
-// `assets/svg/icons/data_destroy.svg`, transcribed
 const DestroyIcon = (): JSX.Element => (
 	<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
 		<g id="trash">
@@ -36,14 +26,11 @@ const DestroyIcon = (): JSX.Element => (
 
 const PaymentSelectionTable = ({ selection, onRemove }: PaymentSelectionTableProps): JSX.Element => {
 	const items = selection?.items ?? []
-	const td = tdClass("create")
 
 	return (
 		<>
-			{/* `span.tbr_text-grey.font-italic` */}
 			<span className="text-[var(--grey)] italic">Item tagihan yang dipilih</span>
 			<PaymentTable
-				variant="create"
 				className="mt-[8px]"
 				head={
 					<>
@@ -59,8 +46,7 @@ const PaymentSelectionTable = ({ selection, onRemove }: PaymentSelectionTablePro
 						<th colSpan={2} className={TH_BOLD_CLASS}>
 							Total yang harus dibayar
 						</th>
-						<th className={TH_CLASS_EMPTY} />
-						{/* `.tbr_text-primary` */}
+						<th className={TH_CLASS} />
 						<th colSpan={2} className={`${TH_BOLD_CLASS} text-[var(--primary)]!`}>
 							{rupiahLabel(selection?.total ?? 0)}
 						</th>
@@ -70,13 +56,11 @@ const PaymentSelectionTable = ({ selection, onRemove }: PaymentSelectionTablePro
 				{items.length > 0 ? (
 					items.map((item, index) => (
 						<tr key={item.invoiceId}>
-							<td className={td}>{index + 1}</td>
-							<td className={td}>{item.name}</td>
-							<td className={td}>{formatIndoDate(item.dueDate)}</td>
-							<td className={td}>{rupiahLabel(item.amount)}</td>
-							<td className={td}>
-								{/* `div.action.ml-3` — neither `.action` nor `.tbr_btn_remove` has any CSS;
-								    the only rule in play is Bootstrap's `ml-3` (1rem). */}
+							<td className={TD_CLASS}>{index + 1}</td>
+							<td className={TD_CLASS}>{item.name}</td>
+							<td className={TD_CLASS}>{formatIndoDate(item.dueDate)}</td>
+							<td className={TD_CLASS}>{rupiahLabel(item.amount)}</td>
+							<td className={TD_CLASS}>
 								<div className="ml-[16px]">
 									<a
 										href="#"
@@ -95,8 +79,7 @@ const PaymentSelectionTable = ({ selection, onRemove }: PaymentSelectionTablePro
 					))
 				) : (
 					<tr>
-						{/* `align="center"` on the cell itself, as legacy writes it */}
-						<td colSpan={5} className={`${td} text-center`}>
+						<td colSpan={5} className={`${TD_CLASS} text-center`}>
 							Tidak ada biaya yang anda pilih.
 						</td>
 					</tr>
@@ -105,8 +88,5 @@ const PaymentSelectionTable = ({ selection, onRemove }: PaymentSelectionTablePro
 		</>
 	)
 }
-
-// The spacer `<th></th>` between the label and the total carries no `.text-weight-600`
-const TH_CLASS_EMPTY = "bg-[#F7F7F7] px-[20px] py-[12px] text-left font-normal"
 
 export default PaymentSelectionTable

@@ -14,9 +14,6 @@ import type {
 import { useLegacyDeletePage, type LegacyDeletePageSubmit } from "@/hooks/use-legacy-delete-page"
 import { adminApi } from "@/lib/api"
 
-// Legacy Akun pages: `accountancy.list` / `accountancy.edit` / `accountancy.store` /
-// `accountancy.update`, plus `accountancy.showDestroy` → `destroy` and
-// `accountancy.showDelegateChild` → `delegateChild`.
 export const accountancyKeys = {
 	all: ["admin-accountancies"] as const,
 	list: () => [...accountancyKeys.all, "list"] as const,
@@ -25,11 +22,6 @@ export const accountancyKeys = {
 	deleteStep: (id: number, step: AccountancyDeleteTarget) => [...accountancyKeys.all, "delete-step", id, step] as const,
 }
 
-/**
- * Legacy navigated away with a full page load, so nothing re-fetched the page it left. Marking
- * the cache stale without refetching does the same: the row is gone, and a refetch fired while
- * the navigation is in flight would 404 behind the success toast.
- */
 const markStale = (queryClient: QueryClient): Promise<void> =>
 	queryClient.invalidateQueries({ queryKey: accountancyKeys.all, refetchType: "none" })
 
@@ -51,7 +43,6 @@ export const useAccountancyDeleteStep = (id: number, step: AccountancyDeleteTarg
 		queryKey: accountancyKeys.deleteStep(id, step),
 		queryFn: () => adminApi.getAccountancyDeleteStep(id, step),
 		enabled: Number.isFinite(id),
-		// The step is a snapshot of what the row looked like when the list rendered
 		staleTime: 0,
 		retry: false,
 	})
@@ -72,7 +63,6 @@ export const useUpdateAccountancy = (id: number): UseMutationResult<AdminMessage
 	})
 }
 
-/** `accountancy/delete/delete.blade.php` — the plain confirm, driven by `delegate-ajax.js`. */
 export const useDeleteAccountancy = (id: number): LegacyDeletePageSubmit<void> => {
 	const queryClient = useQueryClient()
 	return useLegacyDeletePage<void>({
@@ -84,7 +74,6 @@ export const useDeleteAccountancy = (id: number): LegacyDeletePageSubmit<void> =
 	})
 }
 
-/** `accountancy/delete/delegate-child.blade.php` — move the direct children, then delete. */
 export const useDelegateAccountancyChild = (id: number): LegacyDeletePageSubmit<AccountancyDelegatePayload> => {
 	const queryClient = useQueryClient()
 	return useLegacyDeletePage<AccountancyDelegatePayload>({

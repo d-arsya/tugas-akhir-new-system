@@ -7,18 +7,11 @@ import { cn } from "@roja/utils"
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyCard from "@/components/legacy/legacy-card"
 import LegacyInput from "@/components/legacy/legacy-input"
-import { legacyNotify } from "@/components/legacy/legacy-notify"
 import LegacySelect from "@/components/legacy/legacy-select"
-import type { EwalletFilters } from "@/hooks/use-ewallets"
-import { adminApi } from "@/lib/api"
-import { saveBlob } from "@/lib/download"
+import { useDownloadEwalletBalanceReport, type EwalletFilters } from "@/hooks/use-ewallets"
 import type { TableState } from "@/lib/legacy-table"
 
 import { ExportIcon, FilterIcon } from "./ewallet-icons"
-
-// Legacy `ewallet/index.blade.php` 96-172 — the row above the table — and the `#filter-button`
-// script at the foot of the page. The DataTables length/search row is hidden in legacy
-// (`<"d-none"lf>`); these controls stand in for it (`ewallet-datatable-tools.js`).
 
 const ENTRIES = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
 
@@ -43,42 +36,24 @@ type EwalletToolbarProps = {
 
 const EwalletToolbar = ({ state, onStateChange, filters, onFiltersChange }: EwalletToolbarProps): JSX.Element => {
 	const [filterOpen, setFilterOpen] = useState(false)
-	const [downloading, setDownloading] = useState(false)
 	const panel = useRef<HTMLDivElement>(null)
+	const download = useDownloadEwalletBalanceReport()
 
-	// `$(document).on("click", () => $("#content-filter").hide())`, with the panel itself and the
-	// select2 dropdowns (rendered at the end of `<body>`) not counted as "outside"
 	useEffect(() => {
 		if (!filterOpen) return undefined
 		const close = (event: MouseEvent): void => {
 			const target = event.target as HTMLElement
-			if (panel.current?.contains(target) || target.closest("[data-radix-popper-content-wrapper]")) return
+			const insidePanel = panel.current?.contains(target)
+			const insideSelectDropdown = target.closest("[data-radix-popper-content-wrapper]")
+			if (insidePanel || insideSelectDropdown) return
 			setFilterOpen(false)
 		}
 		document.addEventListener("click", close)
 		return () => document.removeEventListener("click", close)
 	}, [filterOpen])
 
-	// The Export form is a plain GET in legacy (the browser downloads it); the API needs the bearer
-	// token, so the workbook is fetched and saved instead.
-	const download = async (): Promise<void> => {
-		setDownloading(true)
-		try {
-			const { blob, fileName } = await adminApi.downloadEwalletBalanceReport({
-				...(filters.status ? { status: filters.status } : {}),
-				...(filters.member ? { member: filters.member } : {}),
-			})
-			saveBlob(blob, fileName ?? "Laporan Saldo Akhir.xlsx")
-		} catch {
-			legacyNotify.error("Terjadi kesalahan pada sistem. Silakan reload ulang halaman ini.")
-		} finally {
-			setDownloading(false)
-		}
-	}
-
 	return (
 		<div className="mx-[-15px] my-[8px] flex flex-wrap">
-			{/* `.col-md-2 > .mb-2.tbr_w-md-75px` */}
 			<div className="w-full px-[15px] min-[768px]:w-1/6">
 				<div className="mb-[8px] min-[760px]:w-[75px]!">
 					<LegacySelect
@@ -90,7 +65,6 @@ const EwalletToolbar = ({ state, onStateChange, filters, onFiltersChange }: Ewal
 				</div>
 			</div>
 
-			{/* `.col > .row.justify-content-end > .col-md-6 > input.form-control.mb-2` */}
 			<div className="w-full min-w-0 flex-1 basis-0 px-[15px]">
 				<div className="mx-[-15px] flex flex-wrap justify-end">
 					<div className="w-full px-[15px] min-[768px]:w-1/2">
@@ -106,7 +80,6 @@ const EwalletToolbar = ({ state, onStateChange, filters, onFiltersChange }: Ewal
 				</div>
 			</div>
 
-			{/* `.col-md-auto.d-flex.justify-content-end.mb-2.pl-0` */}
 			<div className="flex w-full justify-end px-[15px] pl-0 min-[768px]:w-auto max-[767px]:pl-[15px] mb-[8px]">
 				<button
 					type="button"
@@ -117,14 +90,12 @@ const EwalletToolbar = ({ state, onStateChange, filters, onFiltersChange }: Ewal
 					}}
 					className={legacyButtonClass(
 						"light",
-						// `.tbr_btn-light-warning`: orange at 16%, solid on hover, where `.tbr_btn:hover svg path` turns white
 						"mr-[15px] inline-flex bg-[rgba(255,168,0,0.16)] p-[8px] text-[var(--warning)] hover:bg-[var(--warning)] hover:text-white focus:bg-[var(--warning)] focus:text-white [&:hover_path]:fill-white [&:focus_path]:fill-white",
 					)}
 				>
 					<FilterIcon />
 				</button>
 
-				{/* `#content-filter.card.tbr_card.tbr_advanced--filter`, pinned to the page card */}
 				{filterOpen ? (
 					<div
 						ref={panel}
@@ -155,16 +126,15 @@ const EwalletToolbar = ({ state, onStateChange, filters, onFiltersChange }: Ewal
 				<button
 					type="button"
 					onClick={() => {
-						if (!downloading) void download()
+						if (!download.isPending) download.mutate(filters)
 					}}
-					aria-disabled={downloading}
+					aria-disabled={download.isPending}
 					className={cn(legacyButtonClass("info", "mr-[15px] inline-flex px-[20px]"), "aria-disabled:cursor-progress aria-disabled:opacity-65")}
 				>
 					<ExportIcon />
 					<div className="ml-[8px]">Export</div>
 				</button>
 
-				{/* No `target="_blank"`: the print-all page replaces this one */}
 				<Link to="/ewallets/qr-all" className={legacyButtonClass("danger", "inline-flex")}>
 					Download QR
 				</Link>

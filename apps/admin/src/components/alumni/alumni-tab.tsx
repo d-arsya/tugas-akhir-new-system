@@ -10,11 +10,6 @@ import { PhoneInput, SocietyRadios, StackedLabel } from "@/components/society/so
 import type { SocietyFieldContext } from "@/components/society/society-field-context"
 import type { SocietySettingLookup } from "@/components/society/society-settings"
 
-// OWNER: AK-A. `alumni/partials/edit/data/alumni.blade.php` — the first (award) tab of the detail page: three
-// Summernote fields (`registrant/summernote.js`, height 120), Status Menikah, the "62" phone, the email and the
-// alumni address (`initProvince('#alumni_province_id', …)` + `initRegency`). None of these hangs off a setting.
-
-/** The address group the shared cascade renders; label and help text are fixed in this blade. */
 const ALUMNI_ADDRESS: SocietyAddressGroup = {
 	settingId: 0,
 	labelId: 0,
@@ -35,10 +30,8 @@ const FIXED_LOOKUP: SocietySettingLookup = {
 	lineVisible: () => true,
 }
 
-/** `hr.tbr_divider_solid` */
 const Divider = (): JSX.Element => <hr className="my-[22px] h-[2px] border-0 bg-[var(--bg-primary)]" />
 
-/** `div.row.no-gutters.justify-content-center > div.col-12` with `p.mb-2` over `div.form-group > textarea.summernote` */
 const RichField = ({ name, label, value, onChange }: { name: string; label: string; value: string; onChange: (value: string) => void }): JSX.Element => (
 	<div className="flex flex-wrap justify-center">
 		<div id={name} className="w-full">
@@ -72,7 +65,6 @@ const AlumniTab = ({ values, onChange }: AlumniTabProps): JSX.Element => {
 
 			<div className="mb-[16px]">
 				<StackedLabel htmlFor="marriage_status" label="Status Menikah" info="required" />
-				{/* No option is pre-checked: an alumnus without a status posts none (and gets "wajib untuk diisi") */}
 				<SocietyRadios
 					name="marriage_status"
 					value={value("marriage_status")}

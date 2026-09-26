@@ -2,8 +2,6 @@ import type { JSX, ReactNode } from "react"
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@roja/ui"
 
-// Port of the Bootstrap `[data-toggle="tooltip"][data-placement="top"]` used by `.tbr_fp_help`
-// and `.tbr_fp_visibility`: bootstrap.css 6171-6280 with `.tooltip-inner` from app.css 1380-1393.
 const CONTENT_CLASS = [
 	"z-[1000000] max-w-[240px] animate-none rounded-[10px] border-0! bg-[rgba(23,40,60,0.9)] px-[20px] py-[16px]",
 	"[font-family:-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,'Helvetica_Neue',Arial,sans-serif]",
@@ -16,7 +14,6 @@ const CONTENT_CLASS = [
 type FormPanelTooltipProps = { title: string; className?: string; children: ReactNode }
 
 const FormPanelTooltip = ({ title, className, children }: FormPanelTooltipProps): JSX.Element => (
-	// Bootstrap tooltips open on hover/focus without a delay
 	<TooltipProvider delayDuration={0}>
 		<Tooltip>
 			<TooltipTrigger asChild>

@@ -1,17 +1,13 @@
-import { useState, type JSX } from "react"
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 
 import type { StudentTransactionDetail } from "@roja/types"
 
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import LegacyTooltip from "@/components/legacy/legacy-tooltip"
-import { adminApi } from "@/lib/api"
-import { saveBlob } from "@/lib/download"
 import { formatIndoDateJam } from "@/components/student-transactions/transaction-detail-tables"
+import { receiptPrintUrl, useDownloadReceipt } from "@/hooks/use-payments"
 
-// Legacy `student-transaction/detail.blade.php:42-82`. Owned by WS P1-C.
-
-// `:60-64`, transcribed verbatim
 const BackIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
@@ -24,7 +20,6 @@ const BackIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `:67-71`, transcribed verbatim
 const PrintIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 		<rect width="24" height="24" fill="none" />
@@ -37,7 +32,6 @@ const PrintIcon = (): JSX.Element => (
 	</svg>
 )
 
-// `:74-78`, transcribed verbatim
 const DownloadIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 		<path d="M0,0H24V24H0Z" fill="none" fillRule="evenodd" />
@@ -56,39 +50,23 @@ const DownloadIcon = (): JSX.Element => (
 )
 
 const TransactionDetailHeader = ({ detail }: { detail: StudentTransactionDetail }): JSX.Element => {
-	const [downloading, setDownloading] = useState(false)
-
-	const download = async (): Promise<void> => {
-		setDownloading(true)
-		try {
-			const file = await adminApi.downloadReceipt(detail.id)
-			saveBlob(file.blob, file.fileName ?? `${detail.transactionCode ?? detail.id}.pdf`)
-		} finally {
-			setDownloading(false)
-		}
-	}
+	const receipt = useDownloadReceipt(detail.id, `${detail.transactionCode ?? detail.id}.pdf`)
 
 	return (
-		// `.row.mb-3`
 		<div className="mx-[-15px] mb-[16px] flex flex-wrap">
 			<div className="relative w-full px-[15px] min-[768px]:w-1/2">
-				{/* `.tbr_card_intro .tbr_title` (app.css 2481-2486) */}
 				<div className="relative mt-[2px] inline-block text-[16px] font-bold">Detail Pembayaran</div>
-				{/* `:47` — `.alert.tbr_alert-primary.rounded.font-weight-bold.p-1` (app.css 1332) */}
 				<div>
 					<span className="inline-block rounded-[0.25rem] bg-[rgba(var(--primary-rgb),0.1)] p-[4px] font-bold text-[var(--primary)]">
 						{detail.transactionCode}
 					</span>
 				</div>
-				{/* `:48` — `formatDate($transaction->created_at, 'd F Y \j\a\m H:i')` */}
 				<p className="m-0! text-[var(--grey)]">Dibayar pada tanggal {formatIndoDateJam(detail.createdAt)}</p>
 			</div>
 
 			<div className="w-full px-[15px] text-right min-[768px]:w-1/2">
-				{/* `.d-flex.align-items-center.justify-content-start.justify-content-lg-end.mt-3.mt-lg-0.mb-1.mb-lg-0` */}
 				<div className="mt-[16px] mb-[4px] flex items-center justify-start min-[992px]:mt-0 min-[992px]:mb-0 min-[992px]:justify-end">
 					<LegacyTooltip content="Kembali" placement="left">
-						{/* `.btn.tbr_btn.mr-3.p-2.tbr_btn-light-info.d-inline-flex` */}
 						<Link
 							to="/student-transactions"
 							className={legacyButtonClass(
@@ -100,27 +78,20 @@ const TransactionDetailHeader = ({ detail }: { detail: StudentTransactionDetail 
 						</Link>
 					</LegacyTooltip>
 
-					{/*
-					 * `:66` opens `studentInvoice.printTransaction` in a new tab — the legacy
-					 * `print.transaction` blade rendered for the browser print dialog. The frozen
-					 * contract has only `downloadReceipt`, so there is no endpoint to point this at.
-					 * Reported to the lead; the button is rendered disabled rather than dropped so
-					 * the toolbar keeps its legacy shape.
-					 */}
-					<button
-						type="button"
-						disabled
+					<a
+						href={receiptPrintUrl(detail.id)}
+						target="_blank"
+						rel="noreferrer"
 						title="Cetak"
-						className={legacyButtonClass("secondary", "mr-[16px] p-[8px]")}
+						className={legacyButtonClass("secondary", "mr-[16px] inline-flex p-[8px]")}
 					>
 						<PrintIcon />
-					</button>
+					</a>
 
-					{/* `:73` — `studentInvoice.downloadTransaction`, P1-B's receipt endpoint */}
 					<button
 						type="button"
-						onClick={() => void download()}
-						disabled={downloading}
+						onClick={() => receipt.mutate()}
+						disabled={receipt.isPending}
 						title="Unduh"
 						className={legacyButtonClass("danger", "mr-[16px] p-[8px]")}
 					>

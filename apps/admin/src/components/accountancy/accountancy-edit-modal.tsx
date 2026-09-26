@@ -12,18 +12,6 @@ import { useAccountancy, useAccountancyOptions, useUpdateAccountancy } from "@/h
 import AccountancyChildFields from "./accountancy-child-fields"
 import AccountancyFieldLabel from "./accountancy-field-label"
 
-/**
- * `accountancy/edit.blade.php`, fetched per row by `assets/js/account/edit-data.js` and opened
- * with magnific-popup (`modal-block-sm`, so 400px).
- *
- * Two details from the blade:
- *  - the `#childData` block renders `@if ($accountancy->parent_id != NULL)`, i.e. it keys off the
- *    parent, while the header badge keys off `is_parent`. Both are reproduced as written.
- *  - the parent select here has **no** blank "Select" option, unlike the create form's.
- *
- * `is_parent` is never submitted from this modal; the port's payload type carries it, so the
- * account's own value is sent back unchanged.
- */
 type AccountancyEditModalProps = {
 	accountancyId: number | null
 	onClose: () => void
@@ -41,7 +29,6 @@ const AccountancyEditModal = ({ accountancyId, onClose }: AccountancyEditModalPr
 	const [isStudentCost, setIsStudentCost] = useState(false)
 	const [note, setNote] = useState("")
 
-	// Legacy renders the partial server-side with the row's values already in it
 	useEffect(() => {
 		setName(data?.name ?? "")
 		setParentId(data?.parentId === undefined || data.parentId === null ? "" : String(data.parentId))
@@ -53,7 +40,6 @@ const AccountancyEditModal = ({ accountancyId, onClose }: AccountancyEditModalPr
 	const submit = useLegacySubmit({
 		mutationFn: (payload: AccountancyPayload) => update.mutateAsync(payload),
 		errorTitle: "Gagal!",
-		// `default-ajax2.js` reloads the page 1000 ms later; here the tree refetches and we close
 		onDone: onClose,
 	})
 
@@ -77,7 +63,6 @@ const AccountancyEditModal = ({ accountancyId, onClose }: AccountancyEditModalPr
 			onClose={onClose}
 			size="sm"
 			title="Edit akun"
-			// `<header class="card-header">` carries the title and this badge side by side
 			icon={<span>{data?.isParent ? "Induk akun" : "Anak akun"}</span>}
 			footer={
 				<div className="text-right">
@@ -96,7 +81,6 @@ const AccountancyEditModal = ({ accountancyId, onClose }: AccountancyEditModalPr
 					save()
 				}}
 			>
-				{/* `.form-group.mb-3` — the label carries `m-0` in this blade, unlike the create form */}
 				<div className="mb-[16px]">
 					<AccountancyFieldLabel htmlFor="edit_name" badge="required" tight>
 						Nama
@@ -122,7 +106,6 @@ const AccountancyEditModal = ({ accountancyId, onClose }: AccountancyEditModalPr
 						onIsStudentCostChange={setIsStudentCost}
 						idSuffix="_edit"
 						tightLabels
-						// `.card-body.p-2` on the inner `is_student_cost` card here, `.p-3` on the create form
 						innerPadding="p-[8px]"
 					/>
 				) : null}

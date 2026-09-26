@@ -3,6 +3,7 @@ import { useState } from "react"
 import type { ReportArrearFilterParams } from "@roja/types"
 
 import { legacyNotify } from "@/components/legacy/legacy-notify"
+import { todayDmy } from "@/lib/legacy-format"
 
 export type ReportFilters = {
 	from: string
@@ -22,8 +23,9 @@ export const emptyFilters = (from = "", to = ""): ReportFilters => ({
 	accountancy: "",
 })
 
-// assets/js/report/*-filter.js `validateFilter()`
-export const validateReportFilters = (filters: ReportFilters): boolean => {
+export const todayFilters = (): ReportFilters => emptyFilters(todayDmy(), todayDmy())
+
+const validateReportFilters = (filters: ReportFilters): boolean => {
 	if (filters.subGrade && !filters.academicYear && !filters.grade) {
 		legacyNotify.error(["Tahun ajaran wajib untuk dipilih.", "Kelas wajib untuk dipilih."])
 		return false
@@ -35,7 +37,6 @@ export const validateReportFilters = (filters: ReportFilters): boolean => {
 	return true
 }
 
-// Query params without empty values (legacy `$.param` + ConvertEmptyStringsToNull)
 export const toFilterParams = (filters: ReportFilters): ReportArrearFilterParams => ({
 	from: filters.from || undefined,
 	to: filters.to || undefined,
@@ -45,8 +46,6 @@ export const toFilterParams = (filters: ReportFilters): ReportArrearFilterParams
 	accountancy: filters.accountancy || undefined,
 })
 
-// Legacy filter bars only reload the table when "Filter" is clicked, so the inputs (draft)
-// and the last loaded request (applied) are kept apart
 export const useReportFilters = (
 	initial: ReportFilters,
 ): {

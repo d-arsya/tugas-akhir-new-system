@@ -15,14 +15,18 @@ import type {
 	AdminStudentStatusDto,
 	AdminStudentSubGradeDto,
 	AdminStudentYearRow,
+	SocietyDraft,
+	SocietyDraftStepKey,
 } from "@roja/types"
 
+import { legacyNotify } from "@/components/legacy/legacy-notify"
 import { akademikKeys } from "@/hooks/use-akademik-keys"
 import { adminApi } from "@/lib/api"
+import { saveBlob } from "@/lib/download"
+import { legacyErrors } from "@/lib/legacy-errors"
 
-// Queries and writes behind Akademik → Santri (legacy `StudentController`). Every read sits under
-// `akademikKeys.student` with `staleTime: 0` (legacy reloads the page); every write invalidates
-// `akademikKeys.all`, because Lulus creates an alumni and PSB / Alumni pages read the same rows.
+const ROSTER_EXPORT_FILE = "Hasil export data santri.xlsx"
+
 export const studentKeys = {
 	years: () => [...akademikKeys.student, "years"] as const,
 	year: (academicYearId: number) => [...akademikKeys.student, "year", academicYearId] as const,
@@ -72,7 +76,6 @@ export const useStudentDetail = (studentGradeId: number): UseQueryResult<AdminSt
 		...FRESH,
 	})
 
-/** A write that refreshes the whole Akademik menu once it lands. */
 const useAkademikWrite = <TVariables, TData>(
 	mutationFn: (variables: TVariables) => Promise<TData>,
 ): UseMutationResult<TData, unknown, TVariables> => {
@@ -119,3 +122,19 @@ export const useStudentUpdate = (): UseMutationResult<AdminStudentMessage, unkno
 
 export const useStudentCreate = (): UseMutationResult<AdminStudentCreated, unknown, FormData> =>
 	useAkademikWrite((form: FormData) => adminApi.createStudent(form))
+
+export const useValidateStudentStep = (): UseMutationResult<AdminStudentMessage, unknown, { step: SocietyDraftStepKey; draft: SocietyDraft }> =>
+	useMutation({
+		mutationFn: ({ step, draft }: { step: SocietyDraftStepKey; draft: SocietyDraft }) => adminApi.validateStudentStep(step, draft),
+	})
+
+export const useDownloadStudentRoster = (academicYearId: number, grade: number, levelId: number): UseMutationResult<void, unknown, void> =>
+	useMutation<void, unknown, void>({
+		mutationFn: async () => {
+			const { blob, fileName } = await adminApi.downloadStudentRoster(academicYearId, grade, levelId)
+			saveBlob(blob, fileName ?? ROSTER_EXPORT_FILE)
+		},
+		onError: (error) => legacyNotify.error(legacyErrors(error)),
+	})
+
+export const studentPrintUrl = (studentGradeId: number): string => adminApi.studentPrintUrl(studentGradeId)

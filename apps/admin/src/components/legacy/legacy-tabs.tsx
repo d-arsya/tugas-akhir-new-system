@@ -2,7 +2,6 @@ import { useEffect, useState, type JSX, type ReactNode } from "react"
 
 import { cn } from "@roja/utils"
 
-// Legacy tab links are `div.d-flex.align-items-center > {svg} + span.mx-2.tbr_weight-medium`
 export type LegacyTab<K extends string> = { key: K; label: ReactNode; icon?: ReactNode; content: ReactNode }
 
 type LegacyTabsProps<K extends string> = {
@@ -12,10 +11,7 @@ type LegacyTabsProps<K extends string> = {
 	className?: string
 }
 
-// Port of `ul.nav.nav-tabs.tbr_tabs` + `.tab-content.tbr_tab_content` (public/assets/css/app.css).
-// Every pane stays mounted like the legacy markup, so each keeps its own state
 const LegacyTabs = <K extends string>({ tabs, active, onChange, className }: LegacyTabsProps<K>): JSX.Element => {
-	// Bootstrap `.fade`: the newly shown pane fades in over 150ms
 	const [shown, setShown] = useState(active)
 	useEffect(() => {
 		const frame = requestAnimationFrame(() => setShown(active))
@@ -44,7 +40,6 @@ const LegacyTabs = <K extends string>({ tabs, active, onChange, className }: Leg
 							>
 								<div className="flex items-center">
 									{tab.icon}
-									{/* `span.mx-2.tbr_weight-medium` */}
 									<span className="mx-[8px] font-medium">{tab.label}</span>
 								</div>
 							</a>

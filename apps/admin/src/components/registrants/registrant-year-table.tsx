@@ -8,14 +8,10 @@ import LegacyLabel from "@/components/legacy/legacy-label"
 import { useRegistrantYears } from "@/hooks/use-registrants"
 import { clientTable, INITIAL_TABLE_STATE, type TableState } from "@/lib/legacy-table"
 
-// `registrant/index.blade.php` + `default-datatable.js` (`initDatatable(url, [0, 8])`) over
-// `RegistrantController::academicYearList` — the counters print as "N Peserta".
-
 type NumberedYear = AdminRegistrantAcademicYearRow & { no: number }
 
 const peserta = (count: number): string => `${count} Peserta`
 
-// `AcademicYearService::getStatus()`
 const statusText = (row: AdminRegistrantAcademicYearRow): string =>
 	row.status === "none" ? "-" : row.status === "open" ? "Dibuka" : "Ditutup"
 
@@ -77,7 +73,6 @@ const RegistrantYearTable = (): JSX.Element => {
 			key: "actions",
 			header: "Actions",
 			sortable: false,
-			// `StudentService::editButton()` — `div.actions > a > img[data_detail.svg]`
 			cell: (row) => (
 				<div className="align-middle">
 					<Link
@@ -102,7 +97,6 @@ const RegistrantYearTable = (): JSX.Element => {
 			onStateChange={setState}
 			processing={isFetching}
 			loaded={isSuccess}
-			// DataTables' default `order: [[0, "asc"]]` applies although "No" is not orderable
 			initialSort={{ key: "no", dir: "asc" }}
 			minWidth="950px"
 		/>

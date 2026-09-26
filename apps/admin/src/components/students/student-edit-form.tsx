@@ -16,14 +16,9 @@ import { StudentEditActions } from "./student-edit-actions"
 import { StudentWidgetInfo, StudentWidgetStatus } from "./student-edit-widgets"
 import { noticeLines } from "./student-ui"
 
-// `student/edit.blade.php`: `form#main-form` = the summary bar, then widget-info (col-lg-3), the six tabs
-// (col-lg-6) and widget-status (col-lg-3). `update.js` `specificFormWithFile` posts the whole form (hidden
-// settings and disabled selects are not posted), shows the message and reloads 1000 ms later.
-
 const STEPS: readonly SocietyStepKey[] = ["personal", "identity", "family", "guardian", "attachment"]
 const RELOAD_MS = 1000
 
-// `.tbr_summary_icon` — svg#Group_5648
 const SummaryIcon = (): JSX.Element => (
 	<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" className="block">
 		<path d="M0,0H40V40H0Z" fill="none" fillRule="evenodd" />
@@ -32,7 +27,6 @@ const SummaryIcon = (): JSX.Element => (
 	</svg>
 )
 
-/** PHP `ucwords()` */
 const ucwords = (value: string | null): string => (value ?? "").replace(/(^|[\s\t\r\n\f\v])(\S)/g, (_, space: string, letter: string) => space + letter.toUpperCase())
 
 const Summary = ({ detail }: { detail: AdminStudentDetail }): JSX.Element => {
@@ -51,7 +45,6 @@ const Summary = ({ detail }: { detail: AdminStudentDetail }): JSX.Element => {
 								Jenjang {detail.levelName}, Kelas {detail.grade}
 							</span>{" "}
 							<span>
-								{/* `.tbr_indicator` — an 8px dot 8px in, the text 24px in */}
 								<span
 									className={`relative pl-[24px] font-medium italic before:absolute before:top-[calc(50%-4px)] before:left-[8px] before:h-[8px] before:w-[8px] before:rounded-[8px] before:content-[''] ${active ? "text-[var(--success)] before:bg-[var(--success)]" : "text-[var(--danger)] before:bg-[var(--danger)]"}`}
 								>
@@ -79,7 +72,6 @@ const StudentEditForm = ({ detail, options, settings, onReload }: Props): JSX.El
 		email: detail.email ?? "",
 		password: "",
 		password_confirmation: "",
-		// `is_blocked == 0` is checked for null too
 		is_blocked: detail.isBlocked === true ? "1" : "0",
 	})
 	const [subGrade, setSubGrade] = useState(detail.subGrade ?? "")
@@ -106,9 +98,7 @@ const StudentEditForm = ({ detail, options, settings, onReload }: Props): JSX.El
 			...postableValues(values, settings, "all"),
 			nis,
 			...account,
-			// `<input type="hidden" name="level_id">` — the level select itself is disabled
 			level_id: detail.levelId === null ? "" : String(detail.levelId),
-			// A select left on its disabled placeholder posts nothing
 			...(subGrade === "" ? {} : { sub_grade: subGrade }),
 			...(majorName === "" ? {} : { major_name: majorName }),
 		}

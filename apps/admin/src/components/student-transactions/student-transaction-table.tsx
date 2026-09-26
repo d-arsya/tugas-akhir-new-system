@@ -8,20 +8,11 @@ import LegacyDateRange from "@/components/legacy/legacy-date-range"
 import { useStudentTransactionTable, type TransactionDateRange } from "@/hooks/use-student-transactions"
 import { formatIndoDate, rupiahLabel } from "@/lib/legacy-format"
 
-// Legacy `student-transaction/index.blade.php` + `student-transaction-serverside.js`.
-// Owned by WS P1-C.
-
 type StudentTransactionTableProps = {
 	range: TransactionDateRange
 	onRangeChange: (range: TransactionDateRange) => void
 }
 
-/**
- * `student-transaction-serverside.js:85-95`, headers from `index.blade.php:70-80`.
- *
- * `DT_RowIndex` and `action` are `orderable: false` (`:86` and the `orderFalse` argument `[8]`
- * passed at `index.blade.php:105`); every other column sorts through `orderCol()`.
- */
 const columns: LegacyColumn<StudentTransactionListRow>[] = [
 	{ key: "no", header: "No", width: "7%", sortable: false, cell: (_row, index) => index },
 	{
@@ -29,7 +20,6 @@ const columns: LegacyColumn<StudentTransactionListRow>[] = [
 		header: "ID Pembayaran",
 		width: "20%",
 		sortable: true,
-		// `:101` — an inline `color: #E4007E` with no weight change, then the grey timestamp
 		cell: (row) => (
 			<>
 				<div style={{ color: "#E4007E" }}>{row.transactionCode}</div>
@@ -47,7 +37,6 @@ const columns: LegacyColumn<StudentTransactionListRow>[] = [
 		header: "Kelas",
 		width: "10%",
 		sortable: true,
-		// `:108` — `$transaction->grade .' '. $transaction->sub_grade`, always with the space
 		cell: (row) => `${row.grade ?? ""} ${row.subGrade ?? ""}`,
 	},
 	{
@@ -55,11 +44,8 @@ const columns: LegacyColumn<StudentTransactionListRow>[] = [
 		header: "Actions",
 		width: "5%",
 		sortable: false,
-		// `:113-119` — a bare `<div class="action">`, no flex and no centering, unlike the
-		// Data Master tables' `.actions.d-flex.justify-content-center`
 		cell: (row) => (
 			<div>
-				{/* `.modal-with-zoom-anim` is dead: magnific-popup is never initialised on this page */}
 				<Link
 					to="/student-transactions/$transactionId"
 					params={{ transactionId: String(row.id) }}
@@ -77,13 +63,6 @@ const StudentTransactionTable = ({ range, onRangeChange }: StudentTransactionTab
 
 	return (
 		<>
-			{/*
-			 * `index.blade.php:14-67` puts the length select, the date range and the search box in
-			 * one `.row` because the DataTable hides its own `l` and `f` behind `<"d-none"lf>`
-			 * (`student-transaction-serverside.js:21`). `LegacyDataTable` always renders its own
-			 * toolbar and the kit is frozen, so the range sits in its own row above it — same
-			 * `col-md-4` horizontal slot, one row higher. Reported to the lead.
-			 */}
 			<div className="mx-[-15px] mb-[8px] flex flex-wrap">
 				<div className="w-full px-[15px] min-[768px]:w-2/12" />
 				<div className="w-full px-[15px] min-[768px]:w-3/12" />
@@ -100,7 +79,6 @@ const StudentTransactionTable = ({ range, onRangeChange }: StudentTransactionTab
 				<div className="w-full px-[15px] min-[768px]:w-3/12" />
 			</div>
 
-			{/* `<table … style="min-width: 1250px;">` */}
 			<LegacyDataTable
 				columns={columns}
 				rows={table.rows}
@@ -110,7 +88,6 @@ const StudentTransactionTable = ({ range, onRangeChange }: StudentTransactionTab
 				onStateChange={table.setState}
 				processing={table.processing}
 				loaded={table.loaded}
-				// `student-transaction-serverside.js:36` — `order: [[1, "desc"]]`, i.e. paid_at desc
 				initialSort={{ key: "paidAt", dir: "desc" }}
 				minWidth="1250px"
 			/>

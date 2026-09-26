@@ -16,7 +16,6 @@ type SummaryWidgetsProps = {
 	onAcademicYearChange: (academicYearId: number | undefined) => void
 }
 
-// Legacy `.tbr_widget` colour variants (public/assets/css/widget.css)
 const WIDGET_VARIANT = {
 	primary: "bg-[var(--primary)] shadow-[0px_8px_10px_rgba(228,0,126,0.25)]",
 	secondary: "bg-[var(--secondary)] shadow-[0px_8px_10px_rgba(141,195,30,0.25)]",
@@ -36,7 +35,6 @@ const PeopleIcon = (): JSX.Element => (
 type WidgetProps = { variant: keyof typeof WIDGET_VARIANT; count: number | undefined; label: string }
 
 const Widget = ({ variant, count, label }: WidgetProps): JSX.Element => (
-	// Bootstrap col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 (bootstrap breakpoints, not Tailwind's)
 	<div className="w-full px-[15px] min-[576px]:w-1/2 min-[992px]:w-1/3">
 		<Link
 			to="/registrants"
@@ -58,7 +56,6 @@ const Widget = ({ variant, count, label }: WidgetProps): JSX.Element => (
 	</div>
 )
 
-// Port of legacy dashboard/partials/summary-widgets.blade.php
 const SummaryWidgets = ({ stats, options, academicYearId, onAcademicYearChange }: SummaryWidgetsProps): JSX.Element => {
 	const yearOptions = [
 		{ value: ALL_YEARS, label: "Semua Tahun Ajaran" },
@@ -76,7 +73,6 @@ const SummaryWidgets = ({ stats, options, academicYearId, onAcademicYearChange }
 						<div className="my-[16px] min-[992px]:my-0">
 							<LegacySelect
 								variant="summary"
-								// Legacy options carry title="Select", which select2 renders in grey
 								mutedText
 								value={academicYearId === undefined ? ALL_YEARS : String(academicYearId)}
 								options={yearOptions}

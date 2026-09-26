@@ -4,8 +4,6 @@ import { cn } from "@roja/utils"
 
 type LegacyCardProps = { className?: string; bodyClassName?: string; children: ReactNode }
 
-// Port of `.card.tbr_card > .card-body` (public/assets/css/app.css 1413-1431).
-// Legacy pages write `.card-body.p-4`, so 24px is the default padding
 const LegacyCard = ({ className, bodyClassName, children }: LegacyCardProps): JSX.Element => (
 	<div className={cn("relative flex min-w-0 flex-col border-0 bg-transparent shadow-none", className)}>
 		<div
@@ -21,7 +19,6 @@ const LegacyCard = ({ className, bodyClassName, children }: LegacyCardProps): JS
 
 type WithChildren = { className?: string; children: ReactNode }
 
-// `h4.tbr_card_title` (app.css 491-494); `!` because globals.css styles h4 outside any @layer
 export const LegacyCardTitle = ({ className, children }: WithChildren): JSX.Element => (
 	<h4
 		className={cn(
@@ -33,12 +30,10 @@ export const LegacyCardTitle = ({ className, children }: WithChildren): JSX.Elem
 	</h4>
 )
 
-// `p.tbr_text-grey` (app.css 401-403) over porto's `p { line-height: 24px; margin: 0 0 20px }`
 export const LegacyCardText = ({ className, children }: WithChildren): JSX.Element => (
 	<p className={cn("mt-0 mb-[20px] leading-[24px] text-[var(--grey)]", className)}>{children}</p>
 )
 
-// `hr.tbr_divider` (app.css 478-485) over porto's `hr` (1px tall, 22px margins)
 export const LegacyDivider = ({ className }: { className?: string }): JSX.Element => (
 	<hr
 		className={cn(

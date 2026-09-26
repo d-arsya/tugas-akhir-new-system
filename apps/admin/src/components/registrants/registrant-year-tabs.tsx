@@ -5,10 +5,6 @@ import { cn } from "@roja/utils"
 
 import LegacyLabel from "@/components/legacy/legacy-label"
 
-// `registrant/registrant.blade.php` — `ul.nav.nav-tabs.tbr_tabs.tbr_tabs-primary.tbr_tabs-registrant` +
-// `.tab-content.tbr_tab_content > .tab-pane.overflow-hidden` (app.css 1598-1690, 2955: 187px tabs from 1200px).
-// The label is `span.mx-2.tbr_weight-medium` then a `span.tbr_label` count; the active tab is pink (`-primary`).
-
 export type RegistrantYearTab = {
 	key: AdminRegistrantListTab
 	label: string
@@ -19,7 +15,6 @@ export type RegistrantYearTab = {
 
 const RegistrantYearTabs = ({ tabs }: { tabs: RegistrantYearTab[] }): JSX.Element => {
 	const [active, setActive] = useState<AdminRegistrantListTab>("new")
-	// Bootstrap `.fade`: the newly shown pane fades in over 150ms
 	const [shown, setShown] = useState(active)
 	useEffect(() => {
 		const frame = requestAnimationFrame(() => setShown(active))
@@ -48,7 +43,6 @@ const RegistrantYearTabs = ({ tabs }: { tabs: RegistrantYearTab[] }): JSX.Elemen
 							>
 								<div className="flex items-center justify-center">
 									<span className="mx-[8px] font-medium">{tab.label}</span>
-									{/* `span.tbr_label.tbr_label-*` outside a table: 4px / 14px padding, no minimum size */}
 									<LegacyLabel variant={tab.variant} className="min-h-0 min-w-0 px-[14px] py-[4px]">
 										{tab.count ?? ""}
 									</LegacyLabel>

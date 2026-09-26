@@ -1,23 +1,16 @@
-import { useState, type JSX } from "react"
+import type { JSX } from "react"
 import { Link } from "@tanstack/react-router"
 
 import { cn } from "@roja/utils"
 
 import { legacyButtonClass } from "@/components/legacy/legacy-button"
 import { BackArrowIcon } from "@/components/legacy/legacy-icons"
-import { legacyNotify } from "@/components/legacy/legacy-notify"
 import LegacyTooltip from "@/components/legacy/legacy-tooltip"
 import { CARD_BACK_CLASS, Kembali } from "@/components/student-capabilities/capability-chrome"
-import { adminApi } from "@/lib/api"
-import { saveBlob } from "@/lib/download"
-import { legacyErrors } from "@/lib/legacy-errors"
+import { useDownloadStudentRoster } from "@/hooks/use-students"
 import { RIPPLE_CLASS, triggerRipple } from "@/lib/ripple"
 
 import { StudentLabel } from "./student-ui"
-
-// `student/partials/listing-student/card-header.blade.php`: "Santri Kelas N" with the row count
-// (`showStudentCount()`), the class line, Kembali, Export (`student.download`) and Tambah (`student.create`
-// with the year, Kelas and Jenjang). The commented-out Import button stays out.
 
 type Props = {
 	academicYearId: number
@@ -58,16 +51,11 @@ const PlusIcon = (): JSX.Element => (
 )
 
 const StudentRosterHeader = ({ academicYearId, year, grade, levelId, levelName, count }: Props): JSX.Element => {
-	const [downloading, setDownloading] = useState(false)
+	const exportRoster = useDownloadStudentRoster(academicYearId, grade, levelId)
 
 	const download = (): void => {
-		if (downloading) return
-		setDownloading(true)
-		adminApi
-			.downloadStudentRoster(academicYearId, grade, levelId)
-			.then(({ blob, fileName }) => saveBlob(blob, fileName ?? "Hasil export data santri.xlsx"))
-			.catch((error: unknown) => legacyNotify.error(legacyErrors(error)))
-			.finally(() => setDownloading(false))
+		if (exportRoster.isPending) return
+		exportRoster.mutate()
 	}
 
 	return (
@@ -75,7 +63,6 @@ const StudentRosterHeader = ({ academicYearId, year, grade, levelId, levelName, 
 			<div className="mx-[-15px] flex flex-wrap items-center">
 				<div className="w-full px-[15px] min-[992px]:w-1/2 min-[1200px]:w-7/12">
 					<div className="relative">
-						{/* `.tbr_card_intro .tbr_title` */}
 						<div className="relative mt-[2px] inline-block text-[16px] font-bold">
 							Santri <span className="pl-[4px] text-[var(--primary)]">Kelas {grade}</span>{" "}
 							<StudentLabel variant="primary" size="base">

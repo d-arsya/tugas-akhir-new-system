@@ -4,17 +4,9 @@ import { cn } from "@roja/utils"
 
 import { legacyButtonClass, type LegacyButtonVariant } from "./legacy-button"
 
-/**
- * The icon-only save button on the Kelas page: `.btn.tbr_btn.tbr_btn-light-primary.p-2.mb-2`
- * whose `.tbr_btn_text` holds nothing but a 24×24 SVG — no label at all.
- *
- * It exists separately from `LegacyButton` because the padding collapses to `p-2` and the
- * accessible name has to come from `ariaLabel` rather than the (absent) text.
- */
 type LegacyIconButtonProps = {
 	variant: LegacyButtonVariant
 	icon: ReactNode
-	/** There is no visible text, so every instance must name itself for screen readers. */
 	ariaLabel: string
 	type?: "button" | "submit"
 	onClick?: () => void

@@ -6,14 +6,10 @@ import LegacyButton from "@/components/legacy/legacy-button"
 import LegacySelect from "@/components/legacy/legacy-select"
 import type { TableState } from "@/lib/legacy-table"
 
-import { HelpButton } from "./capability-chrome"
+import { HelpButton, SEARCH_INPUT_CLASS } from "./capability-chrome"
 import { CAPABILITY_FILTER_OPTIONS, type CapabilityFilter } from "./capability-student-filters"
 
 const LENGTH_OPTIONS = ["10", "25", "50", "100"].map((value) => ({ value, label: value }))
-
-// The DataTables search input's own skin, reused for the external `#search_filter` box
-const SEARCH_CLASS =
-	"h-[40px] w-full rounded-[6px] border-2 border-[var(--bg-form-border)]! bg-[var(--bg-form)] px-[16px] py-[6px] text-[12px] leading-[22.2px] text-[var(--body-txt-inverse)] outline-none placeholder:text-[var(--grey)] focus:border-[var(--secondary)]!"
 
 type CapabilityStudentToolbarProps = {
 	filter: CapabilityFilter
@@ -29,11 +25,6 @@ type CapabilityStudentToolbarProps = {
 	onHelp: () => void
 }
 
-/**
- * `capability.blade.php:14-78` — the two control rows above the santri table. Legacy hides
- * DataTables' own length and search (`sDom: '<"d-none"lf>'`) and drives them from `#show_entry`
- * and `#search_filter` here instead (`capability-filter.js:1-17`).
- */
 const CapabilityStudentToolbar = ({
 	filter,
 	onFilterChange,
@@ -48,15 +39,10 @@ const CapabilityStudentToolbar = ({
 	onHelp,
 }: CapabilityStudentToolbarProps): JSX.Element => (
 	<>
-		{/* `.row.justify-content-between.mb-2` */}
 		<div className="mx-[-15px] mb-[8px] flex flex-wrap justify-between">
 			<div className="w-full px-[15px] min-[992px]:w-1/3">
 				<div className="mb-[24px] flex min-[992px]:mb-0">
 					<HelpButton onClick={onHelp} />
-					{/*
-					 * `a#tbr_btn_create_capability.btn.tbr_btn.tbr_btn-danger.btn-block.ml-3.tbr_w_228px`
-					 * — `.tbr_disabled` (opacity .5, no pointer events) until something is ticked
-					 */}
 					<LegacyButton
 						variant="danger"
 						loading={submitting}
@@ -78,7 +64,6 @@ const CapabilityStudentToolbar = ({
 			</div>
 		</div>
 
-		{/* `hr.tbr_divider_solid` (app.css 486-490) over porto's 22px `hr` margins */}
 		<hr className="my-[22px] h-[2px] border-0 bg-[var(--bg-primary)]" />
 
 		<div className="mx-[-15px] mb-[8px] flex flex-wrap">
@@ -107,7 +92,7 @@ const CapabilityStudentToolbar = ({
 					value={state.search}
 					placeholder="Search"
 					onChange={(event) => onStateChange({ ...state, search: event.target.value, page: 1 })}
-					className={SEARCH_CLASS}
+					className={SEARCH_INPUT_CLASS}
 				/>
 			</div>
 		</div>
