@@ -11,7 +11,15 @@
 // None of these lists is paged: legacy hand-builds the whole `['data' => …]` array and the browser
 // pages it, so each statement returns its complete set.
 
+import type { EntityManager } from "typeorm"
+
+import type { CardSqlRow } from "@admin/capabilities/capability-format"
 import { LOCAL_TIMESTAMP, TIMEZONE, truthy } from "@admin/common/sql"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
+import { Level } from "@shared/master/entities/level.entity"
 
 // ─── Level 1: academic years (`@academicYearList`) ───────────────────────────
 
@@ -127,26 +135,30 @@ export const CAPABILITY_STUDENTS_SQL = `SELECT sg.id AS "studentGradeId",
  * The academic year on the card hangs off the **student** (`$studentGrade->student->academicYear`),
  * which is a different column from `student_grades.current_academic_year` used for the lookup.
  */
-export const CAPABILITY_STUDENT_CARD_SQL = `SELECT sg.id AS "studentGradeId",
-		s.id AS "studentId",
-		s.nis,
-		sg.fullname AS "fullName",
-		sg.attach_photo AS "photoPath",
-		ay.year AS "academicYear",
-		l.name AS "levelName",
-		sg.grade::text AS grade,
-		sg.sub_grade AS "subGrade",
-		sg.father_fullname AS "fatherName",
-		sg.current_academic_year AS "currentAcademicYear",
-		cay.id AS "costAcademicYearId",
-		g.id AS "gradeId"
-	FROM tbr_student_grades sg
-	LEFT JOIN tbr_students s ON s.id = sg.student_id
-	LEFT JOIN tbr_levels l ON l.id = sg.level_id
-	LEFT JOIN tbr_academic_years ay ON ay.id = s.academic_year_id
-	LEFT JOIN tbr_academic_years cay ON cay.year = sg.current_academic_year
-	LEFT JOIN tbr_grades g ON g.label = sg.grade
-	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
+export const selectStudentCard = (manager: EntityManager, studentGradeId: number): Promise<CardSqlRow | undefined> =>
+	manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "studentGradeId")
+		.addSelect("s.id", "studentId")
+		.addSelect("s.nis", "nis")
+		.addSelect("sg.fullname", "fullName")
+		.addSelect("sg.attachPhoto", "photoPath")
+		.addSelect("ay.year", "academicYear")
+		.addSelect("l.name", "levelName")
+		.addSelect("sg.grade", "grade")
+		.addSelect("sg.subGrade", "subGrade")
+		.addSelect("sg.fatherFullname", "fatherName")
+		.addSelect("sg.currentAcademicYear", "currentAcademicYear")
+		.addSelect("cay.id", "costAcademicYearId")
+		.addSelect("g.id", "gradeId")
+		.leftJoin(Student, "s", "s.id = sg.studentId")
+		.leftJoin(Level, "l", "l.id = sg.levelId")
+		.leftJoin(AcademicYear, "ay", "ay.id = s.academicYearId")
+		.leftJoin(AcademicYear, "cay", "cay.year = sg.currentAcademicYear")
+		.leftJoin(Grade, "g", "g.label = sg.grade")
+		.where("sg.id = :studentGradeId", { studentGradeId })
+		.andWhere("sg.deletedAt IS NULL")
+		.getRawOne<CardSqlRow>()
 
 /**
  * `$student_grade->studentCapabilities()->oldest()->get()` — the whole history, oldest first,

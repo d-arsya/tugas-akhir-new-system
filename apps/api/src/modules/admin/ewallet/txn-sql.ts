@@ -2,8 +2,8 @@ import { EPOCH_SECONDS, LOCAL_TIMESTAMP, TIMEZONE, type SqlParams } from "@admin
 import { parseDmy } from "@admin/common/date-format"
 import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/balance"
 
-// Raw SQL for the transaction detail, the status update and Riwayat Transaksi — legacy
-// `EwalletController@transactionDetail/@transactionUpdate` and `EwalletTransactionHistoryController`.
+// Raw SQL for the transaction detail and Riwayat Transaksi — legacy
+// `EwalletController@transactionDetail` and `EwalletTransactionHistoryController`.
 //
 // The ewallet tables mix `bigint`, `numeric` and `varchar` ids:
 // `details.ewallet_transaction_id` and `items.ewallet_transaction_id` are numeric,
@@ -51,12 +51,6 @@ export const STUDENT_NAMES_SQL = `SELECT
 			ORDER BY g.created_at DESC, g.id DESC LIMIT 1) AS latest`
 
 export const MERCHANT_NAME_SQL = "SELECT name FROM tbr_merchants WHERE id::text = $1"
-
-// ─── Update (`@transactionUpdate`) ───────────────────────────────
-
-/** Row lock on the transaction, taken after the wallets (ascending) so no two updates can deadlock. */
-export const TRANSACTION_FOR_UPDATE_SQL = `SELECT id, payment_method AS "paymentMethod", status
-	FROM tbr_ewallet_transactions WHERE id = $1 FOR UPDATE`
 
 // ─── Riwayat: list, export ───────────────────────────────────────
 
@@ -128,9 +122,6 @@ export const HISTORY_DEFAULT_SORT: { orderBy: HistorySortKey; orderDir: "asc" | 
 
 export const historyCountSql = (where: string): string =>
 	`SELECT count(*)::int AS total FROM tbr_ewallet_transactions t ${ITEMS_JOIN} ${where}`
-
-/** `recordsTotal`: the base query, no filter. */
-export const HISTORY_TOTAL_SQL = "SELECT count(*)::int AS total FROM tbr_ewallet_transactions"
 
 /** `st.id DESC` breaks ties so a page never repeats or skips a row when the sort column ties. */
 export const historyListSql = (where: string, orderExpr: string, orderDir: string, limitExpr: string, offsetExpr: string): string =>

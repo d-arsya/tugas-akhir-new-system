@@ -29,7 +29,6 @@ import {
 	toItemRow,
 	YEAR_NOT_FOUND,
 	type CapabilitySqlRow,
-	type CardSqlRow,
 	type GradeSqlRow,
 	type HistorySqlRow,
 	type ItemSqlRow,
@@ -229,7 +228,7 @@ export class CapabilityAdminService {
 	 * is a 500 in legacy and a 404 here.
 	 */
 	private async findStudentContext(studentGradeId: number): Promise<StudentContext> {
-		const [row] = await this.dataSource.query<CardSqlRow[]>(sql.CAPABILITY_STUDENT_CARD_SQL, [studentGradeId])
+		const row = await sql.selectStudentCard(this.dataSource.manager, studentGradeId)
 		if (!row) throw new NotFoundException(STUDENT_NOT_FOUND)
 		if (row.costAcademicYearId === null) throw new NotFoundException(YEAR_NOT_FOUND)
 		if (row.gradeId === null) throw new NotFoundException(GRADE_NOT_FOUND)

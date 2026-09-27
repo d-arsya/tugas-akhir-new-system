@@ -27,9 +27,9 @@ import {
 	type InvoiceSqlRow,
 	type LinkSqlRow,
 	type Message,
-	type TransactionSqlRow,
 } from "@admin/payments/payment-format"
 import { RECEIPT_CONTENT_TYPE, receiptFileName } from "@admin/payments/payment-receipt-pdf"
+import { findInvoiceLinks, lockTransaction } from "@admin/payments/payment-queries"
 import { loadReceiptData, PaymentReceiptStore } from "@admin/payments/payment-receipt-store"
 import { insertLink, insertTransaction, resetInvoice } from "@admin/payments/payment-write"
 import * as sql from "@admin/payments/payment-sql"
@@ -66,7 +66,7 @@ export class PaymentAdminService {
 		const rows = await this.dataSource.query<InvoiceSqlRow[]>(sql.SELECT_INVOICES_SQL, [ids])
 		this.assertSelection(rows, dto.studentGradeId, ids)
 
-		const links = await this.dataSource.query<LinkSqlRow[]>(sql.SELECT_INVOICE_LINKS_SQL, [ids])
+		const links = await findInvoiceLinks(this.dataSource.manager, ids)
 		const billed = this.priceSelection(rows, links)
 
 		const items = rows.map((row) => ({
@@ -96,7 +96,7 @@ export class PaymentAdminService {
 			const rows = await manager.query<InvoiceSqlRow[]>(sql.SELECT_INVOICES_FOR_UPDATE_SQL, [ids])
 			this.assertSelection(rows, dto.studentGradeId, ids)
 
-			const links = await manager.query<LinkSqlRow[]>(sql.SELECT_INVOICE_LINKS_SQL, [ids])
+			const links = await findInvoiceLinks(manager, ids)
 			const billed = this.priceSelection(rows, links)
 
 			// Fix F-8: no invoice is ever settled by a zero-rupiah line. Anything already covered
@@ -171,10 +171,7 @@ export class PaymentAdminService {
 	 */
 	async cancel(transactionId: number, cancelNote: string): Promise<Message> {
 		return this.dataSource.transaction(async (manager) => {
-			const [transaction] = await manager.query<TransactionSqlRow[]>(
-				sql.SELECT_TRANSACTION_FOR_UPDATE_SQL,
-				[transactionId],
-			)
+			const transaction = await lockTransaction(manager, transactionId)
 			if (!transaction) throw new NotFoundException(NOT_FOUND)
 
 			const pivots = await manager.find(StudentInvoiceTransaction, {
@@ -194,10 +191,7 @@ export class PaymentAdminService {
 			await manager.update(StudentTransaction, { id: transactionId }, { status: "invalid", cancelNote })
 
 			// Read after the flip: this transaction's own links now report `invalid` and drop out.
-			const links =
-				ids.length > 0
-					? await manager.query<LinkSqlRow[]>(sql.SELECT_INVOICE_LINKS_SQL, [ids])
-					: []
+			const links = await findInvoiceLinks(manager, ids)
 			const valid = validTransactionIds(links)
 
 			for (const invoice of invoices) {
@@ -211,10 +205,7 @@ export class PaymentAdminService {
 	/** `updateTransaction`: the note always, the cancellation reason only while already `invalid`. */
 	async updateNote(transactionId: number, dto: UpdateTransactionNoteInput): Promise<Message> {
 		return this.dataSource.transaction(async (manager) => {
-			const [transaction] = await manager.query<TransactionSqlRow[]>(
-				sql.SELECT_TRANSACTION_FOR_UPDATE_SQL,
-				[transactionId],
-			)
+			const transaction = await lockTransaction(manager, transactionId)
 			if (!transaction) throw new NotFoundException(NOT_FOUND)
 
 			await manager.update(StudentTransaction, { id: transactionId }, { note: dto.note ?? null })

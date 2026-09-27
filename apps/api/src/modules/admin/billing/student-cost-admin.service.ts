@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { DataSource, Repository, type EntityManager, type QueryRunner } from "typeorm"
+import { DataSource, In, Repository, type EntityManager, type QueryRunner } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import {
@@ -66,6 +66,7 @@ export class StudentCostAdminService {
 		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
 		@InjectRepository(StudentCostTerm) private readonly terms: Repository<StudentCostTerm>,
 		@InjectRepository(Accountancy) private readonly accountancies: Repository<Accountancy>,
+		@InjectRepository(StudentCost) private readonly costs: Repository<StudentCost>,
 	) {}
 
 	/** Level 1 — `academicYearList()`: `exceptArchive()`, `ORDER BY year DESC`. */
@@ -85,14 +86,13 @@ export class StudentCostAdminService {
 	async findGrades(academicYearId: number): Promise<StudentCostGradeRow[]> {
 		await this.requireYear(academicYearId)
 
-		const [rows, totals] = await Promise.all([
+		const [rows, totalItems] = await Promise.all([
 			this.dataSource.query<{ gradeId: string; label: string | null; appliedCount: number }[]>(
 				sql.STUDENT_COST_GRADES_SQL,
 				[academicYearId],
 			),
-			this.dataSource.query<{ total: number }[]>(sql.STUDENT_COST_ITEM_TOTAL_SQL),
+			this.accountancies.countBy({ isStudentCost: true }),
 		])
-		const totalItems = totals[0]?.total ?? 0
 
 		return rows.map((row) => ({
 			gradeId: Number(row.gradeId),
@@ -158,8 +158,7 @@ export class StudentCostAdminService {
 		const grade = await this.requireGrade(gradeId)
 		const accountancy = await this.requireAccountancy(accountancyId)
 		const row = await this.findTermRow(academicYearId, accountancyId, String(grade.label ?? ""))
-		const lock = [year.year, grade.label]
-		const locked = await this.dataSource.query<unknown[]>(sql.STUDENT_COST_PERIOD_LOCK_SQL, lock)
+		const periodLocked = await sql.isPeriodLocked(this.dataSource.manager, year.year, grade.label)
 		const amounts = row === null ? new Map<string, number[]>() : await this.amountsByTerm([row.id])
 
 		return {
@@ -167,7 +166,7 @@ export class StudentCostAdminService {
 			academicYear: { id: year.id, year: year.year, costDateStart: year.costDateStart },
 			grade: { id: grade.id, label: grade.label },
 			term: row === null ? null : toTerm(row, amounts.get(row.id) ?? [], year.costDateStart),
-			periodLocked: locked.length > 0,
+			periodLocked,
 		}
 	}
 
@@ -231,12 +230,16 @@ export class StudentCostAdminService {
 		const grouped = new Map<string, number[]>()
 		if (termIds.length === 0) return grouped
 
-		type Row = { termId: string; amount: string }
-		const rows = await this.dataSource.query<Row[]>(sql.STUDENT_COST_AMOUNTS_SQL, [termIds])
+		const rows = await this.costs.find({
+			select: { id: true, stucoTermId: true, amount: true },
+			where: { stucoTermId: In(termIds.map(Number)) },
+			order: { stucoTermId: "ASC", id: "ASC" },
+		})
 		for (const row of rows) {
-			const bucket = grouped.get(row.termId)
+			const termId = String(row.stucoTermId)
+			const bucket = grouped.get(termId)
 			if (bucket) bucket.push(Number(row.amount))
-			else grouped.set(row.termId, [Number(row.amount)])
+			else grouped.set(termId, [Number(row.amount)])
 		}
 		return grouped
 	}

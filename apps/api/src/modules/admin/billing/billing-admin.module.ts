@@ -8,10 +8,23 @@ import { StudentCostAdminService } from "@admin/billing/student-cost-admin.servi
 import { Accountancy } from "@admin/common/entities/accountancy.entity"
 import { StudentCostTerm } from "@admin/common/entities/student-cost-term.entity"
 import { StudentCost } from "@admin/common/entities/student-cost.entity"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 
 @Module({
-	imports: [TypeOrmModule.forFeature([Accountancy, Grade, StudentCost, StudentCostTerm])],
+	imports: [
+		TypeOrmModule.forFeature([
+			Accountancy,
+			Grade,
+			Student,
+			StudentCapability,
+			StudentCost,
+			StudentCostTerm,
+			StudentGrade,
+		]),
+	],
 	controllers: [AccountancyAdminController, StudentCostAdminController],
 	providers: [AccountancyAdminService, StudentCostAdminService],
 })

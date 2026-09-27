@@ -91,29 +91,7 @@ SELECT COALESCE(SUM(e.total_balance) FILTER (WHERE e.ewalletable_type = ${STUDEN
 	COALESCE(SUM(e.total_balance) FILTER (WHERE e.ewalletable_type = ${MERCHANT}), 0)::text AS merchant
 FROM tbr_ewallets e ${where}`
 
-/** `ViewServiceProvider`: `EwalletTransaction::process()->count()`. */
-export const PROCESS_BADGE_SQL = "SELECT count(*)::int AS count FROM tbr_ewallet_transactions WHERE status = 'process'"
-
 // --- One wallet ------------------------------------------------------------------------
-
-export type WalletRow = {
-	id: string
-	uniqueId: string | null
-	ownerType: string | null
-	ownerId: string | null
-	isActive: boolean
-	studentName: string | null
-	studentGradeLevel: string | null
-	studentGradeNumber: string | null
-	studentFatherFullname: string | null
-}
-
-export const WALLET_BY_ID_SQL = `
-SELECT e.id::text AS id, e.unique_id::text AS "uniqueId", e.ewalletable_type AS "ownerType",
-	e.ewalletable_id AS "ownerId", e.is_active AS "isActive", e.student_name AS "studentName",
-	e.student_grade_level AS "studentGradeLevel", e.student_grade_number AS "studentGradeNumber",
-	e.student_father_fullname AS "studentFatherFullname"
-FROM tbr_ewallets e WHERE e.id = $1`
 
 export type StudentOwnerRow = {
 	nis: string | null

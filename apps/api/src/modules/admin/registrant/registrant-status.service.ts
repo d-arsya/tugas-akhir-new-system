@@ -10,6 +10,7 @@ import { copyDiseaseHistories } from "../../../shared/society/disease-history"
 import { generateMasterId } from "../../../shared/society/master-id"
 import { Registrant } from "@psb/entities/registrant.entity"
 import { Student } from "@santri/entities/student.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
 import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
 
 import { RegistrantMailService } from "./registrant-mail.service"
@@ -58,15 +59,7 @@ const validateStatus = (body: Record<string, unknown>): Partial<Record<StatusKey
 	return posted
 }
 
-type RegistrantRow = {
-	id: string
-	academic_year_id: string | null
-	level_id: string | null
-	nis: string | null
-	email: string | null
-	fullname: string | null
-	data_validation: string | null
-}
+type RegistrantRow = Pick<Registrant, "id" | "academicYearId" | "levelId" | "nis" | "email" | "fullname" | "dataValidation">
 
 // The grade row copies every society column; `*_whatsapp` are bigint here and varchar there
 const GRADE_COLUMNS = SOCIETY_COLUMNS.join(", ")
@@ -88,11 +81,11 @@ export class RegistrantStatusService {
 
 		try {
 			const before = await this.dataSource.transaction(async (manager) => {
-				const rows = (await manager.query(
-					`SELECT id, academic_year_id, level_id, nis, email, fullname, data_validation FROM tbr_registrants WHERE id = $1 FOR UPDATE`,
-					[registrantId],
-				)) as RegistrantRow[]
-				const row = rows[0]
+				const row = await manager.findOne(Registrant, {
+					select: { id: true, academicYearId: true, levelId: true, nis: true, email: true, fullname: true, dataValidation: true },
+					where: { id: registrantId },
+					lock: { mode: "pessimistic_write" },
+				})
 				if (!row) throw new NotFoundException("Pendaftar tidak ditemukan")
 
 				if (validated.approval_status === "approve") {
@@ -109,7 +102,7 @@ export class RegistrantStatusService {
 			})
 
 			// `sendEmailIfInvalid()`: only on the switch into "invalid"
-			if (before.data_validation !== "invalid" && validated.data_validation === "invalid") {
+			if (before.dataValidation !== "invalid" && validated.data_validation === "invalid") {
 				this.mail.invalidData({ email: before.email, fullname: before.fullname })
 			}
 			return { message: UPDATE_SUCCESS }
@@ -126,10 +119,10 @@ export class RegistrantStatusService {
 	 * A level/year pair with no quota row crashed legacy (`$quota->quota` on null) into "Data gagal diupdate.".
 	 */
 	private async checkQuotaFull(manager: EntityManager, row: RegistrantRow): Promise<void> {
-		if (row.level_id === null || row.academic_year_id === null) throw new UnprocessableEntityException(UPDATE_FAILED)
+		if (row.levelId === null || row.academicYearId === null) throw new UnprocessableEntityException(UPDATE_FAILED)
 		const quota = await manager.findOne(LevelAcademicYear, {
 			select: { id: true, quota: true },
-			where: { levelId: Number(row.level_id), academicYearId: Number(row.academic_year_id) },
+			where: { levelId: Number(row.levelId), academicYearId: Number(row.academicYearId) },
 			order: { id: "ASC" },
 		})
 		if (!quota) throw new UnprocessableEntityException(UPDATE_FAILED)
@@ -144,7 +137,7 @@ export class RegistrantStatusService {
 				(SELECT count(*) FROM tbr_student_grades sg
 					JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
 					WHERE sg.deleted_at IS NULL AND s.academic_year_id = $2 AND sg.level_id = $1 AND sg.grade_note = 'tinggal kelas') AS students`,
-			[row.level_id, row.academic_year_id],
+			[row.levelId, row.academicYearId],
 		)) as Array<{ registrants: string; students: string }>
 		const used = Number(counts[0]?.registrants ?? 0) + Number(counts[0]?.students ?? 0)
 		if (Number(quota.quota ?? 0) - used <= 0) throw new UnprocessableEntityException("Kuota sudah penuh")
@@ -167,7 +160,7 @@ export class RegistrantStatusService {
 			if (taken.length > 0) throw new UnprocessableEntityException("Email sudah ada di data santri.")
 		}
 
-		const academicYearId = Number(row.academic_year_id)
+		const academicYearId = Number(row.academicYearId)
 		const nis = await generateMasterId(manager, academicYearId)
 		await manager.update(Registrant, { id: Number(row.id) }, { nis })
 
@@ -181,10 +174,15 @@ export class RegistrantStatusService {
 		)) as Array<{ id: string }>
 		const studentId = Number(students[0]?.id)
 
-		const grades = (await manager.query("SELECT min(label) AS grade FROM tbr_grades WHERE level_id = $1", [row.level_id])) as Array<{
-			grade: string | null
-		}>
-		const grade = grades[0]?.grade === null || grades[0]?.grade === undefined ? 1 : Number(grades[0].grade)
+		const lowest =
+			row.levelId === null
+				? undefined
+				: await manager
+						.createQueryBuilder(Grade, "grade")
+						.select("MIN(grade.label)", "label")
+						.where("grade.levelId = :levelId", { levelId: row.levelId })
+						.getRawOne<{ label: string | null }>()
+		const grade = lowest?.label === null || lowest?.label === undefined ? 1 : Number(lowest.label)
 
 		const inserted = (await manager.query(
 			`INSERT INTO tbr_student_grades (student_id, level_id, grade, grade_status, grade_note, registered_by_admin,

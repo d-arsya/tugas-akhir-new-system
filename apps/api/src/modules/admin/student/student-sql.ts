@@ -57,9 +57,6 @@ export const GRADE_LIST_SQL = `SELECT p.grade, p.level_id AS "levelId", l.name A
 export const ROSTER_EXISTS_SQL = `SELECT EXISTS (SELECT 1 FROM tbr_student_grades
 		WHERE deleted_at IS NULL AND current_academic_year = $1 AND grade = $2 AND level_id = $3) AS exists`
 
-/** `Grade::all()->pluck('label')` → `max()` (empty → 0) */
-export const MAX_GRADE_SQL = `SELECT COALESCE(MAX(label), 0)::int AS "maxGrade" FROM tbr_grades`
-
 /**
  * `studentList:317-354`: `->latest()->get()` (created_at desc; `id` breaks ties). The photo, the date and
  * the parent cell are shaped in `student-format.ts`.
@@ -90,9 +87,6 @@ export const DETAIL_SQL = `SELECT sg.id, sg.student_id AS "studentId", s.nis, s.
 	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
 
 // ─── Export (`StudentExport::view`) ──────────────────────────────────────────
-
-export const EXPORT_SETTINGS_SQL = `SELECT id, COALESCE(status, false) AS status, COALESCE(custom_name, "default", '') AS label
-	FROM tbr_setting_forms ORDER BY id`
 
 /**
  * The export's rows, in the roster's order. `SocietyGetterTrait::getFullAddress()` (RT and RW swapped, kept):

@@ -105,7 +105,7 @@ const ownerTypeOf = (type: string | null): EwalletOwnerType | null => {
 }
 
 /** A valid Cash top-up or withdrawal is final (decision taken for this port). */
-const isEditable = (paymentMethod: string | null, status: string): boolean =>
+const isEditable = (paymentMethod: string | null, status: string | null): boolean =>
 	!(paymentMethod === "Cash" && status === "valid")
 
 @Injectable()
@@ -115,6 +115,7 @@ export class EwalletTxnService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly storageService: StorageService,
+		@InjectRepository(EwalletTransaction) private readonly transactions: Repository<EwalletTransaction>,
 		@InjectRepository(EwalletTransactionItem) private readonly transactionItems: Repository<EwalletTransactionItem>,
 	) {}
 
@@ -169,11 +170,11 @@ export class EwalletTxnService {
 				const wallets = (await walletsAffectedBy(manager, transactionId)).sort((a, b) => a - b)
 				for (const walletId of wallets) await lockWallet(manager, walletId)
 
-				const rows = await manager.query<Array<{ id: string; paymentMethod: string | null; status: string }>>(
-					sql.TRANSACTION_FOR_UPDATE_SQL,
-					[transactionId],
-				)
-				const current = rows[0]
+				const current = await manager.findOne(EwalletTransaction, {
+					select: { id: true, paymentMethod: true, status: true },
+					where: { id: transactionId },
+					lock: { mode: "pessimistic_write" },
+				})
 				if (!current) throw new NotFoundException(NOT_FOUND)
 				if (!isEditable(current.paymentMethod, current.status)) throw new UnprocessableEntityException(CASH_LOCKED)
 
@@ -203,8 +204,8 @@ export class EwalletTxnService {
 		const limitExpr = pageParams.add(query.limit)
 		const offsetExpr = pageParams.add((query.page - 1) * query.limit)
 
-		const [totals, filtered, rows] = await Promise.all([
-			this.dataSource.query<Array<{ total: number }>>(sql.HISTORY_TOTAL_SQL),
+		const [total, filtered, rows] = await Promise.all([
+			this.transactions.count(),
 			this.dataSource.query<Array<{ total: number }>>(sql.historyCountSql(filterWhere), filterParams.values),
 			this.dataSource.query<HistoryListSqlRow[]>(
 				sql.historyListSql(pageWhere, sql.HISTORY_SORT_SQL[orderBy], orderDir, limitExpr, offsetExpr),
@@ -225,7 +226,7 @@ export class EwalletTxnService {
 				// `_partials/actions.blade.php` — the link exists only for a valid row
 				target: row.status !== "valid" ? "none" : row.type === "purchase" ? "history" : "transaction",
 			})),
-			recordsTotal: totals[0]?.total ?? 0,
+			recordsTotal: total,
 			recordsFiltered: filtered[0]?.total ?? 0,
 		}
 	}

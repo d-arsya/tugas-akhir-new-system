@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, UnprocessableEntityException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { DataSource, In } from "typeorm"
 import type { CapabilityItemRow, CapabilityMassPage, CapabilityMassResult, CapabilitySelectionResult } from "@roja/types"
 
 import { toAmount } from "@shared/billing/invoice-calculator"
@@ -35,15 +35,6 @@ const STORE_SUCCESS = "Data berhasil disimpan ke dalam basis data."
 const NOT_FOUND = "Kelas atau tahun ajaran tidak ditemukan."
 const STALE_SELECTION = "Santri yang dipilih tidak sesuai dengan kelas dan tahun ajaran ini."
 
-type ContextRow = { academicYearId: string; year: string | null; gradeId: string; label: string | null }
-type SelectionRow = {
-	studentGradeId: string
-	studentId: string | null
-	fullName: string | null
-	currentAcademicYear: string | null
-	grade: string | null
-	nis: string | null
-}
 type ApprovedItemRow = { studentGradeId: string; capabilityId: string; accountancyId: string | null; amount: string | null }
 
 @Injectable()
@@ -67,8 +58,8 @@ export class MassCapabilityService {
 
 	// ─── Shared loading ────────────────────────────────────────────────────────
 
-	private async context(academicYearId: number, gradeId: number): Promise<ContextRow> {
-		const [row] = await this.dataSource.query<ContextRow[]>(sql.SELECT_CONTEXT_SQL, [academicYearId, gradeId])
+	private async context(academicYearId: number, gradeId: number): Promise<sql.ContextRow> {
+		const row = await sql.selectContext(this.dataSource.manager, academicYearId, gradeId)
 		if (!row) throw new NotFoundException(NOT_FOUND)
 		return row
 	}
@@ -78,14 +69,14 @@ export class MassCapabilityService {
 	 * global session key let a tab on grade 3 post its santri into a grade 5 write; the ids come
 	 * from the client now, so this is all that stands between a crafted body and another grade.
 	 */
-	private async selection(context: ContextRow, studentGradeIds: number[]): Promise<SelectionRow[]> {
-		const rows = await this.dataSource.query<SelectionRow[]>(sql.SELECT_SELECTION_SQL, [studentGradeIds])
+	private async selection(context: sql.ContextRow, studentGradeIds: number[]): Promise<sql.SelectionRow[]> {
+		const rows = await sql.selectSelection(this.dataSource.manager, studentGradeIds)
 		const belongs = rows.filter((row) => row.currentAcademicYear === context.year && row.grade === context.label)
 		if (belongs.length !== studentGradeIds.length) throw new UnprocessableEntityException(STALE_SELECTION)
 		return belongs
 	}
 
-	private costTerms(context: ContextRow): Promise<CostTermRow[]> {
+	private costTerms(context: sql.ContextRow): Promise<CostTermRow[]> {
 		return this.dataSource.query<CostTermRow[]>(sql.SELECT_COST_TERMS_SQL, [context.academicYearId, context.label])
 	}
 
@@ -163,7 +154,7 @@ export class MassCapabilityService {
 		return this.toPage(context, students, !sameAccounts(studentGradeIds, approved))
 	}
 
-	private toPage(context: ContextRow, students: SelectionRow[], specialCondition: boolean): CapabilityMassPage {
+	private toPage(context: sql.ContextRow, students: sql.SelectionRow[], specialCondition: boolean): CapabilityMassPage {
 		return {
 			academicYear: { id: Number(context.academicYearId), year: context.year },
 			grade: { id: Number(context.gradeId), label: context.label === null ? null : Number(context.label) },
@@ -235,7 +226,12 @@ export class MassCapabilityService {
 		let missingPrevious = 0
 
 		await this.dataSource.transaction(async (manager) => {
-			await manager.query(sql.LOCK_CAPABILITIES_SQL, [dto.studentGradeIds])
+			await manager.find(StudentCapability, {
+				select: { id: true },
+				where: { studentGradeId: In(dto.studentGradeIds) },
+				order: { id: "ASC" },
+				lock: { mode: "pessimistic_write" },
+			})
 			// A row inserted by hand with an explicit id leaves the sequence behind MAX(id) and the next
 			// insert collides on the primary key — P2-B's guard, run once per batch.
 			await manager.query(SYNC_CAPABILITY_SEQUENCE_SQL)

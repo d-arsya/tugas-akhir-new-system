@@ -16,6 +16,23 @@
 // `tbr_student_capabilities` and `tbr_student_cost_capabilities` carry no `deleted_at` at all —
 // there is no soft delete to scope out, and no FK, UNIQUE or CHECK constraint anywhere.
 
+import { In, IsNull, type EntityManager } from "typeorm"
+
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
+
+export type ContextRow = { academicYearId: string; year: string | null; gradeId: string; label: string | null }
+export type SelectionRow = {
+	studentGradeId: string
+	studentId: string | null
+	fullName: string | null
+	currentAcademicYear: string | null
+	grade: string | null
+	nis: string | null
+}
+
 // ─── Route context ───────────────────────────────────────────────────────────
 
 /**
@@ -27,13 +44,20 @@
  * every route in the port takes the id, and `label` is read back out here for the cost-term
  * lookup, which genuinely keys on the label.
  */
-export const SELECT_CONTEXT_SQL = `SELECT ay.id AS "academicYearId",
-		ay.year,
-		g.id AS "gradeId",
-		g.label::text AS label
-	FROM tbr_academic_years ay
-	CROSS JOIN tbr_grades g
-	WHERE ay.id = $1 AND g.id = $2`
+export const selectContext = (
+	manager: EntityManager,
+	academicYearId: number,
+	gradeId: number,
+): Promise<ContextRow | undefined> =>
+	manager
+		.createQueryBuilder(AcademicYear, "ay")
+		.select("ay.id", "academicYearId")
+		.addSelect("ay.year", "year")
+		.addSelect("g.id", "gradeId")
+		.addSelect("g.label", "label")
+		.innerJoin(Grade, "g", "g.id = :gradeId", { gradeId })
+		.where("ay.id = :academicYearId", { academicYearId })
+		.getRawOne<ContextRow>()
 
 // ─── The selection ───────────────────────────────────────────────────────────
 
@@ -48,16 +72,19 @@ export const SELECT_CONTEXT_SQL = `SELECT ay.id AS "academicYearId",
  * `StudentGrade` uses `SoftDeletes`; the ordering is the port's own — legacy emitted no
  * `ORDER BY` and took whatever Postgres handed back.
  */
-export const SELECT_SELECTION_SQL = `SELECT sg.id AS "studentGradeId",
-		sg.student_id AS "studentId",
-		sg.fullname AS "fullName",
-		sg.current_academic_year AS "currentAcademicYear",
-		sg.grade::text AS grade,
-		s.nis
-	FROM tbr_student_grades sg
-	LEFT JOIN tbr_students s ON s.id = sg.student_id
-	WHERE sg.id = ANY($1) AND sg.deleted_at IS NULL
-	ORDER BY sg.id`
+export const selectSelection = (manager: EntityManager, studentGradeIds: number[]): Promise<SelectionRow[]> =>
+	manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "studentGradeId")
+		.addSelect("sg.studentId", "studentId")
+		.addSelect("sg.fullname", "fullName")
+		.addSelect("sg.currentAcademicYear", "currentAcademicYear")
+		.addSelect("sg.grade", "grade")
+		.addSelect("s.nis", "nis")
+		.leftJoin(Student, "s", "s.id = sg.studentId")
+		.where({ id: In(studentGradeIds), deletedAt: IsNull() })
+		.orderBy("sg.id", "ASC")
+		.getRawMany<SelectionRow>()
 
 /**
  * `@storeToSession`'s two gates, in one pass.
@@ -161,14 +188,3 @@ export const REPLICATE_HIDDEN_ITEMS_SQL = `INSERT INTO tbr_student_cost_capabili
 	FROM tbr_student_cost_capabilities sc
 	WHERE sc.student_cap_id = $2 AND NOT (sc.accountancy_id = ANY($3))
 	ORDER BY sc.id`
-
-/**
- * Locks the santri's capability rows before the batch writes any of them, in id order, so two
- * operators publishing overlapping selections serialise instead of interleaving. Legacy had no
- * transaction and no lock anywhere in this controller.
- */
-export const LOCK_CAPABILITIES_SQL = `SELECT c.id
-	FROM tbr_student_capabilities c
-	WHERE c.student_grade_id = ANY($1)
-	ORDER BY c.id
-	FOR UPDATE`

@@ -3,6 +3,7 @@ import type { EntityManager } from "typeorm"
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
 import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
+import { Level } from "@shared/master/entities/level.entity"
 
 import { createAlumni } from "./student-alumni"
 import {
@@ -54,11 +55,15 @@ const nextGradeOf = async (manager: EntityManager, grade: string | null): Promis
 		}
 	}
 	// `Grade::with('level')->where('label', $next)->first()->level->id` — no grade or no level dies
-	const levels = (await manager.query(
-		`SELECT l.id FROM tbr_grades g LEFT JOIN tbr_levels l ON l.id = g.level_id WHERE g.label = $1 ORDER BY g.id LIMIT 1`,
-		[next],
-	)) as Array<{ id: string | null }>
-	const levelId = levels[0]?.id ?? null
+	const level = await manager
+		.createQueryBuilder(Grade, "g")
+		.select("l.id", "id")
+		.leftJoin(Level, "l", "l.id = g.levelId")
+		.where("g.label = :label", { label: next })
+		.orderBy("g.id")
+		.limit(1)
+		.getRawOne<{ id: string | null }>()
+	const levelId = level?.id ?? null
 	if (levelId === null) return fail(UPDATE_FAILED)
 	return { grade: next, levelId }
 }

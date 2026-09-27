@@ -12,6 +12,12 @@
 // apart — every statement below uses the **label**, which is also what the out-of-scope
 // Kesanggupan module reads (plan decision).
 
+import type { EntityManager } from "typeorm"
+
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
+
 /**
  * `AcademicYearService::getStatusAkademik()`, flattened — the same expression the Tahun Ajaran
  * list uses, duplicated rather than shared so the two modules stay independent.
@@ -60,15 +66,6 @@ export const STUDENT_COST_GRADES_SQL = `SELECT g.id AS "gradeId",
 	FROM tbr_grades g
 	ORDER BY g.label DESC, g.id DESC`
 
-/**
- * `StudentCostService::appliedCostItem()`'s denominator — `Accountancy::where(['is_student_cost'
- * => 1])->count()`, **9** today. It counts root accounts too, while the level-3 list narrows to
- * `parent_id IS NOT NULL`; the two happen to agree right now because no root account is flagged.
- */
-export const STUDENT_COST_ITEM_TOTAL_SQL = `SELECT COUNT(*)::int AS total
-	FROM tbr_accountancies a
-	WHERE a.is_student_cost`
-
 /** The level-2 and level-3 page headers: the year plus its cost period. */
 export const STUDENT_COST_YEAR_SQL = `SELECT ay.id,
 		ay.year,
@@ -113,18 +110,6 @@ export const STUDENT_COST_ACCOUNTS_SQL = `SELECT a.id AS "accountancyId",
 	ORDER BY a.id`
 
 /**
- * `StudentCost::where('stuco_term_id', $id)->get()` for every visible term at once.
- *
- * `ORDER BY c.id` is **added** for the same reason: the amount order is the user-visible option
- * order, both in the "Option" cell and in the level-4 repeater, and `SELECT *` is unordered in
- * Postgres. Three terms (221, 222, 223) carry 3, 3 and 4 amounts.
- */
-export const STUDENT_COST_AMOUNTS_SQL = `SELECT c.stuco_term_id AS "termId", c.amount
-	FROM tbr_student_costs c
-	WHERE c.stuco_term_id = ANY($1::bigint[])
-	ORDER BY c.stuco_term_id, c.id`
-
-/**
  * `StudentCostService::isAccountancyAppliedAll()` — the header check-all box's initial state.
  * True only when the year+grade has at least one term and every one of them is applied.
  */
@@ -144,12 +129,19 @@ export const STUDENT_COST_APPLIED_TOTALS_SQL = `SELECT COUNT(*)::int AS total,
  * No `deleted_at` filter: legacy builds this with the query builder, not the `StudentGrade`
  * model, so its `SoftDeletes` scope never applies.
  */
-export const STUDENT_COST_PERIOD_LOCK_SQL = `SELECT 1
-	FROM tbr_student_capabilities sc
-	LEFT JOIN tbr_students s ON s.id = sc.student_id
-	LEFT JOIN tbr_student_grades sg ON sg.student_id = s.id
-	WHERE sc.status = 'approve' AND sg.current_academic_year = $1 AND sg.grade = $2
-	LIMIT 1`
+export const isPeriodLocked = (
+	manager: EntityManager,
+	year: string | null,
+	grade: number | null,
+): Promise<boolean> =>
+	manager
+		.createQueryBuilder(StudentCapability, "sc")
+		.leftJoin(Student, "s", "s.id = sc.studentId")
+		.leftJoin(StudentGrade, "sg", "sg.studentId = s.id")
+		.where("sc.status = 'approve'")
+		.andWhere("sg.currentAcademicYear = :year", { year })
+		.andWhere("sg.grade = :grade", { grade })
+		.getExists()
 
 // ─── Writes ─────────────────────────────────────────────────────────────────────
 

@@ -31,6 +31,7 @@ import { buildWalletWorkbook } from "@admin/ewallet/wallet-export"
 import { indoDateTime, ownerKind, ownerLabel, storageKey } from "@admin/ewallet/wallet-format"
 import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/ewallet/wallet-sql"
+import { EwalletTransaction } from "@ewallet/entities/ewallet-transaction.entity"
 import { Ewallet } from "@ewallet/entities/ewallet.entity"
 
 // Legacy `EwalletController`: Akun Dompet list, widgets, badge, detail, per-wallet transactions,
@@ -51,6 +52,7 @@ export class EwalletWalletService {
 		private readonly configService: ConfigService<Env>,
 		private readonly redisService: RedisService,
 		@InjectRepository(Ewallet) private readonly wallets: Repository<Ewallet>,
+		@InjectRepository(EwalletTransaction) private readonly transactions: Repository<EwalletTransaction>,
 	) {}
 
 	/** `@ewalletListAmar` — server-side paged; `recordsTotal` is the unfiltered base query. */
@@ -101,8 +103,7 @@ export class EwalletWalletService {
 
 	/** `ViewServiceProvider`: `EwalletTransaction::process()->count()`. */
 	async badge(): Promise<EwalletBadge> {
-		const rows = await this.dataSource.query<{ count: number }[]>(sql.PROCESS_BADGE_SQL)
-		return { count: rows[0]?.count ?? 0 }
+		return { count: await this.transactions.countBy({ status: "process" }) }
 	}
 
 	/** `@export` — `Laporan Saldo Akhir - {member} - {status}.xlsx`. */
@@ -253,14 +254,28 @@ export class EwalletWalletService {
 		email: string | null
 		blocked: boolean
 	}> {
-		const wallets = await this.dataSource.query<sql.WalletRow[]>(sql.WALLET_BY_ID_SQL, [ewalletId])
-		const wallet = wallets[0]
+		const wallet = await this.wallets.findOne({
+			select: {
+				id: true,
+				uniqueId: true,
+				ewalletableType: true,
+				ewalletableId: true,
+				isActive: true,
+				studentName: true,
+				studentGradeLevel: true,
+				studentGradeNumber: true,
+				studentFatherFullname: true,
+			},
+			where: { id: ewalletId },
+		})
 		if (!wallet) throw new NotFoundException("Data dompet tidak ditemukan.")
-		const kind = ownerKind(wallet.ownerType)
-		if (kind === null || wallet.ownerId === null) throw new NotFoundException("Pemilik dompet tidak ditemukan.")
+		const kind = ownerKind(wallet.ewalletableType)
+		const ownerId = wallet.ewalletableId
+		if (kind === null || ownerId === null) throw new NotFoundException("Pemilik dompet tidak ditemukan.")
+		const summary = { uniqueId: wallet.uniqueId, isActive: wallet.isActive as boolean }
 
 		if (kind === "santri") {
-			const owners = await this.dataSource.query<sql.StudentOwnerRow[]>(sql.STUDENT_OWNER_SQL, [wallet.ownerId])
+			const owners = await this.dataSource.query<sql.StudentOwnerRow[]>(sql.STUDENT_OWNER_SQL, [ownerId])
 			const row = owners[0]
 			if (!row) throw new NotFoundException("Pemilik dompet tidak ditemukan.")
 			const owner: EwalletStudentOwner = {
@@ -276,16 +291,16 @@ export class EwalletWalletService {
 				studentStatus: row.studentStatus,
 			}
 			return {
-				wallet: { uniqueId: wallet.uniqueId, isActive: wallet.isActive },
+				wallet: summary,
 				owner,
 				kind,
-				ownerId: wallet.ownerId,
+				ownerId,
 				email: row.email,
 				blocked: row.isBlocked === true,
 			}
 		}
 
-		const owners = await this.dataSource.query<sql.MerchantOwnerRow[]>(sql.MERCHANT_OWNER_SQL, [wallet.ownerId])
+		const owners = await this.dataSource.query<sql.MerchantOwnerRow[]>(sql.MERCHANT_OWNER_SQL, [ownerId])
 		const row = owners[0]
 		if (!row) throw new NotFoundException("Pemilik dompet tidak ditemukan.")
 		const owner: EwalletMerchantOwner = {
@@ -298,10 +313,10 @@ export class EwalletWalletService {
 			uniqueNumber: row.uniqueNumber,
 		}
 		return {
-			wallet: { uniqueId: wallet.uniqueId, isActive: wallet.isActive },
+			wallet: summary,
 			owner,
 			kind,
-			ownerId: wallet.ownerId,
+			ownerId,
 			email: row.email,
 			blocked: row.isBlocked === true,
 		}

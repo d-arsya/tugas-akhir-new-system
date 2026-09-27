@@ -23,12 +23,11 @@ import {
 	validTransactionIds,
 	type BillDetailSqlRow,
 	type BillSqlRow,
-	type CardSqlRow,
-	type LinkSqlRow,
 	type TransactionSqlRow,
 } from "@admin/payments/invoice-format"
 import { SqlParams } from "@admin/common/sql"
 import { Accountancy } from "@admin/common/entities/accountancy.entity"
+import { findBillLinks, findStudentCardRow } from "@admin/payments/invoice-queries"
 import * as sql from "@admin/payments/invoice-sql"
 import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 
@@ -87,7 +86,7 @@ export class InvoiceAdminService {
 			where: { studentGradeId: String(studentGradeId), validityStatus: true },
 			order: { id: "ASC" },
 		})
-		const links = await this.fetchLinks(invoices.map((invoice) => Number(invoice.id)))
+		const links = await findBillLinks(this.dataSource, invoices.map((invoice) => Number(invoice.id)))
 		const costOptions = await this.accountancies.find({
 			select: { id: true, name: true },
 			where: { parentId: Not(IsNull()), isStudentCost: true },
@@ -119,8 +118,8 @@ export class InvoiceAdminService {
 		const limit = params.add(query.limit)
 		const offset = params.add((query.page - 1) * query.limit)
 
-		const [totals, filtered, rows] = await Promise.all([
-			this.dataSource.query<{ total: number }[]>(sql.BILL_TOTAL_SQL, [studentGradeId]),
+		const [recordsTotal, filtered, rows] = await Promise.all([
+			this.invoices.countBy({ studentGradeId: String(studentGradeId), validityStatus: true }),
 			this.dataSource.query<{ total: number }[]>(sql.billCountSql(where), params.values.slice(0, -2)),
 			this.dataSource.query<BillSqlRow[]>(
 				sql.billRowsSql(where, sql.billOrderBy(query), limit, offset),
@@ -128,7 +127,7 @@ export class InvoiceAdminService {
 			),
 		])
 
-		const links = await this.fetchLinks(rows.map((row) => Number(row.id)))
+		const links = await findBillLinks(this.dataSource, rows.map((row) => Number(row.id)))
 		const valid = validTransactionIds(links)
 		const linkRows = links.map(toLinkRow)
 
@@ -156,7 +155,7 @@ export class InvoiceAdminService {
 					selectable: row.status === "unpaid",
 				}
 			}),
-			recordsTotal: totals[0]?.total ?? 0,
+			recordsTotal,
 			recordsFiltered: filtered[0]?.total ?? 0,
 		}
 	}
@@ -181,7 +180,7 @@ export class InvoiceAdminService {
 		const transactions = await this.dataSource.query<
 			{ id: string; transactionCode: string | null; note: string | null; paidAt: string | null; pay: string | null }[]
 		>(sql.INVOICE_TRANSACTIONS_SQL, [invoiceId])
-		const links = await this.dataSource.query<LinkSqlRow[]>(sql.INVOICE_LINKS_SQL, [invoiceId])
+		const links = await findBillLinks(this.dataSource, [invoiceId])
 
 		const amount = toAmount(invoice.amount)
 		const totalPaid = calculatePaid(toInvoiceRow(invoice), links.map(toLinkRow), validTransactionIds(links))
@@ -223,7 +222,7 @@ export class InvoiceAdminService {
 	// ─── internals ───────────────────────────────────────────────
 
 	private async findStudentCard(studentGradeId: number): Promise<InvoiceStudentCard> {
-		const [row] = await this.dataSource.query<CardSqlRow[]>(sql.STUDENT_CARD_SQL, [studentGradeId])
+		const row = await findStudentCardRow(this.dataSource, studentGradeId)
 		// Legacy binds `StudentGrade` through the router, so a missing or soft-deleted grade 404s
 		if (!row) throw new NotFoundException("Santri tidak ditemukan")
 
@@ -253,11 +252,6 @@ export class InvoiceAdminService {
 			description: row.description,
 			...(status === "invalid" ? { cancelNote: row.cancelNote } : {}),
 		}))
-	}
-
-	private async fetchLinks(invoiceIds: number[]): Promise<LinkSqlRow[]> {
-		if (invoiceIds.length === 0) return []
-		return this.dataSource.query<LinkSqlRow[]>(sql.BILL_LINKS_SQL, [invoiceIds])
 	}
 
 	/** PHP `storage_url()`: an absolute URL passes through, anything else is an S3 key. */

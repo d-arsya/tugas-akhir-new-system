@@ -18,12 +18,7 @@ import type { DataSource } from "typeorm"
 import type { CapabilityStatus } from "@roja/types"
 
 import type { StorageService } from "@core/storage/storage.service"
-import type {
-	CapabilityDocumentData,
-	CapabilityDocumentItem,
-	CapabilityDocumentSchool,
-	CapabilityDocumentStudent,
-} from "@admin/capabilities/capability-document"
+import type { CapabilityDocumentData, CapabilityDocumentItem } from "@admin/capabilities/capability-document"
 import * as docSql from "@admin/capabilities/capability-document-sql"
 import { CAPABILITY_NOT_FOUND, STUDENT_NOT_FOUND } from "@admin/capabilities/capability-format"
 import { CAPABILITY_CONTENT_TYPE, renderCapabilityPdf } from "@admin/capabilities/capability-pdf"
@@ -52,18 +47,16 @@ export const loadCapabilityDocument = async (
 	if (!capability) throw new NotFoundException(CAPABILITY_NOT_FOUND)
 	if (Number(capability.studentGradeId ?? 0) !== studentGradeId) throw new NotFoundException(CAPABILITY_NOT_FOUND)
 
-	const [student] = await dataSource.query<CapabilityDocumentStudent[]>(docSql.CAPABILITY_DOCUMENT_STUDENT_SQL, [
-		studentGradeId,
-	])
+	const student = await docSql.selectDocumentStudent(dataSource.manager, studentGradeId)
 	if (!student) throw new NotFoundException(STUDENT_NOT_FOUND)
 
-	const [items, schools] = await Promise.all([
+	const [items, school] = await Promise.all([
 		dataSource.query<CapabilityDocumentItem[]>(docSql.CAPABILITY_DOCUMENT_ITEMS_SQL, [
 			capabilityId,
 			student.academicYearId,
 			student.grade,
 		]),
-		dataSource.query<CapabilityDocumentSchool[]>(docSql.CAPABILITY_DOCUMENT_SCHOOL_SQL),
+		docSql.selectDocumentSchool(dataSource.manager),
 	])
 
 	return {
@@ -71,7 +64,7 @@ export const loadCapabilityDocument = async (
 		approveDate: capability.approveDate,
 		student,
 		items,
-		school: schools[0] ?? null,
+		school: school ?? null,
 	}
 }
 

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { DataSource, Not, Repository } from "typeorm"
+import { DataSource, In, Not, Repository } from "typeorm"
 
 import type {
 	AdminMessageResult,
@@ -19,6 +19,7 @@ import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
 import { Registrant } from "@psb/entities/registrant.entity"
+import { SettingForm } from "@psb/entities/setting-form.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Level } from "@shared/master/entities/level.entity"
 
@@ -54,6 +55,7 @@ export class RegistrantAdminService {
 		@InjectRepository(Level) private readonly levels: Repository<Level>,
 		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
 		@InjectRepository(Registrant) private readonly registrants: Repository<Registrant>,
+		@InjectRepository(SettingForm) private readonly settingForms: Repository<SettingForm>,
 	) {}
 
 	/** `Level::where('status', 'show')->get()` */
@@ -107,12 +109,13 @@ export class RegistrantAdminService {
 		if (!academicYear) throw new NotFoundException("Tahun ajaran tidak ditemukan")
 		const params: Array<number | string> = status === "approve" || status === "reject" ? [academicYearId, status] : [academicYearId]
 		const rows = (await this.dataSource.query(exportSql(status), params)) as ListRow[]
-		const settings = (await this.dataSource.query(
-			`SELECT id, status, coalesce(custom_name, "default") AS label FROM tbr_setting_forms WHERE id IN (1, 19)`,
-		)) as Array<{ id: string; status: boolean | null; label: string | null }>
+		const settings = await this.settingForms.find({
+			select: { id: true, status: true, customName: true, default: true },
+			where: { id: In([1, 19]) },
+		})
 		const column = (id: number): string | null => {
 			const setting = settings.find((row) => Number(row.id) === id)
-			return setting?.status === true ? (setting.label ?? "").toUpperCase() : null
+			return setting?.status === true ? (setting.customName ?? setting.default ?? "").toUpperCase() : null
 		}
 		const body = await buildRegistrantWorkbook({
 			rows,

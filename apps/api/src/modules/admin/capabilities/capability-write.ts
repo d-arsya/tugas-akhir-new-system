@@ -1,4 +1,4 @@
-import type { EntityManager } from "typeorm"
+import { In, type EntityManager } from "typeorm"
 
 import { toAmount } from "@shared/billing/invoice-calculator"
 import { unmaskAmount } from "@admin/common/amount-mask"
@@ -6,6 +6,7 @@ import type { CapabilityWriteInput } from "@admin/capabilities/dto/capability-pu
 import type { GeneratedInvoice, GeneratorItem } from "@admin/capabilities/invoice-generator"
 import { invoiceUniqueId } from "@admin/capabilities/invoice-generator"
 import * as sql from "@admin/capabilities/publish-sql"
+import { StudentCostTerm } from "@admin/common/entities/student-cost-term.entity"
 import { StudentCapability } from "@santri/entities/student-capability.entity"
 import { StudentCostCapability } from "@santri/entities/student-cost-capability.entity"
 import { StudentInvoice } from "@santri/entities/student-invoice.entity"
@@ -18,14 +19,6 @@ import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-tran
 
 // ─── Row shapes ─────────────────────────────────────────────────────────────────
 
-export type CapabilitySqlRow = {
-	id: string
-	studentId: string | null
-	studentGradeId: string | null
-	status: string | null
-	note: string | null
-}
-
 export type StudentGradeSqlRow = {
 	id: string
 	studentId: string | null
@@ -35,29 +28,12 @@ export type StudentGradeSqlRow = {
 	fullName: string | null
 }
 
-export type AcademicYearSqlRow = {
-	id: string
-	year: string | null
-	costDateStart: string | null
-	costDateEnd: string | null
-}
-
 export type CapabilityItemSqlRow = {
 	id: string
 	accountancyId: string | null
 	amount: string | null
 	/** Null when the accountancy was hard-deleted; the billable predicate already excludes those. */
 	name: string | null
-}
-
-export type CostTermSqlRow = {
-	id: string
-	accountancyId: string | null
-	period: string | null
-	timeSpan: string | null
-	monthOf: string | null
-	dayOf: string | null
-	reminder: string | null
 }
 
 export type PredecessorSqlRow = {
@@ -114,12 +90,24 @@ export const buildGeneratorItems = async (
 	grade: string | null,
 	lines: readonly CapabilityItemSqlRow[],
 ): Promise<GeneratorItem[]> => {
-	const terms = await manager.query<CostTermSqlRow[]>(sql.SELECT_COST_TERMS_SQL, [
-		academicYearId,
-		lines.map((line) => Number(line.accountancyId)),
-		grade,
-	])
-	const byAccountancy = new Map<number, CostTermSqlRow>()
+	const accountancyIds = lines.map((line) => Number(line.accountancyId))
+	const terms =
+		grade === null
+			? []
+			: await manager.find(StudentCostTerm, {
+					select: {
+						id: true,
+						accountancyId: true,
+						period: true,
+						timeSpan: true,
+						monthOf: true,
+						dayOf: true,
+						reminder: true,
+					},
+					where: { academicYearId, accountancyId: In(accountancyIds), grade, applied: true },
+					order: { accountancyId: "ASC", id: "ASC" },
+				})
+	const byAccountancy = new Map<number, StudentCostTerm>()
 	for (const term of terms) {
 		const id = Number(term.accountancyId)
 		if (!byAccountancy.has(id)) byAccountancy.set(id, term)
@@ -202,11 +190,11 @@ export const replaceCapabilityItems = async (
  * See `MAX_INVOICE_GENERATION_SQL` for the damage that reuse caused.
  */
 export const nextGeneration = async (manager: EntityManager, studentGradeId: number): Promise<number> => {
-	const [counted] = await manager.query<{ count: number }[]>(sql.COUNT_CAPABILITIES_SQL, [studentGradeId])
+	const counted = await manager.countBy(StudentCapability, { studentGradeId })
 	const [highest] = await manager.query<{ maxGeneration: number }[]>(sql.MAX_INVOICE_GENERATION_SQL, [
 		studentGradeId,
 	])
-	return Math.max(counted?.count ?? 1, Number(highest?.maxGeneration ?? 0) + 1, 1)
+	return Math.max(counted, Number(highest?.maxGeneration ?? 0) + 1, 1)
 }
 
 // ─── The invoices ───────────────────────────────────────────────────────────────
@@ -225,20 +213,22 @@ export const insertGeneratedInvoices = async (
 	const inserted: InsertedInvoice[] = []
 	for (const row of rows) {
 		const uniqueId = invoiceUniqueId(context.studentGradeId, row.accountancyId, row.index, context.generation)
-		const result = await manager.query<{ id: string }[]>(sql.INSERT_INVOICE_SQL, [
+		const result = await manager.insert(StudentInvoice, {
 			uniqueId,
-			context.studentId,
-			context.studentGradeId,
-			row.name,
-			row.amount,
-			row.dueDate,
-			row.reminder,
-			row.accountancyId,
-		])
-		const id = result[0]?.id
-		if (id === undefined) throw new Error("Tagihan gagal dibuat.")
+			studentId: context.studentId,
+			studentGradeId: String(context.studentGradeId),
+			name: row.name,
+			amount: row.amount,
+			status: "unpaid",
+			dueDate: row.dueDate,
+			reminder: row.reminder,
+			accountancyId: String(row.accountancyId),
+			validityStatus: true,
+			createdAt: () => "now()",
+			updatedAt: () => "now()",
+		})
 		inserted.push({
-			id: Number(id),
+			id: Number(result.identifiers[0]?.id),
 			uniqueId,
 			accountancyId: row.accountancyId,
 			index: row.index,
@@ -288,8 +278,12 @@ export const applyCarryOver = async (
 		if (amount < previousAmount) {
 			if (predecessor.status === "paid") amount = previousAmount
 
-			const [sum] = await manager.query<{ paid: string }[]>(sql.SUM_INVOICE_LINKS_SQL, [invoice.id])
-			const paid = toAmount(sum?.paid ?? 0)
+			const sum = await manager
+				.createQueryBuilder(StudentInvoiceTransaction, "link")
+				.select("SUM(link.pay)", "paid")
+				.where("link.studentInvoiceId = :invoiceId", { invoiceId: invoice.id })
+				.getRawOne<{ paid: string | null }>()
+			const paid = toAmount(sum?.paid)
 			if (predecessor.status === "unpaid" && predecessor.paymentMethod === "installment" && paid >= amount) {
 				status = "paid"
 			}

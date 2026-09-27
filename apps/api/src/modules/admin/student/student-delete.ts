@@ -1,5 +1,6 @@
 import type { EntityManager } from "typeorm"
 
+import { Student } from "@santri/entities/student.entity"
 import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import {
@@ -40,6 +41,17 @@ const firstRow = async (manager: EntityManager, where: string, params: unknown[]
 	)) as KbmRow[]
 	return rows[0] ?? null
 }
+
+type NisRow = { id: string; grade: string | null; nis: string | null }
+
+const liveRowsWithNis = (manager: EntityManager) =>
+	manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "id")
+		.addSelect("sg.grade", "grade")
+		.addSelect("s.nis", "nis")
+		.leftJoin(Student, "s", "s.id = sg.studentId AND s.deletedAt IS NULL")
+		.where("sg.deletedAt IS NULL")
 
 const reopen = async (manager: EntityManager, row: KbmRow): Promise<void> => {
 	await manager.update(StudentGrade, { id: Number(row.id) }, { gradeStatus: "active", gradeNote: row.prev_grade_note })
@@ -83,13 +95,11 @@ export const updateKbmNote = async (manager: EntityManager, nis: string | null, 
 
 /** `destroy:947-971` — only an active row; then the grade row cascade, its unpaid future invoices and its capabilities. */
 export const destroyGradeRow = async (manager: EntityManager, studentGradeId: number): Promise<string> => {
-	const rows = (await manager.query(
-		`SELECT sg.id, sg.grade, sg.grade_status, s.nis FROM tbr_student_grades sg
-		LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
-		WHERE sg.id = $1 AND sg.deleted_at IS NULL FOR UPDATE OF sg`,
-		[studentGradeId],
-	)) as Array<{ id: string; grade: string | null; grade_status: string | null; nis: string | null }>
-	const row = rows[0]
+	const row = await liveRowsWithNis(manager)
+		.addSelect("sg.gradeStatus", "grade_status")
+		.andWhere("sg.id = :id", { id: studentGradeId })
+		.setLock("pessimistic_write", undefined, ["sg"])
+		.getRawOne<NisRow & { grade_status: string | null }>()
 	if (!row || row.grade_status === "inactive") return fail(DELETE_FAILED)
 
 	await updateKbmNote(manager, row.nis, row.grade)
@@ -106,11 +116,14 @@ export const destroyGradeRow = async (manager: EntityManager, studentGradeId: nu
  * Capabilities are not touched here, as in legacy.
  */
 export const destroyByGrade = async (manager: EntityManager, year: string | null, grade: number): Promise<string> => {
-	const select = `SELECT sg.id, sg.grade, s.nis FROM tbr_student_grades sg
-		LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
-		WHERE sg.deleted_at IS NULL AND sg.current_academic_year = $1 AND sg.grade = $2 AND sg.grade_status = 'active'
-		ORDER BY sg.id`
-	const rows = (await manager.query(select, [year, grade])) as Array<{ id: string; grade: string | null; nis: string | null }>
+	const activeRows = (): Promise<NisRow[]> =>
+		liveRowsWithNis(manager)
+			.andWhere("sg.currentAcademicYear = :year", { year })
+			.andWhere("sg.grade = :grade", { grade })
+			.andWhere("sg.gradeStatus = 'active'")
+			.orderBy("sg.id")
+			.getRawMany<NisRow>()
+	const rows = await activeRows()
 
 	for (const row of rows) {
 		await updateKbmNote(manager, row.nis, row.grade)
@@ -118,7 +131,7 @@ export const destroyByGrade = async (manager: EntityManager, year: string | null
 		await deleteUnpaidInvoices(manager, Number(row.id))
 	}
 
-	const after = (await manager.query(select, [year, grade])) as Array<{ id: string }>
+	const after = await activeRows()
 	if (after.length === 0) return fail(DELETE_FAILED)
 	for (const row of after) await deleteGradeRow(manager, Number(row.id))
 	return DELETE_SUCCESS

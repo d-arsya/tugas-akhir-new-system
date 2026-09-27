@@ -25,7 +25,15 @@ import {
 	type ReceiptTransaction,
 } from "@admin/payments/payment-format"
 import { RECEIPT_CONTENT_TYPE, renderReceiptPdf } from "@admin/payments/payment-receipt-pdf"
-import * as sql from "@admin/payments/payment-sql"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
+import { StudentTransaction } from "@santri/entities/student-transaction.entity"
+import { Student } from "@santri/entities/student.entity"
+import { District } from "@shared/location/entities/district.entity"
+import { Province } from "@shared/location/entities/province.entity"
+import { Regency } from "@shared/location/entities/regency.entity"
+import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 
 /**
  * The three rows behind both receipt documents — `downloadTransaction` and
@@ -35,17 +43,52 @@ export const loadReceiptData = async (
 	dataSource: DataSource,
 	transactionId: number,
 ): Promise<ReceiptData> => {
-	const [transaction] = await dataSource.query<ReceiptTransaction[]>(sql.SELECT_RECEIPT_SQL, [
-		transactionId,
-	])
+	const transaction = await dataSource
+		.createQueryBuilder(StudentTransaction, "t")
+		.select("t.id", "id")
+		.addSelect("t.studentTransactionCode", "transactionCode")
+		.addSelect("t.paidAt", "paidAt")
+		.addSelect("t.amount", "amount")
+		.addSelect("t.desc", "desc")
+		.addSelect("t.status", "status")
+		.addSelect("sg.fullname", "fullname")
+		.addSelect("sg.grade", "grade")
+		.addSelect("sg.subGrade", "subGrade")
+		.addSelect("s.nis", "nis")
+		.leftJoin(StudentGrade, "sg", "sg.id = t.studentGradeId")
+		.leftJoin(Student, "s", "s.id = sg.studentId")
+		.where("t.id = :transactionId", { transactionId })
+		.getRawOne<ReceiptTransaction>()
 	if (!transaction) throw new NotFoundException(NOT_FOUND)
 
-	const [items, schools] = await Promise.all([
-		dataSource.query<ReceiptItem[]>(sql.SELECT_RECEIPT_ITEMS_SQL, [transactionId]),
-		dataSource.query<ReceiptSchool[]>(sql.SELECT_RECEIPT_SCHOOL_SQL),
+	const [items, school] = await Promise.all([
+		dataSource
+			.createQueryBuilder(StudentInvoiceTransaction, "lnk")
+			.select("lnk.id", "id")
+			.addSelect("lnk.studentInvoiceId", "invoiceId")
+			.addSelect("lnk.pay", "pay")
+			.addSelect("i.name", "name")
+			.leftJoin(StudentInvoice, "i", "i.id = lnk.studentInvoiceId")
+			.where("lnk.studentTransactionId = :transactionId", { transactionId })
+			.orderBy("lnk.id", "ASC")
+			.getRawMany<ReceiptItem>(),
+		dataSource
+			.createQueryBuilder(SettingSchool, "ss")
+			.select("ss.name", "name")
+			.addSelect("ss.phone", "phone")
+			.addSelect("ss.fullAddress", "fullAddress")
+			.addSelect("d.name", "districtName")
+			.addSelect("r.name", "regencyName")
+			.addSelect("p.name", "provinceName")
+			.leftJoin(District, "d", "d.id = ss.districtId")
+			.leftJoin(Regency, "r", "r.id = ss.regencyId")
+			.leftJoin(Province, "p", "p.id = ss.provinceId")
+			.orderBy("ss.id", "ASC")
+			.limit(1)
+			.getRawOne<ReceiptSchool>(),
 	])
 
-	return { transaction, items, school: schools[0] ?? null }
+	return { transaction, items, school: school ?? null }
 }
 
 /**

@@ -12,9 +12,6 @@ import {
 	nextGeneration,
 	replaceCapabilityItems,
 	resolveAgreedItems,
-	type AcademicYearSqlRow,
-	type CapabilityItemSqlRow,
-	type CapabilitySqlRow,
 	type PredecessorSqlRow,
 	type StudentGradeSqlRow,
 } from "@admin/capabilities/capability-write"
@@ -23,6 +20,7 @@ import * as sql from "@admin/capabilities/publish-sql"
 import { CapabilityDocumentQueue } from "@admin/capabilities/capability-document.queue"
 import { StudentCapability } from "@santri/entities/student-capability.entity"
 import { StudentCostCapability } from "@santri/entities/student-cost-capability.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 // Legacy `StudentCapabilityController` — the single-santri write half: `@store` (567-628),
 // `@change` (631-679), `@update` (839-880) and `@publishInvoice` (681-836).
@@ -66,7 +64,7 @@ export class CapabilityPublishService {
 			const items = await resolveAgreedItems(manager, Number(academicYear.id), studentGrade.grade, dto)
 
 			// `StudentCapability::where(['status' => 'approve', …])->first()` — superseded, never edited
-			const [previous] = await manager.query<{ id: string }[]>(sql.SELECT_APPROVED_CAPABILITY_SQL, [studentGradeId])
+			const previous = await sql.selectApprovedCapability(manager, studentGradeId)
 			if (previous) await manager.update(StudentCapability, { id: Number(previous.id) }, { status: "changed" })
 
 			const capabilityId = await insertCapability(manager, {
@@ -95,7 +93,7 @@ export class CapabilityPublishService {
 	async change(studentGradeId: number): Promise<CapabilityPublishResult> {
 		return this.dataSource.transaction(async (manager) => {
 			const studentGrade = await this.loadStudentGrade(manager, studentGradeId)
-			const [previous] = await manager.query<{ id: string }[]>(sql.SELECT_APPROVED_CAPABILITY_SQL, [studentGradeId])
+			const previous = await sql.selectApprovedCapability(manager, studentGradeId)
 			if (!previous) throw new UnprocessableEntityException(NO_AGREED)
 			const previousId = Number(previous.id)
 
@@ -191,7 +189,7 @@ export class CapabilityPublishService {
 		const capability = await this.loadCapability(manager, capabilityId, studentGradeId)
 		const studentGrade = await this.loadStudentGrade(manager, studentGradeId)
 
-		const lines = await manager.query<CapabilityItemSqlRow[]>(sql.SELECT_CAPABILITY_ITEMS_SQL, [capabilityId])
+		const lines = await sql.selectCapabilityItems(manager, capabilityId)
 		if (lines.length === 0) throw new UnprocessableEntityException(NO_ITEMS)
 
 		const academicYear = await this.loadAcademicYear(manager, studentGrade)
@@ -240,8 +238,12 @@ export class CapabilityPublishService {
 		manager: EntityManager,
 		capabilityId: number,
 		studentGradeId: number,
-	): Promise<CapabilitySqlRow> {
-		const [capability] = await manager.query<CapabilitySqlRow[]>(sql.SELECT_CAPABILITY_FOR_PUBLISH_SQL, [capabilityId])
+	): Promise<StudentCapability> {
+		const capability = await manager.findOne(StudentCapability, {
+			select: { id: true, studentId: true, studentGradeId: true, status: true, note: true },
+			where: { id: capabilityId },
+			lock: { mode: "pessimistic_write" },
+		})
 		if (!capability) throw new NotFoundException(NOT_FOUND)
 		// Legacy binds `{capability}` and `{studentGrade}` independently and never checks they
 		// belong together, so a crafted URL publishes capability A against santri B — and
@@ -251,16 +253,14 @@ export class CapabilityPublishService {
 	}
 
 	private async loadStudentGrade(manager: EntityManager, studentGradeId: number): Promise<StudentGradeSqlRow> {
-		const [studentGrade] = await manager.query<StudentGradeSqlRow[]>(sql.SELECT_STUDENT_GRADE_SQL, [studentGradeId])
+		const studentGrade = await sql.selectStudentGrade(manager, studentGradeId)
 		if (!studentGrade) throw new NotFoundException(NOT_FOUND)
 		return studentGrade
 	}
 
 	/** `getAcademicYearId($student_grade->current_academic_year)`, with the missing-row guard legacy lacks. */
-	private async loadAcademicYear(manager: EntityManager, studentGrade: StudentGradeSqlRow): Promise<AcademicYearSqlRow> {
-		const [academicYear] = await manager.query<AcademicYearSqlRow[]>(sql.SELECT_ACADEMIC_YEAR_BY_NAME_SQL, [
-			studentGrade.currentAcademicYear,
-		])
+	private async loadAcademicYear(manager: EntityManager, studentGrade: StudentGradeSqlRow): Promise<AcademicYear> {
+		const academicYear = await sql.selectAcademicYearByName(manager, studentGrade.currentAcademicYear)
 		if (!academicYear) {
 			throw new UnprocessableEntityException(
 				`Tahun ajaran "${studentGrade.currentAcademicYear ?? "-"}" tidak ditemukan.`,
@@ -270,7 +270,7 @@ export class CapabilityPublishService {
 	}
 
 	/** `generateInvoices`, with its faults turned into 422s rather than a 500 or a silent no-op. */
-	private schedule(items: GeneratorItem[], academicYear: AcademicYearSqlRow): ReturnType<typeof generateInvoices> {
+	private schedule(items: GeneratorItem[], academicYear: AcademicYear): ReturnType<typeof generateInvoices> {
 		try {
 			return generateInvoices(items, {
 				costDateStart: academicYear.costDateStart,

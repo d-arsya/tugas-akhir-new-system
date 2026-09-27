@@ -1,7 +1,7 @@
 // Raw SQL for the write half of the legacy `StudentInvoiceController`: `@getDataInvoice`
 // (467-499), `@createTransaction` (508-538), `@storeTransaction` (546-616),
-// `@editTransaction` (624-646), `@updateTransaction` (655-673), `@cancelTransaction`
-// (682-741) and `@downloadTransaction` (822-845).
+// `@editTransaction` (624-646), `@updateTransaction` (655-673) and `@cancelTransaction`
+// (682-741).
 //
 // Legacy walks all of these as Eloquent relations, one `StudentInvoice::find()` per selected
 // id and one `$invoice->studentTransactions` per invoice, so a five-invoice payment fires
@@ -51,27 +51,6 @@ export const SELECT_INVOICES_SQL = `SELECT i.id,
 	FROM tbr_student_invoices i
 	WHERE i.id = ANY($1::bigint[])
 	ORDER BY i.id`
-
-/**
- * Every payment link addressed to the given invoices, with the status of the transaction it
- * belongs to. Feeds `invoice-calculator`, which decides on its own which links count — this
- * statement deliberately does **not** filter to `valid`, because `cancelTransaction` has to see
- * the cancelled ones to recompute correctly.
- *
- * Cancellation is a status flip and never a delete, so a link whose transaction row is missing
- * entirely is data damage rather than a cancellation; the LEFT JOIN surfaces it as a NULL
- * status, which the calculator then excludes.
- */
-export const SELECT_INVOICE_LINKS_SQL = `SELECT lnk.id,
-		lnk.student_invoice_id AS "studentInvoiceId",
-		lnk.student_transaction_id AS "studentTransactionId",
-		lnk.pay,
-		lnk.amount,
-		trx.status AS "transactionStatus"
-	FROM tbr_student_invoice_transactions lnk
-	LEFT JOIN tbr_student_transactions trx ON trx.id = lnk.student_transaction_id
-	WHERE lnk.student_invoice_id = ANY($1::bigint[])
-	ORDER BY lnk.id`
 
 /**
  * Fix F-9. `UUIDTraits::generateTransactionId()` (42-59) reads `YYYYMMDD001`, asks whether it is
@@ -129,67 +108,3 @@ export const SYNC_LINK_SEQUENCE_SQL = `SELECT setval('tbr_student_invoice_transa
 			(SELECT last_value FROM tbr_student_invoice_transactions_id_seq),
 			(SELECT COALESCE(MAX(id), 1) FROM tbr_student_invoice_transactions)
 		), true)`
-
-/** Route-model binding for `{transaction}`, with the row locked for the cancel / note write. */
-export const SELECT_TRANSACTION_FOR_UPDATE_SQL = `SELECT t.id,
-		t.student_transaction_code::text AS "transactionCode",
-		t.student_grade_id AS "studentGradeId",
-		t.amount,
-		t.status,
-		t.note,
-		t.cancel_note AS "cancelNote"
-	FROM tbr_student_transactions t
-	WHERE t.id = $1
-	FOR UPDATE`
-
-/**
- * `downloadTransaction` (822-845) — the receipt header. `studentGradeWithTrashed` is what the
- * blades read, so a santri deleted after paying still prints their own name; there is no
- * `deleted_at` filter here for exactly that reason.
- */
-export const SELECT_RECEIPT_SQL = `SELECT t.id,
-		t.student_transaction_code::text AS "transactionCode",
-		t.paid_at AS "paidAt",
-		t.amount,
-		t."desc",
-		t.status,
-		sg.fullname,
-		sg.grade::text AS grade,
-		sg.sub_grade AS "subGrade",
-		s.nis
-	FROM tbr_student_transactions t
-	LEFT JOIN tbr_student_grades sg ON sg.id = t.student_grade_id
-	LEFT JOIN tbr_students s ON s.id = sg.student_id
-	WHERE t.id = $1`
-
-/**
- * The receipt's cost lines. Legacy indexes `$amount[]` by the position of `$invoices`, filled
- * from `$transaction->studentInvoiceTransations[$key]->pay` — two separately ordered relations
- * lined up by position. Joining the pivot to the invoice removes the assumption entirely.
- */
-export const SELECT_RECEIPT_ITEMS_SQL = `SELECT lnk.id,
-		lnk.student_invoice_id AS "invoiceId",
-		lnk.pay,
-		i.name
-	FROM tbr_student_invoice_transactions lnk
-	LEFT JOIN tbr_student_invoices i ON i.id = lnk.student_invoice_id
-	WHERE lnk.student_transaction_id = $1
-	ORDER BY lnk.id`
-
-/**
- * `SettingSchool::first()` plus the three lookups behind the `school_invoice_address` accessor
- * (`SettingSchool.php:38-46` → `Helper.php:228-297`). Each helper swallows a missing row and
- * returns `""`, which the LEFT JOINs reproduce as NULL.
- */
-export const SELECT_RECEIPT_SCHOOL_SQL = `SELECT ss.name,
-		ss.phone::text AS phone,
-		ss.full_address AS "fullAddress",
-		d.name AS "districtName",
-		r.name AS "regencyName",
-		p.name AS "provinceName"
-	FROM tbr_setting_schools ss
-	LEFT JOIN tbr_districts d ON d.id = ss.district_id
-	LEFT JOIN tbr_regencies r ON r.id = ss.regency_id
-	LEFT JOIN tbr_provinces p ON p.id = ss.province_id
-	ORDER BY ss.id
-	LIMIT 1`

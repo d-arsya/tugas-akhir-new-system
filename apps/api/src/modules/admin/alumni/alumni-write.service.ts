@@ -13,6 +13,8 @@ import { replaceDiseaseHistories } from "../../../shared/society/disease-history
 import { storeSocietyUpload } from "../../../shared/society/files"
 import { readSocietyMultipart, validateSocietyInput, type SocietyUpload } from "../../../shared/society/society-rules"
 import { Alumni } from "@admin/common/entities/alumni.entity"
+import { Student } from "@santri/entities/student.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 
 import * as sql from "./alumni-sql"
 
@@ -57,6 +59,19 @@ const updateAlumni = async (manager: EntityManager, id: number, columns: Record<
 	)
 }
 
+const lockAlumni = (manager: EntityManager, id: number): Promise<Alumni | null> =>
+	manager.findOne(Alumni, { select: { id: true, studentId: true }, where: { id }, lock: { mode: "pessimistic_write" } })
+
+const liveGradeOwner = (manager: EntityManager, gradeId: number): Promise<{ id: string; student_id: string | null } | undefined> =>
+	manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "id")
+		.addSelect("s.id", "student_id")
+		.leftJoin(Student, "s", "s.id = sg.studentId AND s.deletedAt IS NULL")
+		.where("sg.id = :gradeId", { gradeId })
+		.andWhere("sg.deletedAt IS NULL")
+		.getRawOne()
+
 @Injectable()
 export class AlumniWriteService {
 	private readonly logger = new Logger(AlumniWriteService.name)
@@ -98,7 +113,7 @@ export class AlumniWriteService {
 				attachments[column] = await storeSocietyUpload(this.storageService, upload)
 			}
 			await this.dataSource.transaction(async (manager) => {
-				await manager.query(sql.ALUMNI_LOCK_SQL, [id])
+				await lockAlumni(manager, id)
 				await updateAlumni(manager, id, { ...validated.columns, ...attachments })
 				await replaceDiseaseHistories(manager, "alumni", id, validated.diseases)
 			})
@@ -119,10 +134,10 @@ export class AlumniWriteService {
 		await this.assertExists(id)
 		try {
 			await this.dataSource.transaction(async (manager) => {
-				const [alumni] = (await manager.query(sql.ALUMNI_LOCK_SQL, [id])) as Array<{ student_id: string | null }>
-				const gradeId = alumni?.student_id ?? null
+				const alumni = await lockAlumni(manager, id)
+				const gradeId = alumni?.studentId ?? null
 				if (gradeId !== null) {
-					const [owner] = (await manager.query(sql.GRADE_OWNER_SQL, [gradeId])) as Array<{ student_id: string | null }>
+					const owner = await liveGradeOwner(manager, gradeId)
 					if (owner) {
 						await manager.query(sql.RESTORE_GRADE_SQL, [gradeId])
 						if (!owner.student_id) throw new Error(`grade row ${gradeId} has no live account`)

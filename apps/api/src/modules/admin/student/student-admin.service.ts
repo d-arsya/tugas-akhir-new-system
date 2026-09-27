@@ -24,6 +24,7 @@ import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
 import { validateSocietyInput, type SocietyRuleInput } from "../../../shared/society/society-rules"
+import { SettingForm } from "@psb/entities/setting-form.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import { Level } from "@shared/master/entities/level.entity"
@@ -52,7 +53,13 @@ export class StudentAdminService {
 		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
 		@InjectRepository(SubGrade) private readonly subGrades: Repository<SubGrade>,
 		@InjectRepository(Major) private readonly majors: Repository<Major>,
+		@InjectRepository(SettingForm) private readonly settingForms: Repository<SettingForm>,
 	) {}
+
+	private async maxGrade(): Promise<number> {
+		const top = await this.grades.createQueryBuilder("g").select("MAX(g.label)", "label").getRawOne<{ label: string | null }>()
+		return Number(top?.label ?? 0)
+	}
 
 	private async yearOrFail(academicYearId: number): Promise<AdminStudentAcademicYear> {
 		const year = await this.academicYears.findOne({ select: { id: true, year: true }, where: { id: academicYearId } })
@@ -92,7 +99,7 @@ export class StudentAdminService {
 		const academicYear = await this.yearOrFail(academicYearId)
 		const [exists, maxGrade, level, majors, subGrades] = await Promise.all([
 			this.dataSource.query(sql.ROSTER_EXISTS_SQL, [academicYear.year, grade, levelId]) as Promise<Array<{ exists: boolean }>>,
-			this.dataSource.query(sql.MAX_GRADE_SQL) as Promise<Array<{ maxGrade: number }>>,
+			this.maxGrade(),
 			this.levels.findOne({ select: { name: true }, where: { id: levelId } }),
 			this.majorNamesOf(levelId),
 			this.subGrades.find({ select: { label: true }, order: { id: "ASC" } }),
@@ -103,7 +110,7 @@ export class StudentAdminService {
 			levelId,
 			levelName: level?.name ?? null,
 			exists: exists[0]?.exists === true,
-			maxGrade: maxGrade[0]?.maxGrade ?? 0,
+			maxGrade,
 			majors,
 			subGrades: subGrades.map((subGrade) => subGrade.label ?? ""),
 		}
@@ -164,7 +171,7 @@ export class StudentAdminService {
 		if (!row || !record) throw new NotFoundException("Santri tidak ditemukan")
 
 		const [maxGrade, majors] = await Promise.all([
-			this.dataSource.query(sql.MAX_GRADE_SQL) as Promise<Array<{ maxGrade: number }>>,
+			this.maxGrade(),
 			// `optional(Level::find($level_id))->majors ?? collect([new Major()])`
 			this.majorNamesOf(toNumber(row.levelId)),
 		])
@@ -188,7 +195,7 @@ export class StudentAdminService {
 			academicYearId: toNumber(row.academicYearId),
 			photoUrl: societyFileUrl(row.attachPhoto),
 			createdAtDisplay: indoDateTime(row.createdDay, row.createdMonth, row.createdYear, row.createdTime),
-			maxGrade: maxGrade[0]?.maxGrade ?? 0,
+			maxGrade,
 			majors,
 			record,
 		}
@@ -206,8 +213,15 @@ export class StudentAdminService {
 		const year = await this.yearOrFail(academicYearId)
 		const rows = (await this.dataSource.query(sql.EXPORT_SQL, [year.year, grade, levelId])) as Array<ExportRow & { levelName: string | null }>
 		if (rows.length === 0) throw new NotFoundException("Data santri tidak ditemukan")
-		const settings = (await this.dataSource.query(sql.EXPORT_SETTINGS_SQL)) as Array<{ id: string; status: boolean; label: string }>
-		const exportSettings: ExportSetting[] = settings.map((row) => ({ id: Number(row.id), status: row.status, label: row.label }))
+		const settings = await this.settingForms.find({
+			select: { id: true, status: true, customName: true, default: true },
+			order: { id: "ASC" },
+		})
+		const exportSettings: ExportSetting[] = settings.map((row) => ({
+			id: Number(row.id),
+			status: row.status ?? false,
+			label: row.customName ?? row.default ?? "",
+		}))
 		const buffer = await buildStudentWorkbook(exportSettings, rows, { grade, levelName: rows[0]?.levelName ?? null, year: year.year })
 		return { fileName: "Hasil export data santri.xlsx", buffer }
 	}

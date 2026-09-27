@@ -141,16 +141,6 @@ export type InvoiceSqlRow = {
 
 export type LinkSqlRow = InvoiceLinkRow & { id: string; transactionStatus: "valid" | "invalid" | null }
 
-export type TransactionSqlRow = {
-	id: string
-	transactionCode: string | null
-	studentGradeId: string | null
-	amount: string | null
-	status: "valid" | "invalid"
-	note: string | null
-	cancelNote: string | null
-}
-
 export type Message = { message: string }
 
 export const unique = (ids: readonly number[]): number[] => [...new Set(ids)].sort((a, b) => a - b)

@@ -79,26 +79,6 @@ export const studentRowsSql = (where: string, order: string, limit: string, offs
 	${order}
 	LIMIT ${limit} OFFSET ${offset}`
 
-// ─── One santri's detail page (`@edit`) ──────────────────────────────────────
-
-// The card down the left of both detail pages. The academic year hangs off the **student**
-// (`$studentGrade->student->academicYear->year`), not off the grade row.
-export const STUDENT_CARD_SQL = `SELECT sg.id AS "studentGradeId",
-		s.id AS "studentId",
-		s.nis,
-		sg.fullname AS "fullName",
-		sg.attach_photo AS "photoPath",
-		ay.year AS "academicYear",
-		l.name AS "levelName",
-		sg.grade::text AS grade,
-		sg.sub_grade AS "subGrade",
-		sg.father_fullname AS "fatherName"
-	FROM tbr_student_grades sg
-	LEFT JOIN tbr_students s ON s.id = sg.student_id
-	LEFT JOIN tbr_levels l ON l.id = sg.level_id
-	LEFT JOIN tbr_academic_years ay ON ay.id = s.academic_year_id
-	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
-
 // ─── The Tagihan tab (`@listBillServerSide`) ─────────────────────────────────
 /**
  * `COALESCE(SUM(CASE WHEN student_transactions.status = 'valid' THEN pay ELSE 0 END), 0)`, lifted
@@ -179,12 +159,6 @@ export const billOrderBy = (filter: InvoiceBillInput): string =>
 	`ORDER BY ${BILL_ORDER[filter.orderBy ?? "dueDate"]} ${filter.orderDir === "desc" ? "DESC" : "ASC"}, si.id ASC`
 
 export const billCountSql = (where: string): string => `SELECT COUNT(*)::int AS total ${BILL_FROM} ${where}`
-// `recordsTotal` is the santri's whole valid invoice set, ignoring the toggles and the search —
-// the number legacy server-renders into "Dimunculkan dari total N tagihan", while the heading
-// above it is overwritten client-side with `recordsFiltered`.
-export const BILL_TOTAL_SQL = `SELECT COUNT(*)::int AS total
-	FROM tbr_student_invoices si
-	WHERE si.student_grade_id = $1 AND si.validity_status`
 
 export const billRowsSql = (where: string, order: string, limit: string, offset: string): string => `
 	SELECT si.id,
@@ -201,16 +175,6 @@ export const billRowsSql = (where: string, order: string, limit: string, offset:
 	${where}
 	${order}
 	LIMIT ${limit} OFFSET ${offset}`
-
-/** Every link row behind one page of invoices, for `calculateInvoiceTotals`. */
-export const BILL_LINKS_SQL = `SELECT sit.student_invoice_id AS "studentInvoiceId",
-		sit.student_transaction_id AS "studentTransactionId",
-		sit.pay,
-		sit.amount,
-		st.status
-	FROM tbr_student_invoice_transactions sit
-	LEFT JOIN tbr_student_transactions st ON st.id = sit.student_transaction_id
-	WHERE sit.student_invoice_id = ANY($1::bigint[])`
 
 // ─── The Riwayat Pembayaran / Dibatalkan tabs (`@listTransaction`, `@listCancel`) ─────
 
@@ -255,12 +219,3 @@ export const INVOICE_TRANSACTIONS_SQL = `SELECT st.id,
 	JOIN tbr_student_transactions st ON st.id = sit.student_transaction_id
 	WHERE sit.student_invoice_id = $1 AND st.status = 'valid'
 	ORDER BY sit.id`
-
-export const INVOICE_LINKS_SQL = `SELECT sit.student_invoice_id AS "studentInvoiceId",
-		sit.student_transaction_id AS "studentTransactionId",
-		sit.pay,
-		sit.amount,
-		st.status
-	FROM tbr_student_invoice_transactions sit
-	LEFT JOIN tbr_student_transactions st ON st.id = sit.student_transaction_id
-	WHERE sit.student_invoice_id = $1`

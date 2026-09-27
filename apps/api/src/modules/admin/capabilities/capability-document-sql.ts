@@ -2,6 +2,16 @@
 // `@downloadPDF`. Split out of `capability-sql.ts` to keep both under the 300-line limit; the
 // one statement they share with the drill-down (`CAPABILITY_SQL`, the pair guard) stays there.
 
+import type { EntityManager } from "typeorm"
+
+import type { CapabilityDocumentSchool, CapabilityDocumentStudent } from "@admin/capabilities/capability-document"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { District } from "@shared/location/entities/district.entity"
+import { Province } from "@shared/location/entities/province.entity"
+import { Regency } from "@shared/location/entities/regency.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { SettingSchool } from "@shared/school/entities/setting-school.entity"
+
 /**
  * `$capability->accountancies()->whereNotNull('parent_id')->where('is_student_cost', 1)->get()`
  * with the pivot amount, plus the term whose `translate_period` fills the Periode column.
@@ -48,45 +58,55 @@ export const CAPABILITY_DOCUMENT_ITEMS_SQL = `SELECT scc.id,
 	ORDER BY scc.id`
 
 /** Every santri field the two agreement views print, plus the three region lookups. */
-export const CAPABILITY_DOCUMENT_STUDENT_SQL = `SELECT sg.id AS "studentGradeId",
-		sg.fullname,
-		sg.school_name AS "schoolName",
-		sg.current_academic_year AS "currentAcademicYear",
-		sg.grade::text AS grade,
-		sg.father_fullname AS "fatherFullname",
-		sg.father_job AS "fatherJob",
-		sg.father_phone::text AS "fatherPhone",
-		sg.family_street AS "familyStreet",
-		sg.family_rt AS "familyRt",
-		sg.family_rw AS "familyRw",
-		sg.family_sub_village AS "familySubVillage",
-		sg.family_village AS "familyVillage",
-		d.name AS "districtName",
-		r.name AS "regencyName",
-		p.name AS "provinceName",
-		ay.id AS "academicYearId"
-	FROM tbr_student_grades sg
-	LEFT JOIN tbr_districts d ON d.id = sg.family_district_id
-	LEFT JOIN tbr_regencies r ON r.id = sg.family_regency_id
-	LEFT JOIN tbr_provinces p ON p.id = sg.family_province_id
-	LEFT JOIN tbr_academic_years ay ON ay.year = sg.current_academic_year
-	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
+export const selectDocumentStudent = (
+	manager: EntityManager,
+	studentGradeId: number,
+): Promise<CapabilityDocumentStudent | undefined> =>
+	manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "studentGradeId")
+		.addSelect("sg.fullname", "fullname")
+		.addSelect("sg.schoolName", "schoolName")
+		.addSelect("sg.currentAcademicYear", "currentAcademicYear")
+		.addSelect("sg.grade", "grade")
+		.addSelect("sg.fatherFullname", "fatherFullname")
+		.addSelect("sg.fatherJob", "fatherJob")
+		.addSelect("sg.fatherPhone", "fatherPhone")
+		.addSelect("sg.familyStreet", "familyStreet")
+		.addSelect("sg.familyRt", "familyRt")
+		.addSelect("sg.familyRw", "familyRw")
+		.addSelect("sg.familySubVillage", "familySubVillage")
+		.addSelect("sg.familyVillage", "familyVillage")
+		.addSelect("d.name", "districtName")
+		.addSelect("r.name", "regencyName")
+		.addSelect("p.name", "provinceName")
+		.addSelect("ay.id", "academicYearId")
+		.leftJoin(District, "d", "d.id = sg.familyDistrictId")
+		.leftJoin(Regency, "r", "r.id = sg.familyRegencyId")
+		.leftJoin(Province, "p", "p.id = sg.familyProvinceId")
+		.leftJoin(AcademicYear, "ay", "ay.year = sg.currentAcademicYear")
+		.where("sg.id = :studentGradeId", { studentGradeId })
+		.andWhere("sg.deletedAt IS NULL")
+		.getRawOne<CapabilityDocumentStudent>()
 
 /**
  * `SettingSchool::first()` plus the three lookups behind `school_full_address`
  * (`SettingSchool.php:20-31`). Unlike the receipt's `school_invoice_address`, this accessor keeps
  * the "Kecamatan" and "Provinsi" prefixes, so they are added in the formatter rather than here.
  */
-export const CAPABILITY_DOCUMENT_SCHOOL_SQL = `SELECT ss.name,
-		ss.phone::text AS phone,
-		ss.logo,
-		ss.full_address AS "fullAddress",
-		d.name AS "districtName",
-		r.name AS "regencyName",
-		p.name AS "provinceName"
-	FROM tbr_setting_schools ss
-	LEFT JOIN tbr_districts d ON d.id = ss.district_id
-	LEFT JOIN tbr_regencies r ON r.id = ss.regency_id
-	LEFT JOIN tbr_provinces p ON p.id = ss.province_id
-	ORDER BY ss.id
-	LIMIT 1`
+export const selectDocumentSchool = (manager: EntityManager): Promise<CapabilityDocumentSchool | undefined> =>
+	manager
+		.createQueryBuilder(SettingSchool, "ss")
+		.select("ss.name", "name")
+		.addSelect("ss.phone", "phone")
+		.addSelect("ss.logo", "logo")
+		.addSelect("ss.fullAddress", "fullAddress")
+		.addSelect("d.name", "districtName")
+		.addSelect("r.name", "regencyName")
+		.addSelect("p.name", "provinceName")
+		.leftJoin(District, "d", "d.id = ss.districtId")
+		.leftJoin(Regency, "r", "r.id = ss.regencyId")
+		.leftJoin(Province, "p", "p.id = ss.provinceId")
+		.orderBy("ss.id", "ASC")
+		.limit(1)
+		.getRawOne<CapabilityDocumentSchool>()

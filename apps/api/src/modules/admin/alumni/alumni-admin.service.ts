@@ -10,7 +10,11 @@ import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
 import { MONTHS_ID } from "@admin/common/date-format"
+import { Alumni } from "@admin/common/entities/alumni.entity"
 import { SettingForm } from "@psb/entities/setting-form.entity"
+import { Province } from "@shared/location/entities/province.entity"
+import { Regency } from "@shared/location/entities/regency.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 import { ALUMNI_EXPORT_FILE, buildAlumniWorkbook } from "./alumni-export"
 import * as sql from "./alumni-sql"
@@ -61,6 +65,7 @@ export class AlumniAdminService {
 	constructor(
 		private readonly dataSource: DataSource,
 		@InjectRepository(SettingForm) private readonly settingForms: Repository<SettingForm>,
+		@InjectRepository(Alumni) private readonly alumni: Repository<Alumni>,
 	) {}
 
 	/** `getInputLabel` / `getInputStatus` of setting 1 (the name column). */
@@ -72,9 +77,27 @@ export class AlumniAdminService {
 		return { label: setting?.customName ?? setting?.default ?? "", visible: setting?.status === true }
 	}
 
-	private async list(query: string, params: unknown[]): Promise<AdminAlumniList> {
-		const [name, rows] = await Promise.all([this.nameSetting(), this.dataSource.query(query, params) as Promise<Row[]>])
+	private async list(loadRows: () => Promise<Row[]>): Promise<AdminAlumniList> {
+		const [name, rows] = await Promise.all([this.nameSetting(), loadRows()])
 		return { nameLabel: name.label, nameVisible: name.visible, rows: rows.map(toRow) }
+	}
+
+	private archiveRows(): Promise<Row[]> {
+		return this.alumni
+			.createQueryBuilder("a")
+			.select("a.id", "id")
+			.addSelect("a.attachPhoto", "attach_photo")
+			.addSelect("a.fullname", "fullname")
+			.addSelect("a.alumniPhone", "alumni_phone")
+			.addSelect("p.name", "province_name")
+			.addSelect("r.name", "regency_name")
+			.addSelect("a.alumniTalent", "alumni_talent")
+			.leftJoin(AcademicYear, "ay", "ay.id = a.academicYearId")
+			.leftJoin(Province, "p", "p.id = a.alumniProvinceId")
+			.leftJoin(Regency, "r", "r.id = a.alumniRegencyId")
+			.where("ay.id = 1")
+			.orderBy("a.id")
+			.getRawMany<Row>()
 	}
 
 	/** `list()` — the "Alumni" tab. */
@@ -90,12 +113,12 @@ export class AlumniAdminService {
 
 	/** `listArchive()` — the "Archive" tab. */
 	async archive(): Promise<AdminAlumniList> {
-		return this.list(sql.ALUMNI_ARCHIVE_SQL, [])
+		return this.list(() => this.archiveRows())
 	}
 
 	/** `listByYear()` — `/alumni/graduation-year/$year`. */
 	async byYear(year: number): Promise<AdminAlumniList> {
-		return this.list(sql.ALUMNI_BY_YEAR_SQL, [year])
+		return this.list(() => this.dataSource.query(sql.ALUMNI_BY_YEAR_SQL, [year]) as Promise<Row[]>)
 	}
 
 	/** `download()` — "Hasil export data alumni.xlsx". */

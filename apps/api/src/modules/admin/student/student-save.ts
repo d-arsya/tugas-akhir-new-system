@@ -9,7 +9,10 @@ import { replaceDiseaseHistories } from "../../../shared/society/disease-history
 import { storeSocietyUpload } from "../../../shared/society/files"
 import { generateMasterId } from "../../../shared/society/master-id"
 import type { SocietyRuleInput, SocietyValidated } from "../../../shared/society/society-rules"
+import { Student } from "@santri/entities/student.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
+import { Grade } from "@shared/master/entities/grade.entity"
 
 import { fail, UPDATE_FAILED } from "./student-grade-ops"
 
@@ -143,7 +146,7 @@ export const createStudent = async (
 	return studentGradeId
 }
 
-type EditRow = { id: string; student_id: string | null; level_id: string | null; nis: string | null; student_live: boolean }
+type EditRow = { id: string; level_id: string | null; nis: string | null; live_student_id: string | null }
 
 /**
  * Edit save. Order as legacy: registrant NISP, Jenjang change (→ lowest Kelas of the new level), the grade
@@ -157,15 +160,19 @@ export const updateStudent = async (
 	studentGradeId: number,
 	input: Pick<SocietyRuleInput, "values" | "diseases" | "files">,
 ): Promise<void> => {
-	const rows = (await manager.query(
-		`SELECT sg.id, sg.student_id, sg.level_id, s.nis, (s.id IS NOT NULL) AS student_live
-		FROM tbr_student_grades sg LEFT JOIN tbr_students s ON s.id = sg.student_id AND s.deleted_at IS NULL
-		WHERE sg.id = $1 AND sg.deleted_at IS NULL FOR UPDATE OF sg`,
-		[studentGradeId],
-	)) as EditRow[]
-	const row = rows[0]
+	const row = await manager
+		.createQueryBuilder(StudentGrade, "sg")
+		.select("sg.id", "id")
+		.addSelect("sg.levelId", "level_id")
+		.addSelect("s.nis", "nis")
+		.addSelect("s.id", "live_student_id")
+		.leftJoin(Student, "s", "s.id = sg.studentId AND s.deletedAt IS NULL")
+		.where("sg.id = :id", { id: studentGradeId })
+		.andWhere("sg.deletedAt IS NULL")
+		.setLock("pessimistic_write", undefined, ["sg"])
+		.getRawOne<EditRow>()
 	if (!row) throw new NotFoundException("Santri tidak ditemukan")
-	const studentId = row.student_live && row.student_id !== null ? Number(row.student_id) : null
+	const studentId = row.live_student_id === null ? null : Number(row.live_student_id)
 
 	const validated = await validate({ variant: "student-update", ...input, ...(studentId === null ? {} : { ignoreId: studentId }) })
 	const columns = validated.columns
@@ -187,10 +194,12 @@ export const updateStudent = async (
 	const gradeColumns: Values = { ...pick(columns, (key) => !NOT_GRADE_COLUMNS.has(key)), level_id: levelId }
 	// `updateGrade:493-505`
 	if (String(levelId ?? "") !== String(row.level_id ?? "")) {
-		const lowest = (await manager.query(`SELECT MIN(label) AS label FROM tbr_grades WHERE level_id = $1`, [levelId])) as Array<{
-			label: string | null
-		}>
-		gradeColumns["grade"] = lowest[0]?.label === null || lowest[0]?.label === undefined ? 1 : Number(lowest[0].label)
+		const lowest = await manager
+			.createQueryBuilder(Grade, "g")
+			.select("MIN(g.label)", "label")
+			.where("g.levelId = :levelId", { levelId })
+			.getRawOne<{ label: string | null }>()
+		gradeColumns["grade"] = lowest?.label === null || lowest?.label === undefined ? 1 : Number(lowest.label)
 	}
 	await updateRow(manager, "tbr_student_grades", studentGradeId, { ...gradeColumns, ...(await storeUploads(storage, validated)) })
 
