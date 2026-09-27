@@ -6,6 +6,7 @@ import { StorageModule } from "@core/storage/storage.module"
 import { EwalletModule } from "@modules/ewallet/ewallet.module"
 import { SantriAuthController } from "@santri/auth/santri-auth.controller"
 import { SantriAuthService } from "@santri/auth/santri-auth.service"
+import { SantriGoogleLoginService } from "@santri/auth/santri-google-login.service"
 import { SantriPasswordResetService } from "@santri/auth/services/santri-password-reset.service"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 import { StudentGrade } from "@santri/entities/student-grade.entity"
@@ -62,6 +63,7 @@ import { SettingService } from "@santri/setting/setting.service"
 	],
 	providers: [
 		SantriAuthService,
+		SantriGoogleLoginService,
 		SantriPasswordResetService,
 		SantriEwalletService,
 		SantriEwalletTransactionService,

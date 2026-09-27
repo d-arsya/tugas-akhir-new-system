@@ -12,9 +12,11 @@ import { ApiResponseWrapped } from "@core/decorators/api-response-wrapped.decora
 import { PsbJwtAuthGuard } from "@psb/guards/psb-jwt-auth.guard"
 import { PsbJwtRefreshGuard } from "@psb/guards/psb-jwt-refresh.guard"
 import { PsbAuthService } from "@psb/auth/psb-auth.service"
+import { PsbGoogleLoginService } from "@psb/auth/psb-google-login.service"
+import { GoogleLoginDto } from "@core/auth/google/google-login.dto"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import { Throttle } from '@nestjs/throttler';
-import { Response } from "express"
+import type { Response } from "express"
 
 @ApiTags("PSB — Authentication")
 @Controller("psb/auth")
@@ -22,6 +24,7 @@ import { Response } from "express"
 export class PsbAuthController {
 	constructor(
 		private readonly psbAuthService: PsbAuthService,
+		private readonly psbGoogleLoginService: PsbGoogleLoginService,
 		private readonly configService: ConfigService,
 	) { }
 
@@ -67,6 +70,24 @@ export class PsbAuthController {
 	}
 
 	@Public()
+	@Post("google")
+	@ApiOperation({ summary: "Login akun pendaftar dengan Google" })
+	@ApiResponseWrapped({ status: 200, description: "Login berhasil atau membutuhkan verifikasi kode 2FA", type: PsbAuthResultDto })
+	@ApiResponse({ status: 401, description: "Token Google tidak valid atau email tidak terdaftar" })
+	@ApiResponse({ status: 403, description: "Akun diblokir" })
+	async loginWithGoogle(
+		@Body() dto: GoogleLoginDto,
+		@Ip() ip: string,
+		@Res({ passthrough: true }) response: Response,
+	): Promise<PsbAuthResultDto> {
+		const result = await this.psbGoogleLoginService.login(dto.credential, ip)
+		if ("accessToken" in result) {
+			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+		}
+		return result
+	}
+
+	@Public()
 	@Post("two-factor")
 	@ApiOperation({ summary: "Verifikasi 6-digit kode 2FA dari email" })
 	@ApiResponseWrapped({ status: 200, description: "Verifikasi sukses dan mengembalikan JWT access & refresh token", type: PsbAuthResultDto })
@@ -95,11 +116,8 @@ export class PsbAuthController {
 	@Post("verify-email")
 	@ApiOperation({ summary: "Verifikasi email akun pendaftar menggunakan token link email" })
 	@ApiResponseWrapped({ status: 200, description: "Email berhasil diverifikasi", type: MessageResponseDto })
-	async verifyEmail(
-		@Body("token") token: string,
-		@Body("email") email?: string,
-	): Promise<MessageResponseDto> {
-		return this.psbAuthService.verifyEmail(token, email)
+	async verifyEmail(@Body("token") token: string): Promise<MessageResponseDto> {
+		return this.psbAuthService.verifyEmail(token)
 	}
 
 	@Public()

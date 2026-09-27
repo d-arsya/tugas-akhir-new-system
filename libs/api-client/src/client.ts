@@ -55,6 +55,7 @@ export const createApiClient = (
 					const requestUrl = originalRequest?.url || ""
 					if (
 						requestUrl.includes("/auth/login") ||
+						requestUrl.includes("/auth/google") ||
 						requestUrl.includes("/auth/two-factor") ||
 						requestUrl.includes("/auth/refresh") ||
 						requestUrl.includes("/ewallet/pin")

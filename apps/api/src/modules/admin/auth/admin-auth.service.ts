@@ -72,6 +72,15 @@ export class AdminAuthService {
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
+		return this.completeLogin(user, clientIp, userAgent, dto.rememberMe)
+	}
+
+	async completeLogin(
+		user: User,
+		clientIp: string,
+		userAgent?: string,
+		rememberMe?: boolean,
+	): Promise<AdminAuthResult> {
 		if (user.isBlocked) {
 			await this.authLogWriter.open({
 				userId: user.id,
@@ -83,7 +92,7 @@ export class AdminAuthService {
 			throw new ForbiddenException("Akun admin Anda saat ini sedang nonaktif atau diblokir.")
 		}
 
-		return this.issueSession(user, clientIp, userAgent, dto.rememberMe)
+		return this.issueSession(user, clientIp, userAgent, rememberMe)
 	}
 
 	/**

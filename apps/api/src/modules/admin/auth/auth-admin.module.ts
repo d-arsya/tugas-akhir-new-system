@@ -4,6 +4,7 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 
 import { AdminAuthController } from "@admin/auth/admin-auth.controller"
 import { AdminAuthService } from "@admin/auth/admin-auth.service"
+import { AdminGoogleLoginService } from "@admin/auth/admin-google-login.service"
 import { AdminCreatePasswordController } from "@admin/auth/admin-create-password.controller"
 import { AdminCreatePasswordService } from "@admin/auth/admin-create-password.service"
 import { AdminProfileController } from "@admin/auth/admin-profile.controller"
@@ -27,6 +28,7 @@ import { AdminIpBanController } from "@admin/auth/ip-ban.controller"
 	],
 	providers: [
 		AdminAuthService,
+		AdminGoogleLoginService,
 		AdminCreatePasswordService,
 		AdminProfileService,
 		AuthLogService,

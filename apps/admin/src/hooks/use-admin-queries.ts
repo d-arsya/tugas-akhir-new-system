@@ -18,6 +18,18 @@ export function useAdminLoginMutation() {
 	})
 }
 
+export function useAdminGoogleLoginMutation() {
+	const auth = useAuthStore()
+	return useMutation({
+		mutationFn: (credential: string) => adminApi.loginWithGoogle(credential),
+		onSuccess: (res) => {
+			if (res.user) {
+				auth.login(res.user as AuthUser)
+			}
+		},
+	})
+}
+
 export function useAdminVerify2faMutation() {
 	const auth = useAuthStore()
 	return useMutation({

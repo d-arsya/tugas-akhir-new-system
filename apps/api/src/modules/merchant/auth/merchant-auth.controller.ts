@@ -27,13 +27,19 @@ import {
 import { MerchantJwtAuthGuard } from "@merchant/guards/merchant-jwt-auth.guard"
 import { MerchantJwtRefreshGuard } from "@merchant/guards/merchant-jwt-refresh.guard"
 import { MerchantAuthResult, MerchantAuthService } from "@merchant/auth/merchant-auth.service"
+import { MerchantGoogleLoginService } from "@merchant/auth/merchant-google-login.service"
+import { GoogleLoginDto } from "@core/auth/google/google-login.dto"
 import { ConfigService } from "@nestjs/config"
-import { Response } from "express"
+import type { Response } from "express"
 
 @ApiTags("Merchant — Authentication")
 @Controller("merchant/auth")
 export class MerchantAuthController {
-	constructor(private readonly merchantAuthService: MerchantAuthService, private readonly configService: ConfigService) { }
+	constructor(
+		private readonly merchantAuthService: MerchantAuthService,
+		private readonly merchantGoogleLoginService: MerchantGoogleLoginService,
+		private readonly configService: ConfigService,
+	) { }
 
 	private getCookieDomain(): string | undefined {
 		const rawDomain = this.configService.get<string>("COOKIE_DOMAIN")?.trim().toLowerCase()
@@ -82,6 +88,28 @@ export class MerchantAuthController {
 		@Res({ passthrough: true }) response: any,
 	): Promise<MerchantAuthResult> {
 		const result = await this.merchantAuthService.login(dto, ip)
+		if ("accessToken" in result) {
+			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+		}
+		return result
+	}
+
+	@Public()
+	@Post("google")
+	@ApiOperation({ summary: "Login akun merchant dengan Google" })
+	@ApiResponseWrapped({
+		status: 200,
+		description: "Login berhasil atau memerlukan verifikasi 2FA",
+		type: MerchantAuthResultDto,
+	})
+	@ApiResponse({ status: 401, description: "Token Google tidak valid atau email tidak terdaftar" })
+	@ApiResponse({ status: 403, description: "Akun diblokir" })
+	async loginWithGoogle(
+		@Body() dto: GoogleLoginDto,
+		@Ip() ip: string,
+		@Res({ passthrough: true }) response: Response,
+	): Promise<MerchantAuthResult> {
+		const result = await this.merchantGoogleLoginService.login(dto.credential, ip)
 		if ("accessToken" in result) {
 			this.setAuthCookies(response, result.accessToken, result.refreshToken)
 		}

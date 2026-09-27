@@ -56,10 +56,13 @@ export class PsbAuthService {
 		const dbHash = registrant.password.trim().replace(/^\$2y\$/, "$2b$")
 		const isPasswordValid = await bcrypt.compare(dto.password, dbHash)
 		if (!isPasswordValid) {
-			console.log(`[Auth Debug] Password mismatch for ${dto.email}. DB Hash: "${registrant.password}" (len: ${registrant.password.length})`)
 			throw new UnauthorizedException("Email atau password yang Anda masukkan salah.")
 		}
 
+		return this.completeLogin(registrant, clientIp)
+	}
+
+	async completeLogin(registrant: Registrant, clientIp: string): Promise<AuthResult> {
 		if (registrant.isBlocked) {
 			throw new ForbiddenException("Akun pendaftaran Anda saat ini sedang dinonaktifkan atau diblokir.")
 		}
@@ -175,9 +178,8 @@ export class PsbAuthService {
 		return { message: "Email verifikasi telah dikirimkan. Silakan cek kotak masuk email Anda." }
 	}
 
-	async verifyEmail(token: string, emailParam?: string): Promise<{ message: string }> {
-		const redisEmail = await this.redisService.get(`email-verify:${token}`)
-		const targetEmail = redisEmail || emailParam
+	async verifyEmail(token: string): Promise<{ message: string }> {
+		const targetEmail = await this.redisService.get(`email-verify:${token}`)
 
 		if (!targetEmail) {
 			throw new BadRequestException("Token verifikasi email tidak valid atau telah kadaluarsa.")
@@ -194,9 +196,7 @@ export class PsbAuthService {
 
 		registrant.emailVerifiedAt = new Date()
 		await this.registrantRepository.save(registrant)
-		if (redisEmail) {
-			await this.redisService.del(`email-verify:${token}`)
-		}
+		await this.redisService.del(`email-verify:${token}`)
 
 		return { message: "Email Anda telah berhasil diverifikasi! Silakan login untuk melanjutkan." }
 	}

@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useState, type JSX } from "react"
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
-import { LoginCard, type LoginSubmitValues } from "@roja/ui"
+import type { MerchantLoginResponse } from "@roja/api-client"
+import { GoogleSignInButton, LoginCard, useGoogleClientId, type LoginSubmitValues } from "@roja/ui"
 import { toast } from "sonner"
 
-import { merchantApi } from "@/lib/api"
+import { merchantApi, sharedApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
 
 export const Route = createFileRoute("/_guest/login")({
@@ -17,14 +18,13 @@ function LoginRouteComponent(): JSX.Element {
 	const [isLoading, setIsLoading] = useState(false)
 	const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-	const onSubmit = async (data: LoginSubmitValues) => {
+	const googleClientId = useGoogleClientId(sharedApi.getGoogleConfig)
+
+	const signIn = async (request: () => Promise<MerchantLoginResponse>): Promise<void> => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		try {
-			const res = await merchantApi.login({
-				uniqueNumber: data.identifier,
-				password: data.password,
-			})
+			const res = await request()
 			if (res.requires2fa) {
 				toast.info("Verifikasi 2FA diperlukan", {
 					description: "Kode 2FA telah dikirim ke email terdaftar.",
@@ -50,6 +50,11 @@ function LoginRouteComponent(): JSX.Element {
 		}
 	}
 
+	const onSubmit = (data: LoginSubmitValues): Promise<void> =>
+		signIn(() => merchantApi.login({ uniqueNumber: data.identifier, password: data.password }))
+
+	const onGoogle = (credential: string): Promise<void> => signIn(() => merchantApi.loginWithGoogle(credential))
+
 	return (
 		<LoginCard
 			title="Login Merchant Area"
@@ -59,6 +64,11 @@ function LoginRouteComponent(): JSX.Element {
 			forgotPasswordHref="/forgot-password"
 			isLoading={isLoading}
 			errorMsg={errorMsg}
+			alternativeLogin={
+				googleClientId ? (
+					<GoogleSignInButton clientId={googleClientId} onCredential={onGoogle} disabled={isLoading} />
+				) : undefined
+			}
 			footer={
 				<>
 					Butuh bantuan akun?{" "}

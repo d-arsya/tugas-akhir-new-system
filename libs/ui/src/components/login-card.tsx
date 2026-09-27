@@ -28,6 +28,7 @@ export interface LoginCardProps {
 	errorMsg?: string | null
 	infoMsg?: string | null
 	extraAlertContent?: ReactNode
+	alternativeLogin?: ReactNode
 	footer?: ReactNode
 	className?: string
 	onSubmit: (values: LoginSubmitValues) => void | Promise<void>
@@ -48,6 +49,7 @@ export const LoginCard = ({
 	errorMsg,
 	infoMsg,
 	extraAlertContent,
+	alternativeLogin,
 	footer,
 	className = "",
 	onSubmit,
@@ -146,6 +148,17 @@ export const LoginCard = ({
 					{isLoading ? "Memproses..." : submitLabel}
 				</Button>
 			</form>
+
+			{alternativeLogin && (
+				<>
+					<div className="flex items-center gap-3 my-4 text-[11px] text-slate-400">
+						<span className="h-px flex-1 bg-slate-200" />
+						atau
+						<span className="h-px flex-1 bg-slate-200" />
+					</div>
+					{alternativeLogin}
+				</>
+			)}
 		</AuthCard>
 	)
 }

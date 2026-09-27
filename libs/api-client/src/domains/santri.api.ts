@@ -148,6 +148,7 @@ export type SantriTopUpBankTransferDto = {
 
 export type SantriApi = {
 	login: (data: SantriLoginDto) => Promise<SantriLoginResponse>
+	loginWithGoogle: (credential: string) => Promise<SantriLoginResponse>
 	verify2fa: (data: SantriTwoFactorDto, studentId: number) => Promise<SantriLoginResponse>
 	resend2fa: (studentId: number) => Promise<{ message: string }>
 	forgotPassword: (data: SantriForgotPasswordDto) => Promise<{ message: string }>
@@ -196,6 +197,10 @@ export type SantriApi = {
 export const createSantriApi = (client: AxiosInstance): SantriApi => ({
 	login: async (data): Promise<SantriLoginResponse> => {
 		const { data: res } = await client.post<ApiResponse<SantriLoginResponse>>("/santri/auth/login", data)
+		return res.data
+	},
+	loginWithGoogle: async (credential): Promise<SantriLoginResponse> => {
+		const { data: res } = await client.post<ApiResponse<SantriLoginResponse>>("/santri/auth/google", { credential })
 		return res.data
 	},
 	verify2fa: async (data, studentId): Promise<SantriLoginResponse> => {

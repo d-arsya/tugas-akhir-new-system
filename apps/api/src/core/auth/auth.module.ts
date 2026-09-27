@@ -7,6 +7,8 @@ import { JwtRefreshStrategy } from "@core/auth/strategies/jwt-refresh.strategy"
 import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import { RolesGuard } from "@core/auth/guards/roles.guard"
 import { IpBanGuard } from "@core/auth/guards/ip-ban.guard"
+import { GoogleConfigController } from "@core/auth/google/google-config.controller"
+import { GoogleIdTokenService } from "@core/auth/google/google-id-token.service"
 import type { Env } from "@core/config/env.validation"
 
 @Module({
@@ -22,7 +24,8 @@ import type { Env } from "@core/config/env.validation"
 			}),
 		}),
 	],
-	providers: [JwtStrategy, JwtRefreshStrategy, JwtAuthGuard, RolesGuard, IpBanGuard],
-	exports: [JwtModule, JwtAuthGuard, RolesGuard, IpBanGuard],
+	controllers: [GoogleConfigController],
+	providers: [JwtStrategy, JwtRefreshStrategy, JwtAuthGuard, RolesGuard, IpBanGuard, GoogleIdTokenService],
+	exports: [JwtModule, JwtAuthGuard, RolesGuard, IpBanGuard, GoogleIdTokenService],
 })
 export class AuthModule {}

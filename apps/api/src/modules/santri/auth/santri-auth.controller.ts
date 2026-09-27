@@ -30,6 +30,8 @@ import { SantriUpdateEmailDto } from "@santri/dto/auth/update-email.dto"
 import { SantriJwtAuthGuard } from "@santri/guards/santri-jwt-auth.guard"
 import { SantriJwtRefreshGuard } from "@santri/guards/santri-jwt-refresh.guard"
 import { SantriAuthResult, SantriAuthService } from "@santri/auth/santri-auth.service"
+import { SantriGoogleLoginService } from "@santri/auth/santri-google-login.service"
+import { GoogleLoginDto } from "@core/auth/google/google-login.dto"
 import { ConfigService } from "@nestjs/config"
 import type { Response } from "express"
 
@@ -38,6 +40,7 @@ import type { Response } from "express"
 export class SantriAuthController {
 	constructor(
 		private readonly santriAuthService: SantriAuthService,
+		private readonly santriGoogleLoginService: SantriGoogleLoginService,
 		private readonly configService: ConfigService
 	) { }
 
@@ -80,6 +83,28 @@ export class SantriAuthController {
 		@Res({ passthrough: true }) response: any,
 	): Promise<SantriAuthResult> {
 		const result = await this.santriAuthService.login(dto, ip)
+		if ("accessToken" in result) {
+			this.setAuthCookies(response, result.accessToken, result.refreshToken)
+		}
+		return result
+	}
+
+	@Public()
+	@Post("google")
+	@ApiOperation({ summary: "Login akun santri dengan Google" })
+	@ApiResponseWrapped({
+		status: 200,
+		description: "Login berhasil atau memerlukan verifikasi 2FA",
+		type: SantriAuthResultDto,
+	})
+	@ApiResponse({ status: 401, description: "Token Google tidak valid atau email tidak terdaftar" })
+	@ApiResponse({ status: 403, description: "Akun diblokir" })
+	async loginWithGoogle(
+		@Body() dto: GoogleLoginDto,
+		@Ip() ip: string,
+		@Res({ passthrough: true }) response: Response,
+	): Promise<SantriAuthResult> {
+		const result = await this.santriGoogleLoginService.login(dto.credential, ip)
 		if ("accessToken" in result) {
 			this.setAuthCookies(response, result.accessToken, result.refreshToken)
 		}

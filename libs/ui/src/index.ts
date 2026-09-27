@@ -17,6 +17,7 @@ export { default as WizardStepper, type WizardStepperProps, type WizardSubStep }
 export { default as PinChallengeGate, type PinChallengeGateProps } from "./components/pin-challenge-gate"
 export { default as AuthCard, type AuthCardProps } from "./components/auth-card"
 export { default as LoginCard, type LoginCardProps, type LoginSubmitValues } from "./components/login-card"
+export { GoogleSignInButton, useGoogleClientId, type GoogleSignInButtonProps } from "./components/google-sign-in-button"
 export { default as ForgotPasswordCard, type ForgotPasswordCardProps } from "./components/forgot-password-card"
 export { default as ResetPasswordCard, type ResetPasswordCardProps, type ResetPasswordSubmitValues } from "./components/reset-password-card"
 export { default as TwoFactorCard, type TwoFactorCardProps } from "./components/two-factor-card"

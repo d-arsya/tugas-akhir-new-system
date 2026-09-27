@@ -13,6 +13,7 @@ type SharedApi = {
 	getRegencies: (provinceId: number) => Promise<Regency[]>
 	getDistricts: (regencyId: number) => Promise<District[]>
 	getVillages: (districtId: number, limit?: number) => Promise<Village[]>
+	getGoogleConfig: () => Promise<{ clientId: string | null }>
 }
 
 export const createSharedApi = (client: AxiosInstance): SharedApi => ({
@@ -37,5 +38,9 @@ export const createSharedApi = (client: AxiosInstance): SharedApi => ({
 			`/location/villages?district_id=${districtId}` + (limit ? `&limit=${limit}` : '')
 		);
 		return data.data;
+	},
+	getGoogleConfig: async (): Promise<{ clientId: string | null }> => {
+		const { data } = await client.get<ApiResponse<{ clientId: string | null }>>("/auth/google/config")
+		return data.data
 	},
 })

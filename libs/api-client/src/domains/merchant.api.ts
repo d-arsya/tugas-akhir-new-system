@@ -101,6 +101,7 @@ export type MerchantValidatePinResponse = {
 
 export type MerchantApi = {
 	login: (data: MerchantLoginDto) => Promise<MerchantLoginResponse>
+	loginWithGoogle: (credential: string) => Promise<MerchantLoginResponse>
 	verify2fa: (data: MerchantTwoFactorDto, merchantId: number) => Promise<MerchantLoginResponse>
 	resend2fa: (merchantId: number) => Promise<{ message: string }>
 	forgotPassword: (data: MerchantForgotPasswordDto) => Promise<{ message: string }>
@@ -132,17 +133,20 @@ export type MerchantApi = {
 	resetPin: (data: { email: string; token: string; pin: string; pinConfirmation: string }) => Promise<{ message: string }>
 }
 
+const withMerchantDomain = (body: { data?: MerchantLoginResponse }): MerchantLoginResponse => {
+	const payload = body.data ?? (body as MerchantLoginResponse)
+	if ("user" in payload && !payload.user.domain) {
+		payload.user.domain = "merchant"
+	}
+	return payload
+}
+
 export const createMerchantApi = (client?: AxiosInstance): MerchantApi => {
 	const c = client as AxiosInstance
 	return {
-		login: async (data) => {
-			const res = (await c.post("/merchant/auth/login", data)).data
-			const payload = res.data ?? res
-			if (payload.user && !payload.user.domain) {
-				payload.user.domain = "merchant"
-			}
-			return payload
-		},
+		login: async (data) => withMerchantDomain((await c.post("/merchant/auth/login", data)).data),
+		loginWithGoogle: async (credential) =>
+			withMerchantDomain((await c.post("/merchant/auth/google", { credential })).data),
 		verify2fa: async (data, merchantId) => {
 			const res = (await c.post(`/merchant/auth/2fa/verify?merchant_id=${merchantId}`, data)).data
 			const payload = res.data ?? res

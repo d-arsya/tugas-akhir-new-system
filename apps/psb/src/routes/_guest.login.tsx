@@ -1,9 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
-import { useState } from "react"
+import { useState, type JSX } from "react"
 import axios from "axios"
-import { Button, LoginCard, type LoginSubmitValues } from "@roja/ui"
-import { psbApi } from "@/lib/api"
+import { Button, GoogleSignInButton, LoginCard, useGoogleClientId, type LoginSubmitValues } from "@roja/ui"
+import { psbApi, sharedApi } from "@/lib/api"
 import useAuthStore from "@/stores/auth.store"
+
+type PsbLoginResult = Awaited<ReturnType<typeof psbApi.login>>
 
 const LoginPage = (): JSX.Element => {
 	const navigate = useNavigate()
@@ -14,13 +16,15 @@ const LoginPage = (): JSX.Element => {
 	const [infoMsg, setInfoMsg] = useState<string | null>(null)
 	const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
 
-	const onSubmit = async (data: LoginSubmitValues): Promise<void> => {
+	const googleClientId = useGoogleClientId(sharedApi.getGoogleConfig)
+
+	const signIn = async (request: () => Promise<PsbLoginResult>, email: string | null): Promise<void> => {
 		setIsLoading(true)
 		setErrorMsg(null)
 		setInfoMsg(null)
 		setUnverifiedEmail(null)
 		try {
-			const res = await psbApi.login({ email: data.identifier, password: data.password })
+			const res = await request()
 			if (res.requires2fa) {
 				navigate({ to: "/verify-2fa", search: { email: res.email } })
 			} else {
@@ -41,8 +45,8 @@ const LoginPage = (): JSX.Element => {
 				msg.toLowerCase().includes("verifikasi") ||
 				msg.toLowerCase().includes("verified")
 
-			if (isUnverified) {
-				navigate({ to: "/need-verify", search: { email: data.identifier } })
+			if (isUnverified && email) {
+				navigate({ to: "/need-verify", search: { email } })
 				return
 			}
 			setErrorMsg(msg)
@@ -50,6 +54,11 @@ const LoginPage = (): JSX.Element => {
 			setIsLoading(false)
 		}
 	}
+
+	const onSubmit = (data: LoginSubmitValues): Promise<void> =>
+		signIn(() => psbApi.login({ email: data.identifier, password: data.password }), data.identifier)
+
+	const onGoogle = (credential: string): Promise<void> => signIn(() => psbApi.loginWithGoogle(credential), null)
 
 	const handleResendVerification = async (): Promise<void> => {
 		if (!unverifiedEmail) return
@@ -76,6 +85,11 @@ const LoginPage = (): JSX.Element => {
 			isLoading={isLoading}
 			errorMsg={errorMsg}
 			infoMsg={infoMsg}
+			alternativeLogin={
+				googleClientId ? (
+					<GoogleSignInButton clientId={googleClientId} onCredential={onGoogle} disabled={isLoading} />
+				) : undefined
+			}
 			extraAlertContent={
 				unverifiedEmail && (
 					<Button

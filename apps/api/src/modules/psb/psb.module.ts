@@ -3,6 +3,7 @@ import { JwtModule } from "@nestjs/jwt"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { PsbAuthController } from "@psb/auth/psb-auth.controller"
 import { PsbAuthService } from "@psb/auth/psb-auth.service"
+import { PsbGoogleLoginService } from "@psb/auth/psb-google-login.service"
 import { PsbDashboardController } from "@psb/dashboard/psb-dashboard.controller"
 import { PsbDashboardService } from "@psb/dashboard/psb-dashboard.service"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
@@ -51,6 +52,7 @@ import { PsbSettingService } from "@psb/setting/psb-setting.service"
 	],
 	providers: [
 		PsbAuthService,
+		PsbGoogleLoginService,
 		PsbRegisterService,
 		PsbDashboardService,
 		PsbInvalidService,

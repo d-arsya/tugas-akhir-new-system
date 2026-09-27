@@ -9,7 +9,7 @@ import { JwtService } from "@nestjs/jwt"
 import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "crypto"
-import { Repository } from "typeorm"
+import { IsNull, Repository } from "typeorm"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import type { Env } from "@core/config/env.validation"
 import { MailerService } from "@core/mailer/mailer.service"
@@ -90,6 +90,10 @@ export class MerchantAuthService {
 			throw new UnauthorizedException("Nomor Merchant atau password yang Anda masukkan salah.")
 		}
 
+		return this.completeLogin(merchant, clientIp)
+	}
+
+	async completeLogin(merchant: Merchant, clientIp: string): Promise<MerchantAuthResult> {
 		if (merchant.isBlocked) {
 			throw new ForbiddenException("Akun Merchant Anda saat ini sedang dinonaktifkan atau diblokir.")
 		}
@@ -99,9 +103,10 @@ export class MerchantAuthService {
 			const trustedRecord = await this.twoFactorRepository.findOneBy({
 				merchantId: String(merchant.id),
 				twoFactorIp: clientIp,
+				twoFactorCode: IsNull(),
 			})
 
-			if (!trustedRecord || !trustedRecord.twoFactorIp) {
+			if (!trustedRecord) {
 				const code = Math.floor(100000 + Math.random() * 900000).toString()
 				const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
@@ -239,6 +244,10 @@ export class MerchantAuthService {
 		const merchant = await this.merchantRepository.findOneBy({ id: user.sub })
 		if (!merchant || merchant.isBlocked) {
 			throw new UnauthorizedException("Sesi tidak valid.")
+		}
+
+		if (user.tokenId) {
+			await this.redisService.revokeRefreshToken("merchant", user.sub, user.tokenId)
 		}
 
 		return this.generateTokens(merchant)

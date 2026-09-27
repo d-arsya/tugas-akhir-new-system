@@ -6,6 +6,7 @@ import { StorageModule } from "@core/storage/storage.module"
 import { EwalletModule } from "@modules/ewallet/ewallet.module"
 import { MerchantAuthController } from "@merchant/auth/merchant-auth.controller"
 import { MerchantAuthService } from "@merchant/auth/merchant-auth.service"
+import { MerchantGoogleLoginService } from "@merchant/auth/merchant-google-login.service"
 import { MerchantPasswordReset } from "@merchant/entities/merchant-password-reset.entity"
 import { Merchant } from "@merchant/entities/merchant.entity"
 import { MerchantTwoFactor } from "@merchant/entities/merchant-two-factor.entity"
@@ -45,6 +46,7 @@ import { MerchantTransactionService } from "@merchant/transaction/merchant-trans
 	],
 	providers: [
 		MerchantAuthService,
+		MerchantGoogleLoginService,
 		MerchantEwalletService,
 		MerchantTransactionService,
 		MerchantTransactionHistoryService,

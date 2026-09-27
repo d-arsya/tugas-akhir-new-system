@@ -9,6 +9,8 @@ import { JwtAuthGuard } from "@core/auth/guards/jwt-auth.guard"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import { AdminAuthService, type AdminAuthResult } from "@admin/auth/admin-auth.service"
 import { clearAuthCookies, setAuthCookies } from "@admin/auth/admin-auth-cookies"
+import { AdminGoogleLoginService } from "@admin/auth/admin-google-login.service"
+import { GoogleLoginDto } from "@core/auth/google/google-login.dto"
 import {
 	AdminLoginDto,
 	AdminAuthResultDto,
@@ -24,6 +26,7 @@ import { AdminJwtRefreshGuard } from "@admin/auth/guards/admin-jwt-refresh.guard
 export class AdminAuthController {
 	constructor(
 		private readonly adminAuthService: AdminAuthService,
+		private readonly adminGoogleLoginService: AdminGoogleLoginService,
 		private readonly configService: ConfigService,
 	) {}
 
@@ -40,6 +43,25 @@ export class AdminAuthController {
 		@Res({ passthrough: true }) response: Response,
 	): Promise<AdminAuthResult> {
 		const result = await this.adminAuthService.login(dto, ip, userAgent)
+		if (result.accessToken) {
+			setAuthCookies(response, this.configService, result.accessToken, result.refreshToken)
+		}
+		return result
+	}
+
+	@Public()
+	@Post("google")
+	@ApiOperation({ summary: "Login admin dengan Google" })
+	@ApiResponseWrapped({ status: 200, description: "Login berhasil, mengembalikan JWT tokens", type: AdminAuthResultDto })
+	@ApiResponse({ status: 401, description: "Token Google tidak valid atau email tidak terdaftar" })
+	@ApiResponse({ status: 403, description: "Akun diblokir" })
+	async loginWithGoogle(
+		@Body() dto: GoogleLoginDto,
+		@Ip() ip: string,
+		@Headers("user-agent") userAgent: string,
+		@Res({ passthrough: true }) response: Response,
+	): Promise<AdminAuthResult> {
+		const result = await this.adminGoogleLoginService.login(dto.credential, ip, userAgent)
 		if (result.accessToken) {
 			setAuthCookies(response, this.configService, result.accessToken, result.refreshToken)
 		}

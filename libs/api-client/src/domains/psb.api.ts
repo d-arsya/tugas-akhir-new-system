@@ -42,12 +42,8 @@ export type PsbApi = {
 	submitAttachment: (sessionId: string, files: Record<string, any>) => Promise<{ tokens: TokenPair; user: AuthUser; registrantId: string }>
 	getSuccess: (id: number) => Promise<SuccessResponse>
 	getPrintProof: (type: string, id: number) => Promise<any>
-	login: (
-		data: { email: string; password: string },
-	) => Promise<
-		| { requires2fa: true; email: string }
-		| { requires2fa: false; tokens: TokenPair; user: AuthUser }
-	>
+	login: (data: { email: string; password: string }) => Promise<PsbLoginResult>
+	loginWithGoogle: (credential: string) => Promise<PsbLoginResult>
 	verify2fa: (data: { email: string; code: string }) => Promise<{ tokens: TokenPair; user: AuthUser }>
 	resend2fa: (email: string) => Promise<{ message: string }>
 	refreshToken: () => Promise<{ success: boolean }>
@@ -319,6 +315,43 @@ const mapGuardianToFrontend = (data: any): WizardGuardianData => ({
 	guardianSubVillage: data.guardianSubVillage || "",
 })
 
+export type PsbLoginResult =
+	| { requires2fa: true; email: string }
+	| { requires2fa: false; tokens: TokenPair; user: AuthUser }
+
+type PsbLoginBody = {
+	requires2fa?: boolean
+	email?: string
+	accessToken: string
+	refreshToken: string
+	user?: {
+		id: number
+		email: string
+		fullname?: string | null
+		name?: string
+		role?: string
+		domain?: AuthUser["domain"]
+	}
+}
+
+const toPsbLoginResult = (body: PsbLoginBody, fallbackEmail: string): PsbLoginResult => {
+	if (body.requires2fa || !body.user) {
+		return { requires2fa: true, email: body.email || fallbackEmail }
+	}
+
+	return {
+		requires2fa: false,
+		tokens: { accessToken: body.accessToken, refreshToken: body.refreshToken },
+		user: {
+			id: body.user.id,
+			email: body.user.email,
+			name: body.user.fullname || body.user.name || "",
+			role: body.user.role || "registrant",
+			domain: body.user.domain || "psb",
+		},
+	}
+}
+
 export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 	getLanding: async (): Promise<{ academicYear: AcademicYear, isOpen: boolean; schoolName: string; levels: Array<{ id: number; name: string }>; formSettings?: any[] }> => {
 		const { data } = await client.get<ApiResponse<any>>("/psb/register/landing")
@@ -435,38 +468,14 @@ export const createPsbApi = (client: AxiosInstance): PsbApi => ({
 		return data.data
 	},
 
-	login: async (
-		data: { email: string; password: string },
-	): Promise<
-		| { requires2fa: true; email: string }
-		| { requires2fa: false; tokens: TokenPair; user: AuthUser }
-	> => {
-		const { data: res } = await client.post<ApiResponse<any>>("/psb/auth/login", data)
+	login: async (data: { email: string; password: string }): Promise<PsbLoginResult> => {
+		const { data: res } = await client.post<ApiResponse<PsbLoginBody>>("/psb/auth/login", data)
+		return toPsbLoginResult(res.data, data.email)
+	},
 
-		if (res.data?.requires2fa) {
-			return {
-				requires2fa: true,
-				email: res.data.email || data.email,
-			}
-		}
-
-		const authData = res.data
-		const user: AuthUser = {
-			id: authData.user.id,
-			email: authData.user.email,
-			name: authData.user.fullname || authData.user.name || "",
-			role: authData.user.role || "registrant",
-			domain: authData.user.domain || "psb",
-		}
-
-		return {
-			requires2fa: false,
-			tokens: {
-				accessToken: authData.accessToken,
-				refreshToken: authData.refreshToken,
-			},
-			user,
-		}
+	loginWithGoogle: async (credential: string): Promise<PsbLoginResult> => {
+		const { data: res } = await client.post<ApiResponse<PsbLoginBody>>("/psb/auth/google", { credential })
+		return toPsbLoginResult(res.data, "")
 	},
 
 	verify2fa: async (data: { email: string; code: string }): Promise<{ tokens: TokenPair; user: AuthUser }> => {

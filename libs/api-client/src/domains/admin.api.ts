@@ -54,6 +54,7 @@ export interface AdminApi
 		AdminAlumniApi {
 	// Auth
 	login(data: AdminLoginDto): Promise<AdminLoginResponse>
+	loginWithGoogle(credential: string): Promise<AdminLoginResponse>
 	verify2fa(code: string, adminId: number): Promise<AdminLoginResponse>
 	resend2fa(adminId: number): Promise<{ message: string }>
 	forgotPassword(email: string): Promise<{ message: string }>
@@ -116,6 +117,7 @@ export const createAdminApi = (client: AxiosInstance): AdminApi => ({
 	...createAdminAlumniApi(client),
 
 	login: (data) => unwrap(client.post("/admin/auth/login", data)),
+	loginWithGoogle: (credential) => unwrap(client.post("/admin/auth/google", { credential })),
 	verify2fa: (code, adminId) => unwrap(client.post("/admin/auth/2fa/verify", { code, adminId })),
 	resend2fa: (adminId) => unwrap(client.post(`/admin/auth/2fa/resend/${adminId}`)),
 	forgotPassword: (email) => unwrap(client.post("/admin/auth/forgot-password", { email })),

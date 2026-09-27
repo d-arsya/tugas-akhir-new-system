@@ -9,7 +9,7 @@ import { JwtService } from "@nestjs/jwt"
 import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "crypto"
-import { Repository } from "typeorm"
+import { IsNull, Repository } from "typeorm"
 import type { JwtPayload } from "@core/auth/strategies/jwt.strategy"
 import type { Env } from "@core/config/env.validation"
 import { MailerService } from "@core/mailer/mailer.service"
@@ -94,6 +94,10 @@ export class SantriAuthService {
 			throw new UnauthorizedException("NIS atau password yang Anda masukkan salah.")
 		}
 
+		return this.completeLogin(student, clientIp)
+	}
+
+	async completeLogin(student: Student, clientIp: string): Promise<SantriAuthResult> {
 		if (student.isBlocked) {
 			throw new ForbiddenException("Akun santri Anda saat ini sedang dinonaktifkan atau diblokir.")
 		}
@@ -102,9 +106,10 @@ export class SantriAuthService {
 			const trustedRecord = await this.twoFactorRepository.findOneBy({
 				studentId: String(student.id),
 				twoFactorIp: clientIp,
+				twoFactorCode: IsNull(),
 			})
 
-			if (!trustedRecord || !trustedRecord.twoFactorIp) {
+			if (!trustedRecord) {
 				const code = Math.floor(100000 + Math.random() * 900000).toString()
 				const expiresAt = new Date(Date.now() + 15 * 60 * 1000)
 
@@ -212,6 +217,10 @@ export class SantriAuthService {
 		const student = await this.studentRepository.findOneBy({ id: user.sub })
 		if (!student || student.deletedAt || student.isBlocked) {
 			throw new UnauthorizedException("Sesi tidak valid.")
+		}
+
+		if (user.tokenId) {
+			await this.redisService.revokeRefreshToken("santri", user.sub, user.tokenId)
 		}
 
 		return this.generateTokens(student)
