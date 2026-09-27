@@ -61,20 +61,6 @@ export const LEVEL_CREATE_QUOTA_SQL = `INSERT INTO tbr_level_academic_years (lev
 // ─── The delegation moves ────────────────────────────────────────
 // $1 = the level being deleted, $2 = the destination chosen in the picker.
 
-export const MOVE_REGISTRANTS_SQL = `UPDATE tbr_registrants SET level_id = $2, updated_at = now() WHERE level_id = $1`
-
-/**
- * B-2. Legacy iterated `$level->students` and `Level` has no `students()` relation, so the
- * step threw, the `try` swallowed it and the level survived — the path never once worked in
- * production. `tbr_students` has no `level_id` column at all; the rows that carry the level
- * are `tbr_student_grades`, which is what `Level::studentGrades()` already points at.
- *
- * Scoped to `deleted_at IS NULL` so the UPDATE covers exactly the rows the relation (and the
- * count that routed the user here) sees.
- */
-export const MOVE_STUDENT_GRADES_SQL = `UPDATE tbr_student_grades SET level_id = $2, updated_at = now()
-	WHERE level_id = $1 AND deleted_at IS NULL`
-
 /**
  * Legacy `updateQuota($request, $level)`: for every academic year the **destination** level
  * takes part in, add the source level's quota for that same year onto the destination pivot.

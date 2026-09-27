@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 import type {
 	AdminMessageResult,
 	EwalletBadge,
@@ -30,10 +31,10 @@ import { buildWalletWorkbook } from "@admin/ewallet/wallet-export"
 import { indoDateTime, ownerKind, ownerLabel, storageKey } from "@admin/ewallet/wallet-format"
 import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/ewallet/wallet-sql"
+import { Ewallet } from "@ewallet/entities/ewallet.entity"
 
 // Legacy `EwalletController`: Akun Dompet list, widgets, badge, detail, per-wallet transactions,
-// setting, QR print and the balance export (workstream D-A). Raw SQL, as the Merchant module does:
-// the ewallet entities hand bigint back as strings and join a varchar owner id.
+// setting, QR print and the balance export (workstream D-A).
 //
 // Every list, figure and export here reads the **stored** `total_balance`; only `findOne` shows the
 // recomputed `total_saldo` (`computeBalance`) — that split is legacy's and is kept.
@@ -49,6 +50,7 @@ export class EwalletWalletService {
 		private readonly storageService: StorageService,
 		private readonly configService: ConfigService<Env>,
 		private readonly redisService: RedisService,
+		@InjectRepository(Ewallet) private readonly wallets: Repository<Ewallet>,
 	) {}
 
 	/** `@ewalletListAmar` — server-side paged; `recordsTotal` is the unfiltered base query. */
@@ -219,7 +221,7 @@ export class EwalletWalletService {
 	/** `@updateSetting` — `Data berhasil diupdate.` */
 	async updateSetting(ewalletId: number, isActive: boolean): Promise<AdminMessageResult> {
 		await this.loadWallet(ewalletId)
-		await this.dataSource.query(sql.WALLET_SET_ACTIVE_SQL, [ewalletId, isActive])
+		await this.wallets.update({ id: ewalletId }, { isActive })
 		return { message: "Data berhasil diupdate." }
 	}
 

@@ -133,21 +133,6 @@ export const SELECT_APPROVED_ITEMS_SQL = `WITH current AS (
 // ─── Writes ──────────────────────────────────────────────────────────────────
 
 /**
- * `StudentCapability::create([...])`.
- *
- * **Both** `student_id` and `student_grade_id` are written. Data Master's period lock
- * (`billing/student-cost-sql.ts:169-174`) reaches capabilities through `student_id`, so a row
- * with only `student_grade_id` set is invisible to it and the lock silently stops working.
- *
- * `approve_date` is the caller's — `@massStore`/`@massUpdate` pass `now()` because they create
- * the row already `approve`, while the single-santri path leaves it null on a `disapprove` row.
- */
-export const INSERT_CAPABILITY_SQL = `INSERT INTO tbr_student_capabilities
-		(student_id, student_grade_id, approve_date, note, status, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, now(), now())
-	RETURNING id`
-
-/**
  * `$capability->accountancies()->attach($id, ['amount' => …])`.
  *
  * `withTimestamps()` on the legacy relation is why the pivot carries `created_at`/`updated_at`.
@@ -157,20 +142,6 @@ export const INSERT_CAPABILITY_ITEMS_SQL = `INSERT INTO tbr_student_cost_capabil
 		(student_cap_id, accountancy_id, amount, created_at, updated_at)
 	SELECT $1, u.accountancy_id, u.amount, now(), now()
 	FROM unnest($2::bigint[], $3::bigint[]) AS u(accountancy_id, amount)`
-
-/**
- * `$prev_student_capability->update(['status' => 'changed'])` (`massUpdate:412`).
- *
- * Legacy called `->update()` straight off an unguarded `->first()`, so one santri with no
- * approved capability threw `Call to a member function update() on null` and 500'd the whole
- * batch — after the earlier santri had already been written, because there was no transaction.
- * This returns the ids it actually touched so the service can tell the two cases apart instead
- * of dereferencing null.
- */
-export const SUPERSEDE_CAPABILITY_SQL = `UPDATE tbr_student_capabilities
-	SET status = 'changed', updated_at = now()
-	WHERE id = $1
-	RETURNING id`
 
 /**
  * `massUpdate:436-446` — the accounts the shared mass-edit form did **not** show, replicated

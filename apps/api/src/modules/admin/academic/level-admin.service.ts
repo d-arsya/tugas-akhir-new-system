@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { DataSource, Not, Repository, type EntityManager } from "typeorm"
+import { DataSource, IsNull, Not, Repository, type EntityManager } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { indoDateTimeDot } from "@admin/common/date-format"
@@ -8,13 +8,13 @@ import {
 	LEVEL_BY_ID_SQL,
 	LEVEL_CREATE_QUOTA_SQL,
 	LEVEL_LIST_SQL,
-	MOVE_REGISTRANTS_SQL,
-	MOVE_STUDENT_GRADES_SQL,
 	UPDATE_QUOTA_SQL,
 	type LevelSqlRow,
 } from "@admin/academic/level-sql"
 import type { LevelDelegateInput, LevelWriteInput } from "@admin/academic/dto/level-admin.dto"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
 import { Level } from "@shared/master/entities/level.entity"
@@ -104,7 +104,7 @@ const deleteTargetOf = (row: LevelSqlRow): LevelDeleteTarget => {
  * majors → grades → registrants → student_grades → plain delete.
  *
  * Three legacy blockers are fixed here rather than replicated (plan decisions): B-1 above,
- * B-2 in `MOVE_STUDENT_GRADES_SQL` and B-2b in `UPDATE_QUOTA_SQL`. `createQuota()` is kept
+ * B-2 in `delegateStudent` and B-2b in `UPDATE_QUOTA_SQL`. `createQuota()` is kept
  * verbatim: creating a level attaches it to every academic year.
  */
 @Injectable()
@@ -205,12 +205,17 @@ export class LevelAdminService {
 	}
 
 	async delegateRegistrant(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, (manager) => manager.query(MOVE_REGISTRANTS_SQL, [id, dto.levelId]), "PSB")
+		return this.delegate(id, dto, (manager) => manager.update(Registrant, { levelId: id }, { levelId: dto.levelId }), "PSB")
 	}
 
 	/** Terminal step — legacy's `:society` is lowercase "santri" here, capital "Santri" on Tahun Ajaran. */
 	async delegateStudent(id: number, dto: LevelDelegateInput): Promise<AdminRedirectResult> {
-		return this.delegate(id, dto, (manager) => manager.query(MOVE_STUDENT_GRADES_SQL, [id, dto.levelId]), "santri")
+		return this.delegate(
+			id,
+			dto,
+			(manager) => manager.update(StudentGrade, { levelId: id, deletedAt: IsNull() }, { levelId: dto.levelId }),
+			"santri",
+		)
 	}
 
 	/**

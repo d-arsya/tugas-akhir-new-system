@@ -21,6 +21,8 @@ import {
 import { generateInvoices, InvoiceGenerationError, type GeneratorItem } from "@admin/capabilities/invoice-generator"
 import * as sql from "@admin/capabilities/publish-sql"
 import { CapabilityDocumentQueue } from "@admin/capabilities/capability-document.queue"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentCostCapability } from "@santri/entities/student-cost-capability.entity"
 
 // Legacy `StudentCapabilityController` — the single-santri write half: `@store` (567-628),
 // `@change` (631-679), `@update` (839-880) and `@publishInvoice` (681-836).
@@ -65,7 +67,7 @@ export class CapabilityPublishService {
 
 			// `StudentCapability::where(['status' => 'approve', …])->first()` — superseded, never edited
 			const [previous] = await manager.query<{ id: string }[]>(sql.SELECT_APPROVED_CAPABILITY_SQL, [studentGradeId])
-			if (previous) await manager.query(sql.SUPERSEDE_CAPABILITY_SQL, [Number(previous.id)])
+			if (previous) await manager.update(StudentCapability, { id: Number(previous.id) }, { status: "changed" })
 
 			const capabilityId = await insertCapability(manager, {
 				studentId: studentGrade.studentId === null ? null : Number(studentGrade.studentId),
@@ -102,10 +104,11 @@ export class CapabilityPublishService {
 				Number(academicYear.id),
 				studentGrade.grade,
 			])
-			const held = await manager.query<{ accountancyId: string | null; amount: string | null }[]>(
-				sql.SELECT_CAPABILITY_AMOUNTS_SQL,
-				[previousId],
-			)
+			const held = await manager.find(StudentCostCapability, {
+				select: { id: true, accountancyId: true, amount: true },
+				where: { studentCapId: previousId },
+				order: { id: "ASC" },
+			})
 			// `$prev->getAccountCost($id) ?: 0` — PHP falsiness, so null *and* 0 both write 0
 			const heldAmounts = new Map(held.map((row) => [Number(row.accountancyId), toAmount(row.amount)]))
 
@@ -114,7 +117,7 @@ export class CapabilityPublishService {
 				.filter((accountancyId) => heldAmounts.has(accountancyId))
 				.map((accountancyId) => ({ accountancyId, amount: heldAmounts.get(accountancyId) ?? 0 }))
 
-			await manager.query(sql.SUPERSEDE_CAPABILITY_SQL, [previousId])
+			await manager.update(StudentCapability, { id: previousId }, { status: "changed" })
 			const capabilityId = await insertCapability(manager, {
 				studentId: studentGrade.studentId === null ? null : Number(studentGrade.studentId),
 				studentGradeId,
@@ -143,7 +146,7 @@ export class CapabilityPublishService {
 	async update(capabilityId: number, studentGradeId: number, dto: CapabilityWriteInput): Promise<{ message: string }> {
 		return this.dataSource.transaction(async (manager) => {
 			const capability = await this.loadCapability(manager, capabilityId, studentGradeId)
-			await manager.query(sql.UPDATE_CAPABILITY_NOTE_SQL, [capabilityId, dto.note ?? null])
+			await manager.update(StudentCapability, { id: capabilityId }, { note: dto.note ?? null })
 
 			if (capability.status === "disapprove") {
 				const studentGrade = await this.loadStudentGrade(manager, studentGradeId)
@@ -222,7 +225,11 @@ export class CapabilityPublishService {
 
 		// Only the capability being published — never `latest()->first()`, which agreed whichever
 		// row happened to be newest and could approve a draft nobody had agreed to.
-		await manager.query(sql.APPROVE_CAPABILITY_SQL, [capabilityId, studentGradeId])
+		await manager.update(
+			StudentCapability,
+			{ id: capabilityId },
+			{ status: "approve", approveDate: () => "now()", studentGradeId },
+		)
 
 		return { invoicesCreated: inserted.length }
 	}

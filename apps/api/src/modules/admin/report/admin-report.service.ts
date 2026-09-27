@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 import type {
 	ArrearFilter,
 	ArrearQuery,
@@ -8,7 +9,10 @@ import type {
 	IncomeFilter,
 	INCOME_DETAIL_SORT_KEYS,
 } from "@admin/report/dto/admin-report.dto"
+import { Accountancy } from "@admin/common/entities/accountancy.entity"
 import { LOCAL_TIMESTAMP, SqlParams } from "@admin/common/sql"
+import { Grade } from "@shared/master/entities/grade.entity"
+import { SubGrade } from "@shared/master/entities/sub-grade.entity"
 import {
 	ARREAR_FINAL_AMOUNT,
 	ARREAR_FROM,
@@ -22,8 +26,8 @@ import {
 export type ReportOptions = {
 	academicYears: string[]
 	grades: number[]
-	subGrades: string[]
-	accountancies: string[]
+	subGrades: (string | null)[]
+	accountancies: (string | null)[]
 }
 
 export type IncomeDetailRow = {
@@ -96,7 +100,12 @@ const pageMeta = (paging: { page: number; limit: number }, total: number): PageM
 // Port of legacy ReportController + ReportArrearController (Laporan Pemasukkan & Tunggakan)
 @Injectable()
 export class AdminReportService {
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+		@InjectRepository(SubGrade) private readonly subGrades: Repository<SubGrade>,
+		@InjectRepository(Accountancy) private readonly accountancies: Repository<Accountancy>,
+	) {}
 
 	async getOptions(): Promise<ReportOptions> {
 		const [years, grades, subGrades, accountancies] = await Promise.all([
@@ -105,16 +114,16 @@ export class AdminReportService {
 				`SELECT DISTINCT current_academic_year AS year FROM tbr_student_grades
 				WHERE deleted_at IS NULL ORDER BY current_academic_year DESC`,
 			),
-			this.dataSource.query<{ label: string }[]>("SELECT label FROM tbr_grades ORDER BY id"),
-			this.dataSource.query<{ label: string }[]>("SELECT label FROM tbr_sub_grades ORDER BY id"),
-			this.dataSource.query<{ name: string }[]>("SELECT name FROM tbr_accountancies WHERE is_student_cost = true ORDER BY id"),
+			this.grades.find({ select: { label: true }, order: { id: "ASC" } }),
+			this.subGrades.find({ select: { label: true }, order: { id: "ASC" } }),
+			this.accountancies.find({ select: { name: true }, where: { isStudentCost: true }, order: { id: "ASC" } }),
 		])
 		return {
 			// Legacy renders a NULL year as an empty option value, which is the same as "Tahun Ajaran"
 			academicYears: years.flatMap((row) => (row.year ? [row.year] : [])),
-			grades: grades.map((row) => Number(row.label)),
-			subGrades: subGrades.map((row) => row.label),
-			accountancies: accountancies.map((row) => row.name),
+			grades: grades.map((grade) => Number(grade.label)),
+			subGrades: subGrades.map((subGrade) => subGrade.label),
+			accountancies: accountancies.map((accountancy) => accountancy.name),
 		}
 	}
 

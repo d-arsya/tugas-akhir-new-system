@@ -1,6 +1,7 @@
 import type { EntityManager } from "typeorm"
 
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 
 import { createAlumni } from "./student-alumni"
@@ -18,6 +19,7 @@ import {
 	updateStudentAccount,
 	type GradeRow,
 } from "./student-grade-ops"
+import { toNumber } from "./student-format"
 
 // The roster bulk actions and the edit page's summary buttons — `StudentController::nextGrades:562`,
 // `stayGrades:643`, `graduate:715`, `dropout:797`, `updateMajor:887`, `updateStatus:927`. Each runs inside
@@ -76,16 +78,21 @@ export const nextGrades = async (manager: EntityManager, ids: number[]): Promise
 		}
 		const next = await nextGradeOf(manager, row.grade)
 		const copyId = await replicateGradeRow(manager, Number(row.id))
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_note = 'kenaikan kelas', grade = $2, level_id = $3,
-				current_academic_year = $4, updated_at = now() WHERE id = $1`,
-			[copyId, next.grade, next.levelId, nextAcademicYear(row.current_academic_year, UPDATE_FAILED)],
+		await manager.update(
+			StudentGrade,
+			{ id: copyId },
+			{
+				gradeNote: "kenaikan kelas",
+				grade: toNumber(next.grade),
+				levelId: toNumber(next.levelId),
+				currentAcademicYear: nextAcademicYear(row.current_academic_year, UPDATE_FAILED),
+			},
 		)
 		await copyDiseaseHistories(manager, { society: "student", id: Number(row.id) }, { society: "student", id: copyId })
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_status = 'inactive', grade_note = 'naik kelas', prev_grade_note = $2,
-				updated_at = now() WHERE id = $1`,
-			[row.id, row.grade_note],
+		await manager.update(
+			StudentGrade,
+			{ id: Number(row.id) },
+			{ gradeStatus: "inactive", gradeNote: "naik kelas", prevGradeNote: row.grade_note },
 		)
 	}
 	if (noNextYear === ids.length) fail(NO_NEXT_YEAR)
@@ -107,16 +114,21 @@ export const stayGrades = async (manager: EntityManager, ids: number[]): Promise
 			continue
 		}
 		const copyId = await replicateGradeRow(manager, Number(row.id))
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_status = 'active', grade_note = 'tinggal kelas', prev_grade_note = $2,
-				current_academic_year = $3, updated_at = now() WHERE id = $1`,
-			[copyId, row.grade_note, nextAcademicYear(row.current_academic_year, UPDATE_FAILED)],
+		await manager.update(
+			StudentGrade,
+			{ id: copyId },
+			{
+				gradeStatus: "active",
+				gradeNote: "tinggal kelas",
+				prevGradeNote: row.grade_note,
+				currentAcademicYear: nextAcademicYear(row.current_academic_year, UPDATE_FAILED),
+			},
 		)
 		await copyDiseaseHistories(manager, { society: "student", id: Number(row.id) }, { society: "student", id: copyId })
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_status = 'inactive', grade_note = 'tinggal kelas', prev_grade_note = $2,
-				updated_at = now() WHERE id = $1`,
-			[row.id, row.grade_note],
+		await manager.update(
+			StudentGrade,
+			{ id: Number(row.id) },
+			{ gradeStatus: "inactive", gradeNote: "tinggal kelas", prevGradeNote: row.grade_note },
 		)
 	}
 	if (noNextYear === ids.length) fail(NO_NEXT_YEAR)
@@ -132,10 +144,10 @@ export const graduate = async (manager: EntityManager, ids: number[]): Promise<s
 			failed++
 			continue
 		}
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_status = 'inactive', grade_note = 'lulus', prev_grade_note = $2,
-				updated_at = now() WHERE id = $1`,
-			[row.id, row.grade_note],
+		await manager.update(
+			StudentGrade,
+			{ id: Number(row.id) },
+			{ gradeStatus: "inactive", gradeNote: "lulus", prevGradeNote: row.grade_note },
 		)
 		await updateStudentAccount(manager, row.student_id, { is_blocked: true, student_status: "inactive" })
 		await createAlumni(manager, Number(row.id))
@@ -150,10 +162,10 @@ export const graduate = async (manager: EntityManager, ids: number[]): Promise<s
  */
 export const dropout = async (manager: EntityManager, ids: number[], note: string | null): Promise<string> => {
 	for await (const row of eachRow(manager, ids, UPDATE_FAILED)) {
-		await manager.query(
-			`UPDATE tbr_student_grades SET grade_status = 'inactive', grade_note = 'keluar', dropout_note = $2,
-				updated_at = now() WHERE id = $1`,
-			[row.id, note],
+		await manager.update(
+			StudentGrade,
+			{ id: Number(row.id) },
+			{ gradeStatus: "inactive", gradeNote: "keluar", dropoutNote: note },
 		)
 		await updateStudentAccount(manager, row.student_id, { student_status: "inactive", is_blocked: true })
 		await deleteUnpaidInvoices(manager, Number(row.id))
@@ -164,7 +176,7 @@ export const dropout = async (manager: EntityManager, ids: number[], note: strin
 /** `updateMajor:887-902` */
 export const updateMajor = async (manager: EntityManager, ids: number[], major: string | null): Promise<string> => {
 	for await (const row of eachRow(manager, ids, UPDATE_FAILED)) {
-		await manager.query(`UPDATE tbr_student_grades SET major_name = $2, updated_at = now() WHERE id = $1`, [row.id, major])
+		await manager.update(StudentGrade, { id: Number(row.id) }, { majorName: major })
 	}
 	return UPDATE_SUCCESS
 }
@@ -176,7 +188,7 @@ export const updateMajor = async (manager: EntityManager, ids: number[], major: 
  */
 export const updateSubGrade = async (manager: EntityManager, ids: number[], subGrade: string | null): Promise<string> => {
 	for await (const row of eachRow(manager, ids, UPDATE_FAILED)) {
-		await manager.query(`UPDATE tbr_student_grades SET sub_grade = $2, updated_at = now() WHERE id = $1`, [row.id, subGrade])
+		await manager.update(StudentGrade, { id: Number(row.id) }, { subGrade })
 	}
 	return UPDATE_SUCCESS
 }

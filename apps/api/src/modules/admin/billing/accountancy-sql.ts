@@ -79,17 +79,6 @@ export const ACCOUNTANCY_BY_ID_SQL = `SELECT a.id, a.name, a.is_parent, a.parent
 	WHERE a.id = $1`
 
 /**
- * `Accountancy::all()` — both "Pilih induk akun" selects offer **every** account, parents and
- * children alike, which is how the tree can nest arbitrarily deep. No ORDER BY in legacy, so
- * the rows arrived in physical order; ordering by id reproduces that on today's data and keeps
- * the picker stable once a row is rewritten.
- */
-export const ACCOUNTANCY_OPTIONS_SQL = `SELECT a.id, a.name FROM tbr_accountancies a ORDER BY a.id`
-
-/** Does a chosen parent still exist? With no foreign key, nothing else asks. */
-export const ACCOUNTANCY_EXISTS_SQL = `SELECT a.id FROM tbr_accountancies a WHERE a.id = $1`
-
-/**
  * Every descendant of one account — `showDelegateChild`'s `$this->getChild($accountancy->childs)`,
  * whose flattened output it plucks ids from. Self is not included, matching legacy.
  *
@@ -108,17 +97,7 @@ export const ACCOUNTANCY_DESCENDANTS_SQL = `WITH RECURSIVE sub AS (
 	SELECT sub.id FROM sub`
 
 /**
- * `showDelegateChild`'s candidate list, root branch:
- * `Accountancy::whereNull('parent_id')->where('id', '!=', $accountancy->id)->get()` — deleting
- * a root only ever offers the other roots. Note legacy tests `parent_id`, not `is_parent`.
- */
-export const ACCOUNTANCY_ROOT_CANDIDATES_SQL = `SELECT a.id, a.name
-	FROM tbr_accountancies a
-	WHERE a.parent_id IS NULL AND a.id <> $1
-	ORDER BY a.id`
-
-/**
- * The same list, child branch: every non-root except this account and its own descendants —
+ * `showDelegateChild`'s candidate list, child branch: every non-root except this account and its own descendants —
  * legacy's `whereNotIn('id', collect($this->datatable_data)->pluck('id'))`, which is what stops
  * the user re-parenting a subtree into itself.
  *
@@ -138,32 +117,3 @@ export const ACCOUNTANCY_CHILD_CANDIDATES_SQL = `WITH RECURSIVE sub AS (
 	FROM tbr_accountancies a
 	WHERE a.parent_id IS NOT NULL AND a.id <> $1 AND a.id NOT IN (SELECT sub.id FROM sub)
 	ORDER BY a.id`
-
-/** `Accountancy::create()` — `$guarded = []`, so the whole validated payload lands in one row. */
-export const ACCOUNTANCY_INSERT_SQL = `INSERT INTO tbr_accountancies
-		(name, is_parent, parent_id, "group", is_student_cost, note, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, now(), now())
-	RETURNING id`
-
-export const ACCOUNTANCY_UPDATE_SQL = `UPDATE tbr_accountancies
-	SET name = $2, is_parent = $3, parent_id = $4, "group" = $5, is_student_cost = $6, note = $7, updated_at = now()
-	WHERE id = $1`
-
-/**
- * `delegateChild`: legacy looped `foreach ($accountancy->childs as $account) { $account->update(...) }`
- * — one UPDATE per child, outside any transaction, with the parent's DELETE after it. One
- * set-based UPDATE instead, and the service runs it and the DELETE together.
- *
- * Only the **direct** children move: grandchildren keep pointing at their own parents, so a
- * whole subtree travels with the child that carries it. That is legacy's behaviour and the
- * point of the page. $1 / $2 are both text — `parent_id` is varchar.
- */
-export const MOVE_ACCOUNTANCY_CHILDREN_SQL = `UPDATE tbr_accountancies
-	SET parent_id = $2, updated_at = now()
-	WHERE parent_id = $1`
-
-/**
- * Hard delete, no soft-delete column and no cascade — legacy leaves any `student_cost_terms`
- * and `student_cost_capabilities` rows behind, orphaned. Kept: those tables are WS-B/WS-C's.
- */
-export const DELETE_ACCOUNTANCY_SQL = `DELETE FROM tbr_accountancies WHERE id = $1`

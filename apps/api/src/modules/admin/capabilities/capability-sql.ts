@@ -172,19 +172,6 @@ export const CAPABILITY_HISTORY_SQL = `SELECT c.id,
 	WHERE c.student_grade_id = $1
 	ORDER BY c.created_at ASC, c.id ASC`
 
-/**
- * `$student_grade->studentCapabilities()->latest()->first()->status` — which banner level 4 shows.
- *
- * `latest()` is `created_at` descending, not the highest id. The two agree on every one of the
- * 1,050 live student_grades that hold a capability (verified), but the ordering legacy actually
- * wrote is the one reproduced.
- */
-export const CAPABILITY_NEWEST_STATUS_SQL = `SELECT c.status
-	FROM tbr_student_capabilities c
-	WHERE c.student_grade_id = $1
-	ORDER BY c.created_at DESC, c.id DESC
-	LIMIT 1`
-
 // ─── Level 5: the line items (`@studentCapabilityItem*`) ─────────────────────
 
 /** One capability, for the header badge and the `(capability, studentGrade)` pair guard. */

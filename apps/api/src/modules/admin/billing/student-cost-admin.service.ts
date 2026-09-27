@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { DataSource, Repository, type QueryRunner } from "typeorm"
+import { DataSource, Repository, type EntityManager, type QueryRunner } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import {
@@ -18,6 +18,7 @@ import {
 	toForm,
 	toNumber,
 	toTerm,
+	toTermSqlRow,
 	type AccountSqlRow,
 	type StudentCostAccountPage,
 	type StudentCostGradeRow,
@@ -30,6 +31,9 @@ import type {
 	StudentCostAppliedInput,
 	StudentCostTermWriteInput as Write,
 } from "@admin/billing/dto/student-cost-admin.dto"
+import { Accountancy } from "@admin/common/entities/accountancy.entity"
+import { StudentCostTerm } from "@admin/common/entities/student-cost-term.entity"
+import { StudentCost } from "@admin/common/entities/student-cost.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 
 export type {
@@ -60,6 +64,8 @@ export class StudentCostAdminService {
 	constructor(
 		private readonly dataSource: DataSource,
 		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+		@InjectRepository(StudentCostTerm) private readonly terms: Repository<StudentCostTerm>,
+		@InjectRepository(Accountancy) private readonly accountancies: Repository<Accountancy>,
 	) {}
 
 	/** Level 1 — `academicYearList()`: `exceptArchive()`, `ORDER BY year DESC`. */
@@ -181,11 +187,12 @@ export class StudentCostAdminService {
 		const stored = encodeCostTerm(form, { costDateStart: year.costDateStart ?? "", grade: label })
 
 		const { type, period, monthOf, dayOf, timeSpan, reminder } = stored
-		const args = [accountancyId, academicYearId, type, period, stored.grade, monthOf, dayOf, timeSpan, reminder]
+		const schedule = { type, period, grade: stored.grade, monthOf, dayOf, timeSpan, reminder }
 
 		await this.inTransaction(async (runner) => {
-			const inserted: { id: string }[] = await runner.query(sql.INSERT_STUDENT_COST_TERM_SQL, args)
-			await this.writeAmounts(runner, Number(inserted[0]?.id), dto)
+			const term = { accountancyId, academicYearId, ...schedule, applied: null }
+			const inserted = await runner.manager.insert(StudentCostTerm, term)
+			await this.writeAmounts(runner.manager, Number(inserted.identifiers[0]?.id), dto)
 		})
 
 		return { message: WRITE_SUCCESS }
@@ -207,13 +214,11 @@ export class StudentCostAdminService {
 
 		await this.inTransaction(async (runner) => {
 			// Legacy deletes the costs before updating the term, with no transaction to undo it
-			await runner.query(sql.DELETE_STUDENT_COSTS_SQL, [termId])
-			await this.writeAmounts(runner, termId, dto)
-			const args = once
-				? [termId, stored.type, stored.period, stored.timeSpan, stored.reminder]
-				: [termId, stored.type, stored.period, stored.timeSpan, stored.monthOf, stored.dayOf, stored.reminder]
-			const statement = once ? sql.UPDATE_STUDENT_COST_TERM_ONCE_SQL : sql.UPDATE_STUDENT_COST_TERM_MONTHLY_SQL
-			await runner.query(statement, args)
+			await runner.manager.delete(StudentCost, { stucoTermId: termId })
+			await this.writeAmounts(runner.manager, termId, dto)
+			const schedule = once ? {} : { monthOf: stored.monthOf, dayOf: stored.dayOf }
+			const { type, period, timeSpan, reminder } = stored
+			await runner.manager.update(StudentCostTerm, { id: termId }, { type, period, timeSpan, reminder, ...schedule })
 		})
 
 		return { message: WRITE_SUCCESS }
@@ -237,15 +242,18 @@ export class StudentCostAdminService {
 	}
 
 	private async findTermRow(yearId: number, accId: number, label: string): Promise<TermSqlRow | null> {
-		const args = [yearId, accId, label]
-		return (await this.dataSource.query<TermSqlRow[]>(sql.STUDENT_COST_TERM_SQL, args))[0] ?? null
+		const term = await this.terms.findOne({
+			where: { academicYearId: yearId, accountancyId: accId, grade: label },
+			order: { id: "ASC" },
+		})
+		return term === null ? null : toTermSqlRow(term)
 	}
 
 	/** `StudentCost::create()` — one row for "maximum", one per entry for "option". */
-	private async writeAmounts(runner: QueryRunner, termId: number, dto: Write): Promise<void> {
+	private async writeAmounts(manager: EntityManager, termId: number, dto: Write): Promise<void> {
 		const masked = dto.type === "maximum" ? [dto.amount ?? ""] : (dto.amounts ?? [])
 		for (const amount of encodeAmounts(masked)) {
-			await runner.query(sql.INSERT_STUDENT_COST_SQL, [termId, amount])
+			await manager.save(manager.create(StudentCost, { stucoTermId: termId, amount }))
 		}
 	}
 
@@ -258,15 +266,10 @@ export class StudentCostAdminService {
 	}
 
 	/** Route-model binding: legacy 404s before the handler runs. */
-	private async requireOne<T>(statement: string, id: number, missing: string): Promise<T> {
-		const row = (await this.dataSource.query<T[]>(statement, [id]))[0]
-		if (!row) throw new NotFoundException(missing)
-		return row
-	}
-
 	private async requireYear(id: number): Promise<YearContext> {
 		type Row = Omit<YearContext, "id"> & { id: string }
-		const row = await this.requireOne<Row>(sql.STUDENT_COST_YEAR_SQL, id, "Tahun ajaran tidak ditemukan.")
+		const [row] = await this.dataSource.query<Row[]>(sql.STUDENT_COST_YEAR_SQL, [id])
+		if (!row) throw new NotFoundException("Tahun ajaran tidak ditemukan.")
 		return { ...row, id: Number(row.id) }
 	}
 
@@ -277,9 +280,9 @@ export class StudentCostAdminService {
 	}
 
 	private async requireAccountancy(id: number): Promise<{ id: number; name: string | null }> {
-		type Row = { id: string; name: string | null }
-		const row = await this.requireOne<Row>(sql.STUDENT_COST_ACCOUNTANCY_SQL, id, "Akun tidak ditemukan.")
-		return { id: Number(row.id), name: row.name }
+		const accountancy = await this.accountancies.findOne({ select: { id: true, name: true }, where: { id } })
+		if (!accountancy) throw new NotFoundException("Akun tidak ditemukan.")
+		return { id: Number(accountancy.id), name: accountancy.name }
 	}
 
 	/** Legacy runs store/update/applied outside any transaction (B-8/B-9); the port wraps each one. */

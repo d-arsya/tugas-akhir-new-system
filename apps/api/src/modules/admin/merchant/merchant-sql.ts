@@ -65,22 +65,6 @@ export const MERCHANT_EMAIL_TAKEN_SQL = `SELECT m.id FROM tbr_merchants m
 	LIMIT 1`
 
 /**
- * `Merchant::create($request->validated() + ['unique_number' => …, 'password' => bcrypt(…)])`.
- * `enabled_2fa` and `photo` are left at their column defaults, exactly as `create()` does.
- */
-export const MERCHANT_INSERT_SQL = `INSERT INTO tbr_merchants
-		(name, gender, email, merchant_name, address, phone, is_blocked, unique_number, password,
-		 created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now(), now())
-	RETURNING id`
-
-/** `$merchant->update($request->validated())` — `unique_number` is never submitted. */
-export const MERCHANT_UPDATE_SQL = `UPDATE tbr_merchants
-	SET name = $2, gender = $3, email = $4, merchant_name = $5, address = $6, phone = $7,
-		is_blocked = $8, updated_at = now()
-	WHERE id = $1`
-
-/**
  * The status sync legacy runs after every update:
  * `Ewallet::where('unique_id', $merchant->unique_number)->first()->update(['is_active' => …])`.
  *
@@ -98,6 +82,3 @@ export const EWALLET_BY_UNIQUE_NUMBER_SQL = `SELECT e.id, e.is_active AS "isActi
 	WHERE e.unique_id::text = $1
 	ORDER BY e.id
 	LIMIT 1`
-
-/** The force-write: every save re-asserts `is_active = NOT is_blocked`, even when unchanged. */
-export const EWALLET_SET_ACTIVE_SQL = `UPDATE tbr_ewallets SET is_active = $2, updated_at = now() WHERE id = $1`

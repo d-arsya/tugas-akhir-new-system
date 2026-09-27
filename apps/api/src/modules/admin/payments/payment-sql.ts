@@ -130,44 +130,6 @@ export const SYNC_LINK_SEQUENCE_SQL = `SELECT setval('tbr_student_invoice_transa
 			(SELECT COALESCE(MAX(id), 1) FROM tbr_student_invoice_transactions)
 		), true)`
 
-/**
- * `StudentTransaction::create()` in both branches of `storeTransaction` (556-563, 572-579).
- * `status` is NOT NULL DEFAULT 'valid' and legacy never passes it; it is written explicitly here
- * so the row's meaning does not depend on the default surviving a future migration.
- *
- * `desc` is a reserved word in SQL and has to stay quoted.
- */
-export const INSERT_TRANSACTION_SQL = `INSERT INTO tbr_student_transactions
-		(student_transaction_code, student_grade_id, paid_at, amount, "desc", note, status, created_at, updated_at)
-	VALUES ($1, $2, now(), $3, $4, $5, 'valid', now(), now())
-	RETURNING id`
-
-/**
- * `$student_transaction->studentInvoices()->attach()` (566-569, 595-598).
- *
- * `amount` is the invoice's outstanding balance snapshotted at payment time and `pay` is what
- * this transaction actually contributed — they differ in 1,039 live rows, which is why `pay`
- * is the only correct basis for "how much was paid".
- */
-export const INSERT_LINK_SQL = `INSERT INTO tbr_student_invoice_transactions
-		(student_transaction_id, student_invoice_id, amount, pay, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, now(), now())`
-
-/** `status` only — the branch that keeps an existing `payment_method` (585-588, 715-718). */
-export const SET_INVOICE_STATUS_SQL = `UPDATE tbr_student_invoices
-	SET status = $2, updated_at = now()
-	WHERE id = $1`
-
-/** `status` and `payment_method` together (590-593, 729-732, and the installment mark at 549). */
-export const SET_INVOICE_STATE_SQL = `UPDATE tbr_student_invoices
-	SET status = $2, payment_method = $3, updated_at = now()
-	WHERE id = $1`
-
-/** `payment_method` only — `storeTransaction`'s installment branch leaves `status` unpaid (565). */
-export const SET_INVOICE_PAYMENT_METHOD_SQL = `UPDATE tbr_student_invoices
-	SET payment_method = $2, updated_at = now()
-	WHERE id = $1`
-
 /** Route-model binding for `{transaction}`, with the row locked for the cancel / note write. */
 export const SELECT_TRANSACTION_FOR_UPDATE_SQL = `SELECT t.id,
 		t.student_transaction_code::text AS "transactionCode",
@@ -179,27 +141,6 @@ export const SELECT_TRANSACTION_FOR_UPDATE_SQL = `SELECT t.id,
 	FROM tbr_student_transactions t
 	WHERE t.id = $1
 	FOR UPDATE`
-
-/** `$transaction->studentInvoices` — the ids this payment touched, pivot order. */
-export const SELECT_TRANSACTION_INVOICE_IDS_SQL = `SELECT lnk.student_invoice_id AS "invoiceId"
-	FROM tbr_student_invoice_transactions lnk
-	WHERE lnk.student_transaction_id = $1
-	ORDER BY lnk.id`
-
-/** `cancelTransaction` (695-698): the flip to `invalid` plus the reason. */
-export const CANCEL_TRANSACTION_SQL = `UPDATE tbr_student_transactions
-	SET status = 'invalid', cancel_note = $2, updated_at = now()
-	WHERE id = $1`
-
-/** `updateTransaction` (660-662): the note, always. */
-export const UPDATE_TRANSACTION_NOTE_SQL = `UPDATE tbr_student_transactions
-	SET note = $2, updated_at = now()
-	WHERE id = $1`
-
-/** `updateTransaction` (664-668): the cancel reason, only while the row is already `invalid`. */
-export const UPDATE_TRANSACTION_CANCEL_NOTE_SQL = `UPDATE tbr_student_transactions
-	SET cancel_note = $2, updated_at = now()
-	WHERE id = $1`
 
 /**
  * `downloadTransaction` (822-845) — the receipt header. `studentGradeWithTrashed` is what the

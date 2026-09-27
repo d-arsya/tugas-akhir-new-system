@@ -17,6 +17,7 @@ import {
 	type StoredCostTerm,
 } from "@admin/billing/cost-term-codec"
 import { indoDate, indoDateShort } from "@admin/common/date-format"
+import type { StudentCostTerm as StudentCostTermEntity } from "@admin/common/entities/student-cost-term.entity"
 
 // ─── Row shapes ─────────────────────────────────────────────────────────────────
 
@@ -110,6 +111,24 @@ export type StudentCostTermDetail = {
 }
 
 export const toNumber = (value: string | null): number | null => (value === null ? null : Number(value))
+
+const toText = (value: number | string | null): string | null => (value === null ? null : String(value))
+
+export type TermColumns = Pick<
+	StudentCostTermEntity,
+	"id" | "type" | "period" | "timeSpan" | "monthOf" | "dayOf" | "reminder" | "grade"
+>
+
+export const toTermSqlRow = (term: TermColumns): TermSqlRow => ({
+	id: String(term.id),
+	type: term.type as CostTermType,
+	period: term.period as CostTermPeriod,
+	timeSpan: toText(term.timeSpan),
+	monthOf: toText(term.monthOf),
+	dayOf: toText(term.dayOf),
+	reminder: toText(term.reminder),
+	grade: term.grade as string,
+})
 
 /** The six fee columns of one row, as the codec reads them. */
 export const storedFrom = (row: TermSqlRow): StoredCostTerm => ({

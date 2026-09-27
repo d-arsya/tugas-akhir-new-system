@@ -154,8 +154,6 @@ SELECT m.name, m.photo, m.merchant_name AS "merchantName", m.address, m.phone,
 	m.unique_number AS "uniqueNumber", m.is_blocked AS "isBlocked", m.email
 FROM tbr_merchants m WHERE m.id::text = $1`
 
-export const WALLET_SET_ACTIVE_SQL = "UPDATE tbr_ewallets SET is_active = $2, updated_at = NOW() WHERE id = $1"
-
 // --- The per-wallet transaction table --------------------------------------------------
 
 export type WalletTransactionSqlRow = {

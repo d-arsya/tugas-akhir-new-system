@@ -1,7 +1,8 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
 // Nest DI reads constructor parameter types at runtime (emitDecoratorMetadata), so these stay value imports
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { DataSource, type EntityManager } from "typeorm"
+import { DataSource, Repository, type EntityManager } from "typeorm"
 
 import type { AdminAlumniMessage } from "@roja/types"
 
@@ -11,6 +12,7 @@ import { syncStudentWalletActive } from "../../../shared/ewallet/student-wallet"
 import { replaceDiseaseHistories } from "../../../shared/society/disease-history"
 import { storeSocietyUpload } from "../../../shared/society/files"
 import { readSocietyMultipart, validateSocietyInput, type SocietyUpload } from "../../../shared/society/society-rules"
+import { Alumni } from "@admin/common/entities/alumni.entity"
 
 import * as sql from "./alumni-sql"
 
@@ -62,12 +64,12 @@ export class AlumniWriteService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly storageService: StorageService,
+		@InjectRepository(Alumni) private readonly alumni: Repository<Alumni>,
 	) {}
 
 	/** Route-model binding: a missing alumnus is a 404 before anything runs. */
 	private async assertExists(id: number): Promise<void> {
-		const rows = (await this.dataSource.query(`SELECT 1 FROM tbr_alumnis WHERE id = $1`, [id])) as unknown[]
-		if (rows.length === 0) throw new NotFoundException(NOT_FOUND)
+		if (!(await this.alumni.existsBy({ id }))) throw new NotFoundException(NOT_FOUND)
 	}
 
 	/**
@@ -129,7 +131,7 @@ export class AlumniWriteService {
 						if (unblocked > 0) await syncStudentWalletActive(manager, Number(owner.student_id))
 					}
 				}
-				await manager.query(sql.DELETE_ALUMNI_SQL, [id])
+				await manager.delete(Alumni, { id })
 			})
 		} catch (error) {
 			this.logger.error(`alumni ${id} delete failed: ${(error as Error).message}`)

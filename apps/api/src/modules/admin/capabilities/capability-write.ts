@@ -6,6 +6,10 @@ import type { CapabilityWriteInput } from "@admin/capabilities/dto/capability-pu
 import type { GeneratedInvoice, GeneratorItem } from "@admin/capabilities/invoice-generator"
 import { invoiceUniqueId } from "@admin/capabilities/invoice-generator"
 import * as sql from "@admin/capabilities/publish-sql"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentCostCapability } from "@santri/entities/student-cost-capability.entity"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
+import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
 
 // The SQL-facing half of `store`, `change`, `update` and `publishInvoice`: the row shapes, the
 // lookups that assemble a publish's inputs, and the statement-level write primitives. Split out of
@@ -62,8 +66,8 @@ export type PredecessorSqlRow = {
 	accountancyId: string
 	index: number
 	amount: string | null
-	status: string | null
-	paymentMethod: string | null
+	status: StudentInvoice["status"]
+	paymentMethod: StudentInvoice["paymentMethod"]
 	overdue: boolean
 }
 
@@ -155,16 +159,16 @@ export const insertCapability = async (
 	values: CapabilityInsert,
 ): Promise<number> => {
 	await manager.query(sql.SYNC_CAPABILITY_SEQUENCE_SQL)
-	const rows = await manager.query<{ id: string }[]>(sql.INSERT_CAPABILITY_SQL, [
-		values.studentId,
-		values.studentGradeId,
-		values.note,
-		values.status,
-		values.approveDate === "now" ? new Date() : null,
-	])
-	const id = rows[0]?.id
-	if (id === undefined) throw new Error("Data gagal disimpan ke dalam basis data.")
-	return Number(id)
+	const saved = await manager.save(
+		manager.create(StudentCapability, {
+			studentId: values.studentId,
+			studentGradeId: values.studentGradeId,
+			note: values.note,
+			status: values.status,
+			approveDate: values.approveDate === "now" ? new Date() : null,
+		}),
+	)
+	return Number(saved.id)
 }
 
 /**
@@ -179,11 +183,11 @@ export const replaceCapabilityItems = async (
 	capabilityId: number,
 	items: readonly { accountancyId: number; amount: number }[],
 ): Promise<void> => {
-	await manager.query(sql.DELETE_CAPABILITY_ITEMS_SQL, [capabilityId])
+	await manager.delete(StudentCostCapability, { studentCapId: capabilityId })
 	if (items.length === 0) return
 	await manager.query(sql.SYNC_CAPABILITY_ITEM_SEQUENCE_SQL)
-	for (const item of items) {
-		await manager.query(sql.INSERT_CAPABILITY_ITEM_SQL, [capabilityId, item.accountancyId, item.amount])
+	for (const { accountancyId, amount } of items) {
+		await manager.save(manager.create(StudentCostCapability, { studentCapId: capabilityId, accountancyId, amount }))
 	}
 }
 
@@ -269,7 +273,8 @@ export const applyCarryOver = async (
 	invoice: InsertedInvoice,
 	predecessor: PredecessorSqlRow,
 ): Promise<void> => {
-	await manager.query(sql.REPOINT_INVOICE_LINKS_SQL, [Number(predecessor.id), invoice.id])
+	const predecessorId = Number(predecessor.id)
+	await manager.update(StudentInvoiceTransaction, { studentInvoiceId: predecessorId }, { studentInvoiceId: invoice.id })
 
 	const previousAmount = toAmount(predecessor.amount)
 	let amount = invoice.amount
@@ -296,5 +301,5 @@ export const applyCarryOver = async (
 		}
 	}
 
-	await manager.query(sql.SET_INVOICE_CARRYOVER_SQL, [invoice.id, status, paymentMethod, amount])
+	await manager.update(StudentInvoice, { id: invoice.id }, { status, paymentMethod, amount })
 }

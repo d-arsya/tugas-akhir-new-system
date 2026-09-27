@@ -112,14 +112,6 @@ export const SELECT_APPROVED_CAPABILITY_SQL = `SELECT sc.id, sc.status
 	LIMIT 1
 	FOR UPDATE`
 
-/** The agreed lines of the capability `change()` copies forward. */
-export const SELECT_CAPABILITY_AMOUNTS_SQL = `SELECT
-		scc.accountancy_id AS "accountancyId",
-		scc.amount
-	FROM tbr_student_cost_capabilities scc
-	WHERE scc.student_cap_id = $1
-	ORDER BY scc.id`
-
 /**
  * Every accountancy an agreement may hold for this (year, grade) — the set legacy's `store()`,
  * `change()` and `update()` iterate when they attach line items.
@@ -176,50 +168,6 @@ export const SYNC_CAPABILITY_ITEM_SEQUENCE_SQL = sync("tbr_student_cost_capabili
 export const SYNC_INVOICE_SEQUENCE_SQL = sync("tbr_student_invoices")
 
 /**
- * `StudentCapability::create()`.
- *
- * **`student_id` and `student_grade_id` both go in.** Data Master's period lock
- * (`student-cost-sql.ts:169-174`) reaches capabilities through `students.id`, so a row with only
- * `student_grade_id` is invisible to it and the lock silently stops holding.
- */
-export const INSERT_CAPABILITY_SQL = `INSERT INTO tbr_student_capabilities
-		(student_id, student_grade_id, note, status, approve_date, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, now(), now())
-	RETURNING id`
-
-/** `$prev_student_capability->update(['status' => 'changed'])`. */
-export const SUPERSEDE_CAPABILITY_SQL = `UPDATE tbr_student_capabilities
-	SET status = 'changed', updated_at = now()
-	WHERE id = $1`
-
-/**
- * The approve at the end of `publishInvoice`.
- *
- * Legacy runs two updates: the capability being published (821-827, guarded by `status != 'approve'`)
- * and then `latest()->first()` — **whatever row has the newest `created_at`**, re-approved
- * unconditionally (829-835). On a santri whose newest capability is a still-unagreed draft, that
- * second statement agrees a draft nobody agreed to. Only the capability actually being published
- * is approved here (plan decision).
- */
-export const APPROVE_CAPABILITY_SQL = `UPDATE tbr_student_capabilities
-	SET status = 'approve', approve_date = now(), student_grade_id = $2, updated_at = now()
-	WHERE id = $1`
-
-/** `$student_capability->update(['note' => …])`. */
-export const UPDATE_CAPABILITY_NOTE_SQL = `UPDATE tbr_student_capabilities
-	SET note = $2, updated_at = now()
-	WHERE id = $1`
-
-/** `$student_capability->accountancies()->detach()`. */
-export const DELETE_CAPABILITY_ITEMS_SQL = `DELETE FROM tbr_student_cost_capabilities
-	WHERE student_cap_id = $1`
-
-/** `$student_capability->accountancies()->attach($id, ['amount' => …])`. */
-export const INSERT_CAPABILITY_ITEM_SQL = `INSERT INTO tbr_student_cost_capabilities
-		(student_cap_id, accountancy_id, amount, created_at, updated_at)
-	VALUES ($1, $2, $3, now(), now())`
-
-/**
  * Step 3 of the publish: the santri's **entire** previous generation stops counting.
  *
  * Kept as legacy, paid invoices included and with no confirmation step — that is the documented
@@ -270,17 +218,6 @@ export const SELECT_PREDECESSORS_SQL = `SELECT DISTINCT ON (
 		si.id DESC`
 
 /**
- * `$student_invoices_transaction->update(['student_invoice_id' => $new->id])`.
- *
- * The one statement that stops a re-publish orphaning the money: without it the payment rows stay
- * pointed at an invoice that is now `validity_status = false` and the santri portal shows the bill
- * as unpaid. 21 links in the reference database are already in that state.
- */
-export const REPOINT_INVOICE_LINKS_SQL = `UPDATE tbr_student_invoice_transactions
-	SET student_invoice_id = $2, updated_at = now()
-	WHERE student_invoice_id = $1`
-
-/**
  * `array_sum($amount)` over `$new_student_invoice->studentInvoiceTransations`, read **after** the
  * re-point. Legacy sums every link's `pay` regardless of whether its transaction is still valid;
  * kept verbatim, because narrowing it would settle fewer invoices than legacy did.
@@ -288,7 +225,3 @@ export const REPOINT_INVOICE_LINKS_SQL = `UPDATE tbr_student_invoice_transaction
 export const SUM_INVOICE_LINKS_SQL = `SELECT COALESCE(sum(pay), 0)::text AS paid
 	FROM tbr_student_invoice_transactions
 	WHERE student_invoice_id = $1`
-
-export const SET_INVOICE_CARRYOVER_SQL = `UPDATE tbr_student_invoices
-	SET status = $2, payment_method = $3, amount = $4, updated_at = now()
-	WHERE id = $1`

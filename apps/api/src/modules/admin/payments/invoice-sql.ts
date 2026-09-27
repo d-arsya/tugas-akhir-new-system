@@ -9,8 +9,8 @@ import type { InvoiceBillInput, StudentInvoiceListInput } from "@admin/payments/
 // accountancy ids that were deleted, so any join to that table must be a LEFT JOIN or those rows
 // vanish from every list and total. Legacy filters the cost dropdown on `student_invoices.name`
 // rather than the account, so the read half needs no join at all — the account list is a
-// standalone query (`COST_OPTIONS_SQL`). Money columns are `bigint`, which node-postgres returns
-// as strings, so the service normalises every figure through `toAmount()`.
+// standalone query. Money columns are `bigint`, which node-postgres returns as strings, so the
+// service normalises every figure through `toAmount()`.
 
 const TODAY = `(now() AT TIME ZONE '${TIMEZONE}')::date`
 
@@ -98,18 +98,6 @@ export const STUDENT_CARD_SQL = `SELECT sg.id AS "studentGradeId",
 	LEFT JOIN tbr_levels l ON l.id = sg.level_id
 	LEFT JOIN tbr_academic_years ay ON ay.id = s.academic_year_id
 	WHERE sg.id = $1 AND sg.deleted_at IS NULL`
-
-/** Every valid invoice of one santri — the input to `calculateSetTotals` for the widgets. */
-export const STUDENT_INVOICES_SQL = `SELECT si.id, si.amount, si.status, si.payment_method AS "paymentMethod"
-	FROM tbr_student_invoices si
-	WHERE si.student_grade_id = $1 AND si.validity_status
-	ORDER BY si.id`
-
-/** `Accountancy::whereNotNull('parent_id')->where('is_student_cost', 1)` — the `#cost` select2. */
-export const COST_OPTIONS_SQL = `SELECT a.id, a.name
-	FROM tbr_accountancies a
-	WHERE a.parent_id IS NOT NULL AND a.is_student_cost
-	ORDER BY a.id`
 
 // ─── The Tagihan tab (`@listBillServerSide`) ─────────────────────────────────
 /**
@@ -276,7 +264,3 @@ export const INVOICE_LINKS_SQL = `SELECT sit.student_invoice_id AS "studentInvoi
 	FROM tbr_student_invoice_transactions sit
 	LEFT JOIN tbr_student_transactions st ON st.id = sit.student_transaction_id
 	WHERE sit.student_invoice_id = $1`
-
-export const UPDATE_NOTE_SQL = `UPDATE tbr_student_invoices
-	SET note = $2, updated_at = now()
-	WHERE id = $1`

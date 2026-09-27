@@ -1,27 +1,28 @@
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "node:crypto"
-import { DataSource } from "typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import { MailerService } from "@core/mailer/mailer.service"
 import { indoDate } from "@admin/common/date-format"
 import {
 	EWALLET_BY_UNIQUE_NUMBER_SQL,
-	EWALLET_SET_ACTIVE_SQL,
 	MERCHANT_BY_ID_SQL,
 	MERCHANT_EMAIL_TAKEN_SQL,
-	MERCHANT_INSERT_SQL,
 	MERCHANT_LIST_SQL,
 	MERCHANT_NEXT_NUMBER_SQL,
-	MERCHANT_UPDATE_SQL,
 	type MerchantDetailSqlRow,
 	type MerchantSqlRow,
 } from "@admin/merchant/merchant-sql"
 import type { Env } from "@core/config/env.validation"
 import type { MerchantWriteInput } from "@admin/merchant/dto/merchant-admin.dto"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { Ewallet } from "@ewallet/entities/ewallet.entity"
+import { Merchant } from "@merchant/entities/merchant.entity"
+import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 
 export type MerchantRow = {
 	id: number
@@ -101,6 +102,7 @@ export class MerchantAdminService {
 		private readonly dataSource: DataSource,
 		private readonly mailerService: MailerService,
 		private readonly configService: ConfigService<Env>,
+		@InjectRepository(SettingSchool) private readonly schools: Repository<SettingSchool>,
 	) {}
 
 	/** `Merchant::get()` — no where, no order; legacy leaves the order to the DB. */
@@ -161,18 +163,20 @@ export class MerchantAdminService {
 				// otherwise race for it, and `unique_number` carries a UNIQUE index
 				const numbers = await manager.query<{ uniqueNumber: string }[]>(MERCHANT_NEXT_NUMBER_SQL)
 				uniqueNumber = numbers[0]?.uniqueNumber ?? ""
-				const inserted = await manager.query<{ id: string }[]>(MERCHANT_INSERT_SQL, [
-					dto.name,
-					dto.gender,
-					dto.email,
-					dto.merchantName,
-					dto.address,
-					dto.phone,
-					dto.isBlocked,
-					uniqueNumber,
-					hashed,
-				])
-				id = Number(inserted[0]?.id)
+				const saved = await manager.save(
+					manager.create(Merchant, {
+						name: dto.name,
+						gender: dto.gender,
+						email: dto.email,
+						merchantName: dto.merchantName,
+						address: dto.address,
+						phone: dto.phone,
+						isBlocked: dto.isBlocked,
+						uniqueNumber,
+						password: hashed,
+					}),
+				)
+				id = Number(saved.id)
 			})
 		} catch (error) {
 			this.logger.error("[Merchant] gagal menyimpan merchant", error)
@@ -211,16 +215,19 @@ export class MerchantAdminService {
 
 		try {
 			await this.dataSource.transaction(async (manager) => {
-				await manager.query(MERCHANT_UPDATE_SQL, [
-					id,
-					dto.name,
-					dto.gender,
-					dto.email,
-					dto.merchantName,
-					dto.address,
-					dto.phone,
-					dto.isBlocked,
-				])
+				await manager.update(
+					Merchant,
+					{ id },
+					{
+						name: dto.name,
+						gender: dto.gender,
+						email: dto.email,
+						merchantName: dto.merchantName,
+						address: dto.address,
+						phone: dto.phone,
+						isBlocked: dto.isBlocked,
+					},
+				)
 
 				const wallets = await manager.query<{ id: string; isActive: boolean | null }[]>(
 					EWALLET_BY_UNIQUE_NUMBER_SQL,
@@ -234,7 +241,7 @@ export class MerchantAdminService {
 					return
 				}
 				// The force-write, verbatim: re-asserted on every save even when it does not change
-				await manager.query(EWALLET_SET_ACTIVE_SQL, [Number(wallet.id), !dto.isBlocked])
+				await manager.update(Ewallet, { id: Number(wallet.id) }, { isActive: !dto.isBlocked })
 			})
 		} catch (error) {
 			this.logger.error("[Merchant] gagal menyimpan merchant", error)
@@ -273,9 +280,7 @@ export class MerchantAdminService {
 
 	/** `SettingSchool::first()->name ?? config('app.name')` — the mail subject and footer. */
 	private async schoolName(): Promise<string> {
-		const rows = await this.dataSource.query<{ name: string | null }[]>(
-			"SELECT s.name FROM tbr_setting_schools s ORDER BY s.id LIMIT 1",
-		)
-		return rows[0]?.name || (this.configService.get("APP_NAME", { infer: true }) ?? "Pondok Roja")
+		const [school] = await this.schools.find({ select: { name: true }, order: { id: "ASC" }, take: 1 })
+		return school?.name || (this.configService.get("APP_NAME", { infer: true }) ?? "Pondok Roja")
 	}
 }

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { DataSource, Repository } from "typeorm"
+import { DataSource, Not, Repository } from "typeorm"
 
 import type {
 	AdminMessageResult,
@@ -18,6 +18,8 @@ import { deleteDiseaseHistories } from "../../../shared/society/disease-history"
 import { societyFileUrl } from "../../../shared/society/files"
 import { renderSocietyPrintPage } from "../../../shared/society/print/society-print"
 import { loadSocietyRecord } from "../../../shared/society/society-record"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Level } from "@shared/master/entities/level.entity"
 
 import { buildRegistrantWorkbook, registrantExportFileName } from "./registrant-export"
@@ -50,6 +52,8 @@ export class RegistrantAdminService {
 	constructor(
 		@Inject(DataSource) private readonly dataSource: DataSource,
 		@InjectRepository(Level) private readonly levels: Repository<Level>,
+		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
+		@InjectRepository(Registrant) private readonly registrants: Repository<Registrant>,
 	) {}
 
 	/** `Level::where('status', 'show')->get()` */
@@ -99,10 +103,8 @@ export class RegistrantAdminService {
 
 	/** `download(AcademicYear, $approval_status = null)` */
 	async exportRows(academicYearId: number, status: AdminRegistrantExportStatus): Promise<{ body: Buffer; fileName: string }> {
-		const years = (await this.dataSource.query("SELECT year FROM tbr_academic_years WHERE id = $1", [academicYearId])) as Array<{
-			year: string | null
-		}>
-		if (!years[0]) throw new NotFoundException("Tahun ajaran tidak ditemukan")
+		const academicYear = await this.academicYears.findOne({ select: { id: true, year: true }, where: { id: academicYearId } })
+		if (!academicYear) throw new NotFoundException("Tahun ajaran tidak ditemukan")
 		const params: Array<number | string> = status === "approve" || status === "reject" ? [academicYearId, status] : [academicYearId]
 		const rows = (await this.dataSource.query(exportSql(status), params)) as ListRow[]
 		const settings = (await this.dataSource.query(
@@ -115,18 +117,20 @@ export class RegistrantAdminService {
 		const body = await buildRegistrantWorkbook({
 			rows,
 			status,
-			year: years[0].year,
+			year: academicYear.year,
 			nameColumn: column(1),
 			schoolColumn: column(19),
 		})
-		return { body, fileName: registrantExportFileName(years[0].year) }
+		return { body, fileName: registrantExportFileName(academicYear.year) }
 	}
 
 	/** `PersonalController::personal` — the step-1 selects of the wizard. */
 	async findCreateOptions(): Promise<AdminRegistrantCreateOptions> {
-		const years = (await this.dataSource.query(
-			"SELECT id, year FROM tbr_academic_years WHERE id <> 1 ORDER BY year DESC",
-		)) as Array<{ id: string; year: string | null }>
+		const years = await this.academicYears.find({
+			select: { id: true, year: true },
+			where: { id: Not(1) },
+			order: { year: "DESC" },
+		})
 		return {
 			academicYears: years.map((row) => ({ id: Number(row.id), year: row.year })),
 			levels: await this.shownLevels(),
@@ -174,12 +178,11 @@ export class RegistrantAdminService {
 	 * Kept as legacy: a failure still answers 200, with the failure text.
 	 */
 	async remove(registrantId: number): Promise<AdminMessageResult> {
-		const found = (await this.dataSource.query("SELECT id FROM tbr_registrants WHERE id = $1", [registrantId])) as unknown[]
-		if (found.length === 0) throw new NotFoundException("Pendaftar tidak ditemukan")
+		if (!(await this.registrants.existsBy({ id: registrantId }))) throw new NotFoundException("Pendaftar tidak ditemukan")
 		try {
 			await this.dataSource.transaction(async (manager) => {
 				await deleteDiseaseHistories(manager, "registrant", registrantId)
-				await manager.query("DELETE FROM tbr_registrants WHERE id = $1", [registrantId])
+				await manager.delete(Registrant, { id: registrantId })
 			})
 			return { message: DELETE_SUCCESS }
 		} catch (error) {
@@ -189,7 +192,6 @@ export class RegistrantAdminService {
 	}
 
 	private async assertYear(academicYearId: number): Promise<void> {
-		const rows = (await this.dataSource.query("SELECT id FROM tbr_academic_years WHERE id = $1", [academicYearId])) as unknown[]
-		if (rows.length === 0) throw new NotFoundException("Tahun ajaran tidak ditemukan")
+		if (!(await this.academicYears.existsBy({ id: academicYearId }))) throw new NotFoundException("Tahun ajaran tidak ditemukan")
 	}
 }

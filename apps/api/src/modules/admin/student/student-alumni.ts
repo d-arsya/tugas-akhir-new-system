@@ -3,7 +3,9 @@ import type { EntityManager } from "typeorm"
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
 
 import { fail, UPDATE_FAILED } from "./student-grade-ops"
+import { Alumni } from "@admin/common/entities/alumni.entity"
 import { TIMEZONE } from "@admin/common/sql"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 
 // `StudentController::createAlumni:763-792`, called by Lulus for every graduated grade row.
 
@@ -43,13 +45,10 @@ const selectExpression = (column: string): string =>
  * year set to the second half of `current_academic_year` (`now()->setYear(explode('/', …)[1])`).
  */
 export const createAlumni = async (manager: EntityManager, studentGradeId: number): Promise<void> => {
-	const existing = (await manager.query(`SELECT 1 FROM tbr_alumnis WHERE student_id = $1 LIMIT 1`, [studentGradeId])) as unknown[]
-	if (existing.length > 0) return
+	if (await manager.existsBy(Alumni, { studentId: studentGradeId })) return
 
-	const years = (await manager.query(`SELECT current_academic_year FROM tbr_student_grades WHERE id = $1`, [studentGradeId])) as Array<{
-		current_academic_year: string | null
-	}>
-	const graduateYear = /^\s*(\d+)/.exec((years[0]?.current_academic_year ?? "").split("/")[1] ?? "")?.[1]
+	const gradeRow = await manager.findOne(StudentGrade, { select: { id: true, currentAcademicYear: true }, where: { id: studentGradeId } })
+	const graduateYear = /^\s*(\d+)/.exec((gradeRow?.currentAcademicYear ?? "").split("/")[1] ?? "")?.[1]
 	if (graduateYear === undefined) fail(UPDATE_FAILED)
 
 	const columns = await alumniSharedColumns(manager)

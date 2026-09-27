@@ -5,7 +5,7 @@ import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/bal
 // Raw SQL for the transaction detail, the status update and Riwayat Transaksi — legacy
 // `EwalletController@transactionDetail/@transactionUpdate` and `EwalletTransactionHistoryController`.
 //
-// Everything is raw SQL because the ewallet tables mix `bigint`, `numeric` and `varchar` ids:
+// The ewallet tables mix `bigint`, `numeric` and `varchar` ids:
 // `details.ewallet_transaction_id` and `items.ewallet_transaction_id` are numeric,
 // `ewalletable_id` is a varchar. See the plan's "Data reality".
 
@@ -57,9 +57,6 @@ export const MERCHANT_NAME_SQL = "SELECT name FROM tbr_merchants WHERE id::text 
 /** Row lock on the transaction, taken after the wallets (ascending) so no two updates can deadlock. */
 export const TRANSACTION_FOR_UPDATE_SQL = `SELECT id, payment_method AS "paymentMethod", status
 	FROM tbr_ewallet_transactions WHERE id = $1 FOR UPDATE`
-
-export const TRANSACTION_UPDATE_SQL = `UPDATE tbr_ewallet_transactions
-	SET status = $2, invalid_note = $3, updated_at = NOW() WHERE id = $1`
 
 // ─── Riwayat: list, export ───────────────────────────────────────
 
@@ -164,9 +161,6 @@ export const HISTORY_DETAIL_SQL = `SELECT t.id, t.code, t.type, t.status, t.paym
 	) det ON true
 	LEFT JOIN tbr_ewallets se ON se.id = det.ewallet_id
 	WHERE t.id = $1`
-
-export const HISTORY_ITEMS_SQL = `SELECT description, price FROM tbr_ewallet_transaction_items
-	WHERE ewallet_transaction_id = $1 ORDER BY id`
 
 export const MERCHANT_LABEL_SQL = "SELECT merchant_name AS name FROM tbr_merchants WHERE id::text = $1"
 

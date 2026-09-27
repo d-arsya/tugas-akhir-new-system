@@ -1,8 +1,9 @@
 import { randomInt } from "node:crypto"
 
 import { BadRequestException, HttpException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
-import { DataSource, type EntityManager } from "typeorm"
+import { DataSource, Like, Repository, type EntityManager } from "typeorm"
 
 import type { AdminMessageResult, AdminRegistrantCreateResult, SocietyDraftStepKey, SocietyStepCheckDto } from "@roja/types"
 import { SOCIETY_COLUMNS } from "@roja/utils/society-fields"
@@ -11,6 +12,8 @@ import { StorageService } from "../../../core/storage/storage.service"
 import { replaceDiseaseHistories } from "../../../shared/society/disease-history"
 import { storeSocietyUpload } from "../../../shared/society/files"
 import { readSocietyMultipart, validateSocietyInput, type SocietyUpload, type SocietyValidated } from "../../../shared/society/society-rules"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 import { RegistrantMailService } from "./registrant-mail.service"
 
@@ -52,17 +55,17 @@ const generatePassword = (): string => {
  */
 const generateRegistrantId = async (manager: EntityManager, academicYearId: number): Promise<string> => {
 	await manager.query("SELECT pg_advisory_xact_lock($1)", [REGISTRANT_ID_LOCK_KEY])
-	const years = (await manager.query("SELECT year, serial_number FROM tbr_academic_years WHERE id = $1", [academicYearId])) as Array<{
-		year: string | null
-		serial_number: string | null
-	}>
-	const serial = years[0]?.serial_number ?? ""
-	const prefix = `PR${(years[0]?.year ?? "").slice(0, 4)}`
-	const taken = new Set(
-		((await manager.query("SELECT registrant_id FROM tbr_registrants WHERE registrant_id LIKE $1", [`${prefix}%`])) as Array<{
-			registrant_id: string
-		}>).map((row) => row.registrant_id),
-	)
+	const academicYear = await manager.findOne(AcademicYear, {
+		select: { id: true, year: true, serialNumber: true },
+		where: { id: academicYearId },
+	})
+	const serial = academicYear?.serialNumber ?? ""
+	const prefix = `PR${(academicYear?.year ?? "").slice(0, 4)}`
+	const registrants = await manager.find(Registrant, {
+		select: { id: true, registrantId: true },
+		where: { registrantId: Like(`${prefix}%`) },
+	})
+	const taken = new Set(registrants.map((registrant) => registrant.registrantId))
 	const start = serial.replace(/^0+/, "")
 	let increment = Number(start === "" ? "0" : start)
 	let candidate = `${prefix}${start.padStart(serial.length, "0")}`
@@ -87,6 +90,7 @@ export class RegistrantWriteService {
 
 	constructor(
 		@Inject(DataSource) private readonly dataSource: DataSource,
+		@InjectRepository(Registrant) private readonly registrants: Repository<Registrant>,
 		@Inject(StorageService) private readonly storageService: StorageService,
 		@Inject(RegistrantMailService) private readonly mail: RegistrantMailService,
 	) {}
@@ -154,12 +158,12 @@ export class RegistrantWriteService {
 		body: Record<string, unknown>,
 		files: Record<string, SocietyUpload[] | undefined> | undefined,
 	): Promise<AdminMessageResult> {
-		const rows = (await this.dataSource.query("SELECT id, registered_by_admin, fullname, email FROM tbr_registrants WHERE id = $1", [
-			registrantId,
-		])) as Array<{ id: string; registered_by_admin: boolean | null; fullname: string | null; email: string | null }>
-		const row = rows[0]
+		const row = await this.registrants.findOne({
+			select: { id: true, registeredByAdmin: true, fullname: true, email: true },
+			where: { id: registrantId },
+		})
 		if (!row) throw new NotFoundException("Pendaftar tidak ditemukan")
-		const portalRow = row.registered_by_admin !== true
+		const portalRow = row.registeredByAdmin !== true
 
 		const input = readSocietyMultipart(body, files)
 		const validated = await validateSocietyInput(this.dataSource.manager, {

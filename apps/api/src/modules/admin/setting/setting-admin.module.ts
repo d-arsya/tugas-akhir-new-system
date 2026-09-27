@@ -10,8 +10,8 @@ import { AdminSettingFormService } from "@admin/setting/admin-setting-form.servi
 import { AdminSystemSettingController } from "@admin/setting/admin-system-setting.controller"
 import { AdminSystemSettingService } from "@admin/setting/admin-system-setting.service"
 import { Setting } from "@admin/setting/entities/setting.entity"
-import { SettingAnnc } from "@shared/school/entities/setting-annc.entity"
-import { SettingForm } from "@shared/school/entities/setting-form.entity"
+import { SettingAnnc } from "@psb/entities/setting-annc.entity"
+import { SettingForm } from "@psb/entities/setting-form.entity"
 import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 
 @Module({

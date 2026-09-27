@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 import type {
 	InvoiceStudentCard,
 	ServerTableResult,
@@ -12,6 +13,7 @@ import { toAmount } from "@shared/billing/invoice-calculator"
 import type { StudentTransactionListFilter } from "@admin/payments/dto/transaction-admin.dto"
 import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/payments/transaction-sql"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 
 // Legacy `StudentTransactionController` — the Riwayat Transaksi index and detail.
 // Owned by WS P1-C.
@@ -46,7 +48,7 @@ type DetailRow = {
 }
 
 type ItemRow = {
-	invoiceId: string
+	invoiceId: string | null
 	name: string | null
 	dueDate: string | null
 	pay: string | null
@@ -65,6 +67,7 @@ export class TransactionAdminService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly storageService: StorageService,
+		@InjectRepository(StudentInvoice) private readonly invoices: Repository<StudentInvoice>,
 	) {}
 
 	/**
@@ -170,12 +173,13 @@ export class TransactionAdminService {
 		}
 	}
 
-	private async invoiceStudentId(invoiceId: string): Promise<number | null> {
-		const rows = await this.dataSource.query<{ studentId: string | null }[]>(
-			`SELECT si.student_id AS "studentId" FROM tbr_student_invoices si WHERE si.id = $1`,
-			[invoiceId],
-		)
-		const value = rows[0]?.studentId
+	private async invoiceStudentId(invoiceId: string | null): Promise<number | null> {
+		if (invoiceId === null) return null
+		const invoice = await this.invoices.findOne({
+			select: { id: true, studentId: true },
+			where: { id: Number(invoiceId) },
+		})
+		const value = invoice?.studentId
 		return value === null || value === undefined ? null : Number(value)
 	}
 

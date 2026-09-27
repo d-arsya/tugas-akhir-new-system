@@ -13,6 +13,10 @@ import { MajorAdminController } from "@admin/academic/major-admin.controller"
 import { MajorAdminService } from "@admin/academic/major-admin.service"
 import { SubGradeAdminController } from "@admin/academic/sub-grade-admin.controller"
 import { SubGradeAdminService } from "@admin/academic/sub-grade-admin.service"
+import { Alumni } from "@admin/common/entities/alumni.entity"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
@@ -21,7 +25,20 @@ import { Major } from "@shared/master/entities/major.entity"
 import { SubGrade } from "@shared/master/entities/sub-grade.entity"
 
 @Module({
-	imports: [TypeOrmModule.forFeature([AcademicYear, Level, LevelAcademicYear, Grade, Major, SubGrade])],
+	imports: [
+		TypeOrmModule.forFeature([
+			AcademicYear,
+			Level,
+			LevelAcademicYear,
+			Grade,
+			Major,
+			SubGrade,
+			Registrant,
+			Student,
+			StudentGrade,
+			Alumni,
+		]),
+	],
 	controllers: [
 		AcademicYearAdminController,
 		AcademicYearDeleteController,

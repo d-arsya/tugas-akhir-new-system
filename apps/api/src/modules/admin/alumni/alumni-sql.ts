@@ -85,8 +85,5 @@ export const UNBLOCK_STUDENT_SQL = `UPDATE tbr_students SET is_blocked = false, 
 	WHERE id = $1 AND deleted_at IS NULL AND is_blocked IS DISTINCT FROM false
 	RETURNING id`
 
-/** `$alumni->delete()` — the model has no cascade, so its disease rows stay behind, as in legacy. */
-export const DELETE_ALUMNI_SQL = `DELETE FROM tbr_alumnis WHERE id = $1`
-
 /** `destroyByGraduationYear()` — every alumnus of the year, archive rows included (legacy quirk, kept). */
 export const DELETE_YEAR_SQL = `DELETE FROM tbr_alumnis a WHERE ${YEAR} = $1`

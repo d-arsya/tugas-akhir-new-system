@@ -8,7 +8,6 @@ import type {
 	CapabilityHistoryRow,
 	CapabilityItemPage,
 	CapabilityItemRow,
-	CapabilityStatus,
 	CapabilityStudentPage,
 	CapabilityStudentRow,
 	InvoiceStudentCard,
@@ -48,6 +47,7 @@ import { renderCapabilityPrint } from "@admin/capabilities/capability-print"
 import * as sql from "@admin/capabilities/capability-sql"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
 
 /** What levels 4 and 5 both need before they can answer: the card plus the two resolved ids. */
 type StudentContext = { student: InvoiceStudentCard; academicYearId: number; gradeId: number; grade: string }
@@ -70,6 +70,7 @@ export class CapabilityAdminService {
 		private readonly storageService: StorageService,
 		@InjectRepository(AcademicYear) private readonly academicYears: Repository<AcademicYear>,
 		@InjectRepository(Grade) private readonly grades: Repository<Grade>,
+		@InjectRepository(StudentCapability) private readonly capabilities: Repository<StudentCapability>,
 	) {
 		this.pdfStore = new CapabilityPdfStore(storageService)
 	}
@@ -137,14 +138,15 @@ export class CapabilityAdminService {
 	async findStudentPage(studentGradeId: number): Promise<CapabilityStudentPage> {
 		const context = await this.findStudentContext(studentGradeId)
 
-		const [newest] = await this.dataSource.query<{ status: CapabilityStatus | null }[]>(
-			sql.CAPABILITY_NEWEST_STATUS_SQL,
-			[studentGradeId],
-		)
+		const newest = await this.capabilities.findOne({
+			select: { id: true, status: true },
+			where: { studentGradeId },
+			order: { createdAt: "DESC", id: "DESC" },
+		})
 
 		return {
 			student: context.student,
-			alert: alertFor(newest?.status ?? null, newest !== undefined),
+			alert: alertFor(newest?.status ?? null, newest !== null),
 			academicYearId: context.academicYearId,
 			gradeId: context.gradeId,
 		}

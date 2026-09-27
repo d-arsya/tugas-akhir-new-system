@@ -1,8 +1,9 @@
 import { Injectable, Logger, NotFoundException, UnprocessableEntityException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import { InjectRepository } from "@nestjs/typeorm"
 import * as bcrypt from "bcrypt"
 import * as crypto from "node:crypto"
-import { DataSource } from "typeorm"
+import { DataSource, Repository } from "typeorm"
 
 import type { EwalletMoneyResult, EwalletPendingWithdraw } from "@roja/types"
 
@@ -26,6 +27,7 @@ import {
 	registerPinStrike,
 	wrongPinMessage,
 } from "@admin/ewallet/withdraw-session"
+import { Ewallet } from "@ewallet/entities/ewallet.entity"
 
 /** A refusal that must carry `redirect`; the controller writes it straight to the response. */
 export type MoneyRefusal = { refused: true; message: string; redirect: string }
@@ -52,6 +54,7 @@ export class EwalletMoneyService {
 		private readonly redis: RedisService,
 		private readonly mailer: MailerService,
 		private readonly config: ConfigService<Env, true>,
+		@InjectRepository(Ewallet) private readonly wallets: Repository<Ewallet>,
 	) {}
 
 	private async requireWallet(id: number): Promise<MoneyWallet> {
@@ -115,7 +118,7 @@ export class EwalletMoneyService {
 		const before = await registerPinStrike(this.redis, adminId, walletId)
 		if (before < MAX_FREE_STRIKES) throw new UnprocessableEntityException(wrongPinMessage(before))
 
-		await this.dataSource.query("UPDATE tbr_ewallets SET is_active = false, updated_at = NOW() WHERE id = $1", [walletId])
+		await this.wallets.update({ id: walletId }, { isActive: false })
 		await clearPinStrikes(this.redis, adminId, walletId)
 		await clearPendingWithdraw(this.redis, adminId, walletId)
 		return { refused: true, message: LOCKED_PIN_MESSAGE, redirect: `/ewallets/${walletId}/blocked` }
@@ -172,7 +175,7 @@ export class EwalletMoneyService {
 	// Legacy EwalletController@resetPin — does not touch is_active (the old placeholder forced it on)
 	async resetPin(walletId: number, pin: string): Promise<EwalletMoneyResult> {
 		await this.requireWallet(walletId)
-		await this.dataSource.query("UPDATE tbr_ewallets SET pin = $2, updated_at = NOW() WHERE id = $1", [walletId, pinToStored(pin)])
+		await this.wallets.update({ id: walletId }, { pin: pinToStored(pin) })
 		return { message: "Pin berhasil direset." }
 	}
 
@@ -192,9 +195,9 @@ export class EwalletMoneyService {
 
 		const token = crypto.randomBytes(5).toString("hex")
 		const hashed = await bcrypt.hash(token, 10)
-		await this.dataSource.query(
-			"UPDATE tbr_ewallets SET reset_pin_token = $2, reset_pin_expired = NOW() + interval '60 minutes', updated_at = NOW() WHERE id = $1",
-			[walletId, hashed],
+		await this.wallets.update(
+			{ id: walletId },
+			{ resetPinToken: hashed, resetPinExpired: () => "NOW() + interval '60 minutes'" },
 		)
 
 		// The same base and paths the portals' own reset emails use (`santri-ewallet.service.ts`, `merchant-ewallet.service.ts`),

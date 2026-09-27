@@ -133,24 +133,6 @@ export const STUDENT_COST_APPLIED_TOTALS_SQL = `SELECT COUNT(*)::int AS total,
 	FROM tbr_student_cost_terms t
 	WHERE t.academic_year_id = $1 AND t.grade = $2`
 
-/** Level 4 — the `create()` existence probe and the `edit()` lookup, which are the same row. */
-export const STUDENT_COST_TERM_SQL = `SELECT t.id,
-		t.type,
-		t.period,
-		t.time_span AS "timeSpan",
-		t.month_of AS "monthOf",
-		t.day_of AS "dayOf",
-		t.reminder,
-		t.grade
-	FROM tbr_student_cost_terms t
-	WHERE t.academic_year_id = $1 AND t.accountancy_id = $2 AND t.grade = $3
-	ORDER BY t.id
-	LIMIT 1`
-
-export const STUDENT_COST_ACCOUNTANCY_SQL = `SELECT a.id, a.name
-	FROM tbr_accountancies a
-	WHERE a.id = $1`
-
 /**
  * `edit()`'s `$applies` probe, which disables the Periode radios once a kesanggupan is approved.
  *
@@ -191,42 +173,3 @@ export const STUDENT_COST_UNAPPLY_SQL = `UPDATE tbr_student_cost_terms
 	   SET applied = false, updated_at = now()
 	 WHERE academic_year_id = $1 AND grade = $2 AND NOT (id = ANY($3::bigint[]))
 	   AND applied IS DISTINCT FROM false`
-
-/**
- * `$accountancy->academicYears()->attach(...)` — the term row doubles as the accountancy ↔
- * academic-year pivot.
- *
- * `applied` is deliberately left NULL: a new item is not applied until the user uses the bulk
- * "Terapkan item yang di checklist" button.
- *
- * So are the timestamps. `belongsToMany(...)->withPivot(...)` has no `->withTimestamps()`, which
- * is why `created_at` is NULL on **all 179** existing rows while `updated_at` is set on every one
- * of them — that column only ever gets written by a later `$model->update()`, which does carry
- * Eloquent's timestamps. New rows match, as the `level_academic_years` pivot does in phase 1.
- */
-export const INSERT_STUDENT_COST_TERM_SQL = `INSERT INTO tbr_student_cost_terms
-		(accountancy_id, academic_year_id, type, period, grade, month_of, day_of, time_span, reminder, applied, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, NULL, NULL)
-	RETURNING id`
-
-/**
- * `$student_cost_term->update([...])`.
- *
- * The once branch does not list `month_of` / `day_of`, exactly as legacy's two update blocks do
- * not — switching monthly → once leaves the stale values in place, and `getDueDate()` keys off
- * `period`, so they are simply ignored. `grade` and `applied` are never touched by update.
- */
-export const UPDATE_STUDENT_COST_TERM_ONCE_SQL = `UPDATE tbr_student_cost_terms
-	   SET type = $2, period = $3, time_span = $4, reminder = $5, updated_at = now()
-	 WHERE id = $1`
-
-export const UPDATE_STUDENT_COST_TERM_MONTHLY_SQL = `UPDATE tbr_student_cost_terms
-	   SET type = $2, period = $3, time_span = $4, month_of = $5, day_of = $6, reminder = $7, updated_at = now()
-	 WHERE id = $1`
-
-/** `deleteStudentCosts()` — legacy loops one `DELETE` per row; one statement does the same. */
-export const DELETE_STUDENT_COSTS_SQL = `DELETE FROM tbr_student_costs WHERE stuco_term_id = $1`
-
-export const INSERT_STUDENT_COST_SQL = `INSERT INTO tbr_student_costs
-		(stuco_term_id, amount, created_at, updated_at)
-	VALUES ($1, $2, now(), now())`

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, IsNull, Not, Repository } from "typeorm"
 import type {
 	InvoiceBillDetail,
 	InvoiceBillRow,
@@ -23,12 +24,13 @@ import {
 	type BillDetailSqlRow,
 	type BillSqlRow,
 	type CardSqlRow,
-	type InvoiceSqlRow,
 	type LinkSqlRow,
 	type TransactionSqlRow,
 } from "@admin/payments/invoice-format"
 import { SqlParams } from "@admin/common/sql"
+import { Accountancy } from "@admin/common/entities/accountancy.entity"
 import * as sql from "@admin/payments/invoice-sql"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
 
 const UPDATE_SUCCESS = "Data berhasil diupdate."
 
@@ -45,6 +47,8 @@ export class InvoiceAdminService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly configService: ConfigService<Env, true>,
+		@InjectRepository(StudentInvoice) private readonly invoices: Repository<StudentInvoice>,
+		@InjectRepository(Accountancy) private readonly accountancies: Repository<Accountancy>,
 	) {}
 
 	/** `@studentListServerSide` — `leftjoin` throughout, so a santri with no invoices still lists at 0. */
@@ -78,13 +82,21 @@ export class InvoiceAdminService {
 	async findStudentDetail(studentGradeId: number): Promise<InvoiceDetailPage> {
 		const student = await this.findStudentCard(studentGradeId)
 
-		const invoices = await this.dataSource.query<InvoiceSqlRow[]>(sql.STUDENT_INVOICES_SQL, [studentGradeId])
+		const invoices = await this.invoices.find({
+			select: { id: true, amount: true, status: true, paymentMethod: true },
+			where: { studentGradeId: String(studentGradeId), validityStatus: true },
+			order: { id: "ASC" },
+		})
 		const links = await this.fetchLinks(invoices.map((invoice) => Number(invoice.id)))
-		const costOptions = await this.dataSource.query<{ id: string; name: string | null }[]>(sql.COST_OPTIONS_SQL)
+		const costOptions = await this.accountancies.find({
+			select: { id: true, name: true },
+			where: { parentId: Not(IsNull()), isStudentCost: true },
+			order: { id: "ASC" },
+		})
 
 		// Legacy summed whole-transaction `amount` keyed by transaction id — its third and loosest
 		// reading of "paid". `calculateSetTotals` sums the pivot `pay` of valid transactions instead.
-		const totals = calculateSetTotals(invoices.map(toInvoiceRow), links.map(toLinkRow), validTransactionIds(links))
+		const totals = calculateSetTotals(invoices, links.map(toLinkRow), validTransactionIds(links))
 
 		return {
 			student,
@@ -201,12 +213,10 @@ export class InvoiceAdminService {
 
 	/** `@update` — the only write in the read half: the free-text note under the invoice. */
 	async updateBillNote(invoiceId: number, body: UpdateInvoiceNoteInput): Promise<{ message: string }> {
-		const [invoice] = await this.dataSource.query<{ id: string }[]>("SELECT id FROM tbr_student_invoices WHERE id = $1", [
-			invoiceId,
-		])
-		if (!invoice) throw new NotFoundException("Tagihan tidak ditemukan")
+		const exists = await this.invoices.existsBy({ id: invoiceId })
+		if (!exists) throw new NotFoundException("Tagihan tidak ditemukan")
 
-		await this.dataSource.query(sql.UPDATE_NOTE_SQL, [invoiceId, body.note])
+		await this.invoices.update({ id: invoiceId }, { note: body.note })
 		return { message: UPDATE_SUCCESS }
 	}
 

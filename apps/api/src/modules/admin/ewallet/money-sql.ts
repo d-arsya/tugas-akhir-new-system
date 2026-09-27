@@ -3,6 +3,9 @@ import type { EntityManager } from "typeorm"
 import type { EwalletOwnerType } from "@roja/types"
 
 import { EWALLET_MERCHANT_TYPE, EWALLET_STUDENT_TYPE } from "@shared/ewallet/balance"
+import { SettingSchool } from "@shared/school/entities/setting-school.entity"
+import { User } from "@admin/auth/entities/user.entity"
+import { EwalletTransaction } from "@ewallet/entities/ewallet-transaction.entity"
 
 // Raw SQL for the Dompet money routes. `ewalletable_id` is a varchar, so the owner is joined
 // with `id::text = ewalletable_id`; the santri's name is the active grade's fullname, else the
@@ -87,34 +90,34 @@ export type InsertedTransaction = { id: number; createdAt: Date }
 
 /** Legacy `topUp` / `withdraw` row: valid, Cash/Cash, on behalf of the officer, no transfer news number. */
 export const insertCashTransaction = async (manager: EntityManager, input: CashTransactionInput): Promise<InsertedTransaction> => {
-	const rows = (await manager.query(
-		`INSERT INTO tbr_ewallet_transactions
-			(ewallet_id, code, name, amount, status, type, payment_method, payment_account, payment_on_behalf_of,
-			 transfer_news_number, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, 'valid', $5, 'Cash', 'Cash', $6, NULL, NOW(), NOW())
-		RETURNING id, created_at`,
-		[input.walletId, input.code, input.name, input.amount, input.type, input.officerName],
-	)) as Array<{ id: string; created_at: Date }>
-	const row = rows[0]
-	if (!row) throw new Error("Insert returned no row")
-	return { id: Number(row.id), createdAt: row.created_at }
+	const saved = await manager.save(
+		manager.create(EwalletTransaction, {
+			ewalletId: String(input.walletId),
+			code: input.code,
+			name: input.name,
+			amount: String(input.amount),
+			status: "valid",
+			type: input.type,
+			paymentMethod: "Cash",
+			paymentAccount: "Cash",
+			paymentOnBehalfOf: input.officerName,
+			transferNewsNumber: null,
+		}),
+	)
+	return { id: Number(saved.id), createdAt: saved.createdAt }
 }
 
 export type Officer = { name: string; email: string | null }
 
 /** The signed-in admin (`request()->user()`): `payment_on_behalf_of` and the cashier's copy of the email. */
 export const loadOfficer = async (manager: EntityManager, userId: number): Promise<Officer | null> => {
-	const rows = (await manager.query("SELECT name, email FROM tbr_users WHERE id = $1", [userId])) as Array<{
-		name: string | null
-		email: string | null
-	}>
-	const row = rows[0]
+	const row = await manager.findOne(User, { select: { name: true, email: true }, where: { id: userId } })
 	if (!row) return null
 	return { name: row.name ?? "", email: row.email }
 }
 
 /** `SettingSchool::first()` — the school name in the email subject and footer. */
 export const loadSchoolName = async (manager: EntityManager): Promise<string | null> => {
-	const rows = (await manager.query("SELECT name FROM tbr_setting_schools ORDER BY id LIMIT 1")) as Array<{ name: string | null }>
-	return rows[0]?.name ?? null
+	const [school] = await manager.find(SettingSchool, { select: { name: true }, order: { id: "ASC" }, take: 1 })
+	return school?.name ?? null
 }

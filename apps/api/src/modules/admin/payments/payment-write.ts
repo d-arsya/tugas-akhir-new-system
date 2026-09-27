@@ -3,11 +3,16 @@ import type { EntityManager } from "typeorm"
 import { calculatePaid, toAmount } from "@shared/billing/invoice-calculator"
 import { toInvoiceRow, type InvoiceSqlRow, type LinkSqlRow } from "@admin/payments/payment-format"
 import * as sql from "@admin/payments/payment-sql"
+import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
+import { StudentTransaction } from "@santri/entities/student-transaction.entity"
 
-// The two statements-level write primitives behind `storeTransaction` and `cancelTransaction`.
+// The statement-level write primitives behind `storeTransaction` and `cancelTransaction`.
 // Split out of `payment-admin.service.ts` to keep it under the 300-line limit; both take the
 // caller's `EntityManager`, so they always run inside the caller's transaction and never open
 // one of their own.
+
+const databaseNow = (): string => "now()"
 
 /**
  * Fix F-4. Legacy's two reset branches are `paid + installment + remain < amount` and
@@ -34,15 +39,15 @@ export const resetInvoice = async (
 	if (settled <= 0) {
 		// Nothing valid left: back to a plain unpaid bill. `payment_method` must go to NULL and
 		// not to `cash` — the santri portal treats `installment` as "being paid off".
-		await manager.query(sql.SET_INVOICE_STATE_SQL, [id, "unpaid", null])
+		await manager.update(StudentInvoice, { id }, { status: "unpaid", paymentMethod: null })
 		return
 	}
 	if (settled >= amount) {
 		// Other valid payments still cover it, so it stays settled and keeps its method.
-		await manager.query(sql.SET_INVOICE_STATUS_SQL, [id, "paid"])
+		await manager.update(StudentInvoice, { id }, { status: "paid" })
 		return
 	}
-	await manager.query(sql.SET_INVOICE_STATE_SQL, [id, "unpaid", "installment"])
+	await manager.update(StudentInvoice, { id }, { status: "unpaid", paymentMethod: "installment" })
 }
 
 /** `StudentTransaction::create()`, with the code generated under the day lock (fix F-9). */
@@ -66,14 +71,32 @@ export const insertTransaction = async (
 	const nextCode = codes[0]?.nextCode
 	if (nextCode === undefined) throw new Error("Tidak dapat menentukan kode transaksi.")
 
-	const inserted = await manager.query<{ id: string }[]>(sql.INSERT_TRANSACTION_SQL, [
-		nextCode,
-		values.studentGradeId,
-		values.amount,
-		values.desc,
-		values.note,
-	])
-	const id = inserted[0]?.id
+	const inserted = await manager.insert(StudentTransaction, {
+		studentTransactionCode: nextCode,
+		studentGradeId: String(values.studentGradeId),
+		paidAt: databaseNow,
+		amount: values.amount,
+		desc: values.desc,
+		note: values.note,
+		status: "valid",
+		createdAt: databaseNow,
+		updatedAt: databaseNow,
+	})
+	const id: unknown = inserted.identifiers[0]?.id
 	if (id === undefined) throw new Error("Data gagal disimpan ke dalam basis data")
 	return Number(id)
+}
+
+export const insertLink = async (
+	manager: EntityManager,
+	values: { transactionId: number; invoiceId: number; amount: number; pay: number },
+): Promise<void> => {
+	await manager.insert(StudentInvoiceTransaction, {
+		studentTransactionId: values.transactionId,
+		studentInvoiceId: values.invoiceId,
+		amount: values.amount,
+		pay: values.pay,
+		createdAt: databaseNow,
+		updatedAt: databaseNow,
+	})
 }

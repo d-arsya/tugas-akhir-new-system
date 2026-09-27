@@ -1,5 +1,6 @@
 import { HttpException, Inject, Injectable, InternalServerErrorException, Logger, NotFoundException, UnprocessableEntityException } from "@nestjs/common"
-import { DataSource, type EntityManager } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, IsNull, Repository, type EntityManager } from "typeorm"
 
 import type { AdminMessageResult } from "@roja/types"
 import { SOCIETY_COLUMNS } from "@roja/utils/society-fields"
@@ -7,6 +8,9 @@ import { SOCIETY_COLUMNS } from "@roja/utils/society-fields"
 import { throwFieldErrors } from "../../../core/errors/field-errors"
 import { copyDiseaseHistories } from "../../../shared/society/disease-history"
 import { generateMasterId } from "../../../shared/society/master-id"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { Student } from "@santri/entities/student.entity"
+import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
 
 import { RegistrantMailService } from "./registrant-mail.service"
 
@@ -74,12 +78,12 @@ export class RegistrantStatusService {
 
 	constructor(
 		@Inject(DataSource) private readonly dataSource: DataSource,
+		@InjectRepository(Registrant) private readonly registrants: Repository<Registrant>,
 		@Inject(RegistrantMailService) private readonly mail: RegistrantMailService,
 	) {}
 
 	async updateStatus(registrantId: number, body: Record<string, unknown>): Promise<AdminMessageResult> {
-		const exists = (await this.dataSource.query("SELECT id FROM tbr_registrants WHERE id = $1", [registrantId])) as unknown[]
-		if (exists.length === 0) throw new NotFoundException("Pendaftar tidak ditemukan")
+		if (!(await this.registrants.existsBy({ id: registrantId }))) throw new NotFoundException("Pendaftar tidak ditemukan")
 		const validated = validateStatus(body ?? {})
 
 		try {
@@ -122,11 +126,12 @@ export class RegistrantStatusService {
 	 * A level/year pair with no quota row crashed legacy (`$quota->quota` on null) into "Data gagal diupdate.".
 	 */
 	private async checkQuotaFull(manager: EntityManager, row: RegistrantRow): Promise<void> {
-		const quotas = (await manager.query(
-			"SELECT quota FROM tbr_level_academic_years WHERE level_id = $1 AND academic_year_id = $2 ORDER BY id LIMIT 1",
-			[row.level_id, row.academic_year_id],
-		)) as Array<{ quota: string | null }>
-		const quota = quotas[0]
+		if (row.level_id === null || row.academic_year_id === null) throw new UnprocessableEntityException(UPDATE_FAILED)
+		const quota = await manager.findOne(LevelAcademicYear, {
+			select: { id: true, quota: true },
+			where: { levelId: Number(row.level_id), academicYearId: Number(row.academic_year_id) },
+			order: { id: "ASC" },
+		})
 		if (!quota) throw new UnprocessableEntityException(UPDATE_FAILED)
 
 		// Legacy builds the ids of every academic year before the pendaftar's and hands the array to
@@ -152,10 +157,7 @@ export class RegistrantStatusService {
 	 * santri instead of getting a second one.
 	 */
 	private async createStudent(manager: EntityManager, row: RegistrantRow): Promise<void> {
-		if (row.nis) {
-			const live = (await manager.query("SELECT id FROM tbr_students WHERE nis = $1 AND deleted_at IS NULL LIMIT 1", [row.nis])) as unknown[]
-			if (live.length > 0) return
-		}
+		if (row.nis && (await manager.existsBy(Student, { nis: row.nis, deletedAt: IsNull() }))) return
 
 		if (row.email) {
 			const taken = (await manager.query(
@@ -167,7 +169,7 @@ export class RegistrantStatusService {
 
 		const academicYearId = Number(row.academic_year_id)
 		const nis = await generateMasterId(manager, academicYearId)
-		await manager.query("UPDATE tbr_registrants SET nis = $2, updated_at = now() WHERE id = $1", [row.id, nis])
+		await manager.update(Registrant, { id: Number(row.id) }, { nis })
 
 		const students = (await manager.query(
 			`INSERT INTO tbr_students (email, password, is_blocked, blocked_at, enabled_2fa, academic_year_id, nis,

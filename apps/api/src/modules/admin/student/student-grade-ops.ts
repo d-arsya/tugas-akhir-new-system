@@ -1,10 +1,13 @@
 import { UnprocessableEntityException } from "@nestjs/common"
-import type { EntityManager } from "typeorm"
+import { IsNull, type EntityManager } from "typeorm"
 
 import { syncStudentWalletActive } from "../../../shared/ewallet/student-wallet"
 import { deleteDiseaseHistories } from "../../../shared/society/disease-history"
 
 import { TIMEZONE } from "@admin/common/sql"
+import { Student } from "@santri/entities/student.entity"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 
 // Row-level operations the Santri writes share, each a port of a legacy model method or controller
@@ -30,8 +33,8 @@ export type GradeRow = {
 	grade: string | null
 	level_id: string | null
 	grade_status: string | null
-	grade_note: string | null
-	prev_grade_note: string | null
+	grade_note: StudentGrade["gradeNote"]
+	prev_grade_note: StudentGrade["prevGradeNote"]
 	current_academic_year: string | null
 	fullname: string | null
 }
@@ -135,7 +138,7 @@ export const deleteUnpaidInvoices = async (manager: EntityManager, studentGradeI
 
 /** `StudentController::deleteCapability()` — plain hard delete of the grade row's capabilities. */
 export const deleteCapabilities = async (manager: EntityManager, studentGradeId: number): Promise<void> => {
-	await manager.query(`DELETE FROM tbr_student_capabilities WHERE student_grade_id = $1`, [studentGradeId])
+	await manager.delete(StudentCapability, { studentGradeId })
 }
 
 /**
@@ -145,25 +148,18 @@ export const deleteCapabilities = async (manager: EntityManager, studentGradeId:
  * unless the wallet had already drifted).
  */
 export const deleteGradeRow = async (manager: EntityManager, studentGradeId: number): Promise<void> => {
-	// TypeORM answers an UPDATE with `[rows, rowCount]`, so the owner is read first instead of `RETURNING`
-	const rows = (await manager.query(`SELECT student_id FROM tbr_student_grades WHERE id = $1 AND deleted_at IS NULL`, [studentGradeId])) as Array<{
-		student_id: string | null
-	}>
-	if (rows.length === 0) return
-	await manager.query(`UPDATE tbr_student_grades SET deleted_at = now(), updated_at = now() WHERE id = $1`, [studentGradeId])
+	const gradeRow = await manager.findOne(StudentGrade, {
+		select: { id: true, studentId: true },
+		where: { id: studentGradeId, deletedAt: IsNull() },
+	})
+	if (!gradeRow) return
+	await manager.update(StudentGrade, { id: studentGradeId }, { deletedAt: () => "now()" })
 	await deleteDiseaseHistories(manager, "student", studentGradeId)
-	const studentId = rows[0]?.student_id ?? null
-	if (studentId === null) return
+	if (gradeRow.studentId === null) return
+	const studentId = Number(gradeRow.studentId)
 
-	const left = (await manager.query(
-		`SELECT 1 FROM tbr_student_grades WHERE student_id = $1 AND deleted_at IS NULL LIMIT 1`,
-		[studentId],
-	)) as unknown[]
-	if (left.length > 0) return
+	if (await manager.existsBy(StudentGrade, { studentId, deletedAt: IsNull() })) return
 
-	await manager.query(
-		`UPDATE tbr_students SET deleted_at = now(), updated_at = now() WHERE id = $1 AND deleted_at IS NULL`,
-		[studentId],
-	)
-	await syncStudentWalletActive(manager, Number(studentId))
+	await manager.update(Student, { id: studentId, deletedAt: IsNull() }, { deletedAt: () => "now()" })
+	await syncStudentWalletActive(manager, studentId)
 }

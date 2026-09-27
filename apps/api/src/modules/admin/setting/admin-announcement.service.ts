@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { InjectRepository } from "@nestjs/typeorm"
 import { Repository } from "typeorm"
 
-import { SettingAnnc } from "@shared/school/entities/setting-annc.entity"
+import { SettingAnnc } from "@psb/entities/setting-annc.entity"
 import { isEmptyRichText, type SettingAnnouncementUpdateDto } from "@admin/setting/dto/admin-announcement.dto"
 
 export type SettingAnnouncement = {

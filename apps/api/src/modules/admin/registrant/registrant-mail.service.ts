@@ -2,12 +2,14 @@ import { randomBytes } from "node:crypto"
 
 import { Inject, Injectable, Logger } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
 
 import type { Env } from "../../../core/config/env.validation"
 import { MailerService } from "../../../core/mailer/mailer.service"
 import { RedisService } from "../../../core/redis/redis.service"
 import { societyFileUrl } from "../../../shared/society/files"
+import { SettingSchool } from "@shared/school/entities/setting-school.entity"
 
 // The three mails the PSB admin pages send (legacy `Registrant::send*Notification`). Every one is sent
 // **after** the transaction has committed and never fails the request: a delivery error is logged,
@@ -25,7 +27,7 @@ export class RegistrantMailService {
 	private readonly logger = new Logger(RegistrantMailService.name)
 
 	constructor(
-		@Inject(DataSource) private readonly dataSource: DataSource,
+		@InjectRepository(SettingSchool) private readonly schools: Repository<SettingSchool>,
 		@Inject(MailerService) private readonly mailerService: MailerService,
 		@Inject(RedisService) private readonly redisService: RedisService,
 		@Inject(ConfigService) private readonly configService: ConfigService<Env, true>,
@@ -96,10 +98,7 @@ export class RegistrantMailService {
 
 	/** `SettingSchool::first()` — the sender name / logo (`config('app.name')` when there is no name). */
 	private async school(): Promise<School> {
-		const rows = (await this.dataSource.query("SELECT name, logo FROM tbr_setting_schools ORDER BY id LIMIT 1")) as Array<{
-			name: string | null
-			logo: string | null
-		}>
-		return { school: rows[0]?.name || "Pondok Roja", logoUrl: societyFileUrl(rows[0]?.logo ?? null) }
+		const [setting] = await this.schools.find({ select: { id: true, name: true, logo: true }, order: { id: "ASC" }, take: 1 })
+		return { school: setting?.name || "Pondok Roja", logoUrl: societyFileUrl(setting?.logo ?? null) }
 	}
 }

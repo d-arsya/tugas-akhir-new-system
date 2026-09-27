@@ -6,7 +6,8 @@ import {
 	NotFoundException,
 	UnprocessableEntityException,
 } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, Repository } from "typeorm"
 import type {
 	AdminMessageResult,
 	EwalletHistoryDetail,
@@ -36,10 +37,10 @@ import {
 } from "@admin/ewallet/txn-format"
 import { SqlParams } from "@admin/common/sql"
 import * as sql from "@admin/ewallet/txn-sql"
+import { EwalletTransactionItem } from "@ewallet/entities/ewallet-transaction-item.entity"
+import { EwalletTransaction } from "@ewallet/entities/ewallet-transaction.entity"
 
-// Legacy Dompet: transaction detail, status update and Riwayat Transaksi (workstream D-C). Raw SQL
-// through `DataSource`, as the Merchant and Kesanggupan modules do — the ewallet entities return
-// bigint as strings and join varchar to bigint, so nothing here uses them.
+// Legacy Dompet: transaction detail, status update and Riwayat Transaksi (workstream D-C).
 
 export type EwalletHistoryFile = { fileName: string; buffer: Buffer }
 
@@ -114,6 +115,7 @@ export class EwalletTxnService {
 	constructor(
 		private readonly dataSource: DataSource,
 		private readonly storageService: StorageService,
+		@InjectRepository(EwalletTransactionItem) private readonly transactionItems: Repository<EwalletTransactionItem>,
 	) {}
 
 	/**
@@ -177,7 +179,7 @@ export class EwalletTxnService {
 
 				// `invalid_note` is only kept for `invalid`; legacy wrote whatever arrived
 				const note = input.status === "invalid" ? (input.invalidNote ?? null) : null
-				await manager.query(sql.TRANSACTION_UPDATE_SQL, [transactionId, input.status, note])
+				await manager.update(EwalletTransaction, { id: transactionId }, { status: input.status, invalidNote: note })
 				for (const walletId of wallets) await syncBalance(manager, walletId)
 			})
 			return { message: UPDATE_SUCCESS }
@@ -234,10 +236,11 @@ export class EwalletTxnService {
 		const row = rows[0]
 		if (!row) throw new NotFoundException(NOT_FOUND)
 
-		const items = await this.dataSource.query<Array<{ description: string | null; price: string | null }>>(
-			sql.HISTORY_ITEMS_SQL,
-			[transactionId],
-		)
+		const items = await this.transactionItems.find({
+			select: { description: true, price: true },
+			where: { ewalletTransactionId: String(transactionId) },
+			order: { id: "ASC" },
+		})
 		// `ewalletable->merchant_name` — a santri wallet has no such attribute, so it reads "-"
 		const merchants =
 			row.ownerType === EWALLET_MERCHANT_TYPE && row.ownerId

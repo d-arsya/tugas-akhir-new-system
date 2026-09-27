@@ -1,5 +1,6 @@
 import type { EntityManager } from "typeorm"
 
+import { StudentGrade } from "@santri/entities/student-grade.entity"
 import { Grade } from "@shared/master/entities/grade.entity"
 import {
 	DELETE_FAILED,
@@ -16,7 +17,14 @@ import {
 // `deleteStudentByGrade:1054-1093` (every active row of a grade in a year, from the grades page), both
 // reopening the previous class row through `updateKbmNote:976-1029`. Each runs in one transaction.
 
-type KbmRow = { id: string; student_id: string | null; grade_status: string | null; grade_note: string | null; prev_grade_note: string | null; current_academic_year: string | null }
+type KbmRow = {
+	id: string
+	student_id: string | null
+	grade_status: string | null
+	grade_note: StudentGrade["gradeNote"]
+	prev_grade_note: StudentGrade["prevGradeNote"]
+	current_academic_year: string | null
+}
 
 /**
  * `StudentGrade::whereHas('student', fn => where('nis', $nis))` — a live account with that NIS (a null NIS
@@ -34,10 +42,7 @@ const firstRow = async (manager: EntityManager, where: string, params: unknown[]
 }
 
 const reopen = async (manager: EntityManager, row: KbmRow): Promise<void> => {
-	await manager.query(
-		`UPDATE tbr_student_grades SET grade_status = 'active', grade_note = $2, updated_at = now() WHERE id = $1`,
-		[row.id, row.prev_grade_note],
-	)
+	await manager.update(StudentGrade, { id: Number(row.id) }, { gradeStatus: "active", gradeNote: row.prev_grade_note })
 }
 
 /**

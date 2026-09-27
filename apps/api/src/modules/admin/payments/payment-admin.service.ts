@@ -31,8 +31,11 @@ import {
 } from "@admin/payments/payment-format"
 import { RECEIPT_CONTENT_TYPE, receiptFileName } from "@admin/payments/payment-receipt-pdf"
 import { loadReceiptData, PaymentReceiptStore } from "@admin/payments/payment-receipt-store"
-import { insertTransaction, resetInvoice } from "@admin/payments/payment-write"
+import { insertLink, insertTransaction, resetInvoice } from "@admin/payments/payment-write"
 import * as sql from "@admin/payments/payment-sql"
+import { StudentInvoiceTransaction } from "@santri/entities/student-invoice-transaction.entity"
+import { StudentInvoice } from "@santri/entities/student-invoice.entity"
+import { StudentTransaction } from "@santri/entities/student-transaction.entity"
 
 // Legacy `StudentInvoiceController` — the write half: validating an invoice selection
 // (@getDataInvoice 467-499), pricing the payment form (@createTransaction 508-538), recording
@@ -127,19 +130,19 @@ export class PaymentAdminService {
 
 				if (installment) {
 					// Partial payment of a single invoice: it stays `unpaid`, and only the method moves.
-					await manager.query(sql.SET_INVOICE_PAYMENT_METHOD_SQL, [invoiceId, "installment"])
-					await manager.query(sql.INSERT_LINK_SQL, [transactionId, invoiceId, amount, paid])
+					await manager.update(StudentInvoice, { id: invoiceId }, { paymentMethod: "installment" })
+					await insertLink(manager, { transactionId, invoiceId, amount, pay: paid })
 					continue
 				}
 
 				// An invoice already being paid off in instalments keeps `installment` when the last
 				// instalment closes it — the santri portal reads that value, so it must not become `cash`.
 				if (row.paymentMethod === "installment") {
-					await manager.query(sql.SET_INVOICE_STATUS_SQL, [invoiceId, "paid"])
+					await manager.update(StudentInvoice, { id: invoiceId }, { status: "paid" })
 				} else {
-					await manager.query(sql.SET_INVOICE_STATE_SQL, [invoiceId, "paid", "cash"])
+					await manager.update(StudentInvoice, { id: invoiceId }, { status: "paid", paymentMethod: "cash" })
 				}
-				await manager.query(sql.INSERT_LINK_SQL, [transactionId, invoiceId, amount, amount])
+				await insertLink(manager, { transactionId, invoiceId, amount, pay: amount })
 			}
 
 			return {
@@ -174,12 +177,13 @@ export class PaymentAdminService {
 			)
 			if (!transaction) throw new NotFoundException(NOT_FOUND)
 
-			const idRows = await manager.query<{ invoiceId: string | null }[]>(
-				sql.SELECT_TRANSACTION_INVOICE_IDS_SQL,
-				[transactionId],
-			)
+			const pivots = await manager.find(StudentInvoiceTransaction, {
+				select: { id: true, studentInvoiceId: true },
+				where: { studentTransactionId: transactionId },
+				order: { id: "ASC" },
+			})
 			const ids = unique(
-				idRows.map((row) => toId(row.invoiceId)).filter((id): id is number => id !== null),
+				pivots.map((pivot) => toId(pivot.studentInvoiceId)).filter((id): id is number => id !== null),
 			)
 			// Locked before the flip and in id order, same as `create`, so the two never deadlock.
 			const invoices =
@@ -187,7 +191,7 @@ export class PaymentAdminService {
 					? await manager.query<InvoiceSqlRow[]>(sql.SELECT_INVOICES_FOR_UPDATE_SQL, [ids])
 					: []
 
-			await manager.query(sql.CANCEL_TRANSACTION_SQL, [transactionId, cancelNote])
+			await manager.update(StudentTransaction, { id: transactionId }, { status: "invalid", cancelNote })
 
 			// Read after the flip: this transaction's own links now report `invalid` and drop out.
 			const links =
@@ -213,12 +217,9 @@ export class PaymentAdminService {
 			)
 			if (!transaction) throw new NotFoundException(NOT_FOUND)
 
-			await manager.query(sql.UPDATE_TRANSACTION_NOTE_SQL, [transactionId, dto.note ?? null])
+			await manager.update(StudentTransaction, { id: transactionId }, { note: dto.note ?? null })
 			if (transaction.status === "invalid" && dto.cancelNote !== undefined) {
-				await manager.query(sql.UPDATE_TRANSACTION_CANCEL_NOTE_SQL, [
-					transactionId,
-					dto.cancelNote ?? null,
-				])
+				await manager.update(StudentTransaction, { id: transactionId }, { cancelNote: dto.cancelNote ?? null })
 			}
 
 			return { message: UPDATE_SUCCESS }

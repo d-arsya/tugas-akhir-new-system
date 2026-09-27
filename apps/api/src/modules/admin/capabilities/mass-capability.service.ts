@@ -16,6 +16,7 @@ import { CapabilityDocumentQueue } from "@admin/capabilities/capability-document
 import { CapabilityPublishService } from "@admin/capabilities/capability-publish.service"
 import { SYNC_CAPABILITY_ITEM_SEQUENCE_SQL, SYNC_CAPABILITY_SEQUENCE_SQL } from "@admin/capabilities/publish-sql"
 import * as sql from "@admin/capabilities/mass-sql"
+import { StudentCapability } from "@santri/entities/student-capability.entity"
 
 // Legacy `StudentCapabilityController` — the bulk half: `@storeToSession` (141-190),
 // `@massCreate` + `@massCreateAccountList` (192-242), `@massStore` (244-300),
@@ -245,18 +246,20 @@ export class MassCapabilityService {
 				const previous = approved.get(studentGradeId)
 
 				if (mode === "update") {
-					if (previous) await manager.query(sql.SUPERSEDE_CAPABILITY_SQL, [previous.id])
+					if (previous) await manager.update(StudentCapability, { id: previous.id }, { status: "changed" })
 					else missingPrevious += 1
 				}
 
-				const [created] = await manager.query<{ id: string }[]>(sql.INSERT_CAPABILITY_SQL, [
-					student.studentId,
-					studentGradeId,
-					new Date(),
-					dto.note ?? null,
-					"approve",
-				])
-				const capabilityId = Number(created?.id)
+				const created = await manager.save(
+					manager.create(StudentCapability, {
+						studentId: student.studentId === null ? null : Number(student.studentId),
+						studentGradeId,
+						approveDate: new Date(),
+						note: dto.note ?? null,
+						status: "approve",
+					}),
+				)
+				const capabilityId = Number(created.id)
 
 				await manager.query(sql.INSERT_CAPABILITY_ITEMS_SQL, [
 					capabilityId,

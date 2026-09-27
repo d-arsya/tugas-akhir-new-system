@@ -6,10 +6,14 @@ import {
 	NotFoundException,
 	UnprocessableEntityException,
 } from "@nestjs/common"
-import { DataSource, type EntityManager } from "typeorm"
+import { DataSource, IsNull, type EntityManager } from "typeorm"
 
 import type { AcademicYearDeleteTarget } from "@admin/academic/academic-year-admin.service"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { Alumni } from "@admin/common/entities/alumni.entity"
+import { Registrant } from "@psb/entities/registrant.entity"
+import { StudentGrade } from "@santri/entities/student-grade.entity"
+import { Student } from "@santri/entities/student.entity"
 import { AcademicYear } from "@shared/master/entities/academic-year.entity"
 import { LevelAcademicYear } from "@shared/master/entities/level-academic-year.entity"
 
@@ -77,24 +81,7 @@ const YEAR_SQL = `SELECT y.id, y.year,
 	FROM tbr_academic_years y
 	WHERE y.id = $1`
 
-const MOVE_REGISTRANTS_SQL = `UPDATE tbr_registrants SET academic_year_id = $2, updated_at = now()
-	WHERE academic_year_id = $1`
-const MOVE_STUDENTS_SQL = `UPDATE tbr_students SET academic_year_id = $2, updated_at = now()
-	WHERE academic_year_id = $1 AND deleted_at IS NULL`
-/**
- * The lowercase sentinel is deliberate: `'archive'` matches no `academic_years.year` value,
- * and consumers outside this port read it, so both it and `grade_status = 'inactive'` stay
- * byte-exact.
- */
-const ARCHIVE_STUDENT_GRADES_SQL = `UPDATE tbr_student_grades
-	SET current_academic_year = 'archive', grade_status = 'inactive', updated_at = now()
-	WHERE current_academic_year = $1 AND deleted_at IS NULL`
-const MOVE_ALUMNI_SQL = `UPDATE tbr_alumnis SET academic_year_id = $2, updated_at = now()
-	WHERE academic_year_id = $1`
-
-// `AcademicYear::delete()` is overridden: detach the level pivots, hard-delete the registrants,
-// then delete the row. `Registrant` has no `deleted_at` column, so that really is a hard delete.
-const DELETE_REGISTRANTS_SQL = `DELETE FROM tbr_registrants WHERE academic_year_id = $1`
+const ARCHIVED_GRADE_YEAR = "archive"
 
 const deleteTargetOf = (row: YearSqlRow): AcademicYearDeleteTarget => {
 	if (Number(row.registrantCount) > 0) return "delegate-registrant"
@@ -161,7 +148,7 @@ export class AcademicYearDeleteService {
 		// Legacy rendered the button unclickable and never re-checked; the port does
 		if (row.registrantActive) throw new UnprocessableEntityException(delegateFailed("PSB"))
 		return this.runStep(id, "PSB", async (manager, archiveId) => {
-			await manager.query(MOVE_REGISTRANTS_SQL, [id, archiveId])
+			await manager.update(Registrant, { academicYearId: id }, { academicYearId: archiveId })
 		})
 	}
 
@@ -169,8 +156,13 @@ export class AcademicYearDeleteService {
 		const row = await this.requireYear(id)
 		if (row.studentActive) throw new UnprocessableEntityException(delegateFailed("Santri"))
 		return this.runStep(id, "Santri", async (manager, archiveId) => {
-			await manager.query(MOVE_STUDENTS_SQL, [id, archiveId])
-			await manager.query(ARCHIVE_STUDENT_GRADES_SQL, [row.year])
+			await manager.update(Student, { academicYearId: id, deletedAt: IsNull() }, { academicYearId: archiveId })
+			if (row.year === null) return
+			await manager.update(
+				StudentGrade,
+				{ currentAcademicYear: row.year, deletedAt: IsNull() },
+				{ currentAcademicYear: ARCHIVED_GRADE_YEAR, gradeStatus: "inactive" },
+			)
 		})
 	}
 
@@ -178,7 +170,7 @@ export class AcademicYearDeleteService {
 	async delegateAlumni(id: number): Promise<AdminRedirectResult> {
 		await this.requireYear(id)
 		return this.runStep(id, "Alumni", async (manager, archiveId) => {
-			await manager.query(MOVE_ALUMNI_SQL, [id, archiveId])
+			await manager.update(Alumni, { academicYearId: id }, { academicYearId: archiveId })
 		})
 	}
 
@@ -216,7 +208,7 @@ export class AcademicYearDeleteService {
 
 	private async deleteYear(manager: EntityManager, id: number): Promise<void> {
 		await manager.delete(LevelAcademicYear, { academicYearId: id })
-		await manager.query(DELETE_REGISTRANTS_SQL, [id])
+		await manager.delete(Registrant, { academicYearId: id })
 		await manager.delete(AcademicYear, { id })
 	}
 

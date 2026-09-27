@@ -6,27 +6,22 @@ import {
 	Logger,
 	NotFoundException,
 } from "@nestjs/common"
-import { DataSource } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { DataSource, IsNull, Not, Repository } from "typeorm"
 
 import { throwFieldErrors } from "@core/errors/field-errors"
 import {
 	ACCOUNTANCY_BY_ID_SQL,
 	ACCOUNTANCY_CHILD_CANDIDATES_SQL,
 	ACCOUNTANCY_DESCENDANTS_SQL,
-	ACCOUNTANCY_EXISTS_SQL,
-	ACCOUNTANCY_INSERT_SQL,
-	ACCOUNTANCY_OPTIONS_SQL,
-	ACCOUNTANCY_ROOT_CANDIDATES_SQL,
 	ACCOUNTANCY_TREE_SQL,
-	ACCOUNTANCY_UPDATE_SQL,
-	DELETE_ACCOUNTANCY_SQL,
-	MOVE_ACCOUNTANCY_CHILDREN_SQL,
 	type AccountancyOptionSqlRow,
 	type AccountancySqlRow,
 	type AccountancyTreeSqlRow,
 } from "@admin/billing/accountancy-sql"
 import type { AccountancyDelegateInput, AccountancyWriteInput } from "@admin/billing/dto/accountancy-admin.dto"
 import type { AdminRedirectResult } from "@admin/common/admin-response.dto"
+import { Accountancy } from "@admin/common/entities/accountancy.entity"
 
 export type AccountancyDeleteTarget = "delete" | "delegate-child"
 
@@ -94,7 +89,12 @@ const toParentId = (value: string | null): number | null => {
 	return /^\d+$/.test(trimmed) ? Number(trimmed) : null
 }
 
-const toOption = (row: AccountancyOptionSqlRow): AccountancyOption => ({ id: Number(row.id), name: row.name })
+type AccountancyWriteValues = Pick<Accountancy, "name" | "isParent" | "parentId" | "group" | "isStudentCost" | "note">
+
+const toOption = (row: AccountancyOptionSqlRow | Pick<Accountancy, "id" | "name">): AccountancyOption => ({
+	id: Number(row.id),
+	name: row.name,
+})
 
 /**
  * Port of the legacy `AccountancyController` (Data Master ▸ Keuangan ▸ Akun) — a self-referencing
@@ -119,7 +119,10 @@ const toOption = (row: AccountancyOptionSqlRow): AccountancyOption => ({ id: Num
 export class AccountancyAdminService {
 	private readonly logger = new Logger(AccountancyAdminService.name)
 
-	constructor(private readonly dataSource: DataSource) {}
+	constructor(
+		private readonly dataSource: DataSource,
+		@InjectRepository(Accountancy) private readonly accountancies: Repository<Accountancy>,
+	) {}
 
 	async findAll(): Promise<AccountancyRow[]> {
 		const rows = await this.dataSource.query<AccountancyTreeSqlRow[]>(ACCOUNTANCY_TREE_SQL)
@@ -137,7 +140,7 @@ export class AccountancyAdminService {
 
 	/** `Accountancy::all()` — both selects on the index page offer every account. */
 	async findOptions(): Promise<AccountancyOption[]> {
-		const rows = await this.dataSource.query<AccountancyOptionSqlRow[]>(ACCOUNTANCY_OPTIONS_SQL)
+		const rows = await this.accountancies.find({ select: { id: true, name: true }, order: { id: "ASC" } })
 		return rows.map(toOption)
 	}
 
@@ -148,7 +151,7 @@ export class AccountancyAdminService {
 	async create(dto: AccountancyWriteInput): Promise<{ message: string }> {
 		await this.requireParent(dto)
 		try {
-			await this.dataSource.query(ACCOUNTANCY_INSERT_SQL, this.writeParams(dto))
+			await this.accountancies.save(this.accountancies.create(this.writeValues(dto)))
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
 			throw new InternalServerErrorException(CREATE_FAILED)
@@ -160,7 +163,7 @@ export class AccountancyAdminService {
 		await this.requireAccountancy(id)
 		await this.requireParent(dto, id)
 		try {
-			await this.dataSource.query(ACCOUNTANCY_UPDATE_SQL, [id, ...this.writeParams(dto)])
+			await this.accountancies.update({ id }, this.writeValues(dto))
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
 			throw new InternalServerErrorException(UPDATE_FAILED)
@@ -190,7 +193,7 @@ export class AccountancyAdminService {
 		if (row.hasChildren) throw new ConflictException(DELETE_FAILED)
 
 		try {
-			await this.dataSource.query(DELETE_ACCOUNTANCY_SQL, [id])
+			await this.accountancies.delete({ id })
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
 			throw new InternalServerErrorException(DELETE_FAILED)
@@ -209,13 +212,13 @@ export class AccountancyAdminService {
 			// handler did not.
 			throwFieldErrors({ parentId: ["Kolom pilih induk wajib untuk dipilih."] })
 		}
-		const destination = await this.dataSource.query<{ id: string }[]>(ACCOUNTANCY_EXISTS_SQL, [dto.parentId])
-		if (destination.length === 0) throwFieldErrors({ parentId: ["Kolom pilih induk wajib untuk dipilih."] })
+		const destinationExists = await this.accountancies.existsBy({ id: dto.parentId })
+		if (!destinationExists) throwFieldErrors({ parentId: ["Kolom pilih induk wajib untuk dipilih."] })
 
 		try {
 			await this.dataSource.transaction(async (manager) => {
-				await manager.query(MOVE_ACCOUNTANCY_CHILDREN_SQL, [String(id), String(dto.parentId)])
-				await manager.query(DELETE_ACCOUNTANCY_SQL, [id])
+				await manager.update(Accountancy, { parentId: String(id) }, { parentId: String(dto.parentId) })
+				await manager.delete(Accountancy, { id })
 			})
 		} catch (error) {
 			this.logger.error(error instanceof Error ? error.message : String(error))
@@ -230,13 +233,18 @@ export class AccountancyAdminService {
 	 */
 	private async findDelegateCandidates(row: AccountancySqlRow): Promise<AccountancyOption[]> {
 		const id = Number(row.id)
-		const rows =
-			toParentId(row.parent_id) === null
-				? await this.dataSource.query<AccountancyOptionSqlRow[]>(ACCOUNTANCY_ROOT_CANDIDATES_SQL, [id])
-				: await this.dataSource.query<AccountancyOptionSqlRow[]>(ACCOUNTANCY_CHILD_CANDIDATES_SQL, [
-						id,
-						String(id),
-					])
+		if (toParentId(row.parent_id) === null) {
+			const roots = await this.accountancies.find({
+				select: { id: true, name: true },
+				where: { parentId: IsNull(), id: Not(id) },
+				order: { id: "ASC" },
+			})
+			return roots.map(toOption)
+		}
+		const rows = await this.dataSource.query<AccountancyOptionSqlRow[]>(ACCOUNTANCY_CHILD_CANDIDATES_SQL, [
+			id,
+			String(id),
+		])
 		return rows.map(toOption)
 	}
 
@@ -246,19 +254,18 @@ export class AccountancyAdminService {
 	}
 
 	/**
-	 * The column order `ACCOUNTANCY_INSERT_SQL` and `ACCOUNTANCY_UPDATE_SQL` share. `parent_id` is
-	 * varchar, so the id goes in as a string; the DTO has already forced it (and `group`) to null
-	 * for a root, which is the fix for the invisible-root bug.
+	 * `parent_id` is varchar, so the id goes in as a string; the DTO has already forced it (and
+	 * `group`) to null for a root, which is the fix for the invisible-root bug.
 	 */
-	private writeParams(dto: AccountancyWriteInput): [string, boolean, string | null, string | null, boolean, string | null] {
-		return [
-			dto.name,
-			dto.isParent,
-			dto.parentId === null ? null : String(dto.parentId),
-			dto.group,
-			dto.isStudentCost,
-			dto.note ?? null,
-		]
+	private writeValues(dto: AccountancyWriteInput): AccountancyWriteValues {
+		return {
+			name: dto.name,
+			isParent: dto.isParent,
+			parentId: dto.parentId === null ? null : String(dto.parentId),
+			group: dto.group,
+			isStudentCost: dto.isStudentCost,
+			note: dto.note ?? null,
+		}
 	}
 
 	/** A child's chosen parent must exist, and must not be the account itself or one of its own. */
@@ -268,8 +275,8 @@ export class AccountancyAdminService {
 		if (id !== undefined && (dto.parentId === id || (await this.descendantIds(id)).includes(dto.parentId))) {
 			throwFieldErrors({ parentId: ["Kolom pilih induk akun wajib dipilih."] })
 		}
-		const parent = await this.dataSource.query<{ id: string }[]>(ACCOUNTANCY_EXISTS_SQL, [dto.parentId])
-		if (parent.length === 0) throwFieldErrors({ parentId: ["Kolom pilih induk akun wajib dipilih."] })
+		const parentExists = await this.accountancies.existsBy({ id: dto.parentId })
+		if (!parentExists) throwFieldErrors({ parentId: ["Kolom pilih induk akun wajib dipilih."] })
 	}
 
 	private toDetail(row: AccountancySqlRow): AccountancyDetail {
